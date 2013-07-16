@@ -1,10 +1,17 @@
 package com.musala.atmosphere.client;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.rmi.RemoteException;
+
+import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.DeviceOrientation;
 import com.musala.atmosphere.client.device.Screen;
 import com.musala.atmosphere.client.device.TouchGesture;
+import com.musala.atmosphere.client.exceptions.ApkInstallationFailedException;
 import com.musala.atmosphere.commons.BatteryState;
 import com.musala.atmosphere.commons.CommandFailedException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
@@ -17,6 +24,11 @@ import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
  */
 public class Device
 {
+	// TODO extract constant to config file
+	private static final int MAX_BUFFER_SIZE = 8092; // 8Kb
+
+	private static final Logger LOGGER = Logger.getLogger(Device.class.getCanonicalName());
+
 	private IClientDevice wrappedClientDevice;
 
 	/**
@@ -216,12 +228,83 @@ public class Device
 	 * Installs the application to be tested on the device.
 	 * 
 	 * @param path
-	 *        - location of the .apk
-	 * @throws RemoteException
+	 *        - location of the installation file on the client machine.
+	 * @throws IOException
 	 */
-	public void installAPK(String path) throws RemoteException
+	public void installAPK(String path) throws IOException
 	{
-		// TODO implement device.installAPK
+		LOGGER.info("Preparing for apk installation...");
+
+		try
+		{
+			wrappedClientDevice.initApkInstall();
+		}
+		catch (IOException e)
+		{
+			LOGGER.fatal("Apk instalation failed: could not create temporary apk file on the Device.");
+			throw new ApkInstallationFailedException("Internal error occured: could not install apk.");
+		}
+
+		File apkFile = new File(path);
+
+		// Transfer the apk from Client to his device
+		byte[] buffer = new byte[MAX_BUFFER_SIZE];
+
+		try
+		{
+			LOGGER.info("Transferring apk...");
+			FileInputStream fileReaderFromApk = new FileInputStream(apkFile);
+			// number of characters that we had read with the last iteration of our "while" cycle
+			int numberOfCharactersRead = -1;
+			// number of characters until the end of file
+			int numberOfCharactersLeft = fileReaderFromApk.available();
+
+			while (numberOfCharactersLeft > 0)
+			{
+				if (numberOfCharactersLeft >= MAX_BUFFER_SIZE)
+				{
+					numberOfCharactersRead = fileReaderFromApk.read(buffer, 0, MAX_BUFFER_SIZE);
+				}
+				else
+				{
+					buffer = new byte[numberOfCharactersLeft];
+					numberOfCharactersRead = fileReaderFromApk.read(buffer, 0, numberOfCharactersLeft);
+				}
+				wrappedClientDevice.appendToApk(buffer);
+				numberOfCharactersLeft = fileReaderFromApk.available();
+			}
+		}
+		catch (FileNotFoundException e)
+		{
+			LOGGER.fatal("Could not locate APK file. Make sure the path is correct and the file exists.", e);
+			throw new FileNotFoundException("Missing instalation file for the tested application.");
+		}
+		catch (IOException e)
+		{
+			LOGGER.fatal("Error while reading from APK file.", e);
+			throw new IOException("Could not install APK file. Error while reading from file.");
+		}
+
+		// Install
+		try
+		{
+			LOGGER.info("Installing apk...");
+			wrappedClientDevice.buildAndInstallApk();
+		}
+		catch (IOException e)
+		{
+			LOGGER.fatal("Error while saving the apk file on the wrapped device", e);
+			throw new ApkInstallationFailedException(	"Internal error occured: Could not install application on device.",
+														e);
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.fatal("Error while executing command for installing application.", e);
+			throw new ApkInstallationFailedException(	"Internal error occured: Could not install application on device.",
+														e);
+		}
+
+		LOGGER.info("Apk instalation successfull.");
 	}
 
 	/*

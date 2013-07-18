@@ -9,8 +9,8 @@ import java.rmi.RemoteException;
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.DeviceOrientation;
-import com.musala.atmosphere.client.device.Screen;
 import com.musala.atmosphere.client.device.TouchGesture;
+import com.musala.atmosphere.client.device.query.ScreenTapQueryCreator;
 import com.musala.atmosphere.client.exceptions.ApkInstallationFailedException;
 import com.musala.atmosphere.commons.BatteryState;
 import com.musala.atmosphere.commons.CommandFailedException;
@@ -60,7 +60,7 @@ public class Device
 	 */
 	public void setResolutionHeight(int height)
 	{
-		// TODO implement device.getResolutionheight
+		// TODO implement device.setResolutionheight
 	}
 
 	/**
@@ -203,25 +203,43 @@ public class Device
 	}
 
 	/**
-	 * Allows user to get screenshot whenever he wants
+	 * Allows user to get a device screenshot.
 	 * 
 	 * @return
 	 */
-	public byte[] getScreenShot()
+	public byte[] getScreenshot()
 	{
 		// TODO implement device.getScreenShot
 		return null;
 	}
 
 	/**
-	 * Gets the active screen of the testing device
+	 * Gets the active {@link Screen Screen} of the testing device.
 	 * 
 	 * @return
+	 * @throws CommandFailedException
+	 * @throws RemoteException
 	 */
 	public Screen getActiveScreen()
 	{
-		// TODO implement device.getScreen() method(s)
-		return null;
+		// TODO RemoteException and CommandFailedException should be changed to something else
+		String uiHierarchy = "";
+		try
+		{
+			uiHierarchy = wrappedClientDevice.getUiXml();
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client logic on failed connection
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			// TODO Log this
+			e.printStackTrace();
+		}
+		Screen activeScreen = new Screen(this, uiHierarchy);
+		return activeScreen;
 	}
 
 	/**
@@ -341,6 +359,33 @@ public class Device
 	public void customGesture(TouchGesture gesture)
 	{
 		// TODO implement device.customGesture(gesture);
+	}
+
+	/**
+	 * Simulates a simple tap on the screen at a specified location.
+	 * 
+	 * @param positionX
+	 *        screen tap X coordinate.
+	 * @param positionY
+	 *        screen tap Y coordinate.
+	 */
+	public void tapScreenLocation(int positionX, int positionY)
+	{
+		String query = ScreenTapQueryCreator.createQuery(positionX, positionY);
+		try
+		{
+			wrappedClientDevice.executeShellCommand(query);
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			e.printStackTrace();
+			// TODO Log this.
+		}
 	}
 
 }

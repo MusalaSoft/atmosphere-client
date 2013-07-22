@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.DeviceOrientation;
 import com.musala.atmosphere.client.device.TouchGesture;
-import com.musala.atmosphere.client.device.query.ScreenTapQueryCreator;
+import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.ApkInstallationFailedException;
 import com.musala.atmosphere.commons.BatteryState;
 import com.musala.atmosphere.commons.CommandFailedException;
@@ -235,8 +235,8 @@ public class Device
 		}
 		catch (CommandFailedException e)
 		{
-			// TODO Log this
-			e.printStackTrace();
+			LOGGER.error("Getting active device screen failed.", e);
+			// TODO throw something here
 		}
 		Screen activeScreen = new Screen(this, uiHierarchy);
 		return activeScreen;
@@ -247,9 +247,8 @@ public class Device
 	 * 
 	 * @param path
 	 *        - location of the installation file on the client machine.
-	 * @throws IOException
 	 */
-	public void installAPK(String path) throws IOException
+	public void installAPK(String path)
 	{
 		LOGGER.info("Preparing for apk installation...");
 
@@ -259,8 +258,8 @@ public class Device
 		}
 		catch (IOException e)
 		{
-			LOGGER.fatal("Apk instalation failed: could not create temporary apk file on the Device.");
-			throw new ApkInstallationFailedException("Internal error occured: could not install apk.");
+			LOGGER.fatal("Apk instalation failed: could not create temporary apk file on the Device.", e);
+			throw new ApkInstallationFailedException("Internal error occured: could not install apk.", e);
 		}
 
 		File apkFile = new File(path);
@@ -272,8 +271,6 @@ public class Device
 		{
 			LOGGER.info("Transferring apk...");
 			FileInputStream fileReaderFromApk = new FileInputStream(apkFile);
-			// number of characters that we had read with the last iteration of our "while" cycle
-			int numberOfCharactersRead = -1;
 			// number of characters until the end of file
 			int numberOfCharactersLeft = fileReaderFromApk.available();
 
@@ -281,12 +278,12 @@ public class Device
 			{
 				if (numberOfCharactersLeft >= MAX_BUFFER_SIZE)
 				{
-					numberOfCharactersRead = fileReaderFromApk.read(buffer, 0, MAX_BUFFER_SIZE);
+					fileReaderFromApk.read(buffer, 0, MAX_BUFFER_SIZE);
 				}
 				else
 				{
 					buffer = new byte[numberOfCharactersLeft];
-					numberOfCharactersRead = fileReaderFromApk.read(buffer, 0, numberOfCharactersLeft);
+					fileReaderFromApk.read(buffer, 0, numberOfCharactersLeft);
 				}
 				wrappedClientDevice.appendToApk(buffer);
 				numberOfCharactersLeft = fileReaderFromApk.available();
@@ -295,12 +292,12 @@ public class Device
 		catch (FileNotFoundException e)
 		{
 			LOGGER.fatal("Could not locate APK file. Make sure the path is correct and the file exists.", e);
-			throw new FileNotFoundException("Missing instalation file for the tested application.");
+			throw new ApkInstallationFailedException("Missing instalation file for the tested application.", e);
 		}
 		catch (IOException e)
 		{
 			LOGGER.fatal("Error while reading from APK file.", e);
-			throw new IOException("Could not install APK file. Error while reading from file.");
+			throw new ApkInstallationFailedException("Could not install APK file. Error while reading from file.", e);
 		}
 
 		// Install
@@ -371,7 +368,7 @@ public class Device
 	 */
 	public void tapScreenLocation(int positionX, int positionY)
 	{
-		String query = ScreenTapQueryCreator.createQuery(positionX, positionY);
+		String query = "input tap " + positionX + " " + positionY;
 		try
 		{
 			wrappedClientDevice.executeShellCommand(query);
@@ -383,9 +380,39 @@ public class Device
 		}
 		catch (CommandFailedException e)
 		{
-			e.printStackTrace();
-			// TODO Log this.
+			LOGGER.error("Device screen tap command failed.", e);
 		}
 	}
 
+	/**
+	 * Starts an Activity from a package.
+	 * 
+	 * @param packageName
+	 *        package name from which an activity should be started.
+	 * @param activityName
+	 *        activity name to be started
+	 */
+	public void startActivity(String packageName, String activityName) throws ActivityStartingException
+	{
+		String query = "am start -n " + packageName + "/." + activityName;
+		String response = null;
+		try
+		{
+			response = wrappedClientDevice.executeShellCommand(query);
+		}
+		catch (RemoteException e)
+		{
+			// TODO implement logic behind failed client-server connection
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			throw new ActivityStartingException("The activity starting query was rejected.", e);
+		}
+
+		if (response.contains("Error: Activity class"))
+		{
+			throw new ActivityStartingException("The passed package or Activity was not found.");
+		}
+	}
 }

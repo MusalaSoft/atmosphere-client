@@ -148,9 +148,23 @@ public class Device
 	 *        - level of battery in percent
 	 * @throws RemoteException
 	 */
-	public void setBatteryLevel(int batteryLevel) throws RemoteException
+	public void setBatteryLevel(int batteryLevel)
 	{
-		wrappedClientDevice.setBatteryLevel(batteryLevel);
+		try
+		{
+			wrappedClientDevice.setBatteryLevel(batteryLevel);
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			e.printStackTrace();
+			LOGGER.error("Device screen tap command failed.", e);
+		}
+
 	}
 
 	/**
@@ -175,6 +189,32 @@ public class Device
 	public void setBatteryState(BatteryState batteryState) throws RemoteException
 	{
 		// TODO set battery state here
+	}
+
+	/**
+	 * Gets current power state of the testing device
+	 * 
+	 * @return - true - connected or false - disconnected
+	 * @throws CommandFailedException
+	 * @throws RemoteException
+	 */
+	public boolean getPowerState() throws RemoteException, CommandFailedException
+	{
+		boolean state = wrappedClientDevice.getPowerState();
+		return state;
+	}
+
+	/**
+	 * Sets the power state of the testing device.
+	 * 
+	 * @param state
+	 *        True for connected or false for disconnected.
+	 * @throws CommandFailedException
+	 * @throws RemoteException
+	 */
+	public void setPowerState(boolean state) throws CommandFailedException, RemoteException
+	{
+		wrappedClientDevice.setPowerState(state);
 	}
 
 	/**

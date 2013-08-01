@@ -162,7 +162,7 @@ public class Device
 		catch (CommandFailedException e)
 		{
 			e.printStackTrace();
-			LOGGER.error("Device screen tap command failed.", e);
+			LOGGER.error("Device set battery level command failed.", e);
 		}
 
 	}
@@ -240,6 +240,21 @@ public class Device
 	public void setNetworkSpeed(int upload, int download, int latency) throws RemoteException
 	{
 		// TODO implement device.setNetworkSpeed
+	}
+
+	/**
+	 * Sets the airplane mode of the testing device.
+	 * 
+	 * @param airplaneMode
+	 *        True if in airplane mode, false if not.
+	 * @throws CommandFailedException
+	 * @throws RemoteException
+	 */
+	public void setAirplaneMode(boolean airplaneMode)
+			throws CommandFailedException,
+			RemoteException
+	{
+		wrappedClientDevice.setAirplaneMode(airplaneMode);
 	}
 
 	/**

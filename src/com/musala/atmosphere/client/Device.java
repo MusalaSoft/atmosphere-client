@@ -188,7 +188,20 @@ public class Device
 	 */
 	public void setBatteryState(BatteryState batteryState) throws RemoteException
 	{
-		// TODO set battery state here
+		try
+		{
+			wrappedClientDevice.setBatteryState(batteryState);
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			e.printStackTrace();
+			LOGGER.error("Device set battery level command failed.", e);
+		}
 	}
 
 	/**

@@ -1,14 +1,16 @@
 package com.musala.atmosphere.client;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.DeviceOrientation;
+import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.device.TouchGesture;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.ApkInstallationFailedException;
@@ -17,17 +19,26 @@ import com.musala.atmosphere.commons.CommandFailedException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 
 /**
- * Contains the methods a user can call directly in his test.
+ * Android device representing class.
  * 
  * @author vladimir.vladimirov
  * 
  */
 public class Device
 {
-	// TODO extract constant to config file
 	private static final int MAX_BUFFER_SIZE = 8092; // 8Kb
 
 	private static final Logger LOGGER = Logger.getLogger(Device.class.getCanonicalName());
+
+	private static final String AWAKE_STATUS_DUMP_COMMAND = "dumpsys power";
+
+	private static final String LOCKED_STATUS_DUMP_COMMAND = "dumpsys activity";
+
+	private static final String AWAKE_EXTRACTION_REGEX = ".*mWakefulness=(\\w+).*";
+
+	private static final String LOCKED_CHECK_STRING = "mLockScreenShown true";
+
+	private static final String AWAKE_IDENTIFIER = "awake";
 
 	private IClientDevice wrappedClientDevice;
 
@@ -168,15 +179,27 @@ public class Device
 	}
 
 	/**
-	 * Get current battery state of the testing device
+	 * Gets the current battery state of the testing device.
 	 * 
-	 * @return - "unknown", "charging", "discharging", "not charging" or "full"
-	 * @throws RemoteException
+	 * @return - a {@link BatteryState BatteryState} enumeration member.
 	 */
-	public BatteryState getBatteryState() throws RemoteException
+	public BatteryState getBatteryState()
 	{
-		// TODO implement device.getBatteryState
-		return null;
+		BatteryState state = null;
+		try
+		{
+			state = wrappedClientDevice.getBatteryState();
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Fetching device battery state failed.", e);
+		}
+		return state;
 	}
 
 	/**
@@ -285,8 +308,6 @@ public class Device
 	 * Gets the active {@link Screen Screen} of the testing device.
 	 * 
 	 * @return
-	 * @throws CommandFailedException
-	 * @throws RemoteException
 	 */
 	public Screen getActiveScreen()
 	{
@@ -330,15 +351,13 @@ public class Device
 			throw new ApkInstallationFailedException("Internal error occured: could not install apk.", e);
 		}
 
-		File apkFile = new File(path);
-
 		// Transfer the apk from Client to his device
 		byte[] buffer = new byte[MAX_BUFFER_SIZE];
 
 		try
 		{
+			FileInputStream fileReaderFromApk = new FileInputStream(path);
 			LOGGER.info("Transferring apk...");
-			FileInputStream fileReaderFromApk = new FileInputStream(apkFile);
 			// number of characters until the end of file
 			int numberOfCharactersLeft = fileReaderFromApk.available();
 
@@ -482,5 +501,122 @@ public class Device
 		{
 			throw new ActivityStartingException("The passed package or Activity was not found.");
 		}
+	}
+
+	/**
+	 * Locks the current device.
+	 */
+	public void lock()
+	{
+		if (!isLocked())
+		{
+			pressButton(HardwareButton.POWER);
+		}
+	}
+
+	/**
+	 * Unlocks the current device.
+	 */
+	public void unlock()
+	{
+		if (!isAwake())
+		{
+			pressButton(HardwareButton.POWER);
+		}
+		if (isLocked())
+		{
+			pressButton(HardwareButton.MENU);
+		}
+	}
+
+	/**
+	 * Checks if the device is in a WAKE state.
+	 * 
+	 * @return true if the device is awake, false otherwise.
+	 */
+	public boolean isAwake()
+	{
+		String dump = "";
+		try
+		{
+			dump = wrappedClientDevice.executeShellCommand(AWAKE_STATUS_DUMP_COMMAND);
+		}
+		catch (RemoteException e)
+		{
+			// TODO implement logic behind failed client-server connection
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Fetching device wake state failed.", e);
+		}
+
+		Pattern pattern = Pattern.compile(AWAKE_EXTRACTION_REGEX, Pattern.MULTILINE);
+		Matcher matcher = pattern.matcher(dump);
+		matcher.find();
+
+		boolean awake = matcher.group(1).equalsIgnoreCase(AWAKE_IDENTIFIER);
+		return awake;
+	}
+
+	/**
+	 * Checks if the device is locked.
+	 * 
+	 * @return true if the device is locked, false otherwise.
+	 */
+	public boolean isLocked()
+	{
+		String dump = "";
+		try
+		{
+			dump = wrappedClientDevice.executeShellCommand(LOCKED_STATUS_DUMP_COMMAND);
+		}
+		catch (RemoteException e)
+		{
+			// TODO implement logic behind failed client-server connection
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Fetching device lock state failed.", e);
+		}
+		boolean locked = dump.contains(LOCKED_CHECK_STRING);
+		return locked;
+	}
+
+	/**
+	 * Presses a device hardware button.
+	 * 
+	 * @param keyCode
+	 *        - button key code as specified by the Android KeyEvent KEYCODE_ constants.
+	 */
+	public void pressButton(int keyCode)
+	{
+		String query = "input keyevent " + Integer.toString(keyCode);
+		try
+		{
+			wrappedClientDevice.executeShellCommand(query);
+		}
+		catch (RemoteException e)
+		{
+			// TODO implement logic behind failed client-server connection
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Sending key input failed.", e);
+		}
+	}
+
+	/**
+	 * Presses a device hardware button.
+	 * 
+	 * @param button
+	 *        - {@link HardwareButton HardwareButton} to be pressed.
+	 */
+	public void pressButton(HardwareButton button)
+	{
+		int keycode = button.getKeycode();
+		pressButton(keycode);
 	}
 }

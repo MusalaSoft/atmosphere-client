@@ -3,6 +3,9 @@ package com.musala.atmosphere.client;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -300,8 +303,42 @@ public class Device
 	 */
 	public byte[] getScreenshot()
 	{
-		// TODO implement device.getScreenShot
-		return null;
+		byte[] screenshot = null;
+		try
+		{
+			screenshot = wrappedClientDevice.getScreenshot();
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client logic on failed connection
+			LOGGER.error("Error in connection between client and device.", e);
+		}
+		catch (CommandFailedException e)
+		{
+			// TODO add logic on failed screenshot fetching
+			LOGGER.error("Fetching screenshot had failed for some reason.", e);
+		}
+		return screenshot;
+	}
+
+	/**
+	 * Allows user to get a device screenshot and save it as an image file.
+	 * 
+	 * @return
+	 */
+	public void getScreenshot(String pathToImageFile)
+	{
+		try
+		{
+			Path pathToPngFile = Paths.get(pathToImageFile);
+			byte[] screenshot = getScreenshot();
+			Files.write(pathToPngFile, screenshot);
+		}
+		catch (IOException e)
+		{
+			// TODO add logic on failed screenshot dumping
+			LOGGER.error("Error while writing to file.", e);
+		}
 	}
 
 	/**

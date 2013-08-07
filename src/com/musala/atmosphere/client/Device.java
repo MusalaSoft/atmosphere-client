@@ -12,13 +12,13 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import com.musala.atmosphere.client.device.DeviceOrientation;
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.device.TouchGesture;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.ApkInstallationFailedException;
 import com.musala.atmosphere.commons.BatteryState;
 import com.musala.atmosphere.commons.CommandFailedException;
+import com.musala.atmosphere.commons.DeviceOrientation;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 
 /**
@@ -43,7 +43,7 @@ public class Device
 
 	private static final String AWAKE_IDENTIFIER = "awake";
 
-	private IClientDevice wrappedClientDevice;
+	private final IClientDevice wrappedClientDevice;
 
 	/**
 	 * Constructor that converts given IClientDevice to fully functioning and usable Device object.
@@ -133,14 +133,16 @@ public class Device
 	}
 
 	/**
-	 * Sets new orientation of the testing device.
+	 * Sets new orientation of the testing device. Can only be applied on emulators.
 	 * 
 	 * @param deviceOrientation
 	 *        - new device orientation to be set
+	 * @throws RemoteException
+	 * @throws CommandFailedException
 	 */
-	public void setOrientation(DeviceOrientation deviceOrientation)
+	public void setOrientation(DeviceOrientation deviceOrientation) throws RemoteException, CommandFailedException
 	{
-		// TODO implement device.setOrientation
+		wrappedClientDevice.setOrientation(deviceOrientation);
 	}
 
 	/**
@@ -289,9 +291,7 @@ public class Device
 	 * @throws CommandFailedException
 	 * @throws RemoteException
 	 */
-	public void setAirplaneMode(boolean airplaneMode)
-			throws CommandFailedException,
-			RemoteException
+	public void setAirplaneMode(boolean airplaneMode) throws CommandFailedException, RemoteException
 	{
 		wrappedClientDevice.setAirplaneMode(airplaneMode);
 	}

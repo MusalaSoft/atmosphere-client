@@ -638,24 +638,27 @@ public class Device
 	 * @param text
 	 *        - text to be inputted.
 	 * @param interval
-	 *        - interval in ms between letters.
+	 *        - interval in milliseconds between letters.
 	 * @throws RemoteException
 	 * @throws CommandFailedException
 	 */
-	public void inputText(String text, int interval) throws RemoteException, CommandFailedException
+	public void inputText(String text, int intervalInMs) throws RemoteException, CommandFailedException
 	{
-		String command = "am broadcast -a atmosphere.intent.action.TEXT --ei t ";
-		double intervalInSeconds = interval / 1000;
+		String sb = new String();
+		String command = "am broadcast -a atmosphere.intent.action.TEXT --eia text ";
+
+		sb = sb + command;
 		for (Character currentCharacter : text.toCharArray())
 		{
 			int numericalCharValue = (int) currentCharacter;
-			wrappedClientDevice.executeShellCommand(command + numericalCharValue);
-			if (interval > 0)
-			{
-
-				wrappedClientDevice.executeShellCommand("sleep " + intervalInSeconds);
-			}
+			sb = sb + numericalCharValue + ",";
 		}
+		sb = sb.substring(0, sb.length() - 1);
+		if (intervalInMs > 0)
+		{
+			sb = sb + " --ei interval " + intervalInMs;
+		}
+		System.out.println(wrappedClientDevice.executeShellCommand(sb));
 	}
 
 	/**

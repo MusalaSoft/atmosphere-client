@@ -29,7 +29,7 @@ import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
  */
 public class Device
 {
-	private static final int MAX_BUFFER_SIZE = 8092; // 8Kb
+	private static final int MAX_BUFFER_SIZE = 8092; // 8K
 
 	private static final Logger LOGGER = Logger.getLogger(Device.class.getCanonicalName());
 
@@ -43,7 +43,7 @@ public class Device
 
 	private static final String AWAKE_IDENTIFIER = "awake";
 
-	private final IClientDevice wrappedClientDevice;
+	private IClientDevice wrappedClientDevice;
 
 	/**
 	 * Constructor that converts given IClientDevice to fully functioning and usable Device object.
@@ -57,68 +57,29 @@ public class Device
 	}
 
 	/**
-	 * Checkouts resolution height of the testing device.
+	 * Gets the device information about the testing device.
 	 * 
-	 * @return - height of the screen resolution
+	 * @return a {@link DeviceInformation DeviceInformation} structure with information for the testing device.
 	 */
-	public int getResolutionHeight()
+	public DeviceInformation getInformation()
 	{
-		// TODO implement device.getResolutionHeight
-		return 0;
+		com.musala.atmosphere.commons.DeviceInformation wrappedDeviceInformation = null;
+		try
+		{
+			wrappedDeviceInformation = wrappedClientDevice.getDeviceInformation();
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		DeviceInformation deviceInformation = new DeviceInformation(wrappedDeviceInformation);
+		return deviceInformation;
 	}
 
-	/**
-	 * Sets screen resolution's height.
-	 * 
-	 * @param height
-	 */
-	public void setResolutionHeight(int height)
+	void release()
 	{
-		// TODO implement device.setResolutionheight
-	}
-
-	/**
-	 * Gets testing device's resolution width.
-	 * 
-	 * @return - width of testing device's resolution
-	 */
-	public int getResolutionWidth()
-	{
-		// TODO implement device.getResolutionWidth
-		return 0;
-	}
-
-	/**
-	 * Sets testing device's resolution width to <b> width </b>
-	 * 
-	 * @param width
-	 *        - the width to set
-	 */
-	public void setResolutionWidth(int width)
-	{
-		// TODO implement device.setResolutionWidth
-	}
-
-	/**
-	 * Gets DPI of the testing device's screen.
-	 * 
-	 * @return DPI of the tester's device
-	 */
-	public int getDpi()
-	{
-		// TODO implement device.getDpi
-		return 0;
-	}
-
-	/**
-	 * Sets dpi property on testing device.
-	 * 
-	 * @param dpi
-	 *        - dpi to be set
-	 */
-	public void setDpi(int dpi)
-	{
-		// TODO implement device.set Dpi
+		wrappedClientDevice = new ReleasedClientDevice();
 	}
 
 	/**
@@ -152,17 +113,30 @@ public class Device
 	 * @throws RemoteException
 	 * @throws CommandFailedException
 	 */
-	public int getBatteryLevel() throws RemoteException, CommandFailedException
+	public int getBatteryLevel()
 	{
-		return wrappedClientDevice.getBatteryLevel();
+		int result = 0;
+		try
+		{
+			result = wrappedClientDevice.getBatteryLevel();
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Failed to get battery level.", e);
+		}
+		return result;
 	}
 
 	/**
-	 * Sets battery level
+	 * Sets battery level.
 	 * 
 	 * @param batteryLevel
 	 *        - level of battery in percent
-	 * @throws RemoteException
 	 */
 	public void setBatteryLevel(int batteryLevel)
 	{
@@ -177,16 +151,17 @@ public class Device
 		}
 		catch (CommandFailedException e)
 		{
-			e.printStackTrace();
-			LOGGER.error("Device set battery level command failed.", e);
+			LOGGER.error("Setting battery level failed.", e);
 		}
 
 	}
 
 	/**
-	 * Gets the current battery state of the testing device.
+	 * Get current battery state of the testing device
 	 * 
+	 * @return - "unknown", "charging", "discharging", "not charging" or "full"
 	 * @return - a {@link BatteryState BatteryState} enumeration member.
+	 * @throws RemoteException
 	 */
 	public BatteryState getBatteryState()
 	{
@@ -211,7 +186,7 @@ public class Device
 	 * Sets battery state of testing device.
 	 * 
 	 * @param batteryState
-	 *        - element of type {@link DeviceBatteryState}
+	 *        - element of type {@link BatteryState}
 	 * @throws RemoteException
 	 */
 	public void setBatteryState(BatteryState batteryState) throws RemoteException
@@ -655,5 +630,44 @@ public class Device
 	{
 		int keycode = button.getKeycode();
 		pressButton(keycode);
+	}
+
+	/**
+	 * Inputs text on the testing device through the AtmosphereIME.
+	 * 
+	 * @param text
+	 *        - text to be inputted.
+	 * @param interval
+	 *        - interval in ms between letters.
+	 * @throws RemoteException
+	 * @throws CommandFailedException
+	 */
+	public void inputText(String text, int interval) throws RemoteException, CommandFailedException
+	{
+		String command = "am broadcast -a atmosphere.intent.action.TEXT --ei t ";
+		double intervalInSeconds = interval / 1000;
+		for (Character currentCharacter : text.toCharArray())
+		{
+			int numericalCharValue = (int) currentCharacter;
+			wrappedClientDevice.executeShellCommand(command + numericalCharValue);
+			if (interval > 0)
+			{
+
+				wrappedClientDevice.executeShellCommand("sleep " + intervalInSeconds);
+			}
+		}
+	}
+
+	/**
+	 * Inputs text on the testing device through the AtmosphereIME.
+	 * 
+	 * @param text
+	 *        - text to be inputted.
+	 * @throws RemoteException
+	 * @throws CommandFailedException
+	 */
+	public void inputText(String text) throws RemoteException, CommandFailedException
+	{
+		inputText(text, 0);
 	}
 }

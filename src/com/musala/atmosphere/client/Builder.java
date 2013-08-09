@@ -4,10 +4,11 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.musala.atmosphere.client.exceptions.DeviceNotFoundException;
 import com.musala.atmosphere.client.exceptions.MissingServerAnnotationException;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
 import com.musala.atmosphere.client.util.Server;
@@ -35,6 +36,8 @@ public class Builder
 	private IClientBuilder clientBuilder;
 
 	private Registry serverRmiRegistry;
+
+	private Map<Device, String> deviceToProxyRmiId = new HashMap<Device, String>();
 
 	/**
 	 * Connects to Server through given IP and rmiPort.
@@ -153,27 +156,23 @@ public class Builder
 	 */
 	public Device getDevice(DeviceParameters deviceParameters)
 	{
-		Device device = null;
-
 		try
 		{
 			String deviceProxyRmiId = clientBuilder.getDeviceProxyRmiId(deviceParameters);
-			LOGGER.info(deviceProxyRmiId);
+			LOGGER.info("Returned device with the wanted parameters and device proxy rmi id: " + deviceProxyRmiId
+					+ " from Builder.");
+
 			IClientDevice iClientDevice = (IClientDevice) serverRmiRegistry.lookup(deviceProxyRmiId);
-			device = new Device(iClientDevice);
+
+			Device device = new Device(iClientDevice);
+			deviceToProxyRmiId.put(device, deviceProxyRmiId);
+			return device;
 		}
-		catch (RemoteException e)
+		catch (RemoteException | NotBoundException e)
 		{
 			LOGGER.error("Could not instantiate Device.", e);
 			throw new ServerConnectionFailedException("Could not contact Server to retrieve device.", e);
 		}
-		catch (NotBoundException e)
-		{
-			LOGGER.error("No device found with given ID in RMI.", e);
-			throw new DeviceNotFoundException("No device with given ID is present in RMI.", e);
-		}
-
-		return device;
 	}
 
 	public String getServerIp()
@@ -184,5 +183,46 @@ public class Builder
 	public int getServerRmiPort()
 	{
 		return serverRmiPort;
+	}
+
+	/**
+	 * Relelases previously allocated to a Client device and returns it back in the pool.
+	 * 
+	 * @param device
+	 *        - device to be released.
+	 */
+	public void releaseDevice(Device device)
+	{
+		String deviceRmiId = deviceToProxyRmiId.get(device);
+		try
+		{
+			clientBuilder.releaseDevice(deviceRmiId);
+		}
+		catch (RemoteException e)
+		{
+			LOGGER.error("Could not release Device.", e);
+			throw new ServerConnectionFailedException("Could not contact Server to release device.", e);
+		}
+		System.out.println(deviceRmiId + " is released.");
+		deviceToProxyRmiId.remove(device);
+		device.release();
+	}
+
+	/**
+	 * Releases all allocated devices.
+	 */
+	public void releaseAllDevices()
+	{
+		for (Device device : deviceToProxyRmiId.keySet())
+		{
+			releaseDevice(device);
+		}
+	}
+
+	@Override
+	protected void finalize()
+	{
+		releaseAllDevices();
+		Builder.builder = null;
 	}
 }

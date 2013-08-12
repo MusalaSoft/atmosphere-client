@@ -636,40 +636,58 @@ public class Device
 	 * Inputs text on the testing device through the AtmosphereIME.
 	 * 
 	 * @param text
-	 *        - text to be inputted.
+	 *        - text to be input.
 	 * @param interval
 	 *        - interval in milliseconds between letters.
-	 * @throws RemoteException
-	 * @throws CommandFailedException
 	 */
-	public void inputText(String text, int intervalInMs) throws RemoteException, CommandFailedException
+	public void inputText(String text, int intervalInMs)
 	{
-		String sb = new String();
-		String command = "am broadcast -a atmosphere.intent.action.TEXT --eia text ";
-
-		sb = sb + command;
-		for (Character currentCharacter : text.toCharArray())
+		if (text.isEmpty())
 		{
-			int numericalCharValue = (int) currentCharacter;
-			sb = sb + numericalCharValue + ",";
+			return;
 		}
-		sb = sb.substring(0, sb.length() - 1);
+		StringBuilder intentBuilder = new StringBuilder();
+		String command = "am broadcast -a atmosphere.intent.action.TEXT --eia text ";
+		char[] textCharArray = text.toCharArray();
+
+		intentBuilder.append(command);
+		intentBuilder.append((int) textCharArray[0]);
+		for (int i = 1; i < textCharArray.length; i++)
+		{
+			intentBuilder.append(",");
+			int numericalCharValue = (int) textCharArray[i];
+			intentBuilder.append(numericalCharValue);
+		}
+
 		if (intervalInMs > 0)
 		{
-			sb = sb + " --ei interval " + intervalInMs;
+			intentBuilder.append(" --ei interval ");
+			intentBuilder.append(intervalInMs);
 		}
-		System.out.println(wrappedClientDevice.executeShellCommand(sb));
+
+		try
+		{
+			String builtCommand = intentBuilder.toString();
+			wrappedClientDevice.executeShellCommand(builtCommand);
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Sending text input failed.", e);
+		}
+		catch (RemoteException e)
+		{
+			// TODO implement logic behind failed client-server connection
+			e.printStackTrace();
+		}
 	}
 
 	/**
 	 * Inputs text on the testing device through the AtmosphereIME.
 	 * 
 	 * @param text
-	 *        - text to be inputted.
-	 * @throws RemoteException
-	 * @throws CommandFailedException
+	 *        - text to be input.
 	 */
-	public void inputText(String text) throws RemoteException, CommandFailedException
+	public void inputText(String text)
 	{
 		inputText(text, 0);
 	}

@@ -167,4 +167,29 @@ public class UiElement
 		// TODO implement uiElement.drag()
 	}
 
+	/**
+	 * Inputs text into the UI Element, <b> if it supports text input </b> with interval in milliseconds between the
+	 * input of each letter.
+	 * 
+	 * @param text
+	 *        - text to be inputted.
+	 * @param intervalInMs
+	 *        - interval in milliseconds between the input of each letter.
+	 */
+	public void inputText(String text, int intervalInMs)
+	{
+		tap(); // TODO Replace with focus() when implemented.
+		onDevice.inputText(text, intervalInMs);
+	}
+
+	/**
+	 * Inputs text into the UI Element, <b> if it supports text input</b>.
+	 * 
+	 * @param text
+	 *        - text to be inputted.
+	 */
+	public void inputText(String text)
+	{
+		inputText(text, 0);
+	}
 }

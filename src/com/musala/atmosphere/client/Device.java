@@ -16,9 +16,11 @@ import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.device.TouchGesture;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.ApkInstallationFailedException;
+import com.musala.atmosphere.client.exceptions.DeviceInvocationRejectedException;
 import com.musala.atmosphere.commons.BatteryState;
 import com.musala.atmosphere.commons.CommandFailedException;
 import com.musala.atmosphere.commons.DeviceOrientation;
+import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 
 /**
@@ -45,15 +47,24 @@ public class Device
 
 	private IClientDevice wrappedClientDevice;
 
+	private final long invocationPasskey;
+
 	/**
-	 * Constructor that converts given IClientDevice to fully functioning and usable Device object.
+	 * Constructor that creates a usable Device object by a given IClientDevice and it's invocation passkey.
 	 * 
 	 * @param iClientDevice
+	 * @param devicePasskey
 	 *        -
 	 */
-	Device(IClientDevice iClientDevice)
+	Device(IClientDevice iClientDevice, long devicePasskey)
 	{
 		wrappedClientDevice = iClientDevice;
+		invocationPasskey = devicePasskey;
+	}
+
+	void release()
+	{
+		wrappedClientDevice = new ReleasedClientDevice();
 	}
 
 	/**
@@ -66,20 +77,19 @@ public class Device
 		com.musala.atmosphere.commons.DeviceInformation wrappedDeviceInformation = null;
 		try
 		{
-			wrappedDeviceInformation = wrappedClientDevice.getDeviceInformation();
+			wrappedDeviceInformation = wrappedClientDevice.getDeviceInformation(invocationPasskey);
 		}
 		catch (RemoteException e)
 		{
 			// TODO add client connection failed logic
 			e.printStackTrace();
 		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
 		DeviceInformation deviceInformation = new DeviceInformation(wrappedDeviceInformation);
 		return deviceInformation;
-	}
-
-	void release()
-	{
-		wrappedClientDevice = new ReleasedClientDevice();
 	}
 
 	/**
@@ -98,27 +108,39 @@ public class Device
 	 * 
 	 * @param deviceOrientation
 	 *        - new device orientation to be set
-	 * @throws RemoteException
-	 * @throws CommandFailedException
 	 */
-	public void setOrientation(DeviceOrientation deviceOrientation) throws RemoteException, CommandFailedException
+	public void setOrientation(DeviceOrientation deviceOrientation)
 	{
-		wrappedClientDevice.setOrientation(deviceOrientation);
+		try
+		{
+			wrappedClientDevice.setOrientation(deviceOrientation, invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Setting device orientation failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
 	}
 
 	/**
-	 * Returns battery level
+	 * Returns the current device's battery level.
 	 * 
-	 * @return Battery level of the given device in %
-	 * @throws RemoteException
-	 * @throws CommandFailedException
+	 * @return Battery level of the device in percents.
 	 */
 	public int getBatteryLevel()
 	{
 		int result = 0;
 		try
 		{
-			result = wrappedClientDevice.getBatteryLevel();
+			result = wrappedClientDevice.getBatteryLevel(invocationPasskey);
 		}
 		catch (RemoteException e)
 		{
@@ -127,22 +149,26 @@ public class Device
 		}
 		catch (CommandFailedException e)
 		{
-			LOGGER.error("Failed to get battery level.", e);
+			LOGGER.error("Getting device battery level failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
 		}
 		return result;
 	}
 
 	/**
-	 * Sets battery level.
+	 * Sets current device's battery level.
 	 * 
 	 * @param batteryLevel
-	 *        - level of battery in percent
+	 *        - new battery level in percent.
 	 */
 	public void setBatteryLevel(int batteryLevel)
 	{
 		try
 		{
-			wrappedClientDevice.setBatteryLevel(batteryLevel);
+			wrappedClientDevice.setBatteryLevel(batteryLevel, invocationPasskey);
 		}
 		catch (RemoteException e)
 		{
@@ -151,24 +177,26 @@ public class Device
 		}
 		catch (CommandFailedException e)
 		{
-			LOGGER.error("Setting battery level failed.", e);
+			LOGGER.error("Setting device battery level failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
 		}
 
 	}
 
 	/**
-	 * Get current battery state of the testing device
+	 * Gets the current device's battery state.
 	 * 
-	 * @return - "unknown", "charging", "discharging", "not charging" or "full"
 	 * @return - a {@link BatteryState BatteryState} enumeration member.
-	 * @throws RemoteException
 	 */
 	public BatteryState getBatteryState()
 	{
 		BatteryState state = null;
 		try
 		{
-			state = wrappedClientDevice.getBatteryState();
+			state = wrappedClientDevice.getBatteryState(invocationPasskey);
 		}
 		catch (RemoteException e)
 		{
@@ -179,21 +207,24 @@ public class Device
 		{
 			LOGGER.error("Fetching device battery state failed.", e);
 		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
 		return state;
 	}
 
 	/**
-	 * Sets battery state of testing device.
+	 * Sets the current device's battery state.
 	 * 
 	 * @param batteryState
-	 *        - element of type {@link BatteryState}
-	 * @throws RemoteException
+	 *        - {@link BatteryState} enumeration member.
 	 */
-	public void setBatteryState(BatteryState batteryState) throws RemoteException
+	public void setBatteryState(BatteryState batteryState)
 	{
 		try
 		{
-			wrappedClientDevice.setBatteryState(batteryState);
+			wrappedClientDevice.setBatteryState(batteryState, invocationPasskey);
 		}
 		catch (RemoteException e)
 		{
@@ -202,104 +233,153 @@ public class Device
 		}
 		catch (CommandFailedException e)
 		{
-			e.printStackTrace();
-			LOGGER.error("Device set battery level command failed.", e);
+			LOGGER.error("Setting device battery level failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
 		}
 	}
 
 	/**
-	 * Gets current power state of the testing device
+	 * Gets the current device's power connectivity.
 	 * 
-	 * @return - true - connected or false - disconnected
-	 * @throws CommandFailedException
-	 * @throws RemoteException
+	 * @return true if the device connected or false - disconnected
 	 */
-	public boolean getPowerState() throws RemoteException, CommandFailedException
+	public boolean getPowerState()
 	{
-		boolean state = wrappedClientDevice.getPowerState();
+		boolean state = false;
+		try
+		{
+			wrappedClientDevice.getPowerState(invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Getting device power connectivity state failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
 		return state;
 	}
 
 	/**
-	 * Sets the power state of the testing device.
+	 * Sets the current device's power connectivity state.
 	 * 
 	 * @param state
-	 *        True for connected or false for disconnected.
-	 * @throws CommandFailedException
-	 * @throws RemoteException
+	 *        True for AC connected, false for disconnected.
 	 */
-	public void setPowerState(boolean state) throws CommandFailedException, RemoteException
+	public void setPowerState(boolean state)
 	{
-		wrappedClientDevice.setPowerState(state);
+		try
+		{
+			wrappedClientDevice.setPowerState(state, invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Setting device power connectivity state failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
 	}
 
-	/**
-	 * Gets network speeds of testing device
-	 * 
-	 * @return - triple of ints meaning < uploadSpeed, downloadSpeed, latency >
-	 * @throws RemoteException
-	 */
+	// /**
+	// * Gets network speeds of testing device
+	// *
+	// * @return - triple of ints meaning < uploadSpeed, downloadSpeed, latency >
+	// * @throws RemoteException
+	// */
 	// Triple<Integer> getNetworkSpeed() throws RemoteException
 	// {
 	// // TODO implement device.getNetworkSpeed
 	// return null;
 	// }
 
-	/**
-	 * Sets network speed
-	 * 
-	 * @param upload
-	 * @param download
-	 * @param latency
-	 * @throws RemoteException
-	 */
-	public void setNetworkSpeed(int upload, int download, int latency) throws RemoteException
-	{
-		// TODO implement device.setNetworkSpeed
-	}
+	// /**
+	// * Sets network speed
+	// *
+	// * @param upload
+	// * @param download
+	// * @param latency
+	// */
+	// public void setNetworkSpeed(int upload, int download, int latency)
+	// {
+	// // TODO implement device.setNetworkSpeed
+	// }
 
 	/**
-	 * Sets the airplane mode of the testing device.
+	 * Sets the current device's airplane mode.
 	 * 
 	 * @param airplaneMode
-	 *        True if in airplane mode, false if not.
-	 * @throws CommandFailedException
-	 * @throws RemoteException
+	 *        - True if the device should now be in airplane mode, false if not.
 	 */
-	public void setAirplaneMode(boolean airplaneMode) throws CommandFailedException, RemoteException
+	public void setAirplaneMode(boolean airplaneMode)
 	{
-		wrappedClientDevice.setAirplaneMode(airplaneMode);
+		try
+		{
+			wrappedClientDevice.setAirplaneMode(airplaneMode, invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Setting device airplane mode failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
 	}
 
 	/**
-	 * Allows user to get a device screenshot.
+	 * Gets the current device's screenshot.
 	 * 
-	 * @return
+	 * @return a byte buffer that, when dumped to a file, can be opened as a .PNG image file.
 	 */
 	public byte[] getScreenshot()
 	{
 		byte[] screenshot = null;
 		try
 		{
-			screenshot = wrappedClientDevice.getScreenshot();
+			screenshot = wrappedClientDevice.getScreenshot(invocationPasskey);
 		}
 		catch (RemoteException e)
 		{
 			// TODO add client logic on failed connection
-			LOGGER.error("Error in connection between client and device.", e);
+			e.printStackTrace();
 		}
 		catch (CommandFailedException e)
 		{
-			// TODO add logic on failed screenshot fetching
-			LOGGER.error("Fetching screenshot had failed for some reason.", e);
+			LOGGER.error("Fetching device screenshot failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
 		}
 		return screenshot;
 	}
 
 	/**
-	 * Allows user to get a device screenshot and save it as an image file.
+	 * Gets the current device's screenshot and saves it as an image file at a specified location.
 	 * 
-	 * @return
+	 * @param pathToImageFile
+	 *        - location at which the screenshot image file should be saved.
 	 */
 	public void getScreenshot(String pathToImageFile)
 	{
@@ -311,23 +391,21 @@ public class Device
 		}
 		catch (IOException e)
 		{
-			// TODO add logic on failed screenshot dumping
-			LOGGER.error("Error while writing to file.", e);
+			LOGGER.error("Saving screenshot file failed.", e);
 		}
 	}
 
 	/**
-	 * Gets the active {@link Screen Screen} of the testing device.
+	 * Gets the current device's active {@link Screen Screen}.
 	 * 
-	 * @return
+	 * @return a {@link Screen Screen} instance.
 	 */
 	public Screen getActiveScreen()
 	{
-		// TODO RemoteException and CommandFailedException should be changed to something else
 		String uiHierarchy = "";
 		try
 		{
-			uiHierarchy = wrappedClientDevice.getUiXml();
+			uiHierarchy = wrappedClientDevice.getUiXml(invocationPasskey);
 		}
 		catch (RemoteException e)
 		{
@@ -336,89 +414,107 @@ public class Device
 		}
 		catch (CommandFailedException e)
 		{
-			LOGGER.error("Getting active device screen failed.", e);
-			// TODO throw something here
+			LOGGER.error("Getting device active screen failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
 		}
 		Screen activeScreen = new Screen(this, uiHierarchy);
 		return activeScreen;
 	}
 
 	/**
-	 * Installs the application to be tested on the device.
+	 * Installs a specified application on the current device.
 	 * 
 	 * @param path
-	 *        - location of the installation file on the client machine.
+	 *        - location of the file to be installed.
 	 */
 	public void installAPK(String path)
 	{
-		LOGGER.info("Preparing for apk installation...");
-
 		try
 		{
-			wrappedClientDevice.initApkInstall();
-		}
-		catch (IOException e)
-		{
-			LOGGER.fatal("Apk instalation failed: could not create temporary apk file on the Device.", e);
-			throw new ApkInstallationFailedException("Internal error occured: could not install apk.", e);
-		}
-
-		// Transfer the apk from Client to his device
-		byte[] buffer = new byte[MAX_BUFFER_SIZE];
-
-		try
-		{
-			FileInputStream fileReaderFromApk = new FileInputStream(path);
-			LOGGER.info("Transferring apk...");
-			// number of characters until the end of file
-			int numberOfCharactersLeft = fileReaderFromApk.available();
-
-			while (numberOfCharactersLeft > 0)
+			try
 			{
-				if (numberOfCharactersLeft >= MAX_BUFFER_SIZE)
-				{
-					fileReaderFromApk.read(buffer, 0, MAX_BUFFER_SIZE);
-				}
-				else
-				{
-					buffer = new byte[numberOfCharactersLeft];
-					fileReaderFromApk.read(buffer, 0, numberOfCharactersLeft);
-				}
-				wrappedClientDevice.appendToApk(buffer);
-				numberOfCharactersLeft = fileReaderFromApk.available();
+				wrappedClientDevice.initApkInstall(invocationPasskey);
 			}
-		}
-		catch (FileNotFoundException e)
-		{
-			LOGGER.fatal("Could not locate APK file. Make sure the path is correct and the file exists.", e);
-			throw new ApkInstallationFailedException("Missing instalation file for the tested application.", e);
-		}
-		catch (IOException e)
-		{
-			LOGGER.fatal("Error while reading from APK file.", e);
-			throw new ApkInstallationFailedException("Could not install APK file. Error while reading from file.", e);
-		}
+			catch (IOException e)
+			{
+				LOGGER.fatal("File instalation failed: could not create temporary apk file on the remote Agent.", e);
+				throw new ApkInstallationFailedException(	"File instalation failed: could not create temporary apk file on the remote Agent.",
+															e);
+			}
 
-		// Install
-		try
-		{
-			LOGGER.info("Installing apk...");
-			wrappedClientDevice.buildAndInstallApk();
-		}
-		catch (IOException e)
-		{
-			LOGGER.fatal("Error while saving the apk file on the wrapped device", e);
-			throw new ApkInstallationFailedException(	"Internal error occured: Could not install application on device.",
-														e);
-		}
-		catch (CommandFailedException e)
-		{
-			LOGGER.fatal("Error while executing command for installing application.", e);
-			throw new ApkInstallationFailedException(	"Internal error occured: Could not install application on device.",
-														e);
-		}
+			// Transfer the installation file from the current machine to the device
+			byte[] buffer = new byte[MAX_BUFFER_SIZE];
+			try
+			{
+				FileInputStream fileReaderFromApk = new FileInputStream(path);
+				LOGGER.info("Transferring installation file...");
+				// number of characters until the end of file
+				int numberOfCharactersLeft = fileReaderFromApk.available();
 
-		LOGGER.info("Apk instalation successfull.");
+				while (numberOfCharactersLeft > 0)
+				{
+					if (numberOfCharactersLeft >= MAX_BUFFER_SIZE)
+					{
+						fileReaderFromApk.read(buffer, 0, MAX_BUFFER_SIZE);
+					}
+					else
+					{
+						buffer = new byte[numberOfCharactersLeft];
+						fileReaderFromApk.read(buffer, 0, numberOfCharactersLeft);
+					}
+					wrappedClientDevice.appendToApk(buffer, invocationPasskey);
+					numberOfCharactersLeft = fileReaderFromApk.available();
+				}
+			}
+			catch (FileNotFoundException e)
+			{
+				LOGGER.fatal(	"Could not locate installation file. Make sure the path is correct and the file exists.",
+								e);
+				wrappedClientDevice.discardApk(invocationPasskey);
+				throw new ApkInstallationFailedException(	"Could not locate installation file. Make sure the path is correct and the file exists.",
+															e);
+			}
+			catch (IOException e)
+			{
+				LOGGER.fatal("Reading from local file/Writing to remote file resulted in exception.", e);
+				wrappedClientDevice.discardApk(invocationPasskey);
+				throw new ApkInstallationFailedException(	"Reading from local file/Writing to remote file resulted in exception.",
+															e);
+			}
+
+			// Install
+			try
+			{
+				LOGGER.info("Installing transferred file...");
+				wrappedClientDevice.buildAndInstallApk(invocationPasskey);
+			}
+			catch (IOException e)
+			{
+				LOGGER.fatal("Error while saving the apk file on the remote Agent.", e);
+				wrappedClientDevice.discardApk(invocationPasskey);
+				throw new ApkInstallationFailedException("Error while saving the apk file on the remote Agent.", e);
+			}
+			catch (CommandFailedException e)
+			{
+				LOGGER.fatal("Executing file installation command failed.", e);
+				wrappedClientDevice.discardApk(invocationPasskey);
+				throw new ApkInstallationFailedException("Executing file installation command failed.", e);
+			}
+
+			LOGGER.info("File instalation successfull.");
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
 	}
 
 	/*
@@ -428,7 +524,7 @@ public class Device
 	 */
 
 	/**
-	 * Redirects specific adress to another adress.
+	 * Redirects specific address to another address.
 	 * 
 	 * @param toIp
 	 * @param toNewIp
@@ -470,7 +566,7 @@ public class Device
 		String query = "input tap " + positionX + " " + positionY;
 		try
 		{
-			wrappedClientDevice.executeShellCommand(query);
+			wrappedClientDevice.executeShellCommand(query, invocationPasskey);
 		}
 		catch (RemoteException e)
 		{
@@ -479,7 +575,11 @@ public class Device
 		}
 		catch (CommandFailedException e)
 		{
-			LOGGER.error("Device screen tap command failed.", e);
+			LOGGER.error("Device screen tap failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
 		}
 	}
 
@@ -489,7 +589,8 @@ public class Device
 	 * @param packageName
 	 *        package name from which an activity should be started.
 	 * @param activityName
-	 *        activity name to be started
+	 *        activity name to be started.
+	 * @throws ActivityStartingException
 	 */
 	public void startActivity(String packageName, String activityName) throws ActivityStartingException
 	{
@@ -497,7 +598,7 @@ public class Device
 		String response = null;
 		try
 		{
-			response = wrappedClientDevice.executeShellCommand(query);
+			response = wrappedClientDevice.executeShellCommand(query, invocationPasskey);
 		}
 		catch (RemoteException e)
 		{
@@ -507,6 +608,10 @@ public class Device
 		catch (CommandFailedException e)
 		{
 			throw new ActivityStartingException("The activity starting query was rejected.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
 		}
 
 		if (response.contains("Error: Activity class"))
@@ -542,7 +647,7 @@ public class Device
 	}
 
 	/**
-	 * Checks if the device is in a WAKE state.
+	 * Checks if the current device is in a WAKE state.
 	 * 
 	 * @return true if the device is awake, false otherwise.
 	 */
@@ -551,7 +656,7 @@ public class Device
 		String dump = "";
 		try
 		{
-			dump = wrappedClientDevice.executeShellCommand(AWAKE_STATUS_DUMP_COMMAND);
+			dump = wrappedClientDevice.executeShellCommand(AWAKE_STATUS_DUMP_COMMAND, invocationPasskey);
 		}
 		catch (RemoteException e)
 		{
@@ -561,6 +666,10 @@ public class Device
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Fetching device wake state failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
 		}
 
 		Pattern pattern = Pattern.compile(AWAKE_EXTRACTION_REGEX, Pattern.MULTILINE);
@@ -572,7 +681,7 @@ public class Device
 	}
 
 	/**
-	 * Checks if the device is locked.
+	 * Checks if the current device is locked.
 	 * 
 	 * @return true if the device is locked, false otherwise.
 	 */
@@ -581,7 +690,7 @@ public class Device
 		String dump = "";
 		try
 		{
-			dump = wrappedClientDevice.executeShellCommand(LOCKED_STATUS_DUMP_COMMAND);
+			dump = wrappedClientDevice.executeShellCommand(LOCKED_STATUS_DUMP_COMMAND, invocationPasskey);
 		}
 		catch (RemoteException e)
 		{
@@ -592,12 +701,17 @@ public class Device
 		{
 			LOGGER.error("Fetching device lock state failed.", e);
 		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
+
 		boolean locked = dump.contains(LOCKED_CHECK_STRING);
 		return locked;
 	}
 
 	/**
-	 * Presses a device hardware button.
+	 * Presses a device hardware button on the current device.
 	 * 
 	 * @param keyCode
 	 *        - button key code as specified by the Android KeyEvent KEYCODE_ constants.
@@ -607,7 +721,7 @@ public class Device
 		String query = "input keyevent " + Integer.toString(keyCode);
 		try
 		{
-			wrappedClientDevice.executeShellCommand(query);
+			wrappedClientDevice.executeShellCommand(query, invocationPasskey);
 		}
 		catch (RemoteException e)
 		{
@@ -617,6 +731,10 @@ public class Device
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Sending key input failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
 		}
 	}
 
@@ -633,12 +751,12 @@ public class Device
 	}
 
 	/**
-	 * Inputs text on the testing device through the AtmosphereIME.
+	 * Inputs text on the current device through the AtmosphereIME.
 	 * 
 	 * @param text
 	 *        - text to be input.
 	 * @param interval
-	 *        - interval in milliseconds between letters.
+	 *        - time interval in milliseconds between letters typing.
 	 */
 	public void inputText(String text, int intervalInMs)
 	{
@@ -668,7 +786,7 @@ public class Device
 		try
 		{
 			String builtCommand = intentBuilder.toString();
-			wrappedClientDevice.executeShellCommand(builtCommand);
+			wrappedClientDevice.executeShellCommand(builtCommand, invocationPasskey);
 		}
 		catch (CommandFailedException e)
 		{
@@ -679,10 +797,14 @@ public class Device
 			// TODO implement logic behind failed client-server connection
 			e.printStackTrace();
 		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
 	}
 
 	/**
-	 * Inputs text on the testing device through the AtmosphereIME.
+	 * Inputs text on the current device through the AtmosphereIME.
 	 * 
 	 * @param text
 	 *        - text to be input.

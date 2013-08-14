@@ -10,6 +10,7 @@ import com.musala.atmosphere.commons.CommandFailedException;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.DeviceOrientation;
 import com.musala.atmosphere.commons.Pair;
+import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 
 /**
@@ -23,153 +24,204 @@ import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 class ReleasedClientDevice implements IClientDevice
 {
 	@Override
-	public long getFreeRam() throws RemoteException, CommandFailedException
-	{
-		throwDeviceReleasedException();
-		return 0;
-	}
-
-	@Override
-	public String executeShellCommand(String shellCommand) throws RemoteException, CommandFailedException
-	{
-		throwDeviceReleasedException();
-		return null;
-	}
-
-	@Override
-	public List<String> executeSequenceOfShellCommands(List<String> commands)
+	public long getFreeRam(long invocationPasskey)
 		throws RemoteException,
-			CommandFailedException
-	{
-		throwDeviceReleasedException();
-		return null;
-	}
-
-	@Override
-	public void initApkInstall() throws RemoteException, IOException
-	{
-		throwDeviceReleasedException();
-
-	}
-
-	@Override
-	public void appendToApk(byte[] bytes) throws RemoteException, IOException
-	{
-		throwDeviceReleasedException();
-
-	}
-
-	@Override
-	public void buildAndInstallApk() throws RemoteException, IOException, CommandFailedException
-	{
-		throwDeviceReleasedException();
-
-	}
-
-	@Override
-	public void discardApk() throws RemoteException, IOException
-	{
-		throwDeviceReleasedException();
-
-	}
-
-	@Override
-	public String getUiXml() throws RemoteException, CommandFailedException
-	{
-		throwDeviceReleasedException();
-		return null;
-	}
-
-	@Override
-	public byte[] getScreenshot() throws RemoteException, CommandFailedException
-	{
-		throwDeviceReleasedException();
-		return null;
-	}
-
-	@Override
-	public void setNetworkSpeed(Pair<Integer, Integer> speeds) throws RemoteException, CommandFailedException
-	{
-		throwDeviceReleasedException();
-
-	}
-
-	@Override
-	public Pair<Integer, Integer> getNetworkSpeed() throws RemoteException
-	{
-		throwDeviceReleasedException();
-		return null;
-	}
-
-	@Override
-	public void setNetworkLatency(int latency) throws RemoteException
-	{
-		throwDeviceReleasedException();
-
-	}
-
-	@Override
-	public int getNetworkLatency() throws RemoteException
+			CommandFailedException,
+			InvalidPasskeyException
 	{
 		throwDeviceReleasedException();
 		return 0;
 	}
 
 	@Override
-	public void setBatteryLevel(int level) throws RemoteException, CommandFailedException
-	{
-		throwDeviceReleasedException();
-
-	}
-
-	@Override
-	public int getBatteryLevel() throws RemoteException, CommandFailedException
-	{
-		throwDeviceReleasedException();
-		return 0;
-	}
-
-	@Override
-	public void setBatteryState(BatteryState state) throws RemoteException, CommandFailedException
-	{
-		throwDeviceReleasedException();
-	}
-
-	@Override
-	public BatteryState getBatteryState() throws RemoteException, CommandFailedException
+	public String executeShellCommand(String shellCommand, long invocationPasskey)
+		throws RemoteException,
+			CommandFailedException,
+			InvalidPasskeyException
 	{
 		throwDeviceReleasedException();
 		return null;
 	}
 
 	@Override
-	public boolean getPowerState() throws RemoteException, CommandFailedException
+	public List<String> executeSequenceOfShellCommands(List<String> commands, long invocationPasskey)
+		throws RemoteException,
+			CommandFailedException,
+			InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+		return null;
+	}
+
+	@Override
+	public void initApkInstall(long invocationPasskey) throws RemoteException, IOException, InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+
+	}
+
+	@Override
+	public void appendToApk(byte[] bytes, long invocationPasskey)
+		throws RemoteException,
+			IOException,
+			InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+
+	}
+
+	@Override
+	public void buildAndInstallApk(long invocationPasskey)
+		throws RemoteException,
+			IOException,
+			CommandFailedException,
+			InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+
+	}
+
+	@Override
+	public void discardApk(long invocationPasskey) throws RemoteException, InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+
+	}
+
+	@Override
+	public String getUiXml(long invocationPasskey)
+		throws RemoteException,
+			CommandFailedException,
+			InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+		return null;
+	}
+
+	@Override
+	public byte[] getScreenshot(long invocationPasskey)
+		throws RemoteException,
+			CommandFailedException,
+			InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+		return null;
+	}
+
+	@Override
+	public void setNetworkSpeed(Pair<Integer, Integer> speeds, long invocationPasskey)
+		throws RemoteException,
+			CommandFailedException,
+			InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+
+	}
+
+	@Override
+	public Pair<Integer, Integer> getNetworkSpeed(long invocationPasskey)
+		throws RemoteException,
+			InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+		return null;
+	}
+
+	@Override
+	public void setNetworkLatency(int latency, long invocationPasskey) throws RemoteException, InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+
+	}
+
+	@Override
+	public int getNetworkLatency(long invocationPasskey) throws RemoteException, InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+		return 0;
+	}
+
+	@Override
+	public void setBatteryLevel(int level, long invocationPasskey)
+		throws RemoteException,
+			CommandFailedException,
+			InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+
+	}
+
+	@Override
+	public int getBatteryLevel(long invocationPasskey)
+		throws RemoteException,
+			CommandFailedException,
+			InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+		return 0;
+	}
+
+	@Override
+	public void setBatteryState(BatteryState state, long invocationPasskey)
+		throws RemoteException,
+			CommandFailedException,
+			InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+	}
+
+	@Override
+	public BatteryState getBatteryState(long invocationPasskey)
+		throws RemoteException,
+			CommandFailedException,
+			InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+		return null;
+	}
+
+	@Override
+	public boolean getPowerState(long invocationPasskey)
+		throws RemoteException,
+			CommandFailedException,
+			InvalidPasskeyException
 	{
 		throwDeviceReleasedException();
 		return false;
 	}
 
 	@Override
-	public void setPowerState(boolean state) throws CommandFailedException, RemoteException
+	public void setPowerState(boolean state, long invocationPasskey)
+		throws CommandFailedException,
+			RemoteException,
+			InvalidPasskeyException
 	{
 		throwDeviceReleasedException();
 	}
 
 	@Override
-	public void setAirplaneMode(boolean airplaneMode) throws CommandFailedException, RemoteException
+	public void setAirplaneMode(boolean airplaneMode, long invocationPasskey)
+		throws CommandFailedException,
+			RemoteException,
+			InvalidPasskeyException
 	{
 		throwDeviceReleasedException();
 	}
 
 	@Override
-	public DeviceInformation getDeviceInformation() throws RemoteException
+	public DeviceInformation getDeviceInformation(long invocationPasskey)
+		throws RemoteException,
+			InvalidPasskeyException
 	{
 		throwDeviceReleasedException();
 		return null;
 	}
 
 	@Override
-	public void setOrientation(DeviceOrientation deviceOrientation) throws CommandFailedException, RemoteException
+	public void setOrientation(DeviceOrientation deviceOrientation, long invocationPasskey)
+		throws CommandFailedException,
+			RemoteException,
+			InvalidPasskeyException
 	{
 		throwDeviceReleasedException();
 	}

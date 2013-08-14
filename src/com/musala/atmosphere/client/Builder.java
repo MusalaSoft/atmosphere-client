@@ -13,7 +13,9 @@ import com.musala.atmosphere.client.exceptions.MissingServerAnnotationException;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
 import com.musala.atmosphere.client.util.Server;
 import com.musala.atmosphere.commons.Pair;
+import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.RmiStringConstants;
+import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformation;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceParameters;
 import com.musala.atmosphere.commons.cs.clientbuilder.IClientBuilder;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
@@ -37,14 +39,13 @@ public class Builder
 
 	private Registry serverRmiRegistry;
 
-	private Map<Device, String> deviceToProxyRmiId = new HashMap<Device, String>();
+	private Map<Device, DeviceAllocationInformation> deviceToDescriptor = new HashMap<Device, DeviceAllocationInformation>();
 
 	/**
 	 * Connects to Server through given IP and rmiPort.
 	 * 
 	 * @param annotationServerIp
 	 * @param annotationRmiPort
-	 * @throws RuntimeException
 	 */
 	private Builder(String annotationServerIp, int annotationRmiPort)
 	{
@@ -58,19 +59,18 @@ public class Builder
 		}
 		catch (RemoteException e)
 		{
-			LOGGER.fatal("Cannot connect to RMI. There is no RMI connection to IP: \"" + annotationServerIp
-					+ "\" on port: \"" + annotationRmiPort + "\"", e);
-			throw new ServerConnectionFailedException("Cannot connect to RMI. There is no RMI connection to IP: \""
-					+ annotationServerIp + "\" on port: \"" + annotationRmiPort + "\"");
+			LOGGER.fatal("Getting the server's pool manager RMI stub resulted in exception.", e);
+			throw new ServerConnectionFailedException(	"Getting the server's pool manager RMI stub resulted in exception.",
+														e);
 		}
 		catch (NotBoundException e)
 		{
-			LOGGER.fatal(	"There is no POOL_MANAGER registered in RMI. You are connecting to something different than a Server.",
+			LOGGER.fatal(	"The required Server stubs are not available in the target RMI registry. The target is most likely not an ATMOSPHERE Server.",
 							e);
-			throw new ServerConnectionFailedException("You are trying to connect to something that is not a Server.");
+			throw new ServerConnectionFailedException("The required Server stubs are not available in the target RMI registry. The target is most likely not an ATMOSPHERE Server.");
 		}
 
-		LOGGER.info("Builder has connected to the server's Pool of devices.");
+		LOGGER.info("Builder has connected to the server's device pool manager.");
 	}
 
 	/**
@@ -104,15 +104,15 @@ public class Builder
 			}
 			catch (ClassNotFoundException e)
 			{
-				LOGGER.error("Could not find class with name: " + callerMethod.getClassName());
+				LOGGER.error("Could not find class with name: " + callerMethod.getClassName(), e);
 			}
 
 		}
 
 		if (serverIp == null || serverPort == null)
 		{
-			LOGGER.fatal("@Server annotation missing on Test class.");
-			throw new MissingServerAnnotationException("@Server annotation missing on Test class.");
+			LOGGER.fatal("The invoking class is missing a @Server annotation.");
+			throw new MissingServerAnnotationException("The invoking class is missing a @Server annotation.");
 		}
 
 		Pair<String, Integer> annotationValues = new Pair<String, Integer>(serverIp, serverPort);
@@ -120,9 +120,9 @@ public class Builder
 	}
 
 	/**
-	 * Gets the instance of the builder
+	 * Gets the {@link Builder Builder} instance for the anotated Server address.
 	 * 
-	 * @return Instance of the builder
+	 * @return {@link Builder Builder} instance.
 	 */
 	public static Builder getInstance()
 	{
@@ -149,29 +149,32 @@ public class Builder
 	}
 
 	/**
-	 * Gets Device with given ClientDeviceParameters.
+	 * Gets a {@link Device Device} instance with given {@link DeviceParameters DeviceParameters}.
 	 * 
 	 * @param deviceParameters
-	 * @return
+	 *        - required device parameters.
+	 * @return a {@link Device Device} instance.
 	 */
 	public Device getDevice(DeviceParameters deviceParameters)
 	{
 		try
 		{
-			String deviceProxyRmiId = clientBuilder.getDeviceProxyRmiId(deviceParameters);
-			LOGGER.info("Returned device with the wanted parameters and device proxy rmi id: " + deviceProxyRmiId
-					+ " from Builder.");
+			DeviceAllocationInformation deviceDescriptor = clientBuilder.allocateDevice(deviceParameters);
+
+			String deviceProxyRmiId = deviceDescriptor.getProxyRmiId();
+			LOGGER.info("Fetched device with proxy RMI id: " + deviceProxyRmiId + ".");
 
 			IClientDevice iClientDevice = (IClientDevice) serverRmiRegistry.lookup(deviceProxyRmiId);
+			long passkey = deviceDescriptor.getProxyPasskey();
 
-			Device device = new Device(iClientDevice);
-			deviceToProxyRmiId.put(device, deviceProxyRmiId);
+			Device device = new Device(iClientDevice, passkey);
+			deviceToDescriptor.put(device, deviceDescriptor);
 			return device;
 		}
 		catch (RemoteException | NotBoundException e)
 		{
-			LOGGER.error("Could not instantiate Device.", e);
-			throw new ServerConnectionFailedException("Could not contact Server to retrieve device.", e);
+			LOGGER.error("Fetching Device failed (server connection failure).", e);
+			throw new ServerConnectionFailedException("Fetching Device failed (server connection failure).", e);
 		}
 	}
 
@@ -186,25 +189,34 @@ public class Builder
 	}
 
 	/**
-	 * Relelases previously allocated to a Client device and returns it back in the pool.
+	 * Releases previously allocated to a device.
 	 * 
 	 * @param device
 	 *        - device to be released.
 	 */
 	public void releaseDevice(Device device)
 	{
-		String deviceRmiId = deviceToProxyRmiId.get(device);
+		DeviceAllocationInformation deviceDescriptor = deviceToDescriptor.get(device);
+		String deviceRmiId = deviceDescriptor.getProxyRmiId();
+
 		try
 		{
-			clientBuilder.releaseDevice(deviceRmiId);
+			deviceToDescriptor.remove(device);
+			device.release();
+			clientBuilder.releaseDevice(deviceDescriptor);
 		}
 		catch (RemoteException e)
 		{
-			LOGGER.error("Could not release Device.", e);
-			throw new ServerConnectionFailedException("Could not contact Server to release device.", e);
+			LOGGER.error("Could not release Device (connection failure).", e);
+			throw new ServerConnectionFailedException("Could not release Device (connection failure).", e);
 		}
-		deviceToProxyRmiId.remove(device);
-		device.release();
+		catch (InvalidPasskeyException e)
+		{
+			// We did not have the correct passkey. The device most likely timed out and got freed to be used by someone
+			// else. So nothing to do here.
+		}
+
+		LOGGER.info(deviceRmiId + " is released.");
 	}
 
 	/**
@@ -212,7 +224,7 @@ public class Builder
 	 */
 	public void releaseAllDevices()
 	{
-		for (Device device : deviceToProxyRmiId.keySet())
+		for (Device device : deviceToDescriptor.keySet())
 		{
 			releaseDevice(device);
 		}
@@ -222,6 +234,6 @@ public class Builder
 	protected void finalize()
 	{
 		releaseAllDevices();
-		Builder.builder = null;
+		builder = null;
 	}
 }

@@ -1,6 +1,7 @@
 package com.musala.atmosphere.client;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -29,8 +30,9 @@ public class InstallApkTest
 	@Before
 	public void setUpDevice()
 	{
+		long testPasskey = 0;
 		innerClientDeviceMock = mock(IClientDevice.class);
-		device = new Device(innerClientDeviceMock);
+		device = new Device(innerClientDeviceMock, testPasskey);
 	}
 
 	@After
@@ -46,41 +48,33 @@ public class InstallApkTest
 	}
 
 	@Test(expected = ApkInstallationFailedException.class)
-	public void apkFileInitializationErrorTest() throws IOException, ApkInstallationFailedException
+	public void apkFileInitializationErrorTest() throws Exception
 	{
-		doThrow(new IOException()).when(innerClientDeviceMock).initApkInstall();
+		doThrow(new IOException()).when(innerClientDeviceMock).initApkInstall(anyLong());
 		device.installAPK(PATH_TO_APK_FILE);
-		verify(innerClientDeviceMock, times(1)).initApkInstall();
+		verify(innerClientDeviceMock, times(1)).initApkInstall(anyLong());
 	}
 
 	@Test(expected = ApkInstallationFailedException.class)
-	public void appendingErrorTest() throws IOException, ApkInstallationFailedException
+	public void appendingErrorTest() throws Exception
 	{
-		doThrow(new IOException()).when(innerClientDeviceMock).appendToApk((byte[]) any());
+		doThrow(new IOException()).when(innerClientDeviceMock).appendToApk((byte[]) any(), anyLong());
 		device.installAPK(PATH_TO_APK_FILE);
-		verify(innerClientDeviceMock, times(1)).appendToApk((byte[]) any());
+		verify(innerClientDeviceMock, times(1)).appendToApk((byte[]) any(), anyLong());
 	}
 
 	@Test(expected = ApkInstallationFailedException.class)
-	public void installationFailedCommandExecutionTest()
-		throws CommandFailedException,
-			IOException,
-			ApkInstallationFailedException
+	public void installationFailedCommandExecutionTest() throws Exception
 	{
-		doThrow(new CommandFailedException()).when(innerClientDeviceMock).buildAndInstallApk();
+		doThrow(new CommandFailedException()).when(innerClientDeviceMock).buildAndInstallApk(anyLong());
 		device.installAPK(PATH_TO_APK_FILE);
-		verify(innerClientDeviceMock, times(1)).appendToApk((byte[]) any());
 	}
 
 	@Test(expected = ApkInstallationFailedException.class)
-	public void installationWritingOnWrappedDeviceErrorTest()
-		throws IOException,
-			CommandFailedException,
-			ApkInstallationFailedException
+	public void installationWritingOnWrappedDeviceErrorTest() throws Exception
 	{
-		doThrow(new CommandFailedException()).when(innerClientDeviceMock).buildAndInstallApk();
+		doThrow(new CommandFailedException()).when(innerClientDeviceMock).buildAndInstallApk(anyLong());
 		device.installAPK(PATH_TO_APK_FILE);
-		verify(innerClientDeviceMock, times(1)).appendToApk((byte[]) any());
 	}
 
 }

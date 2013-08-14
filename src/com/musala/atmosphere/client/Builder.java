@@ -203,7 +203,6 @@ public class Builder
 			LOGGER.error("Could not release Device.", e);
 			throw new ServerConnectionFailedException("Could not contact Server to release device.", e);
 		}
-		System.out.println(deviceRmiId + " is released.");
 		deviceToProxyRmiId.remove(device);
 		device.release();
 	}

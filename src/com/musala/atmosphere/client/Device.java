@@ -17,6 +17,7 @@ import com.musala.atmosphere.client.device.TouchGesture;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.ApkInstallationFailedException;
 import com.musala.atmosphere.client.exceptions.DeviceInvocationRejectedException;
+import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.commons.BatteryState;
 import com.musala.atmosphere.commons.CommandFailedException;
 import com.musala.atmosphere.commons.DeviceOrientation;
@@ -561,9 +562,11 @@ public class Device
 	 * @param positionY
 	 *        screen tap Y coordinate.
 	 */
-	public void tapScreenLocation(int positionX, int positionY)
+	public void tapScreenLocation(Point tapPoint)
 	{
-		String query = "input tap " + positionX + " " + positionY;
+		int tapPointX = tapPoint.getX();
+		int tapPointY = tapPoint.getY();
+		String query = "input tap " + tapPointX + " " + tapPointY;
 		try
 		{
 			wrappedClientDevice.executeShellCommand(query, invocationPasskey);
@@ -773,7 +776,7 @@ public class Device
 		for (int i = 1; i < textCharArray.length; i++)
 		{
 			intentBuilder.append(",");
-			int numericalCharValue = (int) textCharArray[i];
+			int numericalCharValue = textCharArray[i];
 			intentBuilder.append(numericalCharValue);
 		}
 

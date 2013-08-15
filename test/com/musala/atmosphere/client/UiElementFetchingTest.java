@@ -1,7 +1,7 @@
 package com.musala.atmosphere.client;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
+import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.client.uiutils.UiElementSelector;
 
 public class UiElementFetchingTest
@@ -120,7 +121,6 @@ public class UiElementFetchingTest
 
 		element.tap();
 
-		verify(device, times(1)).tapScreenLocation(anyInt(), anyInt());
+		verify(device, times(1)).tapScreenLocation(any(Point.class));
 	}
-
 }

@@ -7,8 +7,9 @@ import java.util.Map;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.musala.atmosphere.client.geometry.Bounds;
+import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.client.uiutils.UiXmlParser;
-import com.musala.atmosphere.commons.Pair;
 
 /**
  * Used to access and manipulate certain views on the testing device, for example tapping, double-taping or holding
@@ -74,12 +75,30 @@ public class UiElement
 	 */
 	public void tap()
 	{
-		Pair<Integer, Integer> firstBound = elementAttributes.getBounds().getKey();
-		Pair<Integer, Integer> secondBound = elementAttributes.getBounds().getValue();
-		int pressX = (firstBound.getKey() + secondBound.getKey()) / 2;
-		int pressY = (firstBound.getValue() + secondBound.getValue()) / 2;
+		Bounds elementBounds = elementAttributes.getBounds();
+		Point tapPoint = elementBounds.getCenter();
 
-		onDevice.tapScreenLocation(pressX, pressY);
+		onDevice.tapScreenLocation(tapPoint);
+	}
+
+	public void tap(Point point)
+	{
+		Bounds elementBounds = elementAttributes.getBounds();
+		Point boundsUpperLeftCorner = elementBounds.getUpperLeftCorner();
+
+		int tapPointX = boundsUpperLeftCorner.getX() + point.getX();
+		int tapPointY = boundsUpperLeftCorner.getY() + point.getY();
+		Point tapPoint = new Point(tapPointX, tapPointY);
+
+		if (elementBounds.contains(tapPoint))
+		{
+			onDevice.tapScreenLocation(tapPoint);
+		}
+		else
+		{
+			throw new IllegalArgumentException("Point " + point + " not in element bounds.");
+		}
+
 	}
 
 	/**

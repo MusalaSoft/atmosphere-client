@@ -2,12 +2,12 @@ package com.musala.atmosphere.client;
 
 import java.util.Map;
 
-import com.musala.atmosphere.client.uiutils.UiElementBoundsParser;
-import com.musala.atmosphere.commons.Pair;
+import com.musala.atmosphere.client.geometry.Bounds;
+import com.musala.atmosphere.client.ui.UiElementBoundsParser;
 
 public class UiElementAttributes
 {
-	private Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> bounds;
+	private Bounds bounds;
 
 	private boolean selected;
 
@@ -63,7 +63,7 @@ public class UiElementAttributes
 		bounds = UiElementBoundsParser.parse(elementBoundsString);
 	}
 
-	public Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> getBounds()
+	public Bounds getBounds()
 	{
 		return bounds;
 	}

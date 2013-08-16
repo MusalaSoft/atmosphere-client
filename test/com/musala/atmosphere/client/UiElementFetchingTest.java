@@ -51,7 +51,7 @@ public class UiElementFetchingTest
 		final String desiredElementContentDescription = "derp";
 
 		UiElement element = screen.getElementCSS("hierarchy > *[class=" + desiredElementClass + "]");
-		UiElementAttributes attributes = element.getElementAttributes();
+		UiElementAttributes attributes = element.getElementAttributes(false);
 
 		assertEquals(	"Desired element was not fetched correctly.",
 						attributes.getContentDescription(),
@@ -66,7 +66,7 @@ public class UiElementFetchingTest
 
 		UiElement element = screen.getElementXPath("//hierarchy/*[@content-desc='" + desiredElementContentDescription
 				+ "']");
-		UiElementAttributes attributes = element.getElementAttributes();
+		UiElementAttributes attributes = element.getElementAttributes(false);
 
 		assertEquals("Desired element was not fetched correctly.", attributes.getClassName(), desiredElementClass);
 	}
@@ -80,7 +80,7 @@ public class UiElementFetchingTest
 		UiElementSelector selector = new UiElementSelector();
 		selector.setContentDescription(desiredElementContentDescription);
 		UiElement element = screen.getElement(selector);
-		UiElementAttributes attributes = element.getElementAttributes();
+		UiElementAttributes attributes = element.getElementAttributes(false);
 
 		assertEquals("Desired element was not fetched correctly.", attributes.getClassName(), desiredElementClass);
 	}
@@ -119,7 +119,7 @@ public class UiElementFetchingTest
 		selector.setContentDescription(desiredElementContentDescription);
 		UiElement element = screen.getElement(selector);
 
-		element.tap();
+		element.tap(false);
 
 		verify(device, times(1)).tapScreenLocation(any(Point.class));
 	}

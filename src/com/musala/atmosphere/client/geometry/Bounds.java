@@ -182,9 +182,6 @@ public class Bounds
 		boolean containsPointX = point.getX() >= upperLeftCorner.getX() && point.getX() <= lowerRightCorner.getX();
 		boolean containsPointY = point.getY() >= upperLeftCorner.getY() && point.getY() <= lowerRightCorner.getY();
 
-		System.out.println("x " + containsPointX);
-		System.out.println("y " + containsPointY);
-
 		return containsPointX && containsPointY;
 	}
 

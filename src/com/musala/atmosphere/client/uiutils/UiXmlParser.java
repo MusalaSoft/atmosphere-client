@@ -15,6 +15,7 @@ import org.jsoup.select.Elements;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 
@@ -43,14 +44,20 @@ public class UiXmlParser
 	{
 		XPath x = XPathFactory.newInstance().newXPath();
 		XPathExpression expression = x.compile(xPathQuery);
-		Node node = (Node) expression.evaluate(domDocument, XPathConstants.NODE);
 
-		if (node == null)
+		NodeList nodeList = (NodeList) expression.evaluate(domDocument, XPathConstants.NODESET);
+		int foundElements = 0;
+		if (nodeList == null || (foundElements = nodeList.getLength()) == 0)
 		{
 			throw new UiElementFetchingException("No element found for the passed XPath expression.");
 		}
+		if (foundElements > 1)
+		{
+			throw new UiElementFetchingException("Found " + foundElements
+					+ " elements that match the element selecting query. Please be more specific.");
+		}
 
-		return node;
+		return nodeList.item(0);
 	}
 
 	/**

@@ -3,8 +3,15 @@ package com.musala.atmosphere.client;
 import java.util.Map;
 
 import com.musala.atmosphere.client.geometry.Bounds;
+import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.client.ui.UiElementBoundsParser;
 
+/**
+ * A {@link UiElement UiElement} attributes data container.
+ * 
+ * @author georgi.gaydarov
+ * 
+ */
 public class UiElementAttributes
 {
 	private Bounds bounds;
@@ -141,5 +148,54 @@ public class UiElementAttributes
 	public int getIndex()
 	{
 		return index;
+	}
+
+	/**
+	 * Builds a CSS select element query based on the contents of this container.
+	 * 
+	 * @return the built CSS query.
+	 */
+	public String buildCssQuery()
+	{
+		StringBuilder builder = new StringBuilder();
+
+		if (!className.isEmpty())
+		{
+			builder.append("[class=" + className + "]");
+		}
+		if (!contentDescription.isEmpty())
+		{
+			builder.append("[content-desc=" + contentDescription + "]");
+		}
+		if (!packageName.isEmpty())
+		{
+			builder.append("[package=" + packageName + "]");
+		}
+		Point firstBound = bounds.getUpperLeftCorner();
+		Point secondBound = bounds.getLowerRightCorner();
+		String boundsString = String.format("[%d,%d][%d,%d]",
+											firstBound.getX(),
+											firstBound.getY(),
+											secondBound.getX(),
+											secondBound.getY());
+		builder.append("[bounds=" + boundsString + "]");
+		if (!text.isEmpty())
+		{
+			builder.append("[text=" + text + "]");
+		}
+		builder.append("[index=" + index + "]");
+		builder.append("[checkable=" + checkable + "]");
+		builder.append("[checked=" + checked + "]");
+		builder.append("[clickable=" + clickable + "]");
+		builder.append("[enabled=" + enabled + "]");
+		builder.append("[focusable=" + focusable + "]");
+		builder.append("[focused=" + focused + "]");
+		builder.append("[long-clickable=" + longClickable + "]");
+		builder.append("[password=" + password + "]");
+		builder.append("[scrollable=" + scrollable + "]");
+		builder.append("[selected=" + selected + "]");
+
+		String query = builder.toString();
+		return query;
 	}
 }

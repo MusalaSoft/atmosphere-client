@@ -1,5 +1,7 @@
 package com.musala.atmosphere.client.uiutils;
 
+import com.musala.atmosphere.client.geometry.Bounds;
+import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.commons.Pair;
 
 /**
@@ -11,7 +13,7 @@ import com.musala.atmosphere.commons.Pair;
  */
 public class UiElementSelector
 {
-	private Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> bounds;
+	private Bounds bounds;
 
 	private Boolean selected;
 
@@ -43,12 +45,12 @@ public class UiElementSelector
 
 	private Integer index;
 
-	public Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> getBounds()
+	public Bounds getBounds()
 	{
 		return bounds;
 	}
 
-	public void setBounds(Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> bounds)
+	public void setBounds(Bounds bounds)
 	{
 		this.bounds = bounds;
 	}
@@ -226,10 +228,13 @@ public class UiElementSelector
 		}
 		if (bounds != null)
 		{
-			Pair<Integer, Integer> firstBound = bounds.getKey();
-			Pair<Integer, Integer> secondBound = bounds.getValue();
-			String boundsString = "[" + firstBound.getKey() + "," + firstBound.getValue() + "][" + secondBound.getKey()
-					+ "," + secondBound.getValue() + "]";
+			Point firstBound = bounds.getUpperLeftCorner();
+			Point secondBound = bounds.getLowerRightCorner();
+			String boundsString = String.format("[%d,%d][%d,%d]",
+												firstBound.getX(),
+												secondBound.getX(),
+												firstBound.getY(),
+												secondBound.getY());
 			builder.append("[bounds=" + boundsString + "]");
 		}
 		if (text != null)

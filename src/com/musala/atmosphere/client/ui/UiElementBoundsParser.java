@@ -24,7 +24,7 @@ public class UiElementBoundsParser
 	 */
 	public static Bounds parse(String bounds)
 	{
-		final String BOUNDS_STRING_PATTERN = "\\[(\\d+),(\\d+)\\]\\[(\\d+),(\\d+)\\]";
+		final String BOUNDS_STRING_PATTERN = "\\[(-*\\d+),(-*\\d+)\\]\\[(-*\\d+),(-*\\d+)\\]";
 		final Pattern BOUNDS_PATTERN = Pattern.compile(BOUNDS_STRING_PATTERN);
 		final Matcher BOUNDS_MATCHER = BOUNDS_PATTERN.matcher(bounds);
 

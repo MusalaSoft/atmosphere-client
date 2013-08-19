@@ -234,4 +234,28 @@ public class Bounds
 
 		return relativeBounds;
 	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj == null)
+		{
+			return false;
+		}
+		if (getClass() != obj.getClass())
+		{
+			return false;
+		}
+		final Bounds other = (Bounds) obj;
+		final Point otherUpperLeftCorner = other.getUpperLeftCorner();
+		final int otherWidth = other.getWidth();
+		final int otherHeight = other.getHeight();
+
+		boolean isUpperLeftCornerEqual = upperLeftCorner.equals(otherUpperLeftCorner);
+		boolean isWidthEqual = width == otherWidth;
+		boolean isHeightEqual = height == otherHeight;
+		boolean isEqual = isUpperLeftCornerEqual && isWidthEqual && isHeightEqual;
+
+		return isEqual;
+	}
 }

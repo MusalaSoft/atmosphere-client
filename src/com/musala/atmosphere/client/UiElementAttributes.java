@@ -179,22 +179,7 @@ public class UiElementAttributes
 											secondBound.getX(),
 											secondBound.getY());
 		builder.append("[bounds=" + boundsString + "]");
-		if (!text.isEmpty())
-		{
-			builder.append("[text=" + text + "]");
-		}
 		builder.append("[index=" + index + "]");
-		builder.append("[checkable=" + checkable + "]");
-		builder.append("[checked=" + checked + "]");
-		builder.append("[clickable=" + clickable + "]");
-		builder.append("[enabled=" + enabled + "]");
-		builder.append("[focusable=" + focusable + "]");
-		builder.append("[focused=" + focused + "]");
-		builder.append("[long-clickable=" + longClickable + "]");
-		builder.append("[password=" + password + "]");
-		builder.append("[scrollable=" + scrollable + "]");
-		builder.append("[selected=" + selected + "]");
-
 		String query = builder.toString();
 		return query;
 	}

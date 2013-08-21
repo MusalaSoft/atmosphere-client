@@ -590,13 +590,35 @@ public class Device
 	 * Starts an Activity from a package.
 	 * 
 	 * @param packageName
-	 *        package name from which an activity should be started.
+	 *        - package name from which an activity should be started.
 	 * @param activityName
-	 *        activity name to be started.
+	 *        - activity name to be started.
+	 * 
 	 * @throws ActivityStartingException
 	 */
 	public void startActivity(String packageName, String activityName) throws ActivityStartingException
 	{
+		startActivity(packageName, activityName, true);
+	}
+
+	/**
+	 * Starts an Activity from a package.
+	 * 
+	 * @param packageName
+	 *        - package name from which an activity should be started.
+	 * @param activityName
+	 *        - activity name to be started.
+	 * @param unlockDevice
+	 *        - if true unlocks the device before starting the activity.
+	 * @throws ActivityStartingException
+	 */
+	public void startActivity(String packageName, String activityName, boolean unlockDevice)
+		throws ActivityStartingException
+	{
+		if (unlockDevice)
+		{
+			unlock();
+		}
 		String query = "am start -n " + packageName + "/." + activityName;
 		String response = null;
 		try

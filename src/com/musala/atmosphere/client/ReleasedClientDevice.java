@@ -7,6 +7,7 @@ import java.util.List;
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.commons.BatteryState;
 import com.musala.atmosphere.commons.CommandFailedException;
+import com.musala.atmosphere.commons.DeviceAcceleration;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.DeviceOrientation;
 import com.musala.atmosphere.commons.Pair;
@@ -221,6 +222,14 @@ class ReleasedClientDevice implements IClientDevice
 	public void setOrientation(DeviceOrientation deviceOrientation, long invocationPasskey)
 		throws CommandFailedException,
 			RemoteException,
+			InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+	}
+
+	@Override
+	public void setAcceleration(DeviceAcceleration deviceAcceleration, long invocationPasskey)
+		throws RemoteException,
 			InvalidPasskeyException
 	{
 		throwDeviceReleasedException();

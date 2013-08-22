@@ -20,6 +20,7 @@ import com.musala.atmosphere.client.exceptions.DeviceInvocationRejectedException
 import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.commons.BatteryState;
 import com.musala.atmosphere.commons.CommandFailedException;
+import com.musala.atmosphere.commons.DeviceAcceleration;
 import com.musala.atmosphere.commons.DeviceOrientation;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
@@ -124,6 +125,33 @@ public class Device
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Setting device orientation failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
+	}
+
+	/**
+	 * Sets new acceleration for the testing device. Can only be applied on emulators.
+	 * 
+	 * @param deviceAcceleration
+	 *        - new device acceleration to be set
+	 */
+	public void setAcceleration(DeviceAcceleration deviceAcceleration)
+	{
+		try
+		{
+			wrappedClientDevice.setAcceleration(deviceAcceleration, invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Setting device acceleration failed.", e);
 		}
 		catch (InvalidPasskeyException e)
 		{

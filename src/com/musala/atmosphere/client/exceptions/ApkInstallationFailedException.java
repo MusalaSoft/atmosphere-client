@@ -9,6 +9,9 @@ package com.musala.atmosphere.client.exceptions;
  */
 public class ApkInstallationFailedException extends RuntimeException
 {
+	/**
+	 * auto generated serialization id
+	 */
 	private static final long serialVersionUID = -4948287126155328678L;
 
 	public ApkInstallationFailedException()

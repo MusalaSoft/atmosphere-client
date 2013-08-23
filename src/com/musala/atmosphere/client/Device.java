@@ -3,10 +3,12 @@ package com.musala.atmosphere.client;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.RemoteException;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +19,7 @@ import com.musala.atmosphere.client.device.TouchGesture;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.ApkInstallationFailedException;
 import com.musala.atmosphere.client.exceptions.DeviceInvocationRejectedException;
+import com.musala.atmosphere.client.exceptions.MacroPlayingException;
 import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.commons.BatteryState;
 import com.musala.atmosphere.commons.CommandFailedException;
@@ -24,6 +27,7 @@ import com.musala.atmosphere.commons.DeviceAcceleration;
 import com.musala.atmosphere.commons.DeviceOrientation;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
+import com.musala.atmosphere.commons.standalone.Macro;
 
 /**
  * Android device representing class.
@@ -865,5 +869,66 @@ public class Device
 	public void inputText(String text)
 	{
 		inputText(text, 0);
+	}
+
+	/**
+	 * Plays a recorded macro file on the current device.
+	 * 
+	 * @param filePath
+	 *        - path to the recorded macro file.
+	 * @throws MacroPlayingException
+	 */
+	public void playMacro(String filePath) throws MacroPlayingException
+	{
+		try
+		{
+			FileInputStream macroInputStream = new FileInputStream(filePath);
+			ObjectInputStream deserializationInput = new ObjectInputStream(macroInputStream);
+			Macro macro = (Macro) deserializationInput.readObject();
+
+			String macroDeviceModel = macro.getDeviceIdentifier().trim();
+			String deviceModel = wrappedClientDevice.executeShellCommand("getprop ro.product.model", invocationPasskey);
+			deviceModel = deviceModel.trim();
+
+			if (!deviceModel.equals(macroDeviceModel))
+			{
+				throw new MacroPlayingException("Macro was recorded on a different device model. (macro device model = "
+						+ macroDeviceModel + ", current device model = " + deviceModel + ")");
+			}
+			if (macro.getEventCount() == 0)
+			{
+				return;
+			}
+
+			List<String> events = macro.getParsedEvents();
+			wrappedClientDevice.executeSequenceOfShellCommands(events, invocationPasskey);
+		}
+		catch (FileNotFoundException e)
+		{
+			throw new MacroPlayingException("Specified macro file could not be found.", e);
+		}
+
+		catch (ClassNotFoundException e)
+		{
+			throw new MacroPlayingException("Macro file deserialization failed. Make sure the specified file is a macro file.",
+											e);
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Playing macro failed.", e);
+		}
+		catch (RemoteException e)
+		{
+			// TODO implement logic behind failed client-server connection
+			e.printStackTrace();
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
+		catch (IOException e)
+		{
+			throw new MacroPlayingException("Macro file deserialization failed.", e);
+		}
 	}
 }

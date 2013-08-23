@@ -10,7 +10,7 @@ public class ActivityStartingException extends Exception
 {
 
 	/**
-	 * auto generated serialization vesion id
+	 * auto generated serialization id
 	 */
 	private static final long serialVersionUID = 1928725919257296196L;
 

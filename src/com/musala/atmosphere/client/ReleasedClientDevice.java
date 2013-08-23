@@ -219,7 +219,7 @@ class ReleasedClientDevice implements IClientDevice
 	}
 
 	@Override
-	public void setOrientation(DeviceOrientation deviceOrientation, long invocationPasskey)
+	public void setDeviceOrientation(DeviceOrientation deviceOrientation, long invocationPasskey)
 		throws CommandFailedException,
 			RemoteException,
 			InvalidPasskeyException
@@ -238,5 +238,12 @@ class ReleasedClientDevice implements IClientDevice
 	private void throwDeviceReleasedException()
 	{
 		throw new DeviceReleasedException("Device has been released.");
+	}
+
+	@Override
+	public DeviceOrientation getDeviceOrientation(long invocationPasskey)
+	{
+		throwDeviceReleasedException();
+		return null;
 	}
 }

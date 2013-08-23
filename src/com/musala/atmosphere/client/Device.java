@@ -103,10 +103,29 @@ public class Device
 	 * 
 	 * @return - orientation of the device
 	 */
-	public DeviceOrientation getOrientation()
+	public DeviceOrientation getDeviceOrientation()
 	{
-		// TODO implement device.getOrientation
-		return null;
+		DeviceOrientation deviceOrientation = null;
+		try
+		{
+			deviceOrientation = wrappedClientDevice.getDeviceOrientation(invocationPasskey);
+
+		}
+		catch (InvalidPasskeyException e)
+		{
+			// TODO Add client connection failed logic.
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Getting device orientation failed.", e);
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		return deviceOrientation;
 	}
 
 	/**
@@ -115,11 +134,11 @@ public class Device
 	 * @param deviceOrientation
 	 *        - new device orientation to be set
 	 */
-	public void setOrientation(DeviceOrientation deviceOrientation)
+	public void setDeviceOrientation(DeviceOrientation deviceOrientation)
 	{
 		try
 		{
-			wrappedClientDevice.setOrientation(deviceOrientation, invocationPasskey);
+			wrappedClientDevice.setDeviceOrientation(deviceOrientation, invocationPasskey);
 		}
 		catch (RemoteException e)
 		{

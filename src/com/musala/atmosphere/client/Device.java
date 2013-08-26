@@ -183,6 +183,36 @@ public class Device
 	}
 
 	/**
+	 * Gets current acceleration of the testing device
+	 * 
+	 * @return - acceleration of the device
+	 */
+	public DeviceAcceleration getDeviceAcceleration()
+	{
+		DeviceAcceleration deviceAcceleration = null;
+		try
+		{
+			deviceAcceleration = wrappedClientDevice.getDeviceAcceleration(invocationPasskey);
+
+		}
+		catch (InvalidPasskeyException e)
+		{
+			// TODO Add client connection failed logic.
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Getting device acceleration failed.", e);
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		return deviceAcceleration;
+	}
+
+	/**
 	 * Returns the current device's battery level.
 	 * 
 	 * @return Battery level of the device in percents.

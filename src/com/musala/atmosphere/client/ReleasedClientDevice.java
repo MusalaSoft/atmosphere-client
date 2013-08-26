@@ -246,4 +246,11 @@ class ReleasedClientDevice implements IClientDevice
 		throwDeviceReleasedException();
 		return null;
 	}
+
+	@Override
+	public DeviceAcceleration getDeviceAcceleration(long invocationPasskey)
+	{
+		throwDeviceReleasedException();
+		return null;
+	}
 }

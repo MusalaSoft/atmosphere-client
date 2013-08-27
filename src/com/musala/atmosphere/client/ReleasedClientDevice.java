@@ -11,6 +11,7 @@ import com.musala.atmosphere.commons.DeviceAcceleration;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.DeviceOrientation;
 import com.musala.atmosphere.commons.Pair;
+import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 
@@ -228,13 +229,29 @@ class ReleasedClientDevice implements IClientDevice
 	}
 
 	@Override
-	public void setAcceleration(DeviceAcceleration deviceAcceleration, long invocationPasskey)
+	public void setScreenOrientation(ScreenOrientation screenOrientation, long invocationPasskey)
 		throws RemoteException,
 			InvalidPasskeyException
 	{
 		throwDeviceReleasedException();
 	}
 
+	@Override
+	public void setAutoRotation(boolean autoRotation, long invocationPasskey)
+		throws RemoteException,
+			InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+	}
+
+	@Override
+	public void setAcceleration(DeviceAcceleration deviceAcceleration, long invocationPasskey)
+		throws RemoteException,
+			InvalidPasskeyException
+	{
+		throwDeviceReleasedException();
+	}
+	
 	private void throwDeviceReleasedException()
 	{
 		throw new DeviceReleasedException("Device has been released.");

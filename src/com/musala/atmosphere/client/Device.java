@@ -25,6 +25,7 @@ import com.musala.atmosphere.commons.BatteryState;
 import com.musala.atmosphere.commons.CommandFailedException;
 import com.musala.atmosphere.commons.DeviceAcceleration;
 import com.musala.atmosphere.commons.DeviceOrientation;
+import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.standalone.Macro;
@@ -148,6 +149,53 @@ public class Device
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Setting device orientation failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
+	}
+
+	/**
+	 * Control whether the accelerometer will be used to change screen orientation
+	 * 
+	 * @param autoRotation
+	 *        - if false, it will not be used unless explicitly requested by the application; if true, it will be used
+	 *        by default unless explicitly disabled by the application.
+	 */
+	public void setAutoRotation(boolean autoRotation)
+	{
+		try
+		{
+			wrappedClientDevice.setAutoRotation(autoRotation, invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
+	}
+
+	/**
+	 * Sets new screen orientation for the device.
+	 * 
+	 * @param screenOrientation
+	 *        - new screen orientation to be set
+	 */
+	public void setScreenOrientation(ScreenOrientation screenOrientation)
+	{
+		try
+		{
+			wrappedClientDevice.setScreenOrientation(screenOrientation, invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
 		}
 		catch (InvalidPasskeyException e)
 		{

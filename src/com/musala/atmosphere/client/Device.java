@@ -46,11 +46,11 @@ public class Device
 
 	private static final String LOCKED_STATUS_DUMP_COMMAND = "dumpsys activity";
 
-	private static final String AWAKE_EXTRACTION_REGEX = ".*mWakefulness=(\\w+).*";
+	private static final String AWAKE_CHECK_STRING_4_2_2 = " mWakefulness=Awake";
+
+	private static final String AWAKE_CHECK_EXPRESSION_4_1_2 = "mPowerState=[1-9]\\d*";
 
 	private static final String LOCKED_CHECK_STRING = "mLockScreenShown true";
-
-	private static final String AWAKE_IDENTIFIER = "awake";
 
 	private IClientDevice wrappedClientDevice;
 
@@ -826,12 +826,13 @@ public class Device
 			throw new DeviceInvocationRejectedException(e);
 		}
 
-		Pattern pattern = Pattern.compile(AWAKE_EXTRACTION_REGEX, Pattern.MULTILINE);
-		Matcher matcher = pattern.matcher(dump);
-		matcher.find();
+		Pattern awakeAPI16Pattern = Pattern.compile(AWAKE_CHECK_EXPRESSION_4_1_2);
+		Matcher awakeAPI16Matcher = awakeAPI16Pattern.matcher(dump);
+		boolean awakeAPI16 = awakeAPI16Matcher.find();
 
-		boolean awake = matcher.group(1).equalsIgnoreCase(AWAKE_IDENTIFIER);
-		return awake;
+		boolean awakeAPI17 = dump.contains(AWAKE_CHECK_STRING_4_2_2);
+
+		return awakeAPI16 || awakeAPI17;
 	}
 
 	/**

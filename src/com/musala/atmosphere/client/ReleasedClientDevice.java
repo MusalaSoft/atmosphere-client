@@ -7,9 +7,11 @@ import java.util.List;
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.commons.BatteryState;
 import com.musala.atmosphere.commons.CommandFailedException;
+import com.musala.atmosphere.commons.ConnectionType;
 import com.musala.atmosphere.commons.DeviceAcceleration;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.DeviceOrientation;
+import com.musala.atmosphere.commons.MobileDataState;
 import com.musala.atmosphere.commons.Pair;
 import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
@@ -251,7 +253,7 @@ class ReleasedClientDevice implements IClientDevice
 	{
 		throwDeviceReleasedException();
 	}
-	
+
 	private void throwDeviceReleasedException()
 	{
 		throw new DeviceReleasedException("Device has been released.");
@@ -266,6 +268,35 @@ class ReleasedClientDevice implements IClientDevice
 
 	@Override
 	public DeviceAcceleration getDeviceAcceleration(long invocationPasskey)
+	{
+		throwDeviceReleasedException();
+		return null;
+	}
+
+	@Override
+	public void setMobileDataState(MobileDataState state, long invocationPasskey)
+		throws InvalidPasskeyException,
+			CommandFailedException,
+			RemoteException
+	{
+		throwDeviceReleasedException();
+	}
+
+	@Override
+	public ConnectionType getConnectionType(long invocationPasskey)
+		throws InvalidPasskeyException,
+			CommandFailedException,
+			RemoteException
+	{
+		throwDeviceReleasedException();
+		return null;
+	}
+
+	@Override
+	public MobileDataState getMobileDataState(long invocationPasskey)
+		throws InvalidPasskeyException,
+			CommandFailedException,
+			RemoteException
 	{
 		throwDeviceReleasedException();
 		return null;

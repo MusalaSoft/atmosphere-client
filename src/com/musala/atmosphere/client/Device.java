@@ -23,8 +23,10 @@ import com.musala.atmosphere.client.exceptions.MacroPlayingException;
 import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.commons.BatteryState;
 import com.musala.atmosphere.commons.CommandFailedException;
+import com.musala.atmosphere.commons.ConnectionType;
 import com.musala.atmosphere.commons.DeviceAcceleration;
 import com.musala.atmosphere.commons.DeviceOrientation;
+import com.musala.atmosphere.commons.MobileDataState;
 import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
@@ -1028,5 +1030,88 @@ public class Device
 		{
 			throw new MacroPlayingException("Macro file deserialization failed.", e);
 		}
+	}
+
+	/**
+	 * Sets the mobile data state of an emulator.
+	 * 
+	 * @param state
+	 *        - member of the {@link MobileDataState} enumeration.
+	 */
+	public void setMobileDataState(MobileDataState state)
+	{
+		try
+		{
+			wrappedClientDevice.setMobileDataState(state, invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Setting mobile data state failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
+	}
+
+	/**
+	 * Gets the connection type of the device - MOBILE, WIFI, or NONE - if not connected to WiFi or Mobile network.
+	 * 
+	 * @return a member of the {@link ConnectionType} enum.
+	 */
+	public ConnectionType getConnectionType()
+	{
+		ConnectionType type = null;
+		try
+		{
+			type = wrappedClientDevice.getConnectionType(invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Fetching device connection type failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
+		return type;
+	}
+
+	/**
+	 * Gets the mobile data state of an emulator.
+	 * 
+	 * @return a member of the {@link MobileDataState} enum.
+	 */
+	public MobileDataState getMobileDataState()
+	{
+		MobileDataState state = null;
+		try
+		{
+			state = wrappedClientDevice.getMobileDataState(invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Fetching device connection type failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
+		return state;
 	}
 }

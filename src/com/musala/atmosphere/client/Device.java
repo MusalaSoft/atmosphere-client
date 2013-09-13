@@ -114,7 +114,7 @@ public class Device
 			deviceOrientation = wrappedClientDevice.getDeviceOrientation(invocationPasskey);
 
 		}
-		catch (InvalidPasskeyException e)
+		catch (RemoteException e)
 		{
 			// TODO Add client connection failed logic.
 			e.printStackTrace();
@@ -123,10 +123,9 @@ public class Device
 		{
 			LOGGER.error("Getting device orientation failed.", e);
 		}
-		catch (RemoteException e)
+		catch (InvalidPasskeyException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			throw new DeviceInvocationRejectedException(e);
 		}
 		return deviceOrientation;
 	}
@@ -245,18 +244,18 @@ public class Device
 			deviceAcceleration = wrappedClientDevice.getDeviceAcceleration(invocationPasskey);
 
 		}
-		catch (InvalidPasskeyException e)
+		catch (RemoteException e)
 		{
-			// TODO Add client connection failed logic.
+			// TODO add client connection failed logic
 			e.printStackTrace();
 		}
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Getting device acceleration failed.", e);
 		}
-		catch (RemoteException e)
+		catch (InvalidPasskeyException e)
 		{
-			// TODO add client connection failed logic
+			// TODO Add client connection failed logic.
 			e.printStackTrace();
 		}
 		return deviceAcceleration;
@@ -315,7 +314,6 @@ public class Device
 		{
 			throw new DeviceInvocationRejectedException(e);
 		}
-
 	}
 
 	/**

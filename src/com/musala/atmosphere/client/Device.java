@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.RemoteException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,16 +22,22 @@ import com.musala.atmosphere.client.exceptions.ApkInstallationFailedException;
 import com.musala.atmosphere.client.exceptions.DeviceInvocationRejectedException;
 import com.musala.atmosphere.client.exceptions.MacroPlayingException;
 import com.musala.atmosphere.client.geometry.Point;
+import com.musala.atmosphere.client.util.settings.AndroidGlobalSettings;
+import com.musala.atmosphere.client.util.settings.AndroidSystemSettings;
+import com.musala.atmosphere.client.util.settings.DeviceSettingsManager;
 import com.musala.atmosphere.commons.BatteryState;
 import com.musala.atmosphere.commons.CommandFailedException;
 import com.musala.atmosphere.commons.ConnectionType;
 import com.musala.atmosphere.commons.DeviceAcceleration;
+import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.DeviceOrientation;
 import com.musala.atmosphere.commons.MobileDataState;
 import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.standalone.Macro;
+import com.musala.atmosphere.commons.util.IntentBuilder;
+import com.musala.atmosphere.commons.util.IntentBuilder.IntentAction;
 
 /**
  * Android device representing class.
@@ -58,6 +65,8 @@ public class Device
 
 	private final long invocationPasskey;
 
+	private DeviceSettingsManager deviceSettings;
+
 	/**
 	 * Constructor that creates a usable Device object by a given IClientDevice and it's invocation passkey.
 	 * 
@@ -69,6 +78,7 @@ public class Device
 	{
 		wrappedClientDevice = iClientDevice;
 		invocationPasskey = devicePasskey;
+		deviceSettings = new DeviceSettingsManager(wrappedClientDevice, invocationPasskey);
 	}
 
 	void release()
@@ -83,7 +93,7 @@ public class Device
 	 */
 	public DeviceInformation getInformation()
 	{
-		com.musala.atmosphere.commons.DeviceInformation wrappedDeviceInformation = null;
+		DeviceInformation wrappedDeviceInformation = null;
 		try
 		{
 			wrappedDeviceInformation = wrappedClientDevice.getDeviceInformation(invocationPasskey);
@@ -97,8 +107,7 @@ public class Device
 		{
 			throw new DeviceInvocationRejectedException(e);
 		}
-		DeviceInformation deviceInformation = new DeviceInformation(wrappedDeviceInformation);
-		return deviceInformation;
+		return wrappedDeviceInformation;
 	}
 
 	/**
@@ -168,7 +177,14 @@ public class Device
 	{
 		try
 		{
-			wrappedClientDevice.setAutoRotation(autoRotation, invocationPasskey);
+			if (autoRotation)
+			{
+				deviceSettings.putInt(AndroidSystemSettings.ACCELEROMETER_ROTATION, 1);
+			}
+			else
+			{
+				deviceSettings.putInt(AndroidSystemSettings.ACCELEROMETER_ROTATION, 0);
+			}
 		}
 		catch (RemoteException e)
 		{
@@ -178,6 +194,10 @@ public class Device
 		catch (InvalidPasskeyException e)
 		{
 			throw new DeviceInvocationRejectedException(e);
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Setting device auto rotation failed.", e);
 		}
 	}
 
@@ -191,7 +211,8 @@ public class Device
 	{
 		try
 		{
-			wrappedClientDevice.setScreenOrientation(screenOrientation, invocationPasskey);
+			setAutoRotation(false);
+			deviceSettings.putInt(AndroidSystemSettings.USER_ROTATION, screenOrientation.getOrientationNumber());
 		}
 		catch (RemoteException e)
 		{
@@ -201,6 +222,10 @@ public class Device
 		catch (InvalidPasskeyException e)
 		{
 			throw new DeviceInvocationRejectedException(e);
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Setting screen orientation failed.", e);
 		}
 	}
 
@@ -458,9 +483,40 @@ public class Device
 	 */
 	public void setAirplaneMode(boolean airplaneMode)
 	{
+
+		DeviceInformation deviceInformation = getInformation();
+		String deviceOs = deviceInformation.getOS();
+
+		final String DEVICE_OS_PATTERN = "(4\\.[2-9]+.*)|([5-9]+\\.\\d+.*)";
+		Pattern osPattern = Pattern.compile(DEVICE_OS_PATTERN);
+		Matcher osMatcher = osPattern.matcher(deviceOs);
+
+		int airplaneModeIntValue = airplaneMode ? 1 : 0;
+
+		IntentBuilder intentBuilder = new IntentBuilder(IntentAction.AIRPLANE_MODE_NOTIFICATION);
+		intentBuilder.putExtraBoolean("state", airplaneMode);
+		String intentCommand = intentBuilder.buildIntentCommand();
+
+		final String INTENT_COMMAND_RESPONSE = "Broadcast completed: result=0";
+
 		try
 		{
-			wrappedClientDevice.setAirplaneMode(airplaneMode, invocationPasskey);
+			if (osMatcher.find())
+			{
+				deviceSettings.putInt(AndroidGlobalSettings.AIRPLANE_MODE_ON, airplaneModeIntValue);
+			}
+			else
+			{
+				deviceSettings.putInt(AndroidSystemSettings.AIRPLANE_MODE_ON, airplaneModeIntValue);
+			}
+
+			String intentCommandResponse = wrappedClientDevice.executeShellCommand(intentCommand, invocationPasskey);
+			Pattern intentCommandResponsePattern = Pattern.compile(INTENT_COMMAND_RESPONSE);
+			Matcher intentCommandResponseMatcher = intentCommandResponsePattern.matcher(intentCommandResponse);
+			if (!intentCommandResponseMatcher.find())
+			{
+				throw new CommandFailedException("Broadcasting notification intent failed.");
+			}
 		}
 		catch (RemoteException e)
 		{
@@ -748,7 +804,10 @@ public class Device
 		{
 			unlock();
 		}
-		String query = "am start -n " + packageName + "/." + activityName;
+
+		IntentBuilder intentBuilder = new IntentBuilder(IntentAction.START_COMPONENT);
+		intentBuilder.putComponent(packageName + "/." + activityName);
+		String query = intentBuilder.buildIntentCommand();
 		String response = null;
 		try
 		{
@@ -919,28 +978,26 @@ public class Device
 		{
 			return;
 		}
-		StringBuilder intentBuilder = new StringBuilder();
-		String command = "am broadcast -a atmosphere.intent.action.TEXT --eia text ";
-		char[] textCharArray = text.toCharArray();
 
-		intentBuilder.append(command);
-		intentBuilder.append((int) textCharArray[0]);
+		IntentBuilder intentBuilder = new IntentBuilder(IntentAction.ATMOSPHERE_TEXT_INPUT);
+
+		char[] textCharArray = text.toCharArray();
+		List<Integer> charsList = new LinkedList<Integer>();
 		for (int i = 1; i < textCharArray.length; i++)
 		{
-			intentBuilder.append(",");
 			int numericalCharValue = textCharArray[i];
-			intentBuilder.append(numericalCharValue);
+			charsList.add(numericalCharValue);
 		}
+		intentBuilder.putExtraIntegerList("text", charsList);
 
 		if (intervalInMs > 0)
 		{
-			intentBuilder.append(" --ei interval ");
-			intentBuilder.append(intervalInMs);
+			intentBuilder.putExtraInteger("interval", intervalInMs);
 		}
 
+		String builtCommand = intentBuilder.buildIntentCommand();
 		try
 		{
-			String builtCommand = intentBuilder.toString();
 			wrappedClientDevice.executeShellCommand(builtCommand, invocationPasskey);
 		}
 		catch (CommandFailedException e)

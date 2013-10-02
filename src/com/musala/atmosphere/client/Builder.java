@@ -12,13 +12,13 @@ import org.apache.log4j.Logger;
 import com.musala.atmosphere.client.exceptions.MissingServerAnnotationException;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
 import com.musala.atmosphere.client.util.Server;
-import com.musala.atmosphere.commons.Pair;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.RmiStringConstants;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformation;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceParameters;
 import com.musala.atmosphere.commons.cs.clientbuilder.IClientBuilder;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
+import com.musala.atmosphere.commons.util.Pair;
 
 /**
  * Used by the user to get appropriate device in the server's pool.

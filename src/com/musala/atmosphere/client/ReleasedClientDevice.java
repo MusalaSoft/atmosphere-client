@@ -12,10 +12,9 @@ import com.musala.atmosphere.commons.DeviceAcceleration;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.DeviceOrientation;
 import com.musala.atmosphere.commons.MobileDataState;
-import com.musala.atmosphere.commons.Pair;
-import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
+import com.musala.atmosphere.commons.util.Pair;
 
 /**
  * An instance of this class is used when a deivce allocated to a Client is released. The methods in this class throw
@@ -204,15 +203,6 @@ class ReleasedClientDevice implements IClientDevice
 	}
 
 	@Override
-	public void setAirplaneMode(boolean airplaneMode, long invocationPasskey)
-		throws CommandFailedException,
-			RemoteException,
-			InvalidPasskeyException
-	{
-		throwDeviceReleasedException();
-	}
-
-	@Override
 	public DeviceInformation getDeviceInformation(long invocationPasskey)
 		throws RemoteException,
 			InvalidPasskeyException
@@ -225,22 +215,6 @@ class ReleasedClientDevice implements IClientDevice
 	public void setDeviceOrientation(DeviceOrientation deviceOrientation, long invocationPasskey)
 		throws CommandFailedException,
 			RemoteException,
-			InvalidPasskeyException
-	{
-		throwDeviceReleasedException();
-	}
-
-	@Override
-	public void setScreenOrientation(ScreenOrientation screenOrientation, long invocationPasskey)
-		throws RemoteException,
-			InvalidPasskeyException
-	{
-		throwDeviceReleasedException();
-	}
-
-	@Override
-	public void setAutoRotation(boolean autoRotation, long invocationPasskey)
-		throws RemoteException,
 			InvalidPasskeyException
 	{
 		throwDeviceReleasedException();

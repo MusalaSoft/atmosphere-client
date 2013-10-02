@@ -2,7 +2,7 @@ package com.musala.atmosphere.client.uiutils;
 
 import com.musala.atmosphere.client.geometry.Bounds;
 import com.musala.atmosphere.client.geometry.Point;
-import com.musala.atmosphere.commons.Pair;
+import com.musala.atmosphere.commons.util.Pair;
 
 /**
  * Selector class for screen UI elements, used to search for a specific element with given attributes.

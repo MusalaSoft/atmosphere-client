@@ -111,32 +111,6 @@ public class Device
 	}
 
 	/**
-	 * Validates whether a communication to the ATMOSPHERE service is available.
-	 * 
-	 * @return - true if communication is available; false otherwise.
-	 */
-	public boolean validateServiceCommunication()
-	{
-		boolean result = false;
-		try
-		{
-			result = wrappedClientDevice.validateServiceCommunication(invocationPasskey);
-
-		}
-		catch (RemoteException e)
-		{
-			// TODO Add client connection failed logic.
-			e.printStackTrace();
-		}
-		catch (InvalidPasskeyException e)
-		{
-			throw new DeviceInvocationRejectedException(e);
-		}
-
-		return result;
-	}
-
-	/**
 	 * Gets current orientation of the testing device
 	 * 
 	 * @return - orientation of the device

@@ -26,14 +26,6 @@ import com.musala.atmosphere.commons.util.Pair;
  */
 class ReleasedClientDevice implements IClientDevice
 {
-
-	@Override
-	public boolean validateServiceCommunication(long invocationPasskey) throws RemoteException, InvalidPasskeyException
-	{
-		throwDeviceReleasedException();
-		return false;
-	}
-
 	@Override
 	public long getFreeRam(long invocationPasskey)
 		throws RemoteException,

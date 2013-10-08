@@ -406,7 +406,7 @@ public class Device
 		boolean state = false;
 		try
 		{
-			wrappedClientDevice.getPowerState(invocationPasskey);
+			state = wrappedClientDevice.getPowerState(invocationPasskey);
 		}
 		catch (RemoteException e)
 		{

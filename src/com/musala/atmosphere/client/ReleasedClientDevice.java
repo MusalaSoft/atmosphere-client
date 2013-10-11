@@ -275,4 +275,13 @@ class ReleasedClientDevice implements IClientDevice
 		throwDeviceReleasedException();
 		return null;
 	}
+
+	@Override
+	public void setWiFi(boolean state, long invocationPaskey)
+		throws InvalidPasskeyException,
+			CommandFailedException,
+			RemoteException
+	{
+		throwDeviceReleasedException();
+	}
 }

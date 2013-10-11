@@ -1169,4 +1169,31 @@ public class Device
 		}
 		return state;
 	}
+
+	/**
+	 * Sets the WiFi state of the device.
+	 * 
+	 * @param state
+	 *        true if the WiFi should be on; false if it should be off.
+	 */
+	public void setWiFi(boolean state)
+	{
+		try
+		{
+			wrappedClientDevice.setWiFi(state, invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			// TODO add client connection failed logic
+			e.printStackTrace();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Setting device WiFi state failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
+	}
 }

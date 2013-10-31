@@ -55,9 +55,9 @@ public class Device
 
 	private static final String LOCKED_STATUS_DUMP_COMMAND = "dumpsys activity";
 
-	private static final String AWAKE_CHECK_STRING_4_2_2 = " mWakefulness=Awake";
+	private static final String AWAKE_CHECK_STRING_API_17 = " mWakefulness=Awake";
 
-	private static final String AWAKE_CHECK_EXPRESSION_4_1_2 = "mPowerState=[1-9]\\d*";
+	private static final String AWAKE_CHECK_EXPRESSION_API_16 = "mPowerState=[1-9]\\d*";
 
 	private static final String LOCKED_CHECK_STRING = "mLockScreenShown true";
 
@@ -483,13 +483,8 @@ public class Device
 	 */
 	public void setAirplaneMode(boolean airplaneMode)
 	{
-
 		DeviceInformation deviceInformation = getInformation();
-		String deviceOs = deviceInformation.getOS();
-
-		final String DEVICE_OS_PATTERN = "(4\\.[2-9]+.*)|([5-9]+\\.\\d+.*)";
-		Pattern osPattern = Pattern.compile(DEVICE_OS_PATTERN);
-		Matcher osMatcher = osPattern.matcher(deviceOs);
+		int apiLevel = deviceInformation.getApiLevel();
 
 		int airplaneModeIntValue = airplaneMode ? 1 : 0;
 
@@ -501,7 +496,7 @@ public class Device
 
 		try
 		{
-			if (osMatcher.find())
+			if (apiLevel >= 17)
 			{
 				deviceSettings.putInt(AndroidGlobalSettings.AIRPLANE_MODE_ON, airplaneModeIntValue);
 			}
@@ -885,11 +880,11 @@ public class Device
 			throw new DeviceInvocationRejectedException(e);
 		}
 
-		Pattern awakeAPI16Pattern = Pattern.compile(AWAKE_CHECK_EXPRESSION_4_1_2);
+		Pattern awakeAPI16Pattern = Pattern.compile(AWAKE_CHECK_EXPRESSION_API_16);
 		Matcher awakeAPI16Matcher = awakeAPI16Pattern.matcher(dump);
 		boolean awakeAPI16 = awakeAPI16Matcher.find();
 
-		boolean awakeAPI17 = dump.contains(AWAKE_CHECK_STRING_4_2_2);
+		boolean awakeAPI17 = dump.contains(AWAKE_CHECK_STRING_API_17);
 
 		return awakeAPI16 || awakeAPI17;
 	}

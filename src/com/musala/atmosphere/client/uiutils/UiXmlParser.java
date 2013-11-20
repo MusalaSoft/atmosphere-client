@@ -113,8 +113,31 @@ public class UiXmlParser
 	}
 
 	/**
+	 * Gets an {@link org.jsoup.select.Elements Elements} object from a {@link org.jsoup.nodes.Document Document} by a JSoup query.
+	 * Elements contains all elements of type {@link org.jsoup.nodes.Node Node} found by the query.
+	 *
+	 * @param document
+	 *        document to search in.
+	 * @param query
+	 *        JSoup type element selecting query.
+	 * @return the found {@link org.jsoup.select.Elements Elements}.
+	 * @throws UiElementFetchingException
+	 */
+	public static Elements getJSoupElements(org.jsoup.nodes.Document document, String query)
+		throws UiElementFetchingException
+	{
+		Elements elements = document.select(query);
+		int foundElements = elements.size();
+		if (foundElements == 0)
+		{
+			throw new UiElementFetchingException("No element found for the passed JSoup expression.");
+		}
+		return elements;
+	}
+
+	/**
 	 * Returns all attributes of an JSoup {@link org.jsoup.nodes.Node Node} object.
-	 * 
+	 *
 	 * @param node
 	 * @return the object attribute map.
 	 */

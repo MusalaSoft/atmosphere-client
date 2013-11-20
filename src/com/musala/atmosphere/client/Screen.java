@@ -4,6 +4,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -12,6 +14,7 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
+import org.jsoup.select.Elements;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
@@ -90,7 +93,7 @@ public class Screen
 	 * @return the requested {@link UiElement UiElement}.
 	 * @throws UiElementFetchingException
 	 */
-	public UiElement getElementCSS(String query) throws UiElementFetchingException
+	public UiElement getElementByCSS(String query) throws UiElementFetchingException
 	{
 		org.jsoup.nodes.Node node = UiXmlParser.getJSoupNode(jSoupDocument, query);
 		UiElement returnElement = new UiElement(node, onDevice);
@@ -106,7 +109,7 @@ public class Screen
 	 * @throws XPathExpressionException
 	 * @throws UiElementFetchingException
 	 */
-	public UiElement getElementXPath(String query) throws XPathExpressionException, UiElementFetchingException
+	public UiElement getElementByXPath(String query) throws XPathExpressionException, UiElementFetchingException
 	{
 		Node node = UiXmlParser.getXPathNode(xPathDomDocument, query);
 		UiElement returnElement = new UiElement(node, onDevice);
@@ -114,18 +117,56 @@ public class Screen
 	}
 
 	/**
-	 * Searches for given UI element in the current screen XML structure using a {@link UIElementSelector
-	 * UIElementSelector} instance.
+	 * Searches for given UI element in the current screen XML structure using a {@link UiElementSelector
+	 * UiElementSelector} instance.
 	 * 
 	 * @param selector
-	 *        - object of type {@link UIElementSelector}
+	 *        - object of type {@link UiElementSelector}
 	 * @return the requested {@link UiElement UiElement}.
 	 * @throws UiElementFetchingException
 	 */
 	public UiElement getElement(UiElementSelector selector) throws UiElementFetchingException
 	{
 		String cssQuery = selector.buildCssQuery();
-		UiElement result = getElementCSS(cssQuery);
+		UiElement result = getElementByCSS(cssQuery);
+		return result;
+	}
+
+	/**
+	 * Searches for UI elements in the current screen XML structure using given CSS. Returns a list of all found
+	 * elements having the used CSS.
+	 * 
+	 * @param query
+	 *        - CSS selector query.
+	 * @return List containing all found elements of type {@link UiElement UiElement}.
+	 * @throws UiElementFetchingException
+	 */
+	public List<UiElement> getElementsByCSS(String query) throws UiElementFetchingException
+	{
+		List<UiElement> uiElementList = new ArrayList<UiElement>();
+
+		Elements elements = UiXmlParser.getJSoupElements(jSoupDocument, query);
+		for (org.jsoup.nodes.Node node : elements)
+		{
+			UiElement returnElement = new UiElement(node, onDevice);
+			uiElementList.add(returnElement);
+		}
+		return uiElementList;
+	}
+
+	/**
+	 * Searches for UI elements in the current screen XML structure using a given {@link UiElementSelector
+	 * UiElementSelector}. Returns a list of all found elements having the used selector.
+	 * 
+	 * @param selector
+	 *        - object of type {@link UiElementSelector}
+	 * @return List containing all found elements of type {@link UiElement UiElement}.
+	 * @throws UiElementFetchingException
+	 */
+	public List<UiElement> getElements(UiElementSelector selector) throws UiElementFetchingException
+	{
+		String cssQuery = selector.buildCssQuery();
+		List<UiElement> result = getElementsByCSS(cssQuery);
 		return result;
 	}
 }

@@ -50,7 +50,7 @@ public class UiElementFetchingTest
 		final String desiredElementClass = "android.widget.FrameLayout";
 		final String desiredElementContentDescription = "derp";
 
-		UiElement element = screen.getElementCSS("hierarchy > *[class=" + desiredElementClass + "]");
+		UiElement element = screen.getElementByCSS("hierarchy > *[class=" + desiredElementClass + "]");
 		UiElementAttributes attributes = element.getElementAttributes(false);
 
 		assertEquals(	"Desired element was not fetched correctly.",
@@ -64,7 +64,7 @@ public class UiElementFetchingTest
 		final String desiredElementContentDescription = "derp";
 		final String desiredElementClass = "android.widget.FrameLayout";
 
-		UiElement element = screen.getElementXPath("//hierarchy/*[@content-desc='" + desiredElementContentDescription
+		UiElement element = screen.getElementByXPath("//hierarchy/*[@content-desc='" + desiredElementContentDescription
 				+ "']");
 		UiElementAttributes attributes = element.getElementAttributes(false);
 
@@ -100,14 +100,14 @@ public class UiElementFetchingTest
 	{
 		final String desiredElementContentDescription = "derp";
 
-		UiElement element = screen.getElementXPath("//hierarchy/nonexistent[@content-desc='"
+		UiElement element = screen.getElementByXPath("//hierarchy/nonexistent[@content-desc='"
 				+ desiredElementContentDescription + "']");
 	}
 
 	@Test(expected = UiElementFetchingException.class)
 	public void multipleFoundByCSSTest() throws UiElementFetchingException
 	{
-		UiElement element = screen.getElementCSS("node");
+		UiElement element = screen.getElementByCSS("node");
 	}
 
 	@Test

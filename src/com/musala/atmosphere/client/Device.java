@@ -787,7 +787,8 @@ public class Device
 	 * @param packageName
 	 *        - package name from which an activity should be started.
 	 * @param activityName
-	 *        - activity name to be started.
+	 *        - activity name to be started. Expects either absolute name or a name starting with dot (.), relative to
+	 *        the packageName.
 	 * @param unlockDevice
 	 *        - if true unlocks the device before starting the activity.
 	 * @throws ActivityStartingException
@@ -801,7 +802,7 @@ public class Device
 		}
 
 		IntentBuilder intentBuilder = new IntentBuilder(IntentAction.START_COMPONENT);
-		intentBuilder.putComponent(packageName + "/." + activityName);
+		intentBuilder.putComponent(packageName + "/" + activityName);
 		String query = intentBuilder.buildIntentCommand();
 		String response = null;
 		try
@@ -978,7 +979,7 @@ public class Device
 
 		char[] textCharArray = text.toCharArray();
 		List<Integer> charsList = new LinkedList<Integer>();
-		for (int i = 1; i < textCharArray.length; i++)
+		for (int i = 0; i < textCharArray.length; i++)
 		{
 			int numericalCharValue = textCharArray[i];
 			charsList.add(numericalCharValue);

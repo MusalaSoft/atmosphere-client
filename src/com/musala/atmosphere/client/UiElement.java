@@ -350,7 +350,7 @@ public class UiElement
 		Screen newScreen = onDevice.getActiveScreen();
 		try
 		{
-			UiElement thisElementRefetched = newScreen.getElementCSS(thisElementQuery);
+			UiElement thisElementRefetched = newScreen.getElementByCSS(thisElementQuery);
 			elementAttributes = thisElementRefetched.getElementAttributes(false);
 		}
 		catch (UiElementFetchingException e)

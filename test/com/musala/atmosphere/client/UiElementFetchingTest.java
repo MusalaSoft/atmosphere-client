@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Scanner;
 
 import javax.xml.xpath.XPathExpressionException;
@@ -108,6 +109,34 @@ public class UiElementFetchingTest
 	public void multipleFoundByCSSTest() throws UiElementFetchingException
 	{
 		UiElement element = screen.getElementByCSS("node");
+	}
+
+	@Test
+	public void getElementsByCSSTest() throws UiElementFetchingException
+	{
+		final String desiredElementClass = "android.widget.FrameLayout";
+
+		List<UiElement> elements = screen.getElementsByCSS("[class=" + desiredElementClass + "]");
+
+		assertEquals("Desired elements were not fetched correctly.", elements.size(), 4);
+	}
+
+	@Test
+	public void getElementsTest() throws UiElementFetchingException
+	{
+		final String desiredElementClass = "android.widget.FrameLayout";
+
+		UiElementSelector selector = new UiElementSelector();
+		selector.setClassName(desiredElementClass);
+		List<UiElement> elements = screen.getElements(selector);
+
+		assertEquals("Desired elements were not fetched correctly.", elements.size(), 4);
+	}
+
+	@Test(expected = UiElementFetchingException.class)
+	public void getElementsByCSSExceptionTest() throws UiElementFetchingException
+	{
+		UiElement element = screen.getElementByCSS("nonexistent");
 	}
 
 	@Test

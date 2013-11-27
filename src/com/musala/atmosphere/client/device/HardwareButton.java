@@ -43,7 +43,11 @@ public enum HardwareButton
 	/**
 	 * End call key (KEYCODE_ENDCALL, 0x6).
 	 */
-	DECLINE(6);
+	DECLINE(6),
+	/**
+	 * Camera key (KEYCODE_CAMERA, 0x1b).
+	 */
+	CAMERA(27);
 
 	private int code;
 

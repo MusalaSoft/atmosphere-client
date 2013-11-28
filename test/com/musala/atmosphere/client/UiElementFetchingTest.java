@@ -1,6 +1,8 @@
 package com.musala.atmosphere.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -151,5 +153,37 @@ public class UiElementFetchingTest
 		element.tap(false);
 
 		verify(device, times(1)).tapScreenLocation(any(Point.class));
+	}
+
+	@Test
+	public void tapElementWithTextTest() throws UiElementFetchingException
+	{
+		screen.tapElementWithText("CoolStory", 0);
+
+		verify(device, times(1)).tapScreenLocation(any(Point.class));
+	}
+
+	@Test(expected = UiElementFetchingException.class)
+	public void tapElementWithTextNotEnoughElementsTest() throws UiElementFetchingException
+	{
+		screen.tapElementWithText("CoolStory", 1);
+	}
+
+	@Test(expected = UiElementFetchingException.class)
+	public void tapElementWithTextNoElementsTest() throws UiElementFetchingException
+	{
+		screen.tapElementWithText("CoolStory1");
+	}
+
+	@Test
+	public void hasElementWithTextTest() throws UiElementFetchingException
+	{
+		assertTrue("Expected to find an element, but did not find one", screen.hasElementWithText("CoolStory"));
+	}
+
+	@Test
+	public void hasElementWithTextNegativeTest() throws UiElementFetchingException
+	{
+		assertFalse("Expected not to find element, but found one", screen.hasElementWithText("CoolStory1"));
 	}
 }

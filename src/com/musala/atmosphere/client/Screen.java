@@ -121,7 +121,7 @@ public class Screen
 	 * UiElementSelector} instance.
 	 * 
 	 * @param selector
-	 *        - object of type {@link UiElementSelector}
+	 *        - object of type {@link UiElementSelector}.
 	 * @return the requested {@link UiElement UiElement}.
 	 * @throws UiElementFetchingException
 	 */
@@ -159,7 +159,7 @@ public class Screen
 	 * UiElementSelector}. Returns a list of all found elements having the used selector.
 	 * 
 	 * @param selector
-	 *        - object of type {@link UiElementSelector}
+	 *        - object of type {@link UiElementSelector}.
 	 * @return List containing all found elements of type {@link UiElement UiElement}.
 	 * @throws UiElementFetchingException
 	 */
@@ -168,5 +168,64 @@ public class Screen
 		String cssQuery = selector.buildCssQuery();
 		List<UiElement> result = getElementsByCSS(cssQuery);
 		return result;
+	}
+
+	/**
+	 * Tap on first found {@link UiElement UiElement}, displaying exactly the supplied search text.
+	 * 
+	 * @param text
+	 *        - search text.
+	 * @throws UiElementFetchingException
+	 */
+	public void tapElementWithText(String text) throws UiElementFetchingException
+	{
+		tapElementWithText(text, 0);
+	}
+
+	/**
+	 * Tap on {@link UiElement}, displaying exactly the supplied search text.
+	 * 
+	 * @param text
+	 *        - search text.
+	 * @param match
+	 *        - determines which element to tap if multiple matches exist; zero based index.
+	 * @throws UiElementFetchingException
+	 */
+	public void tapElementWithText(String text, int match) throws UiElementFetchingException
+	{
+		UiElementSelector selector = new UiElementSelector();
+		selector.setText(text);
+		List<UiElement> elementList = getElements(selector);
+		int listSize = elementList.size();
+		if (listSize <= match)
+		{
+			throw new UiElementFetchingException("Tapping match with index " + match + " requested, but only "
+					+ listSize + "elements matching the criteria found.");
+		}
+		UiElement element = elementList.get(match);
+		element.tap(false);
+	}
+
+	/**
+	 * Check existence of element, displaying exactly the supplied search text.
+	 * 
+	 * @param text
+	 *        - search text.
+	 * @return - true if element with supplied search text exists on screen.
+	 */
+	public boolean hasElementWithText(String text)
+	{
+		try
+		{
+			UiElementSelector selector = new UiElementSelector();
+			selector.setText(text);
+			List<UiElement> elementList = getElements(selector);
+			return elementList.size() > 0;
+		}
+		catch (UiElementFetchingException e)
+		{
+			// no elements were found by the supplied text
+			return false;
+		}
 	}
 }

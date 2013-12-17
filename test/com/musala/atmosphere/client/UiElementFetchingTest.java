@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
+import com.musala.atmosphere.client.geometry.Bounds;
 import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.client.uiutils.UiElementSelector;
 
@@ -153,6 +154,26 @@ public class UiElementFetchingTest
 		element.tap(false);
 
 		verify(device, times(1)).tapScreenLocation(any(Point.class));
+	}
+
+	@Test
+	public void keepBoundsUpperLeftCornerConstructorTest()
+	{
+		Point corner = new Point(0, 0);
+		Bounds bounds = new Bounds(corner, 10, 10);
+		corner.addVector(new Point(50, 50));
+		Point boundsCorner = bounds.getUpperLeftCorner();
+		assertFalse("Upper left corner of Bounds object was modified", corner.equals(boundsCorner));
+	}
+
+	@Test
+	public void keepBoundsUpperLeftCornerTest()
+	{
+		Bounds bounds = new Bounds(new Point(0, 0), 10, 10);
+		Point boundsCorner = bounds.getUpperLeftCorner();
+		boundsCorner.addVector(new Point(50, 50));
+		Point newBoundsCorner = bounds.getUpperLeftCorner();
+		assertFalse("Upper left corner of Bounds object was modified", newBoundsCorner.equals(boundsCorner));
 	}
 
 	@Test

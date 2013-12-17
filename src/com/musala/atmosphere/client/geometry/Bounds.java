@@ -23,7 +23,7 @@ public class Bounds
 	 */
 	public Bounds(Point upperLeftCorner, int width, int height)
 	{
-		this.upperLeftCorner = upperLeftCorner;
+		this.upperLeftCorner = new Point(upperLeftCorner);
 		this.width = width;
 		this.height = height;
 	}
@@ -39,7 +39,7 @@ public class Bounds
 		int calculatedWidth = lowerRightCorner.getX() - upperLeftCorner.getX();
 		int calculatedHeight = lowerRightCorner.getY() - upperLeftCorner.getY();
 
-		this.upperLeftCorner = upperLeftCorner;
+		this.upperLeftCorner = new Point(upperLeftCorner);
 		this.width = calculatedWidth;
 		this.height = calculatedHeight;
 	}
@@ -51,7 +51,7 @@ public class Bounds
 	 */
 	public Point getUpperLeftCorner()
 	{
-		return upperLeftCorner;
+		return new Point(upperLeftCorner);
 	}
 
 	/**
@@ -61,9 +61,7 @@ public class Bounds
 	 */
 	public void setUpperLeftCorner(Point upperLeftCorner)
 	{
-		width += upperLeftCorner.getX() - this.upperLeftCorner.getX();
-		height += upperLeftCorner.getY() - this.upperLeftCorner.getY();
-		this.upperLeftCorner = upperLeftCorner;
+		this.upperLeftCorner = new Point(upperLeftCorner);
 	}
 
 	/**

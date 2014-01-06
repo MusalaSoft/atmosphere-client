@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.musala.atmosphere.client.exceptions.ApkInstallationFailedException;
+import com.musala.atmosphere.client.util.ServerAnnotationProperties;
 import com.musala.atmosphere.commons.CommandFailedException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 
@@ -32,7 +33,9 @@ public class InstallApkTest
 	{
 		long testPasskey = 0;
 		innerClientDeviceMock = mock(IClientDevice.class);
-		device = new Device(innerClientDeviceMock, testPasskey);
+		ServerAnnotationProperties serverAnnotationProperties = mock(ServerAnnotationProperties.class);
+		ServerConnectionHandler serverConnectionHandler = new ServerConnectionHandler(serverAnnotationProperties);
+		device = new Device(innerClientDeviceMock, testPasskey, serverConnectionHandler);
 	}
 
 	@After

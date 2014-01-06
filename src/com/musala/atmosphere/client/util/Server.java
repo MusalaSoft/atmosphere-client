@@ -16,4 +16,6 @@ public @interface Server
 	String ip();
 
 	int port();
+
+	int connectionRetryLimit();
 }

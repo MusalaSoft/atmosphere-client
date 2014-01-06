@@ -2,18 +2,16 @@ package com.musala.atmosphere.client;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.musala.atmosphere.client.exceptions.MissingServerAnnotationException;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
-import com.musala.atmosphere.client.util.Server;
+import com.musala.atmosphere.client.util.ServerAnnotationProperties;
+import com.musala.atmosphere.client.util.ServerConnectionProperties;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
-import com.musala.atmosphere.commons.cs.RmiStringConstants;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformation;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceParameters;
 import com.musala.atmosphere.commons.cs.clientbuilder.IClientBuilder;
@@ -29,11 +27,7 @@ public class Builder
 {
 	private static final Logger LOGGER = Logger.getLogger(Builder.class.getCanonicalName());
 
-	private static Builder builder = null;
-
-	private static String serverIp;
-
-	private static int serverRmiPort;
+	private static Map<ServerConnectionProperties, Builder> builders = new HashMap<ServerConnectionProperties, Builder>();
 
 	private IClientBuilder clientBuilder;
 
@@ -41,107 +35,77 @@ public class Builder
 
 	private Map<Device, DeviceAllocationInformation> deviceToDescriptor = new HashMap<Device, DeviceAllocationInformation>();
 
+	private ServerConnectionHandler serverConnectionHandler;
+
 	/**
-	 * Connects to Server through given IP and rmiPort.
+	 * Initializes {@link Builder} and connects to Server through given {@link ServerConnectionHandler}.
 	 * 
-	 * @param annotationServerIp
-	 * @param annotationRmiPort
+	 * @param serverConnectionHandler
 	 */
-	private Builder(String annotationServerIp, int annotationRmiPort)
+	private Builder(ServerConnectionHandler serverConnectionHandler)
 	{
-		serverIp = annotationServerIp;
-		serverRmiPort = annotationRmiPort;
 
-		try
-		{
-			serverRmiRegistry = LocateRegistry.getRegistry(annotationServerIp, annotationRmiPort);
-			clientBuilder = (IClientBuilder) serverRmiRegistry.lookup(RmiStringConstants.POOL_MANAGER.toString());
-		}
-		catch (RemoteException e)
-		{
-			LOGGER.fatal("Getting the server's pool manager RMI stub resulted in exception.", e);
-			throw new ServerConnectionFailedException(	"Getting the server's pool manager RMI stub resulted in exception.",
-														e);
-		}
-		catch (NotBoundException e)
-		{
-			LOGGER.fatal(	"The required Server stubs are not available in the target RMI registry. The target is most likely not an ATMOSPHERE Server.",
-							e);
-			throw new ServerConnectionFailedException("The required Server stubs are not available in the target RMI registry. The target is most likely not an ATMOSPHERE Server.");
-		}
+		this.serverConnectionHandler = serverConnectionHandler;
+		Pair<IClientBuilder, Registry> builderRegistryPair = serverConnectionHandler.connect();
 
-		LOGGER.info("Builder has connected to the server's device pool manager.");
+		clientBuilder = builderRegistryPair.getKey();
+		serverRmiRegistry = builderRegistryPair.getValue();
 	}
 
 	/**
-	 * Gets server IP and Port from the <i>@Server</i> annotation of the test class or throws
-	 * MissingServerAnnotationException at runtime.
-	 * 
-	 * @return Pair of type (String, Integer) in the context of (IP, port)
-	 */
-	private static Pair<String, Integer> reflectServerAnnotationValues()
-	{
-		String serverIp = null;
-		Integer serverPort = null;
-
-		Exception exception = new Exception();
-		StackTraceElement[] callerMethods = exception.getStackTrace();
-
-		for (StackTraceElement callerMethod : callerMethods)
-		{
-			// going up in the stack trace to see which class has annotation Server
-			Class<?> callerClass = null;
-			try
-			{
-				callerClass = Class.forName(callerMethod.getClassName());
-				if (callerClass.isAnnotationPresent(Server.class))
-				{
-					Server serverAnnotation = (Server) callerClass.getAnnotation(Server.class);
-					serverIp = serverAnnotation.ip();
-					serverPort = serverAnnotation.port();
-					break;
-				}
-			}
-			catch (ClassNotFoundException e)
-			{
-				LOGGER.error("Could not find class with name: " + callerMethod.getClassName(), e);
-			}
-
-		}
-
-		if (serverIp == null || serverPort == null)
-		{
-			LOGGER.fatal("The invoking class is missing a @Server annotation.");
-			throw new MissingServerAnnotationException("The invoking class is missing a @Server annotation.");
-		}
-
-		Pair<String, Integer> annotationValues = new Pair<String, Integer>(serverIp, serverPort);
-		return annotationValues;
-	}
-
-	/**
-	 * Gets the {@link Builder Builder} instance for the anotated Server address.
+	 * Gets the {@link Builder Builder} instance for the annotated Server address.
 	 * 
 	 * @return {@link Builder Builder} instance.
 	 */
 	public static Builder getInstance()
 	{
+		ServerAnnotationProperties serverAnnotationProperties = new ServerAnnotationProperties();
+		Builder builder = builders.get(serverAnnotationProperties);
+
 		if (builder == null)
 		{
 			synchronized (Builder.class)
 			{
-				// Getting the server IP/port from the annotation
-				Pair<String, Integer> annotationPair = reflectServerAnnotationValues();
-
-				String reflectedServerIp = annotationPair.getKey();
-				Integer reflectedRmiPort = annotationPair.getValue();
+				builder = builders.get(serverAnnotationProperties);
 
 				if (builder == null)
 				{
-					builder = new Builder(reflectedServerIp, reflectedRmiPort);
+					ServerConnectionHandler serverConnectionHandler = new ServerConnectionHandler(serverAnnotationProperties);
+
+					builder = new Builder(serverConnectionHandler);
 					LOGGER.info("Builder instance has been created.");
+					builders.put(serverAnnotationProperties, builder);
 				}
 
+			}
+		}
+
+		return builder;
+	}
+
+	/**
+	 * Gets the {@link Builder Builder} instance for the given {@link ServerConnectionProperties}
+	 * 
+	 * @return {@link Builder Builder} instance.
+	 */
+	public static Builder getInstance(ServerConnectionProperties serverConnectionProperties)
+	{
+		Builder builder = builders.get(serverConnectionProperties);
+
+		if (builder == null)
+		{
+			synchronized (Builder.class)
+			{
+				builder = builders.get(serverConnectionProperties);
+
+				if (builder == null)
+				{
+					ServerConnectionHandler serverConnectionHandler = new ServerConnectionHandler(serverConnectionProperties);
+
+					builder = new Builder(serverConnectionHandler);
+					LOGGER.info("Builder instance has been created.");
+					builders.put(serverConnectionProperties, builder);
+				}
 			}
 		}
 
@@ -167,7 +131,7 @@ public class Builder
 			IClientDevice iClientDevice = (IClientDevice) serverRmiRegistry.lookup(deviceProxyRmiId);
 			long passkey = deviceDescriptor.getProxyPasskey();
 
-			Device device = new Device(iClientDevice, passkey);
+			Device device = new Device(iClientDevice, passkey, serverConnectionHandler);
 			deviceToDescriptor.put(device, deviceDescriptor);
 			return device;
 		}
@@ -176,16 +140,6 @@ public class Builder
 			LOGGER.error("Fetching Device failed (server connection failure).", e);
 			throw new ServerConnectionFailedException("Fetching Device failed (server connection failure).", e);
 		}
-	}
-
-	public String getServerIp()
-	{
-		return serverIp;
-	}
-
-	public int getServerRmiPort()
-	{
-		return serverRmiPort;
 	}
 
 	/**
@@ -230,10 +184,23 @@ public class Builder
 		}
 	}
 
+	/**
+	 * Gets the {@link ServerConnectionProperties} that are used for connection.
+	 * 
+	 * @return the {@link ServerConnectionProperties} that are used for connection.
+	 */
+	public ServerConnectionProperties getServerConnectionProperties()
+	{
+		return serverConnectionHandler.getServerConnectionProperties();
+	}
+
 	@Override
 	protected void finalize()
 	{
-		releaseAllDevices();
-		builder = null;
+		synchronized (Builder.class)
+		{
+			releaseAllDevices();
+			builders.remove(getServerConnectionProperties());
+		}
 	}
 }

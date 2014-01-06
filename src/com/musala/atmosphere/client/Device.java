@@ -14,14 +14,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
+import org.mockito.internal.stubbing.answers.ThrowsException;
 
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.device.TouchGesture;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.ApkInstallationFailedException;
 import com.musala.atmosphere.client.exceptions.DeviceInvocationRejectedException;
+import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.client.exceptions.MacroPlayingException;
+import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
 import com.musala.atmosphere.client.geometry.Point;
+import com.musala.atmosphere.client.util.ServerAnnotationProperties;
 import com.musala.atmosphere.client.util.settings.AndroidGlobalSettings;
 import com.musala.atmosphere.client.util.settings.AndroidSystemSettings;
 import com.musala.atmosphere.client.util.settings.DeviceSettingsManager;
@@ -67,6 +71,8 @@ public class Device
 
 	private DeviceSettingsManager deviceSettings;
 
+	private ServerConnectionHandler serverConnectionHandler;
+
 	/**
 	 * Constructor that creates a usable Device object by a given IClientDevice and it's invocation passkey.
 	 * 
@@ -76,8 +82,22 @@ public class Device
 	 */
 	Device(IClientDevice iClientDevice, long devicePasskey)
 	{
+		this(iClientDevice, devicePasskey, new ServerConnectionHandler(new ServerAnnotationProperties()));
+
+	}
+
+	/**
+	 * Constructor that creates a usable Device object by a given IClientDevice, it's invocation passkey.
+	 * 
+	 * @param iClientDevice
+	 * @param devicePasskey
+	 * @param serverConnectionHandler
+	 */
+	Device(IClientDevice iClientDevice, long devicePasskey, ServerConnectionHandler serverConnectionHandler)
+	{
 		wrappedClientDevice = iClientDevice;
 		invocationPasskey = devicePasskey;
+		this.serverConnectionHandler = serverConnectionHandler;
 		deviceSettings = new DeviceSettingsManager(wrappedClientDevice, invocationPasskey);
 	}
 
@@ -100,8 +120,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (InvalidPasskeyException e)
 		{
@@ -125,8 +144,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO Add client connection failed logic.
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -153,8 +171,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -188,8 +205,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (InvalidPasskeyException e)
 		{
@@ -216,8 +232,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (InvalidPasskeyException e)
 		{
@@ -243,8 +258,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -271,8 +285,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -280,8 +293,7 @@ public class Device
 		}
 		catch (InvalidPasskeyException e)
 		{
-			// TODO Add client connection failed logic.
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		return deviceAcceleration;
 	}
@@ -300,8 +312,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -328,8 +339,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -355,8 +365,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -383,8 +392,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -410,8 +418,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -438,8 +445,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -515,8 +521,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -542,8 +547,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client logic on failed connection
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -590,8 +594,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client logic on failed connection
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -621,9 +624,14 @@ public class Device
 			}
 			catch (IOException e)
 			{
-				LOGGER.fatal("File instalation failed: could not create temporary apk file on the remote Agent.", e);
-				throw new ApkInstallationFailedException(	"File instalation failed: could not create temporary apk file on the remote Agent.",
-															e);
+				if (!(e instanceof RemoteException))
+				{
+					LOGGER.fatal("File instalation failed: could not create temporary apk file on the remote Agent.", e);
+					throw new ApkInstallationFailedException(	"File instalation failed: could not create temporary apk file on the remote Agent.",
+																e);
+				}
+
+				throw e;
 			}
 
 			// Transfer the installation file from the current machine to the device
@@ -652,18 +660,24 @@ public class Device
 			}
 			catch (FileNotFoundException e)
 			{
-				LOGGER.fatal(	"Could not locate installation file. Make sure the path is correct and the file exists.",
-								e);
+				String message = "Could not locate installation file. Make sure the path is correct and the file exists.";
+
+				LOGGER.fatal(message, e);
 				wrappedClientDevice.discardApk(invocationPasskey);
-				throw new ApkInstallationFailedException(	"Could not locate installation file. Make sure the path is correct and the file exists.",
-															e);
+				throw new ApkInstallationFailedException(message, e);
 			}
 			catch (IOException e)
 			{
-				LOGGER.fatal("Reading from local file/Writing to remote file resulted in exception.", e);
-				wrappedClientDevice.discardApk(invocationPasskey);
-				throw new ApkInstallationFailedException(	"Reading from local file/Writing to remote file resulted in exception.",
-															e);
+				String message = "Reading from local file/Writing to remote file resulted in exception.";
+
+				if (!(e instanceof RemoteException))
+				{
+					LOGGER.fatal(message, e);
+					wrappedClientDevice.discardApk(invocationPasskey);
+					throw new ApkInstallationFailedException(message, e);
+				}
+
+				throw e;
 			}
 
 			// Install
@@ -674,23 +688,35 @@ public class Device
 			}
 			catch (IOException e)
 			{
-				LOGGER.fatal("Error while saving the apk file on the remote Agent.", e);
-				wrappedClientDevice.discardApk(invocationPasskey);
-				throw new ApkInstallationFailedException("Error while saving the apk file on the remote Agent.", e);
+				String message = "Error while saving the apk file on the remote Agent.";
+
+				if (!(e instanceof RemoteException))
+				{
+					LOGGER.fatal(message, e);
+					wrappedClientDevice.discardApk(invocationPasskey);
+					throw new ApkInstallationFailedException(message, e);
+				}
+
+				throw e;
 			}
 			catch (CommandFailedException e)
 			{
-				LOGGER.fatal("Executing file installation command failed.", e);
+				String message = "Executing file installation command failed.";
+
+				LOGGER.fatal(message, e);
 				wrappedClientDevice.discardApk(invocationPasskey);
-				throw new ApkInstallationFailedException("Executing file installation command failed.", e);
+				throw new ApkInstallationFailedException(message, e);
 			}
 
 			LOGGER.info("File instalation successfull.");
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
+		}
+		catch (IOException e)
+		{
+			// Should never get here since IO exceptions are handled above.
 		}
 		catch (InvalidPasskeyException e)
 		{
@@ -753,8 +779,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -811,8 +836,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO implement logic behind failed client-server connection
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -869,8 +893,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO implement logic behind failed client-server connection
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -904,8 +927,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO implement logic behind failed client-server connection
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -935,8 +957,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO implement logic behind failed client-server connection
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -1002,8 +1023,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO implement logic behind failed client-server connection
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (InvalidPasskeyException e)
 		{
@@ -1070,8 +1090,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO implement logic behind failed client-server connection
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (InvalidPasskeyException e)
 		{
@@ -1097,8 +1116,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -1124,8 +1142,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -1152,8 +1169,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -1180,8 +1196,7 @@ public class Device
 		}
 		catch (RemoteException e)
 		{
-			// TODO add client connection failed logic
-			e.printStackTrace();
+			handleLostConnection();
 		}
 		catch (CommandFailedException e)
 		{
@@ -1191,5 +1206,28 @@ public class Device
 		{
 			throw new DeviceInvocationRejectedException(e);
 		}
+	}
+
+	/**
+	 * Attempts to reconnect to the server;
+	 * 
+	 * @throws ServerConnectionFailedException
+	 * @throws DeeviceReleasedExceprion
+	 */
+	private void handleLostConnection()
+	{
+		try
+		{
+			serverConnectionHandler.connect();
+		}
+		catch (ServerConnectionFailedException e)
+		{
+			throw e;
+		}
+
+		String message = "Reconnecting to server succeeded, but the device was already released.";
+
+		LOGGER.fatal(message);
+		throw new DeviceReleasedException(message);
 	}
 }

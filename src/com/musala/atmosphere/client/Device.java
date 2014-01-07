@@ -823,7 +823,7 @@ public class Device
 	{
 		if (unlockDevice)
 		{
-			unlock();
+			setLocked(false);
 		}
 
 		IntentBuilder intentBuilder = new IntentBuilder(IntentAction.START_COMPONENT);
@@ -854,26 +854,22 @@ public class Device
 	}
 
 	/**
-	 * Locks the current device.
+	 * Changes the lock state of the current device.
+	 * 
+	 * @param state
+	 *        - desired lock state of the device; true - lock the device, false - unlock the device.
 	 */
-	public void lock()
+	public void setLocked(boolean state)
 	{
-		if (!isLocked())
-		{
-			pressButton(HardwareButton.POWER);
-		}
-	}
+		boolean toLock = state && !isLocked();
+		boolean toWakeForUnlock = !state && !isAwake();
 
-	/**
-	 * Unlocks the current device.
-	 */
-	public void unlock()
-	{
-		if (!isAwake())
+		if (toLock || toWakeForUnlock)
 		{
 			pressButton(HardwareButton.POWER);
 		}
-		if (isLocked())
+
+		if (!state && isLocked())
 		{
 			pressButton(HardwareButton.MENU);
 		}

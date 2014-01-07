@@ -1,14 +1,18 @@
 package com.musala.atmosphere.client;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 
 import java.rmi.RemoteException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.musala.atmosphere.client.Device;
-import com.musala.atmosphere.client.ServerConnectionHandler;
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.commons.BatteryState;
 import com.musala.atmosphere.commons.DeviceAcceleration;
@@ -152,7 +156,7 @@ public class ReconnectDeviceTest
 	@Test(expected = DeviceReleasedException.class)
 	public void testThrowsExceptionOnLock()
 	{
-		testDevice.lock();
+		testDevice.setLocked(true);
 	}
 
 	@Test(expected = DeviceReleasedException.class)
@@ -218,6 +222,6 @@ public class ReconnectDeviceTest
 	@Test(expected = DeviceReleasedException.class)
 	public void testThrowsExceptionOnUnlock()
 	{
-		testDevice.unlock();
+		testDevice.setLocked(false);
 	}
 }

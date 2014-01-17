@@ -83,7 +83,7 @@ class ServerConnectionHandler
 		} while (connectionAttemptCounter > 0);
 
 		LOGGER.error("Connecting to server failed!", innerException);
-		throw new ServerConnectionFailedException("Connection retry limit reached.", innerException);
+		throw new ServerConnectionFailedException("Connecting to server retry limit reached.", innerException);
 	}
 
 	private Pair<IClientBuilder, Registry> getClientBuilderRegistryPair()

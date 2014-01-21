@@ -14,7 +14,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.mockito.internal.stubbing.answers.ThrowsException;
 
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.device.TouchGesture;
@@ -37,6 +36,7 @@ import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.DeviceOrientation;
 import com.musala.atmosphere.commons.MobileDataState;
 import com.musala.atmosphere.commons.ScreenOrientation;
+import com.musala.atmosphere.commons.SmsMessage;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.standalone.Macro;
@@ -1197,6 +1197,34 @@ public class Device
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Setting device WiFi state failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			throw new DeviceInvocationRejectedException(e);
+		}
+	}
+
+	/**
+	 * Sends SMS to the testing device.
+	 * 
+	 * Works on emulators only.
+	 * 
+	 * @param smsMessage
+	 *        - message, that will be sent to the device
+	 */
+	public void receiveSms(SmsMessage smsMessage)
+	{
+		try
+		{
+			wrappedClientDevice.receiveSms(smsMessage, invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			handleLostConnection();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Sending SMS to the testing device failed.", e);
 		}
 		catch (InvalidPasskeyException e)
 		{

@@ -12,6 +12,7 @@ import com.musala.atmosphere.commons.DeviceAcceleration;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.DeviceOrientation;
 import com.musala.atmosphere.commons.MobileDataState;
+import com.musala.atmosphere.commons.SmsMessage;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.util.Pair;
@@ -278,6 +279,15 @@ class ReleasedClientDevice implements IClientDevice
 
 	@Override
 	public void setWiFi(boolean state, long invocationPaskey)
+		throws InvalidPasskeyException,
+			CommandFailedException,
+			RemoteException
+	{
+		throwDeviceReleasedException();
+	}
+
+	@Override
+	public void receiveSms(SmsMessage smsMessage, long invocationPasskey)
 		throws InvalidPasskeyException,
 			CommandFailedException,
 			RemoteException

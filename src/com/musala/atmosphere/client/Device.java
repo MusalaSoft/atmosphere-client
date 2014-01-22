@@ -24,7 +24,6 @@ import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.client.exceptions.MacroPlayingException;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
 import com.musala.atmosphere.client.geometry.Point;
-import com.musala.atmosphere.client.util.ServerAnnotationProperties;
 import com.musala.atmosphere.client.util.settings.AndroidGlobalSettings;
 import com.musala.atmosphere.client.util.settings.AndroidSystemSettings;
 import com.musala.atmosphere.client.util.settings.DeviceSettingsManager;
@@ -74,19 +73,6 @@ public class Device
 	private ServerConnectionHandler serverConnectionHandler;
 
 	/**
-	 * Constructor that creates a usable Device object by a given IClientDevice and it's invocation passkey.
-	 * 
-	 * @param iClientDevice
-	 * @param devicePasskey
-	 *        -
-	 */
-	Device(IClientDevice iClientDevice, long devicePasskey)
-	{
-		this(iClientDevice, devicePasskey, new ServerConnectionHandler(new ServerAnnotationProperties()));
-
-	}
-
-	/**
 	 * Constructor that creates a usable Device object by a given IClientDevice, it's invocation passkey.
 	 * 
 	 * @param iClientDevice
@@ -107,9 +93,9 @@ public class Device
 	}
 
 	/**
-	 * Gets the device information about the testing device.
+	 * Gets the device information about this device.
 	 * 
-	 * @return a {@link DeviceInformation DeviceInformation} structure with information for the testing device.
+	 * @return {@link DeviceInformation DeviceInformation} structure with information for the testing device.
 	 */
 	public DeviceInformation getInformation()
 	{
@@ -130,9 +116,9 @@ public class Device
 	}
 
 	/**
-	 * Gets current orientation of the testing device
+	 * Gets current orientation in space of this device.
 	 * 
-	 * @return - orientation of the device
+	 * @return {@link DeviceOrientation DeviceOrientation} of the testing device.
 	 */
 	public DeviceOrientation getDeviceOrientation()
 	{
@@ -158,10 +144,12 @@ public class Device
 	}
 
 	/**
-	 * Sets new orientation of the testing device. Can only be applied on emulators.
+	 * Sets new orientation in space of this device.<br>
+	 * Can only be applied on <b>emulators</b>.
 	 * 
 	 * @param deviceOrientation
-	 *        - new device orientation to be set
+	 *        - new {@link DeviceOrientation DeviceOrientation} to be set.
+	 * @deprecated
 	 */
 	public void setDeviceOrientation(DeviceOrientation deviceOrientation)
 	{
@@ -184,11 +172,11 @@ public class Device
 	}
 
 	/**
-	 * Control whether the accelerometer will be used to change screen orientation
+	 * Changes the screen auto rotation of this device.<br>
+	 * Control whether the accelerometer will be used to change screen orientation.
 	 * 
 	 * @param autoRotation
-	 *        - if false, it will not be used unless explicitly requested by the application; if true, it will be used
-	 *        by default unless explicitly disabled by the application.
+	 *        - <code>false</code> - disables screen auto rotation; <code>true</code> - enables screen auto rotation.
 	 */
 	public void setAutoRotation(boolean autoRotation)
 	{
@@ -218,10 +206,11 @@ public class Device
 	}
 
 	/**
-	 * Sets new screen orientation for the device.
+	 * Sets new screen orientation for this device.<br>
+	 * Implicitly turns off screen auto rotation.
 	 * 
 	 * @param screenOrientation
-	 *        - new screen orientation to be set
+	 *        - new {@link ScreenOrientation ScreenOrientation} to be set.
 	 */
 	public void setScreenOrientation(ScreenOrientation screenOrientation)
 	{
@@ -245,10 +234,11 @@ public class Device
 	}
 
 	/**
-	 * Sets new acceleration for the testing device. Can only be applied on emulators.
+	 * Sets new acceleration for this device.<br>
+	 * Can only be applied on <b>emulators</b>.
 	 * 
 	 * @param deviceAcceleration
-	 *        - new device acceleration to be set
+	 *        - new {@link DeviceAcceleration DeviceAcceleration} to be set.
 	 */
 	public void setAcceleration(DeviceAcceleration deviceAcceleration)
 	{
@@ -271,9 +261,9 @@ public class Device
 	}
 
 	/**
-	 * Gets current acceleration of the testing device
+	 * Gets current acceleration of this device.
 	 * 
-	 * @return - acceleration of the device
+	 * @return {@link DeviceAcceleration DeviceAcceleration} of the device.
 	 */
 	public DeviceAcceleration getDeviceAcceleration()
 	{
@@ -299,7 +289,7 @@ public class Device
 	}
 
 	/**
-	 * Returns the current device's battery level.
+	 * Gets the current battery charge level of this device.
 	 * 
 	 * @return Battery level of the device in percents.
 	 */
@@ -326,10 +316,12 @@ public class Device
 	}
 
 	/**
-	 * Sets current device's battery level.
+	 * Sets the battery charge level of this device.<br>
+	 * <i>On real device, sets the battery level only for limited time, until Android BatteryManager updates the battery
+	 * information.</i>
 	 * 
 	 * @param batteryLevel
-	 *        - new battery level in percent.
+	 *        - new battery level in percent to be set.
 	 */
 	public void setBatteryLevel(int batteryLevel)
 	{
@@ -352,9 +344,9 @@ public class Device
 	}
 
 	/**
-	 * Gets the current device's battery state.
+	 * Gets the current battery state of this device.
 	 * 
-	 * @return - a {@link BatteryState BatteryState} enumeration member.
+	 * @return {@link BatteryState BatteryState} of the device.
 	 */
 	public BatteryState getBatteryState()
 	{
@@ -379,10 +371,12 @@ public class Device
 	}
 
 	/**
-	 * Sets the current device's battery state.
+	 * Sets the battery state of this device.<br>
+	 * <i>On real device, sets the battery state only for limited time, until Android BatteryManager updates the battery
+	 * information.</i>
 	 * 
 	 * @param batteryState
-	 *        - {@link BatteryState} enumeration member.
+	 *        - new {@link BatteryState} to be set.
 	 */
 	public void setBatteryState(BatteryState batteryState)
 	{
@@ -405,9 +399,10 @@ public class Device
 	}
 
 	/**
-	 * Gets the current device's power connectivity.
+	 * Gets the current connection state of this device to external power source.
 	 * 
-	 * @return true if the device connected or false - disconnected
+	 * @return <code>true</code> if the device is connected to a power source.<br>
+	 *         <code>false</code> if device is not connected to a power source.
 	 */
 	public boolean getPowerState()
 	{
@@ -432,10 +427,12 @@ public class Device
 	}
 
 	/**
-	 * Sets the current device's power connectivity state.
+	 * Sets the connection state of this device to external power source.<br>
+	 * <i>On real device, sets the power state only for limited time, until Android BatteryManager updates the power
+	 * connection state information.</i>
 	 * 
 	 * @param state
-	 *        True for AC connected, false for disconnected.
+	 *        - <code>true</code> for connected to AC power adapter, <code>false</code> for disconnected power state.
 	 */
 	public void setPowerState(boolean state)
 	{
@@ -482,10 +479,13 @@ public class Device
 	// }
 
 	/**
-	 * Sets the current device's airplane mode.
+	 * Sets the airplane mode state for this device.<br>
+	 * <i><b>Warning:</b> enabling airplane mode on emulator disconnects it from ATMOSPHERE Agent and this emulator can
+	 * be connected back only after Agent restart.</i>
 	 * 
 	 * @param airplaneMode
-	 *        - True if the device should now be in airplane mode, false if not.
+	 *        - <code>true</code> to enter device in airplane mode, <code>false</code> to exit device from airplane
+	 *        mode.
 	 */
 	public void setAirplaneMode(boolean airplaneMode)
 	{
@@ -534,9 +534,10 @@ public class Device
 	}
 
 	/**
-	 * Gets the current device's screenshot.
+	 * Gets screenshot of this device's active screen.
 	 * 
-	 * @return a byte buffer that, when dumped to a file, can be opened as a .PNG image file.
+	 * @return byte buffer, containing captured device screen.<br>
+	 *         It can be subsequently dumped to a file and directly opened as a PNG image.
 	 */
 	public byte[] getScreenshot()
 	{
@@ -561,7 +562,7 @@ public class Device
 	}
 
 	/**
-	 * Gets the current device's screenshot and saves it as an image file at a specified location.
+	 * Gets screenshot of this device's active screen and saves it as an image file at a specified location.
 	 * 
 	 * @param pathToImageFile
 	 *        - location at which the screenshot image file should be saved.
@@ -581,9 +582,9 @@ public class Device
 	}
 
 	/**
-	 * Gets the current device's active {@link Screen Screen}.
+	 * Gets the currently active {@link Screen Screen} of this device.
 	 * 
-	 * @return a {@link Screen Screen} instance.
+	 * @return {@link Screen Screen} instance.
 	 */
 	public Screen getActiveScreen()
 	{
@@ -609,7 +610,7 @@ public class Device
 	}
 
 	/**
-	 * Installs a specified application on the current device.
+	 * Installs a specified Android application file on this device.<br>
 	 * 
 	 * @param path
 	 *        - location of the file to be installed.
@@ -731,7 +732,7 @@ public class Device
 	 */
 
 	/**
-	 * Redirects specific address to another address.
+	 * Redirects specific IP address to another IP address.
 	 * 
 	 * @param toIp
 	 * @param toNewIp
@@ -742,7 +743,7 @@ public class Device
 	}
 
 	/**
-	 * Simulates random finger actions on the screen of the testing device.
+	 * Simulates random finger actions on the screen of this device.
 	 * 
 	 */
 	public void randomMultiTouchevent()
@@ -751,7 +752,7 @@ public class Device
 	}
 
 	/**
-	 * Executing user-defined gesture on the screen.
+	 * Executes user-defined gesture on this device's screen.
 	 * 
 	 * @param gesture
 	 */
@@ -761,12 +762,10 @@ public class Device
 	}
 
 	/**
-	 * Simulates a simple tap on the screen at a specified location.
+	 * Executes a simple tap on the screen of this device at a specified location point.
 	 * 
-	 * @param positionX
-	 *        screen tap X coordinate.
-	 * @param positionY
-	 *        screen tap Y coordinate.
+	 * @param tapPoint
+	 *        - {@link Point Point} on the screen to tap on.
 	 */
 	public void tapScreenLocation(Point tapPoint)
 	{
@@ -792,12 +791,13 @@ public class Device
 	}
 
 	/**
-	 * Starts an Activity from a package.
+	 * Starts an Activity from a package on this device.
 	 * 
 	 * @param packageName
 	 *        - package name from which an activity should be started.
 	 * @param activityName
-	 *        - activity name to be started.
+	 *        - activity name to be started. Expects either absolute name or a name starting with dot (.), relative to
+	 *        the packageName.
 	 * 
 	 * @throws ActivityStartingException
 	 */
@@ -807,7 +807,7 @@ public class Device
 	}
 
 	/**
-	 * Starts an Activity from a package.
+	 * Starts an Activity from a package on this device.
 	 * 
 	 * @param packageName
 	 *        - package name from which an activity should be started.
@@ -815,7 +815,7 @@ public class Device
 	 *        - activity name to be started. Expects either absolute name or a name starting with dot (.), relative to
 	 *        the packageName.
 	 * @param unlockDevice
-	 *        - if true unlocks the device before starting the activity.
+	 *        - if <code>true</code>, unlocks the device before starting the activity.
 	 * @throws ActivityStartingException
 	 */
 	public void startActivity(String packageName, String activityName, boolean unlockDevice)
@@ -854,10 +854,11 @@ public class Device
 	}
 
 	/**
-	 * Changes the lock state of the current device.
+	 * Changes the lock state of this device.
 	 * 
 	 * @param state
-	 *        - desired lock state of the device; true - lock the device, false - unlock the device.
+	 *        - desired lock state of the device; <code>true</code> - lock the device, <code>false</code> - unlock the
+	 *        device.
 	 */
 	public void setLocked(boolean state)
 	{
@@ -876,9 +877,10 @@ public class Device
 	}
 
 	/**
-	 * Checks if the current device is in a WAKE state.
+	 * Checks if this device is in a WAKE state.<br>
 	 * 
-	 * @return true if the device is awake, false otherwise.
+	 * @return <code>true</code> if the device is awake.<br>
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean isAwake()
 	{
@@ -910,9 +912,10 @@ public class Device
 	}
 
 	/**
-	 * Checks if the current device is locked.
+	 * Checks if this device is locked.
 	 * 
-	 * @return true if the device is locked, false otherwise.
+	 * @return <code>true</code> if the device is locked.<br>
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean isLocked()
 	{
@@ -939,7 +942,7 @@ public class Device
 	}
 
 	/**
-	 * Presses a device hardware button on the current device.
+	 * Presses hardware button on this device.
 	 * 
 	 * @param keyCode
 	 *        - button key code as specified by the Android KeyEvent KEYCODE_ constants.
@@ -966,7 +969,7 @@ public class Device
 	}
 
 	/**
-	 * Presses a device hardware button.
+	 * Presses hardware button on this device.
 	 * 
 	 * @param button
 	 *        - {@link HardwareButton HardwareButton} to be pressed.
@@ -978,14 +981,15 @@ public class Device
 	}
 
 	/**
-	 * Inputs text on the current device through the AtmosphereIME.
+	 * Inputs text on this device through the AtmosphereIME.<br>
+	 * Element on device's screen, that accepts text input should be preselected.
 	 * 
 	 * @param text
 	 *        - text to be input.
 	 * @param interval
-	 *        - time interval in milliseconds between letters typing.
+	 *        - time interval in milliseconds between typing each symbol.
 	 */
-	public void inputText(String text, int intervalInMs)
+	public void inputText(String text, int interval)
 	{
 		if (text.isEmpty())
 		{
@@ -1003,9 +1007,9 @@ public class Device
 		}
 		intentBuilder.putExtraIntegerList("text", charsList);
 
-		if (intervalInMs > 0)
+		if (interval > 0)
 		{
-			intentBuilder.putExtraInteger("interval", intervalInMs);
+			intentBuilder.putExtraInteger("interval", interval);
 		}
 
 		String builtCommand = intentBuilder.buildIntentCommand();
@@ -1028,7 +1032,8 @@ public class Device
 	}
 
 	/**
-	 * Inputs text on the current device through the AtmosphereIME.
+	 * Inputs text on this device through the AtmosphereIME.<br>
+	 * Element on device's screen, that accepts text input should be preselected.
 	 * 
 	 * @param text
 	 *        - text to be input.
@@ -1039,7 +1044,7 @@ public class Device
 	}
 
 	/**
-	 * Plays a recorded macro file on the current device.
+	 * Plays a recorded macro file on this device.
 	 * 
 	 * @param filePath
 	 *        - path to the recorded macro file.
@@ -1099,10 +1104,11 @@ public class Device
 	}
 
 	/**
-	 * Sets the mobile data state of an emulator.
+	 * Sets the mobile data state of this device.<br>
+	 * Can only be applied on <b>emulators</b>.
 	 * 
 	 * @param state
-	 *        - member of the {@link MobileDataState} enumeration.
+	 *        - {@link MobileDataState} to set.
 	 */
 	public void setMobileDataState(MobileDataState state)
 	{
@@ -1125,9 +1131,9 @@ public class Device
 	}
 
 	/**
-	 * Gets the connection type of the device - MOBILE, WIFI, or NONE - if not connected to WiFi or Mobile network.
+	 * Gets the current network connection type of this device.
 	 * 
-	 * @return a member of the {@link ConnectionType} enum.
+	 * @return {@link ConnectionType}.
 	 */
 	public ConnectionType getConnectionType()
 	{
@@ -1152,9 +1158,10 @@ public class Device
 	}
 
 	/**
-	 * Gets the mobile data state of an emulator.
+	 * Gets the current mobile data state of this device.<br>
+	 * Can only be applied on <b>emulators</b>.
 	 * 
-	 * @return a member of the {@link MobileDataState} enum.
+	 * @return {@link MobileDataState}.
 	 */
 	public MobileDataState getMobileDataState()
 	{
@@ -1179,10 +1186,10 @@ public class Device
 	}
 
 	/**
-	 * Sets the WiFi state of the device.
+	 * Sets the WiFi state of this device.
 	 * 
 	 * @param state
-	 *        true if the WiFi should be on; false if it should be off.
+	 *        - <code>true</code> enables WiFi; <code>false</code> disables WiFi.
 	 */
 	public void setWiFi(boolean state)
 	{
@@ -1205,12 +1212,11 @@ public class Device
 	}
 
 	/**
-	 * Sends SMS to the testing device.
-	 * 
-	 * Works on emulators only.
+	 * Sends SMS to this device.<br>
+	 * Can only be applied on <b>emulators</b>.
 	 * 
 	 * @param smsMessage
-	 *        - message, that will be sent to the device
+	 *        - {@link SmsMessage}, that will be sent to the device.
 	 */
 	public void receiveSms(SmsMessage smsMessage)
 	{
@@ -1233,7 +1239,7 @@ public class Device
 	}
 
 	/**
-	 * Attempts to reconnect to the server;
+	 * Attempts to reconnect to the ATMOSPHERE server.
 	 * 
 	 * @throws ServerConnectionFailedException
 	 * @throws DeeviceReleasedExceprion

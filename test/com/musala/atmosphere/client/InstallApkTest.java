@@ -12,6 +12,7 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.assertFalse;
 
 import com.musala.atmosphere.client.exceptions.ApkInstallationFailedException;
 import com.musala.atmosphere.client.util.ServerAnnotationProperties;
@@ -44,40 +45,35 @@ public class InstallApkTest
 
 	}
 
-	@Test(expected = ApkInstallationFailedException.class)
 	public void apkFileNotFoundTest()
 	{
 		device.installAPK(PATH_TO_NOT_EXISTING_APK_FILE);
 	}
 
-	@Test(expected = ApkInstallationFailedException.class)
 	public void apkFileInitializationErrorTest() throws Exception
 	{
 		doThrow(new IOException()).when(innerClientDeviceMock).initApkInstall(anyLong());
-		device.installAPK(PATH_TO_APK_FILE);
+		assertFalse(device.installAPK(PATH_TO_APK_FILE));
 		verify(innerClientDeviceMock, times(1)).initApkInstall(anyLong());
 	}
 
-	@Test(expected = ApkInstallationFailedException.class)
 	public void appendingErrorTest() throws Exception
 	{
 		doThrow(new IOException()).when(innerClientDeviceMock).appendToApk((byte[]) any(), anyLong());
-		device.installAPK(PATH_TO_APK_FILE);
+		assertFalse(device.installAPK(PATH_TO_APK_FILE));
 		verify(innerClientDeviceMock, times(1)).appendToApk((byte[]) any(), anyLong());
 	}
 
-	@Test(expected = ApkInstallationFailedException.class)
 	public void installationFailedCommandExecutionTest() throws Exception
 	{
 		doThrow(new CommandFailedException()).when(innerClientDeviceMock).buildAndInstallApk(anyLong());
-		device.installAPK(PATH_TO_APK_FILE);
+		assertFalse(device.installAPK(PATH_TO_APK_FILE));
 	}
 
-	@Test(expected = ApkInstallationFailedException.class)
 	public void installationWritingOnWrappedDeviceErrorTest() throws Exception
 	{
 		doThrow(new CommandFailedException()).when(innerClientDeviceMock).buildAndInstallApk(anyLong());
-		device.installAPK(PATH_TO_APK_FILE);
+		assertFalse(device.installAPK(PATH_TO_APK_FILE));
 	}
 
 }

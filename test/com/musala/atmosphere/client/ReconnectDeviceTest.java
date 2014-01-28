@@ -13,6 +13,8 @@ import java.rmi.RemoteException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.junit.Assert.assertFalse;
+
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.commons.BatteryState;
 import com.musala.atmosphere.commons.DeviceAcceleration;
@@ -81,10 +83,9 @@ public class ReconnectDeviceTest
 		testDevice.getPowerState();
 	}
 
-	@Test(expected = DeviceReleasedException.class)
 	public void testThrowsExceptionOnAppendToApk()
 	{
-		testDevice.installAPK("");
+		assertFalse(testDevice.installAPK(""));
 	}
 
 	@Test(expected = DeviceReleasedException.class)

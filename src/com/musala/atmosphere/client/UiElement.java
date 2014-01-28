@@ -103,8 +103,9 @@ public class UiElement
 	 *        - the relative point that will be added to the upper left corner's coordinates.
 	 * @param revalidateElement
 	 *        - boolean indicating if the element should be revalidated prior to tapping.
+	 * @return <code>true</code> if the tapping is successful, <code>false</code> if it fails.
 	 */
-	public void tap(Point point, boolean revalidateElement)
+	public boolean tap(Point point, boolean revalidateElement)
 	{
 		if (revalidateElement)
 		{
@@ -117,7 +118,7 @@ public class UiElement
 
 		if (elementBounds.contains(tapPoint))
 		{
-			onDevice.tapScreenLocation(tapPoint);
+			return onDevice.tapScreenLocation(tapPoint);
 		}
 		else
 		{
@@ -130,10 +131,11 @@ public class UiElement
 	 * 
 	 * @param point
 	 *        - the relative point that will be added to the upper left corner's coordinates.
+	 * @return <code>true</code> if the tapping is successful, <code>false</code> if it fails.
 	 */
-	public void tap(Point point)
+	public boolean tap(Point point)
 	{
-		tap(point, true);
+		return tap(point, true);
 	}
 
 	/**
@@ -141,14 +143,15 @@ public class UiElement
 	 * 
 	 * @param revalidateElement
 	 *        - boolean indicating if the element should be revalidated prior to tapping.
+	 * @return <code>true</code> if the tapping is successful, <code>false</code> if it fails.
 	 */
-	public void tap(boolean revalidateElement)
+	public boolean tap(boolean revalidateElement)
 	{
 		Bounds elementBounds = elementAttributes.getBounds();
 		Point centerPoint = elementBounds.getCenter();
 		Point tapPoint = elementBounds.getRelativePoint(centerPoint);
 
-		tap(tapPoint, revalidateElement);
+		return tap(tapPoint, revalidateElement);
 	}
 
 	/**
@@ -156,10 +159,11 @@ public class UiElement
 	 * 
 	 * @param revalidateElement
 	 *        - boolean indicating if the element should be revalidated prior to tapping.
+	 * @return <code>true</code> if the tapping is successful, <code>false</code> if it fails.
 	 */
-	public void tap()
+	public boolean tap()
 	{
-		tap(true);
+		return tap(true);
 	}
 
 	/**
@@ -221,18 +225,24 @@ public class UiElement
 
 	/**
 	 * Simulates holding finger on the screen.
+	 * 
+	 * @return <code>true</code> if the holding is successful, <code>false</code> if it fails.
 	 */
-	public void hold()
+	public boolean hold()
 	{
 		// TODO implement uiElement.hold()
+		return false;
 	}
 
 	/**
 	 * Simulates double-tapping on the given UI element.
+	 * 
+	 * @return <code>true</code> if the double tapping is successful, <code>false</code> if it fails.
 	 */
-	public void doubleTap()
+	public boolean doubleTap()
 	{
 		// TODO implement uiElement.doubleTap()
+		return false;
 	}
 
 	/**
@@ -241,10 +251,12 @@ public class UiElement
 	 * 
 	 * @param toX
 	 * @param toY
+	 * @return <code>true</code> if the dragging is successful, <code>false</code> if it fails.
 	 */
-	public void drag(int toX, int toY)
+	public boolean drag(int toX, int toY)
 	{
 		// TODO implement uiElement.drag()
+		return false;
 	}
 
 	/**
@@ -257,11 +269,12 @@ public class UiElement
 	 *        - interval in milliseconds between the input of each letter.
 	 * @param revalidateElement
 	 *        - boolean indicating if the element should be revalidated prior to text inputting.
+	 * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
 	 */
-	public void inputText(String text, int intervalInMs, boolean revalidateElement)
+	public boolean inputText(String text, int intervalInMs, boolean revalidateElement)
 	{
 		focus(revalidateElement);
-		onDevice.inputText(text, intervalInMs);
+		return onDevice.inputText(text, intervalInMs);
 	}
 
 	/**
@@ -272,10 +285,11 @@ public class UiElement
 	 *        - text to be input.
 	 * @param intervalInMs
 	 *        - interval in milliseconds between the input of each letter.
+	 * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
 	 */
-	public void inputText(String text, int intervalInMs)
+	public boolean inputText(String text, int intervalInMs)
 	{
-		inputText(text, intervalInMs, true);
+		return inputText(text, intervalInMs, true);
 	}
 
 	/**
@@ -285,10 +299,11 @@ public class UiElement
 	 *        - text to be input.
 	 * @param revalidateElement
 	 *        - boolean indicating if the element should be revalidated prior to text inputting.
+	 * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
 	 */
-	public void inputText(String text, boolean revalidateElement)
+	public boolean inputText(String text, boolean revalidateElement)
 	{
-		inputText(text, 0, revalidateElement);
+		return inputText(text, 0, revalidateElement);
 	}
 
 	/**
@@ -296,10 +311,11 @@ public class UiElement
 	 * 
 	 * @param text
 	 *        - text to be input.
+	 * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
 	 */
-	public void inputText(String text)
+	public boolean inputText(String text)
 	{
-		inputText(text, true);
+		return inputText(text, true);
 	}
 
 	/**
@@ -307,8 +323,9 @@ public class UiElement
 	 * 
 	 * @param revalidateElement
 	 *        - boolean indicating if the element should be revalidated prior to focusing.
+	 * @return <code>true</code> if the focusing is successful, <code>false</code> if it fails.
 	 */
-	public void focus(boolean revalidateElement)
+	public boolean focus(boolean revalidateElement)
 	{
 		if (revalidateElement)
 		{
@@ -321,7 +338,7 @@ public class UiElement
 		}
 		if (elementAttributes.isFocused())
 		{
-			return;
+			return true;
 		}
 
 		// The element is already validated if the flag is set, so no need to validate it again.
@@ -331,17 +348,20 @@ public class UiElement
 		{
 			if (!elementAttributes.isFocused())
 			{
-				throw new ActionFailedException("Focusing element failed.");
+				return false;
 			}
 		}
+		return true;
 	}
 
 	/**
 	 * Checks if the current UI element is still valid and if so, focuses it.
+	 * 
+	 * @return <code>true</code> if the focusing is successful, <code>false</code> if it fails.
 	 */
-	public void focus()
+	public boolean focus()
 	{
-		focus(true);
+		return focus(true);
 	}
 
 	private void revalidateThrowing()

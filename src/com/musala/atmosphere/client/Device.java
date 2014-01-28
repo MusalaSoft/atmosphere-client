@@ -18,7 +18,6 @@ import org.apache.log4j.Logger;
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.device.TouchGesture;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
-import com.musala.atmosphere.client.exceptions.ApkInstallationFailedException;
 import com.musala.atmosphere.client.exceptions.DeviceInvocationRejectedException;
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.client.exceptions.MacroPlayingException;
@@ -95,7 +94,8 @@ public class Device
 	/**
 	 * Gets the device information about this device.
 	 * 
-	 * @return {@link DeviceInformation DeviceInformation} structure with information for the testing device.
+	 * @return {@link DeviceInformation DeviceInformation} structure with information for the testing device,<br>
+	 *         <code>null</code> if getting device information fails.
 	 */
 	public DeviceInformation getInformation()
 	{
@@ -110,6 +110,7 @@ public class Device
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Getting device information was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
 		return wrappedDeviceInformation;
@@ -118,7 +119,8 @@ public class Device
 	/**
 	 * Gets current orientation in space of this device.
 	 * 
-	 * @return {@link DeviceOrientation DeviceOrientation} of the testing device.
+	 * @return {@link DeviceOrientation DeviceOrientation} of the testing device,<br>
+	 *         <code>null</code> if getting device orientation fails.
 	 */
 	public DeviceOrientation getDeviceOrientation()
 	{
@@ -138,6 +140,7 @@ public class Device
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Getting device orientation was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
 		return deviceOrientation;
@@ -149,9 +152,11 @@ public class Device
 	 * 
 	 * @param deviceOrientation
 	 *        - new {@link DeviceOrientation DeviceOrientation} to be set.
+	 * @return <code>true</code> if the orientation setting is successful, <code>false</code> if it fails.
 	 * @deprecated
 	 */
-	public void setDeviceOrientation(DeviceOrientation deviceOrientation)
+	@Deprecated
+	public boolean setDeviceOrientation(DeviceOrientation deviceOrientation)
 	{
 		try
 		{
@@ -160,25 +165,31 @@ public class Device
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Setting device orientation failed.", e);
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Setting device orientation was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
+
+		return true;
 	}
 
 	/**
 	 * Changes the screen auto rotation of this device.<br>
-	 * Control whether the accelerometer will be used to change screen orientation.
+	 * Controls whether the accelerometer will be used to change screen orientation.
 	 * 
 	 * @param autoRotation
 	 *        - <code>false</code> - disables screen auto rotation; <code>true</code> - enables screen auto rotation.
+	 * @return <code>true</code> if the auto rotation setting is successful, <code>false</code> if it fails.
 	 */
-	public void setAutoRotation(boolean autoRotation)
+	public boolean setAutoRotation(boolean autoRotation)
 	{
 		try
 		{
@@ -194,15 +205,19 @@ public class Device
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Setting auto rotation was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Setting device auto rotation failed.", e);
+			return false;
 		}
+		return true;
 	}
 
 	/**
@@ -211,26 +226,36 @@ public class Device
 	 * 
 	 * @param screenOrientation
 	 *        - new {@link ScreenOrientation ScreenOrientation} to be set.
+	 * @return <code>true</code> if the screen orientation setting is successful, <code>false</code> if it fails.
 	 */
-	public void setScreenOrientation(ScreenOrientation screenOrientation)
+	public boolean setScreenOrientation(ScreenOrientation screenOrientation)
 	{
 		try
 		{
-			setAutoRotation(false);
+			if (!setAutoRotation(false))
+			{
+				LOGGER.error("Screen orientation was not set due to setting auto rotation failure.");
+				return false;
+			}
 			deviceSettings.putInt(AndroidSystemSettings.USER_ROTATION, screenOrientation.getOrientationNumber());
 		}
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Setting screen orientation was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Setting screen orientation failed.", e);
+			return false;
 		}
+
+		return true;
 	}
 
 	/**
@@ -239,8 +264,9 @@ public class Device
 	 * 
 	 * @param deviceAcceleration
 	 *        - new {@link DeviceAcceleration DeviceAcceleration} to be set.
+	 * @return <code>true</code> if the acceleration setting is successful, <code>false</code> if it fails.
 	 */
-	public void setAcceleration(DeviceAcceleration deviceAcceleration)
+	public boolean setAcceleration(DeviceAcceleration deviceAcceleration)
 	{
 		try
 		{
@@ -249,21 +275,26 @@ public class Device
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Setting device acceleration failed.", e);
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Setting acceleration was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
+		return true;
 	}
 
 	/**
 	 * Gets current acceleration of this device.
 	 * 
-	 * @return {@link DeviceAcceleration DeviceAcceleration} of the device.
+	 * @return {@link DeviceAcceleration DeviceAcceleration} of the device,<br>
+	 *         <code>null</code> if getting acceleration fails.
 	 */
 	public DeviceAcceleration getDeviceAcceleration()
 	{
@@ -283,7 +314,8 @@ public class Device
 		}
 		catch (InvalidPasskeyException e)
 		{
-			handleLostConnection();
+			LOGGER.error("Getting acceleration was rejected by the server side.", e);
+			throw new DeviceInvocationRejectedException(e);
 		}
 		return deviceAcceleration;
 	}
@@ -291,11 +323,12 @@ public class Device
 	/**
 	 * Gets the current battery charge level of this device.
 	 * 
-	 * @return Battery level of the device in percents.
+	 * @return Battery level of the device in percents,<br>
+	 *         <code>null</code> if getting battery level fails.
 	 */
-	public int getBatteryLevel()
+	public Integer getBatteryLevel()
 	{
-		int result = 0;
+		Integer result = null;
 		try
 		{
 			result = wrappedClientDevice.getBatteryLevel(invocationPasskey);
@@ -310,6 +343,7 @@ public class Device
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Getting battery level was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
 		return result;
@@ -322,8 +356,9 @@ public class Device
 	 * 
 	 * @param batteryLevel
 	 *        - new battery level in percent to be set.
+	 * @return <code>true</code> if the battery level setting is successful, <code>false</code> if it fails.
 	 */
-	public void setBatteryLevel(int batteryLevel)
+	public boolean setBatteryLevel(int batteryLevel)
 	{
 		try
 		{
@@ -332,21 +367,27 @@ public class Device
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Setting device battery level failed.", e);
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Setting battery level was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
+
+		return true;
 	}
 
 	/**
 	 * Gets the current battery state of this device.
 	 * 
-	 * @return {@link BatteryState BatteryState} of the device.
+	 * @return Battery state of the device,<br>
+	 *         <code>null</code> if getting battery state fails.
 	 */
 	public BatteryState getBatteryState()
 	{
@@ -365,6 +406,7 @@ public class Device
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Getting battery state was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
 		return state;
@@ -377,8 +419,9 @@ public class Device
 	 * 
 	 * @param batteryState
 	 *        - new {@link BatteryState} to be set.
+	 * @return <code>true</code> if the battery state setting is successful, <code>false</code> if it fails.
 	 */
-	public void setBatteryState(BatteryState batteryState)
+	public boolean setBatteryState(BatteryState batteryState)
 	{
 		try
 		{
@@ -387,26 +430,31 @@ public class Device
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Setting device battery level failed.", e);
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Setting battery state was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
+		return true;
 	}
 
 	/**
 	 * Gets the current connection state of this device to external power source.
 	 * 
 	 * @return <code>true</code> if the device is connected to a power source.<br>
-	 *         <code>false</code> if device is not connected to a power source.
+	 *         <code>false</code> if device is not connected to a power source,<br>
+	 *         <code>null</code> if getting power state fails.
 	 */
-	public boolean getPowerState()
+	public Boolean getPowerState()
 	{
-		boolean state = false;
+		Boolean state = null;
 		try
 		{
 			state = wrappedClientDevice.getPowerState(invocationPasskey);
@@ -421,6 +469,7 @@ public class Device
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Getting power state was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
 		return state;
@@ -433,8 +482,9 @@ public class Device
 	 * 
 	 * @param state
 	 *        - <code>true</code> for connected to AC power adapter, <code>false</code> for disconnected power state.
+	 * @return <code>true</code> if the power state setting is successful, <code>false</code> if it fails.
 	 */
-	public void setPowerState(boolean state)
+	public boolean setPowerState(boolean state)
 	{
 		try
 		{
@@ -443,15 +493,20 @@ public class Device
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Setting device power connectivity state failed.", e);
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Setting power state was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
+
+		return true;
 	}
 
 	// /**
@@ -486,8 +541,9 @@ public class Device
 	 * @param airplaneMode
 	 *        - <code>true</code> to enter device in airplane mode, <code>false</code> to exit device from airplane
 	 *        mode.
+	 * @return <code>true</code> if the airplane mode setting is successful, <code>false</code> if it fails.
 	 */
-	public void setAirplaneMode(boolean airplaneMode)
+	public boolean setAirplaneMode(boolean airplaneMode)
 	{
 		DeviceInformation deviceInformation = getInformation();
 		int apiLevel = deviceInformation.getApiLevel();
@@ -522,21 +578,27 @@ public class Device
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Setting device airplane mode failed.", e);
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Setting airplane mode was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
+
+		return true;
 	}
 
 	/**
 	 * Gets screenshot of this device's active screen.
 	 * 
-	 * @return byte buffer, containing captured device screen.<br>
+	 * @return byte buffer, containing captured device screen,<br>
+	 *         <code>null</code> if getting screenshot fails.<br>
 	 *         It can be subsequently dumped to a file and directly opened as a PNG image.
 	 */
 	public byte[] getScreenshot()
@@ -556,6 +618,7 @@ public class Device
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Getting screenshot was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
 		return screenshot;
@@ -566,8 +629,9 @@ public class Device
 	 * 
 	 * @param pathToImageFile
 	 *        - location at which the screenshot image file should be saved.
+	 * @return <code>true</code> if the getting screenshot is successful, <code>false</code> if it fails.
 	 */
-	public void getScreenshot(String pathToImageFile)
+	public boolean getScreenshot(String pathToImageFile)
 	{
 		try
 		{
@@ -578,17 +642,21 @@ public class Device
 		catch (IOException e)
 		{
 			LOGGER.error("Saving screenshot file failed.", e);
+			return false;
 		}
+
+		return true;
 	}
 
 	/**
 	 * Gets the currently active {@link Screen Screen} of this device.
 	 * 
-	 * @return {@link Screen Screen} instance.
+	 * @return {@link Screen Screen} instance.<br>
+	 *         <code>null</code> if getting active screen fails.
 	 */
 	public Screen getActiveScreen()
 	{
-		String uiHierarchy = "";
+		String uiHierarchy = null;
 		try
 		{
 			uiHierarchy = wrappedClientDevice.getUiXml(invocationPasskey);
@@ -603,8 +671,14 @@ public class Device
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Getting active screen was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
+		if (uiHierarchy == null)
+		{
+			return null;
+		}
+
 		Screen activeScreen = new Screen(this, uiHierarchy);
 		return activeScreen;
 	}
@@ -614,8 +688,9 @@ public class Device
 	 * 
 	 * @param path
 	 *        - location of the file to be installed.
+	 * @return <code>true</code> if the APK installation is successful, <code>false</code> if it fails.
 	 */
-	public void installAPK(String path)
+	public boolean installAPK(String path)
 	{
 		try
 		{
@@ -628,10 +703,8 @@ public class Device
 				if (!(e instanceof RemoteException))
 				{
 					LOGGER.fatal("File instalation failed: could not create temporary apk file on the remote Agent.", e);
-					throw new ApkInstallationFailedException(	"File instalation failed: could not create temporary apk file on the remote Agent.",
-																e);
+					return false;
 				}
-
 				throw e;
 			}
 
@@ -665,7 +738,7 @@ public class Device
 
 				LOGGER.fatal(message, e);
 				wrappedClientDevice.discardApk(invocationPasskey);
-				throw new ApkInstallationFailedException(message, e);
+				return false;
 			}
 			catch (IOException e)
 			{
@@ -675,7 +748,7 @@ public class Device
 				{
 					LOGGER.fatal(message, e);
 					wrappedClientDevice.discardApk(invocationPasskey);
-					throw new ApkInstallationFailedException(message, e);
+					return false;
 				}
 
 				throw e;
@@ -695,7 +768,7 @@ public class Device
 				{
 					LOGGER.fatal(message, e);
 					wrappedClientDevice.discardApk(invocationPasskey);
-					throw new ApkInstallationFailedException(message, e);
+					return false;
 				}
 
 				throw e;
@@ -706,21 +779,25 @@ public class Device
 
 				LOGGER.fatal(message, e);
 				wrappedClientDevice.discardApk(invocationPasskey);
-				throw new ApkInstallationFailedException(message, e);
+				return false;
 			}
 
 			LOGGER.info("File instalation successfull.");
+			return true;
 		}
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (IOException e)
 		{
 			// Should never get here since IO exceptions are handled above.
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("APK installation was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
 	}
@@ -736,29 +813,36 @@ public class Device
 	 * 
 	 * @param toIp
 	 * @param toNewIp
+	 * @return <code>true</code> if the connection redirection is successful, <code>false</code> if it fails.
 	 */
-	public void redirectConnection(String toIp, String toNewIp)
+	public boolean redirectConnection(String toIp, String toNewIp)
 	{
 		// TODO implement device.redirectConnection
+		return false;
 	}
 
 	/**
 	 * Simulates random finger actions on the screen of this device.
 	 * 
+	 * @return <code>true</code> if the random multi-touch event execution is successful, <code>false</code> if it
+	 *         fails.
 	 */
-	public void randomMultiTouchevent()
+	public boolean randomMultiTouchevent()
 	{
 		// TODO implement device.randomMultiTouchEvent()
+		return false;
 	}
 
 	/**
 	 * Executes user-defined gesture on this device's screen.
 	 * 
 	 * @param gesture
+	 * @return <code>true</code> if the custom gesture execution is successful, <code>false</code> if it fails.
 	 */
-	public void customGesture(TouchGesture gesture)
+	public boolean customGesture(TouchGesture gesture)
 	{
 		// TODO implement device.customGesture(gesture);
+		return false;
 	}
 
 	/**
@@ -766,8 +850,10 @@ public class Device
 	 * 
 	 * @param tapPoint
 	 *        - {@link Point Point} on the screen to tap on.
+	 * 
+	 * @return <code>true</code> if tapping screen is successful, <code>false</code> if it fails.
 	 */
-	public void tapScreenLocation(Point tapPoint)
+	public boolean tapScreenLocation(Point tapPoint)
 	{
 		int tapPointX = tapPoint.getX();
 		int tapPointY = tapPoint.getY();
@@ -779,15 +865,19 @@ public class Device
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Device screen tap failed.", e);
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Tapping screen location was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
+		return true;
 	}
 
 	/**
@@ -798,12 +888,13 @@ public class Device
 	 * @param activityName
 	 *        - activity name to be started. Expects either absolute name or a name starting with dot (.), relative to
 	 *        the packageName.
+	 * @return <code>true</code> if the activity start is successful, <code>false</code> if it fails.
 	 * 
 	 * @throws ActivityStartingException
 	 */
-	public void startActivity(String packageName, String activityName) throws ActivityStartingException
+	public boolean startActivity(String packageName, String activityName) throws ActivityStartingException
 	{
-		startActivity(packageName, activityName, true);
+		return startActivity(packageName, activityName, true);
 	}
 
 	/**
@@ -816,9 +907,10 @@ public class Device
 	 *        the packageName.
 	 * @param unlockDevice
 	 *        - if <code>true</code>, unlocks the device before starting the activity.
+	 * @return <code>true</code> if the activity start is successful, <code>false</code> if it fails.
 	 * @throws ActivityStartingException
 	 */
-	public void startActivity(String packageName, String activityName, boolean unlockDevice)
+	public boolean startActivity(String packageName, String activityName, boolean unlockDevice)
 		throws ActivityStartingException
 	{
 		if (unlockDevice)
@@ -837,13 +929,15 @@ public class Device
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (CommandFailedException e)
 		{
-			throw new ActivityStartingException("The activity starting query was rejected.", e);
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Starting activity location was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
 
@@ -851,6 +945,7 @@ public class Device
 		{
 			throw new ActivityStartingException("The passed package or Activity was not found.");
 		}
+		return true;
 	}
 
 	/**
@@ -859,20 +954,22 @@ public class Device
 	 * @param state
 	 *        - desired lock state of the device; <code>true</code> - lock the device, <code>false</code> - unlock the
 	 *        device.
+	 * @return <code>true</code> if the lock state setting is successful, <code>false</code> if it fails.
 	 */
-	public void setLocked(boolean state)
+	public boolean setLocked(boolean state)
 	{
-		boolean toLock = state && !isLocked();
-		boolean toWakeForUnlock = !state && !isAwake();
-
-		if (toLock || toWakeForUnlock)
+		if (state)
 		{
-			pressButton(HardwareButton.POWER);
+			return isLocked() || pressButton(HardwareButton.POWER);
 		}
-
-		if (!state && isLocked())
+		else
 		{
-			pressButton(HardwareButton.MENU);
+			if (!isLocked())
+			{
+				return true;
+			}
+			boolean isAwake = isAwake() || pressButton(HardwareButton.POWER);
+			return isAwake && pressButton(HardwareButton.MENU);
 		}
 	}
 
@@ -899,6 +996,7 @@ public class Device
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Obtaining awake state was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
 
@@ -934,6 +1032,7 @@ public class Device
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Obtaining lock state was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
 
@@ -946,8 +1045,9 @@ public class Device
 	 * 
 	 * @param keyCode
 	 *        - button key code as specified by the Android KeyEvent KEYCODE_ constants.
+	 * @return <code>true</code> if the hardware button press is successful, <code>false</code> if it fails.
 	 */
-	public void pressButton(int keyCode)
+	public boolean pressButton(int keyCode)
 	{
 		String query = "input keyevent " + Integer.toString(keyCode);
 		try
@@ -957,15 +1057,20 @@ public class Device
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Sending key input failed.", e);
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Button press was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
+
+		return true;
 	}
 
 	/**
@@ -973,11 +1078,12 @@ public class Device
 	 * 
 	 * @param button
 	 *        - {@link HardwareButton HardwareButton} to be pressed.
+	 * @return <code>true</code> if the button press is successful, <code>false</code> if it fails.
 	 */
-	public void pressButton(HardwareButton button)
+	public boolean pressButton(HardwareButton button)
 	{
 		int keycode = button.getKeycode();
-		pressButton(keycode);
+		return pressButton(keycode);
 	}
 
 	/**
@@ -988,12 +1094,14 @@ public class Device
 	 *        - text to be input.
 	 * @param interval
 	 *        - time interval in milliseconds between typing each symbol.
+	 * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
 	 */
-	public void inputText(String text, int interval)
+	public boolean inputText(String text, int interval)
 	{
 		if (text.isEmpty())
 		{
-			return;
+			LOGGER.info("Text input requested, but an empty String is given.");
+			return true;
 		}
 
 		IntentBuilder intentBuilder = new IntentBuilder(IntentAction.ATMOSPHERE_TEXT_INPUT);
@@ -1020,15 +1128,20 @@ public class Device
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Sending text input failed.", e);
+			return false;
 		}
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Text input was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
+
+		return true;
 	}
 
 	/**
@@ -1037,10 +1150,11 @@ public class Device
 	 * 
 	 * @param text
 	 *        - text to be input.
+	 * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
 	 */
-	public void inputText(String text)
+	public boolean inputText(String text)
 	{
-		inputText(text, 0);
+		return inputText(text, 0);
 	}
 
 	/**
@@ -1048,9 +1162,10 @@ public class Device
 	 * 
 	 * @param filePath
 	 *        - path to the recorded macro file.
+	 * @return <code>true</code> if the macro playing is successful, <code>false</code> if it fails.
 	 * @throws MacroPlayingException
 	 */
-	public void playMacro(String filePath) throws MacroPlayingException
+	public boolean playMacro(String filePath) throws MacroPlayingException
 	{
 		try
 		{
@@ -1069,7 +1184,7 @@ public class Device
 			}
 			if (macro.getEventCount() == 0)
 			{
-				return;
+				return true;
 			}
 
 			List<String> events = macro.getParsedEvents();
@@ -1088,19 +1203,24 @@ public class Device
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Playing macro failed.", e);
+			return false;
 		}
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Macro execution was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
 		catch (IOException e)
 		{
 			throw new MacroPlayingException("Macro file deserialization failed.", e);
 		}
+
+		return true;
 	}
 
 	/**
@@ -1109,8 +1229,9 @@ public class Device
 	 * 
 	 * @param state
 	 *        - {@link MobileDataState} to set.
+	 * @return <code>true</code> if the mobile data state setting is successful, <code>false</code> if it fails.
 	 */
-	public void setMobileDataState(MobileDataState state)
+	public boolean setMobileDataState(MobileDataState state)
 	{
 		try
 		{
@@ -1119,21 +1240,27 @@ public class Device
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Setting mobile data state failed.", e);
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Setting mobile data state was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
+
+		return true;
 	}
 
 	/**
 	 * Gets the current network connection type of this device.
 	 * 
-	 * @return {@link ConnectionType}.
+	 * @return {@link ConnectionType},<br>
+	 *         <code>null</code> if getting connection type fails.
 	 */
 	public ConnectionType getConnectionType()
 	{
@@ -1152,6 +1279,7 @@ public class Device
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Getting connection type was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
 		return type;
@@ -1161,7 +1289,8 @@ public class Device
 	 * Gets the current mobile data state of this device.<br>
 	 * Can only be applied on <b>emulators</b>.
 	 * 
-	 * @return {@link MobileDataState}.
+	 * @return {@link MobileDataState},<br>
+	 *         <code>null</code> if getting mobile data state fails.
 	 */
 	public MobileDataState getMobileDataState()
 	{
@@ -1180,6 +1309,7 @@ public class Device
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Getting mobile data state was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
 		return state;
@@ -1190,8 +1320,9 @@ public class Device
 	 * 
 	 * @param state
 	 *        - <code>true</code> enables WiFi; <code>false</code> disables WiFi.
+	 * @return <code>true</code> if the WiFi state setting is successful, <code>false</code> if it fails.
 	 */
-	public void setWiFi(boolean state)
+	public boolean setWiFi(boolean state)
 	{
 		try
 		{
@@ -1200,15 +1331,20 @@ public class Device
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Setting device WiFi state failed.", e);
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Setting WiFi state was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
+
+		return true;
 	}
 
 	/**
@@ -1217,8 +1353,9 @@ public class Device
 	 * 
 	 * @param smsMessage
 	 *        - {@link SmsMessage}, that will be sent to the device.
+	 * @return <code>true</code> if the SMS receiving is successful, <code>false</code> if it fails.
 	 */
-	public void receiveSms(SmsMessage smsMessage)
+	public boolean receiveSms(SmsMessage smsMessage)
 	{
 		try
 		{
@@ -1227,15 +1364,20 @@ public class Device
 		catch (RemoteException e)
 		{
 			handleLostConnection();
+			return false;
 		}
 		catch (CommandFailedException e)
 		{
 			LOGGER.error("Sending SMS to the testing device failed.", e);
+			return false;
 		}
 		catch (InvalidPasskeyException e)
 		{
+			LOGGER.error("Receiving SMS was rejected by the server side.", e);
 			throw new DeviceInvocationRejectedException(e);
 		}
+
+		return true;
 	}
 
 	/**

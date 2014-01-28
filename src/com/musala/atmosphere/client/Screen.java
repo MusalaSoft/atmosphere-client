@@ -175,11 +175,12 @@ public class Screen
 	 * 
 	 * @param text
 	 *        - search text.
+	 * @return <code>true</code> if the tapping of element is successful, <code>false</code> if it fails.
 	 * @throws UiElementFetchingException
 	 */
-	public void tapElementWithText(String text) throws UiElementFetchingException
+	public boolean tapElementWithText(String text) throws UiElementFetchingException
 	{
-		tapElementWithText(text, 0);
+		return tapElementWithText(text, 0);
 	}
 
 	/**
@@ -189,9 +190,10 @@ public class Screen
 	 *        - search text.
 	 * @param match
 	 *        - determines which element to tap if multiple matches exist; zero based index.
+	 * @return <code>true</code> if the tapping of element is successful, <code>false</code> if it fails.
 	 * @throws UiElementFetchingException
 	 */
-	public void tapElementWithText(String text, int match) throws UiElementFetchingException
+	public boolean tapElementWithText(String text, int match) throws UiElementFetchingException
 	{
 		UiElementSelector selector = new UiElementSelector();
 		selector.setText(text);
@@ -203,7 +205,7 @@ public class Screen
 					+ listSize + "elements matching the criteria found.");
 		}
 		UiElement element = elementList.get(match);
-		element.tap(false);
+		return element.tap(false);
 	}
 
 	/**

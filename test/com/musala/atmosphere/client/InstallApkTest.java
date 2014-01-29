@@ -47,9 +47,10 @@ public class InstallApkTest
 
 	public void apkFileNotFoundTest()
 	{
-		device.installAPK(PATH_TO_NOT_EXISTING_APK_FILE);
+		assertFalse(device.installAPK(PATH_TO_NOT_EXISTING_APK_FILE));
 	}
 
+	@Test
 	public void apkFileInitializationErrorTest() throws Exception
 	{
 		doThrow(new IOException()).when(innerClientDeviceMock).initApkInstall(anyLong());
@@ -57,6 +58,7 @@ public class InstallApkTest
 		verify(innerClientDeviceMock, times(1)).initApkInstall(anyLong());
 	}
 
+	@Test
 	public void appendingErrorTest() throws Exception
 	{
 		doThrow(new IOException()).when(innerClientDeviceMock).appendToApk((byte[]) any(), anyLong());
@@ -64,12 +66,14 @@ public class InstallApkTest
 		verify(innerClientDeviceMock, times(1)).appendToApk((byte[]) any(), anyLong());
 	}
 
+	@Test
 	public void installationFailedCommandExecutionTest() throws Exception
 	{
 		doThrow(new CommandFailedException()).when(innerClientDeviceMock).buildAndInstallApk(anyLong());
 		assertFalse(device.installAPK(PATH_TO_APK_FILE));
 	}
 
+	@Test
 	public void installationWritingOnWrappedDeviceErrorTest() throws Exception
 	{
 		doThrow(new CommandFailedException()).when(innerClientDeviceMock).buildAndInstallApk(anyLong());

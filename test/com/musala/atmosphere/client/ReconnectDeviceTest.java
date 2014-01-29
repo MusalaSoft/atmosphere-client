@@ -83,9 +83,10 @@ public class ReconnectDeviceTest
 		testDevice.getPowerState();
 	}
 
+	@Test(expected = DeviceReleasedException.class)
 	public void testThrowsExceptionOnAppendToApk()
 	{
-		assertFalse(testDevice.installAPK(""));
+		testDevice.installAPK("");
 	}
 
 	@Test(expected = DeviceReleasedException.class)

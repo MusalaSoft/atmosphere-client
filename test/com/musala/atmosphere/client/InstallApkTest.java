@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 
-import com.musala.atmosphere.client.exceptions.ApkInstallationFailedException;
 import com.musala.atmosphere.client.util.ServerAnnotationProperties;
 import com.musala.atmosphere.commons.CommandFailedException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
@@ -45,6 +44,7 @@ public class InstallApkTest
 
 	}
 
+	@Test
 	public void apkFileNotFoundTest()
 	{
 		assertFalse(device.installAPK(PATH_TO_NOT_EXISTING_APK_FILE));

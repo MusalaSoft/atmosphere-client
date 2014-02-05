@@ -19,7 +19,9 @@ import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.commons.BatteryState;
 import com.musala.atmosphere.commons.DeviceAcceleration;
 import com.musala.atmosphere.commons.DeviceOrientation;
+import com.musala.atmosphere.commons.PhoneNumber;
 import com.musala.atmosphere.commons.ScreenOrientation;
+import com.musala.atmosphere.commons.SmsMessage;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 
 /**
@@ -59,6 +61,11 @@ public class ReconnectDeviceTest
 		doThrow(new RemoteException()).when(mockedClientDevice).setBatteryLevel(anyInt(), anyLong());
 		doThrow(new RemoteException()).when(mockedClientDevice).setPowerState(anyBoolean(), anyLong());
 		doThrow(new RemoteException()).when(mockedClientDevice).setWiFi(anyBoolean(), anyLong());
+		doThrow(new RemoteException()).when(mockedClientDevice).receiveSms((SmsMessage) any(), anyLong());
+		doThrow(new RemoteException()).when(mockedClientDevice).receiveCall((PhoneNumber) any(), anyLong());
+		doThrow(new RemoteException()).when(mockedClientDevice).acceptCall((PhoneNumber) any(), anyLong());
+		doThrow(new RemoteException()).when(mockedClientDevice).holdCall((PhoneNumber) any(), anyLong());
+		doThrow(new RemoteException()).when(mockedClientDevice).cancelCall((PhoneNumber) any(), anyLong());
 
 		mockedServerConnectionHandler = mock(ServerConnectionHandler.class);
 
@@ -225,5 +232,41 @@ public class ReconnectDeviceTest
 	public void testThrowsExceptionOnUnlock()
 	{
 		testDevice.setLocked(false);
+	}
+
+	@Test(expected = DeviceReleasedException.class)
+	public void testThrowsExceptionOnReceiveSms()
+	{
+		PhoneNumber phoneNumber = new PhoneNumber("123");
+		SmsMessage smsMessage = new SmsMessage(phoneNumber, "");
+		testDevice.receiveSms(smsMessage);
+	}
+
+	@Test(expected = DeviceReleasedException.class)
+	public void testThrowsExceptionOnReceiveCall()
+	{
+		PhoneNumber phoneNumber = new PhoneNumber("123");
+		testDevice.receiveCall(phoneNumber);
+	}
+
+	@Test(expected = DeviceReleasedException.class)
+	public void testThrowsExceptionOnAcceptCall()
+	{
+		PhoneNumber phoneNumber = new PhoneNumber("123");
+		testDevice.acceptCall(phoneNumber);
+	}
+
+	@Test(expected = DeviceReleasedException.class)
+	public void testThrowsExceptionOnHoldCall()
+	{
+		PhoneNumber phoneNumber = new PhoneNumber("123");
+		testDevice.holdCall(phoneNumber);
+	}
+
+	@Test(expected = DeviceReleasedException.class)
+	public void testThrowsExceptionOnCancelCall()
+	{
+		PhoneNumber phoneNumber = new PhoneNumber("123");
+		testDevice.cancelCall(phoneNumber);
 	}
 }

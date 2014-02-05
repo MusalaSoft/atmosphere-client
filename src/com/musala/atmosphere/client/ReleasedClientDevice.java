@@ -12,6 +12,7 @@ import com.musala.atmosphere.commons.DeviceAcceleration;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.DeviceOrientation;
 import com.musala.atmosphere.commons.MobileDataState;
+import com.musala.atmosphere.commons.PhoneNumber;
 import com.musala.atmosphere.commons.SmsMessage;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
@@ -288,6 +289,42 @@ class ReleasedClientDevice implements IClientDevice
 
 	@Override
 	public void receiveSms(SmsMessage smsMessage, long invocationPasskey)
+		throws InvalidPasskeyException,
+			CommandFailedException,
+			RemoteException
+	{
+		throwDeviceReleasedException();
+	}
+
+	@Override
+	public void receiveCall(PhoneNumber phoneNumber, long invocationPasskey)
+		throws InvalidPasskeyException,
+			CommandFailedException,
+			RemoteException
+	{
+		throwDeviceReleasedException();
+	}
+
+	@Override
+	public void acceptCall(PhoneNumber phoneNumber, long invocationPasskey)
+		throws InvalidPasskeyException,
+			CommandFailedException,
+			RemoteException
+	{
+		throwDeviceReleasedException();
+	}
+
+	@Override
+	public void holdCall(PhoneNumber phoneNumber, long invocationPasskey)
+		throws InvalidPasskeyException,
+			CommandFailedException,
+			RemoteException
+	{
+		throwDeviceReleasedException();
+	}
+
+	@Override
+	public void cancelCall(PhoneNumber phoneNumber, long invocationPasskey)
 		throws InvalidPasskeyException,
 			CommandFailedException,
 			RemoteException

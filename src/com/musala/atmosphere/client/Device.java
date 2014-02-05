@@ -33,6 +33,7 @@ import com.musala.atmosphere.commons.DeviceAcceleration;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.DeviceOrientation;
 import com.musala.atmosphere.commons.MobileDataState;
+import com.musala.atmosphere.commons.PhoneNumber;
 import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.SmsMessage;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
@@ -1381,10 +1382,162 @@ public class Device
 	}
 
 	/**
+	 * This device receives a call.<br>
+	 * Can only be applied on <b>emulators</b>.
+	 * 
+	 * @param phoneNumber
+	 *        - {@link PhoneNumber}, that will be sent to the device.
+	 * @return <code>true</code> if the call receiving is successful, <code>false</code> if it fails.
+	 */
+	public boolean receiveCall(PhoneNumber phoneNumber)
+	{
+		try
+		{
+			wrappedClientDevice.receiveCall(phoneNumber, invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			handleLostConnection();
+			return false;
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Sending call to the testing device failed.", e);
+			return false;
+		}
+		catch (InvalidPasskeyException e)
+		{
+			LOGGER.error("Receiving call was rejected by the server side.", e);
+			throw new DeviceInvocationRejectedException(e);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Accepts a call to this device.<br>
+	 * Can only be applied on <b>emulators</b>.
+	 * 
+	 * @param phoneNumber
+	 *        - {@link PhoneNumber}, that calls the device.
+	 * @return <code>true</code> if the accepting call is successful, <code>false</code> if it fails.
+	 */
+	public boolean acceptCall(PhoneNumber phoneNumber)
+	{
+		try
+		{
+			wrappedClientDevice.acceptCall(phoneNumber, invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			handleLostConnection();
+			return false;
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Accepting call to the testing device failed.", e);
+			return false;
+		}
+		catch (InvalidPasskeyException e)
+		{
+			LOGGER.error("Accepting call was rejected by the server side.", e);
+			throw new DeviceInvocationRejectedException(e);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Accepts call to this device.<br>
+	 * 
+	 * @return <code>true</code> if the accepting call is successful, <code>false</code> if it fails.
+	 */
+	public boolean acceptCall()
+	{
+		return pressButton(HardwareButton.ANSWER);
+	}
+
+	/**
+	 * Holds a call to this device.<br>
+	 * Can only be applied on <b>emulators</b>.
+	 * 
+	 * @param phoneNumber
+	 *        - {@link PhoneNumber}, that calls the device.
+	 * @return <code>true</code> if the holding call is successful, <code>false</code> if it fails.
+	 */
+	public boolean holdCall(PhoneNumber phoneNumber)
+	{
+		try
+		{
+			wrappedClientDevice.holdCall(phoneNumber, invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			handleLostConnection();
+			return false;
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Holding call to the testing device failed.", e);
+			return false;
+		}
+		catch (InvalidPasskeyException e)
+		{
+			LOGGER.error("Holding call was rejected by the server side.", e);
+			throw new DeviceInvocationRejectedException(e);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Cancels a call to this device.<br>
+	 * Can only be applied on <b>emulators</b>.
+	 * 
+	 * @param phoneNumber
+	 *        - {@link PhoneNumber}, that calls the device.
+	 * @return <code>true</code> if the canceling call is successful, <code>false</code> if it fails.
+	 */
+	public boolean cancelCall(PhoneNumber phoneNumber)
+	{
+		try
+		{
+			wrappedClientDevice.cancelCall(phoneNumber, invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			handleLostConnection();
+			return false;
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Canceling call to the testing device failed.", e);
+			return false;
+		}
+		catch (InvalidPasskeyException e)
+		{
+			LOGGER.error("Canceling call was rejected by the server side.", e);
+			throw new DeviceInvocationRejectedException(e);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Declines a call to this device.<br>
+	 * 
+	 * @return <code>true</code> if the denying call is successful, <code>false</code> if it fails.
+	 */
+	public boolean declineCall()
+	{
+		return pressButton(HardwareButton.DECLINE);
+	}
+
+	/**
 	 * Attempts to reconnect to the ATMOSPHERE server.
 	 * 
 	 * @throws ServerConnectionFailedException
-	 * @throws DeeviceReleasedExceprion
+	 * @throws DeviceReleasedException
 	 */
 	private void handleLostConnection()
 	{

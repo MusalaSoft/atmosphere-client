@@ -16,6 +16,7 @@ import com.musala.atmosphere.commons.PhoneNumber;
 import com.musala.atmosphere.commons.SmsMessage;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
+import com.musala.atmosphere.commons.gesture.Gesture;
 import com.musala.atmosphere.commons.util.Pair;
 
 /**
@@ -289,6 +290,15 @@ class ReleasedClientDevice implements IClientDevice
 
 	@Override
 	public void receiveSms(SmsMessage smsMessage, long invocationPasskey)
+		throws InvalidPasskeyException,
+			CommandFailedException,
+			RemoteException
+	{
+		throwDeviceReleasedException();
+	}
+
+	@Override
+	public void executeGesture(Gesture gesture, long invocationPasskey)
 		throws InvalidPasskeyException,
 			CommandFailedException,
 			RemoteException

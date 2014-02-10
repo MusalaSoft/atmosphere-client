@@ -3,7 +3,6 @@ package com.musala.atmosphere.client;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,11 +15,9 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.HardwareButton;
-import com.musala.atmosphere.client.device.TouchGesture;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.DeviceInvocationRejectedException;
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
-import com.musala.atmosphere.client.exceptions.MacroPlayingException;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
 import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.client.util.settings.AndroidGlobalSettings;
@@ -38,7 +35,7 @@ import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.SmsMessage;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
-import com.musala.atmosphere.commons.standalone.Macro;
+import com.musala.atmosphere.commons.gesture.Gesture;
 import com.musala.atmosphere.commons.util.IntentBuilder;
 import com.musala.atmosphere.commons.util.IntentBuilder.IntentAction;
 
@@ -835,15 +832,30 @@ public class Device
 	}
 
 	/**
-	 * Executes user-defined gesture on this device's screen.
+	 * Executes user-described gesture on this device.
 	 * 
 	 * @param gesture
-	 * @return <code>true</code> if the custom gesture execution is successful, <code>false</code> if it fails.
+	 *        - the gesture to be executed.
 	 */
-	public boolean customGesture(TouchGesture gesture)
+	public void executeGesture(Gesture gesture)
 	{
-		// TODO implement device.customGesture(gesture);
-		return false;
+		try
+		{
+			wrappedClientDevice.executeGesture(gesture, invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			handleLostConnection();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Gesture execution failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			LOGGER.error("Tapping screen location was rejected by the server side.", e);
+			throw new DeviceInvocationRejectedException(e);
+		}
 	}
 
 	/**
@@ -1156,72 +1168,6 @@ public class Device
 	public boolean inputText(String text)
 	{
 		return inputText(text, 0);
-	}
-
-	/**
-	 * Plays a recorded macro file on this device.
-	 * 
-	 * @param filePath
-	 *        - path to the recorded macro file.
-	 * @return <code>true</code> if the macro playing is successful, <code>false</code> if it fails.
-	 * @throws MacroPlayingException
-	 */
-	public boolean playMacro(String filePath) throws MacroPlayingException
-	{
-		try
-		{
-			FileInputStream macroInputStream = new FileInputStream(filePath);
-			ObjectInputStream deserializationInput = new ObjectInputStream(macroInputStream);
-			Macro macro = (Macro) deserializationInput.readObject();
-
-			String macroDeviceModel = macro.getDeviceIdentifier().trim();
-			String deviceModel = wrappedClientDevice.executeShellCommand("getprop ro.product.model", invocationPasskey);
-			deviceModel = deviceModel.trim();
-
-			if (!deviceModel.equals(macroDeviceModel))
-			{
-				throw new MacroPlayingException("Macro was recorded on a different device model. (macro device model = "
-						+ macroDeviceModel + ", current device model = " + deviceModel + ")");
-			}
-			if (macro.getEventCount() == 0)
-			{
-				return true;
-			}
-
-			List<String> events = macro.getParsedEvents();
-			wrappedClientDevice.executeSequenceOfShellCommands(events, invocationPasskey);
-		}
-		catch (FileNotFoundException e)
-		{
-			throw new MacroPlayingException("Specified macro file could not be found.", e);
-		}
-
-		catch (ClassNotFoundException e)
-		{
-			throw new MacroPlayingException("Macro file deserialization failed. Make sure the specified file is a macro file.",
-											e);
-		}
-		catch (CommandFailedException e)
-		{
-			LOGGER.error("Playing macro failed.", e);
-			return false;
-		}
-		catch (RemoteException e)
-		{
-			handleLostConnection();
-			return false;
-		}
-		catch (InvalidPasskeyException e)
-		{
-			LOGGER.error("Macro execution was rejected by the server side.", e);
-			throw new DeviceInvocationRejectedException(e);
-		}
-		catch (IOException e)
-		{
-			throw new MacroPlayingException("Macro file deserialization failed.", e);
-		}
-
-		return true;
 	}
 
 	/**

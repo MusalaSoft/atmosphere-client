@@ -4,9 +4,9 @@ import java.rmi.RemoteException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.musala.atmosphere.commons.CommandFailedException;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
+import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 
 /**
  * Provides better interface for getting and inserting all kinds of Android device settings.

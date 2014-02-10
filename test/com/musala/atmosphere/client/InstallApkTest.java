@@ -16,8 +16,8 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 
 import com.musala.atmosphere.client.util.ServerAnnotationProperties;
-import com.musala.atmosphere.commons.CommandFailedException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
+import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 
 public class InstallApkTest
 {

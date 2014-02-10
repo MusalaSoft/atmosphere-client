@@ -5,17 +5,17 @@ import java.rmi.RemoteException;
 import java.util.List;
 
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
-import com.musala.atmosphere.commons.BatteryState;
-import com.musala.atmosphere.commons.CommandFailedException;
 import com.musala.atmosphere.commons.ConnectionType;
-import com.musala.atmosphere.commons.DeviceAcceleration;
 import com.musala.atmosphere.commons.DeviceInformation;
-import com.musala.atmosphere.commons.DeviceOrientation;
-import com.musala.atmosphere.commons.MobileDataState;
-import com.musala.atmosphere.commons.PhoneNumber;
 import com.musala.atmosphere.commons.SmsMessage;
+import com.musala.atmosphere.commons.beans.BatteryState;
+import com.musala.atmosphere.commons.beans.DeviceAcceleration;
+import com.musala.atmosphere.commons.beans.DeviceOrientation;
+import com.musala.atmosphere.commons.beans.MobileDataState;
+import com.musala.atmosphere.commons.beans.PhoneNumber;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
+import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.gesture.Gesture;
 import com.musala.atmosphere.commons.util.Pair;
 
@@ -23,9 +23,9 @@ import com.musala.atmosphere.commons.util.Pair;
  * An instance of this class is used when a deivce allocated to a Client is released. The methods in this class throw
  * {@link DeviceReleasedException DeviceReleasedException} whenever some of them are called and thus notify the user
  * that he or she is trying to use a device that has been released (and can not be used anymore).
- * 
+ *
  * @author valyo.yolovski
- * 
+ *
  */
 class ReleasedClientDevice implements IClientDevice
 {

@@ -16,12 +16,12 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
-import com.musala.atmosphere.commons.BatteryState;
-import com.musala.atmosphere.commons.DeviceAcceleration;
-import com.musala.atmosphere.commons.DeviceOrientation;
-import com.musala.atmosphere.commons.PhoneNumber;
 import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.SmsMessage;
+import com.musala.atmosphere.commons.beans.BatteryState;
+import com.musala.atmosphere.commons.beans.DeviceAcceleration;
+import com.musala.atmosphere.commons.beans.DeviceOrientation;
+import com.musala.atmosphere.commons.beans.PhoneNumber;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 
 /**

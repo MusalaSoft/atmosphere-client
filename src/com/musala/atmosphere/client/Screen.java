@@ -21,15 +21,17 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
+import com.musala.atmosphere.client.uiutils.CssAttribute;
+import com.musala.atmosphere.client.uiutils.UiElementSelectionOption;
 import com.musala.atmosphere.client.uiutils.UiElementSelector;
 import com.musala.atmosphere.client.uiutils.UiXmlParser;
 
 /**
  * Class that holds a device screen information.
- * 
+ *
  * @author georgi.gaydarov
  * @author vladimir.vladimirov
- * 
+ *
  */
 
 public class Screen
@@ -45,7 +47,7 @@ public class Screen
 	private org.jsoup.nodes.Document jSoupDocument;
 
 	/**
-	 * 
+	 *
 	 * @param onDevice
 	 * @param uiHierarchyXml
 	 */
@@ -73,7 +75,7 @@ public class Screen
 
 	/**
 	 * Saves the underlying device UI XML into a file.
-	 * 
+	 *
 	 * @param path
 	 *        - file to which the UI XML should be saved.
 	 * @throws FileNotFoundException
@@ -87,7 +89,7 @@ public class Screen
 
 	/**
 	 * Searches for given UI element in the current screen XML structure using CSS.
-	 * 
+	 *
 	 * @param query
 	 *        - CSS selector query.
 	 * @return the requested {@link UiElement UiElement}.
@@ -102,7 +104,7 @@ public class Screen
 
 	/**
 	 * Searches for given UI element in the current screen XML structure using XPath.
-	 * 
+	 *
 	 * @param query
 	 *        XPath query.
 	 * @return the requested {@link UiElement UiElement}.
@@ -119,7 +121,7 @@ public class Screen
 	/**
 	 * Searches for given UI element in the current screen XML structure using a {@link UiElementSelector
 	 * UiElementSelector} instance.
-	 * 
+	 *
 	 * @param selector
 	 *        - object of type {@link UiElementSelector}.
 	 * @return the requested {@link UiElement UiElement}.
@@ -135,7 +137,7 @@ public class Screen
 	/**
 	 * Searches for UI elements in the current screen XML structure using given CSS. Returns a list of all found
 	 * elements having the used CSS.
-	 * 
+	 *
 	 * @param query
 	 *        - CSS selector query.
 	 * @return List containing all found elements of type {@link UiElement UiElement}.
@@ -157,7 +159,7 @@ public class Screen
 	/**
 	 * Searches for UI elements in the current screen XML structure using a given {@link UiElementSelector
 	 * UiElementSelector}. Returns a list of all found elements having the used selector.
-	 * 
+	 *
 	 * @param selector
 	 *        - object of type {@link UiElementSelector}.
 	 * @return List containing all found elements of type {@link UiElement UiElement}.
@@ -172,7 +174,7 @@ public class Screen
 
 	/**
 	 * Tap on first found {@link UiElement UiElement}, displaying exactly the supplied search text.
-	 * 
+	 *
 	 * @param text
 	 *        - search text.
 	 * @return <code>true</code> if the tapping of element is successful, <code>false</code> if it fails.
@@ -185,7 +187,7 @@ public class Screen
 
 	/**
 	 * Tap on {@link UiElement}, displaying exactly the supplied search text.
-	 * 
+	 *
 	 * @param text
 	 *        - search text.
 	 * @param match
@@ -196,7 +198,7 @@ public class Screen
 	public boolean tapElementWithText(String text, int match) throws UiElementFetchingException
 	{
 		UiElementSelector selector = new UiElementSelector();
-		selector.setText(text);
+		selector.addSelectionAttribute(CssAttribute.TEXT, UiElementSelectionOption.EQUALS, text);
 		List<UiElement> elementList = getElements(selector);
 		int listSize = elementList.size();
 		if (listSize <= match)
@@ -210,7 +212,7 @@ public class Screen
 
 	/**
 	 * Check existence of element, displaying exactly the supplied search text.
-	 * 
+	 *
 	 * @param text
 	 *        - search text.
 	 * @return - true if element with supplied search text exists on screen.
@@ -220,7 +222,7 @@ public class Screen
 		try
 		{
 			UiElementSelector selector = new UiElementSelector();
-			selector.setText(text);
+			selector.addSelectionAttribute(CssAttribute.TEXT, UiElementSelectionOption.EQUALS, text);
 			List<UiElement> elementList = getElements(selector);
 			return elementList.size() > 0;
 		}

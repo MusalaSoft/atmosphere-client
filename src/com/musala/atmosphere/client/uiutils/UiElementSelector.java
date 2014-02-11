@@ -1,292 +1,220 @@
 package com.musala.atmosphere.client.uiutils;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import com.musala.atmosphere.client.geometry.Bounds;
-import com.musala.atmosphere.client.geometry.Point;
+import com.musala.atmosphere.client.ui.UiElementBoundsParser;
 import com.musala.atmosphere.commons.util.Pair;
 
 /**
  * Selector class for screen UI elements, used to search for a specific element with given attributes.
- * 
+ *
  * @author georgi.gaydarov
  * @author vladimir.vladimirov
- * 
+ *
  */
 public class UiElementSelector
 {
-	private Bounds bounds;
+	private Map<CssAttribute, Pair<Object, UiElementSelectionOption>> attributeProjectionMap;
 
-	private Boolean selected;
-
-	private Boolean password;
-
-	private Boolean longClickable;
-
-	private Boolean scrollable;
-
-	private Boolean focused;
-
-	private Boolean focusable;
-
-	private Boolean enabled;
-
-	private Boolean clickable;
-
-	private Boolean checked;
-
-	private Boolean checkable;
-
-	private String contentDescription;
-
-	private String packageName;
-
-	private String className;
-
-	private String text;
-
-	private Integer index;
-
-	public Bounds getBounds()
+	public UiElementSelector()
 	{
-		return bounds;
+		this.attributeProjectionMap = new HashMap<CssAttribute, Pair<Object, UiElementSelectionOption>>();
 	}
 
-	public void setBounds(Bounds bounds)
+	/**
+	 * Constructs ui element selector out of node attribute map.
+	 *
+	 * This is auxiliary constructor needed for some parts of the system. PLease prefer to use
+	 * {@link #UiElementSelector()}.
+	 *
+	 * @param nodeAttributeMap
+	 *        a map between the html attribute names and their corresponding values
+	 * @throws IllegalArgumentException
+	 *         In case the node attribute map contains an entry with no matching {@link CssAttribute} or if the matching
+	 *         attribute is of type not handled in {@link #determineAttributeValue(CssAttribute, String)}.
+	 */
+	public UiElementSelector(Map<String, String> nodeAttributeMap) throws IllegalArgumentException
 	{
-		this.bounds = bounds;
+		this();
+		for (Entry<String, String> nodeAttributeEntry : nodeAttributeMap.entrySet())
+		{
+			boolean attributeFound = false;
+			for (CssAttribute cssAttribute : CssAttribute.values())
+			{
+				if (cssAttribute.getHtmlAttributeName().equals(nodeAttributeEntry.getKey()))
+				{
+					Object attributeValue = determineAttributeValue(cssAttribute, nodeAttributeEntry.getValue());
+					if (!shouldSkipAttribute(cssAttribute, attributeValue))
+					{
+						addSelectionAttribute(cssAttribute, UiElementSelectionOption.EQUALS, attributeValue);
+					}
+					attributeFound = true;
+					break;
+				}
+			}
+			if (!attributeFound)
+			{
+				throw new IllegalArgumentException("Unsupported attribute passed in to ui element selector constructor");
+			}
+		}
 	}
 
-	public Boolean isSelected()
+	/**
+	 * Adds new selection argument for this ui element selector
+	 * <p>
+	 * Example usage would be:
+	 * <p>
+	 * <code>
+	 * uiElementSelector.addSelectionAttribute(SupportedCssAttribute.CHECKABLE, UiElementSelectionOption.EQUALS, true);
+	 * </code>
+	 *
+	 * @param attribute
+	 *        The attribute for which to add selection expression. If selection expression already existed for the
+	 *        attribute it will be replaced.
+	 * @param selectionOption
+	 *        The selection option. One of the {@link UiElementSelectionOption}.
+	 * @param value
+	 *        The value to be used in the selection expression. Empty strings will not be added as expressions.
+	 * @throws IllegalArgumentException
+	 *         In case the supplied value does not match the type of the specified attribute.
+	 */
+	public void addSelectionAttribute(CssAttribute attribute, UiElementSelectionOption selectionOption, Object value)
+		throws IllegalArgumentException
 	{
-		return selected;
+		if (!attribute.isObjectOfAppropriateType(value))
+		{
+			throw new IllegalArgumentException("Invalid attribute value for attribute: " + attribute + " expected "
+					+ attribute.getAttributeType() + " but was " + value.getClass());
+		}
+		if (!shouldSkipAttribute(attribute, value))
+		{
+			attributeProjectionMap.put(attribute, new Pair<Object, UiElementSelectionOption>(value, selectionOption));
+		}
 	}
 
-	public void setSelected(Boolean selected)
+	/**
+	 * Use the method to get the value of boolean attribute selection argument
+	 *
+	 * @param attribute
+	 *        The attribute for which to get the selection argument
+	 * @return The boolean value or null if no selection was specified.
+	 * @throws IllegalArgumentException
+	 *         If the attribute selection requested is not for boolean attribute.
+	 */
+	public Boolean getBooleanValue(CssAttribute attribute)
 	{
-		this.selected = selected;
+		return (Boolean) getGenericValue(attribute, Boolean.class);
 	}
 
-	public Boolean isPassword()
+	/**
+	 * Use the method to get the value of string attribute selection argument
+	 *
+	 * @param attribute
+	 *        The attribute for which to get the selection argument
+	 * @return The string value or null if no selection was specified.
+	 * @throws IllegalArgumentException
+	 *         If the attribute selection requested is not for string attribute.
+	 */
+	public String getStringValue(CssAttribute attribute)
 	{
-		return password;
+		return (String) getGenericValue(attribute, String.class);
 	}
 
-	public void setPassword(Boolean password)
+	/**
+	 * Use the method to get the value of integer attribute selection argument
+	 *
+	 * @param attribute
+	 *        The attribute for which to get the selection argument
+	 * @return The integer value or null if no selection was specified.
+	 * @throws IllegalArgumentException
+	 *         If the attribute selection requested is not for integer attribute.
+	 */
+	public Integer getIntegerValue(CssAttribute attribute)
 	{
-		this.password = password;
+		return (Integer) getGenericValue(attribute, Integer.class);
 	}
 
-	public Boolean isLongClickable()
+	/**
+	 * Use the method to get the value of {@link Bounds} attribute selection argument
+	 *
+	 * @param attribute
+	 *        The attribute for which to get the selection argument
+	 * @return The {@link Bounds} value or null if no selection was specified.
+	 * @throws IllegalArgumentException
+	 *         If the attribute selection requested is not for {@link Bounds} attribute.
+	 */
+	public Bounds getBoundsValue(CssAttribute attribute)
 	{
-		return longClickable;
-	}
-
-	public void setLongClickable(Boolean longClickable)
-	{
-		this.longClickable = longClickable;
-	}
-
-	public Boolean isScrollable()
-	{
-		return scrollable;
-	}
-
-	public void setScrollable(Boolean scrollable)
-	{
-		this.scrollable = scrollable;
-	}
-
-	public Boolean isFocused()
-	{
-		return focused;
-	}
-
-	public void setFocused(Boolean focused)
-	{
-		this.focused = focused;
-	}
-
-	public Boolean isFocusable()
-	{
-		return focusable;
-	}
-
-	public void setFocusable(Boolean focusable)
-	{
-		this.focusable = focusable;
-	}
-
-	public Boolean isEnabled()
-	{
-		return enabled;
-	}
-
-	public void setEnabled(Boolean enabled)
-	{
-		this.enabled = enabled;
-	}
-
-	public Boolean isClickable()
-	{
-		return clickable;
-	}
-
-	public void setClickable(Boolean clickable)
-	{
-		this.clickable = clickable;
-	}
-
-	public Boolean isChecked()
-	{
-		return checked;
-	}
-
-	public void setChecked(Boolean checked)
-	{
-		this.checked = checked;
-	}
-
-	public Boolean isCheckable()
-	{
-		return checkable;
-	}
-
-	public void setCheckable(Boolean checkable)
-	{
-		this.checkable = checkable;
-	}
-
-	public String getContentDescription()
-	{
-		return contentDescription;
-	}
-
-	public void setContentDescription(String contentDescription)
-	{
-		this.contentDescription = contentDescription;
-	}
-
-	public String getPackageName()
-	{
-		return packageName;
-	}
-
-	public void setPackageName(String packageName)
-	{
-		this.packageName = packageName;
-	}
-
-	public String getClassName()
-	{
-		return className;
-	}
-
-	public void setClassName(String className)
-	{
-		this.className = className;
-	}
-
-	public String getText()
-	{
-		return text;
-	}
-
-	public void setText(String text)
-	{
-		this.text = text;
-	}
-
-	public Integer getIndex()
-	{
-		return index;
-	}
-
-	public void setIndex(Integer index)
-	{
-		this.index = index;
+		return (Bounds) getGenericValue(attribute, Bounds.class);
 	}
 
 	/**
 	 * Builds a CSS select element query based on the contents of this selector.
-	 * 
+	 *
 	 * @return the built CSS query.
 	 */
 	public String buildCssQuery()
 	{
 		StringBuilder builder = new StringBuilder();
 
-		if (className != null)
+		for (Entry<CssAttribute, Pair<Object, UiElementSelectionOption>> attributeProjectionMapEntry : attributeProjectionMap.entrySet())
 		{
-			builder.append("[class=" + className + "]");
-		}
-		if (contentDescription != null)
-		{
-			builder.append("[content-desc=" + contentDescription + "]");
-		}
-		if (packageName != null)
-		{
-			builder.append("[package=" + packageName + "]");
-		}
-		if (bounds != null)
-		{
-			Point firstBound = bounds.getUpperLeftCorner();
-			Point secondBound = bounds.getLowerRightCorner();
-			String boundsString = String.format("[%d,%d][%d,%d]",
-												firstBound.getX(),
-												secondBound.getX(),
-												firstBound.getY(),
-												secondBound.getY());
-			builder.append("[bounds=" + boundsString + "]");
-		}
-		if (text != null)
-		{
-			builder.append("[text=" + text + "]");
-		}
-		if (index != null)
-		{
-			builder.append("[index=" + index + "]");
-		}
-		if (checkable != null)
-		{
-			builder.append("[checkable=" + checkable + "]");
-		}
-		if (checked != null)
-		{
-			builder.append("[checked=" + checked + "]");
-		}
-		if (clickable != null)
-		{
-			builder.append("[clickable=" + clickable + "]");
-		}
-		if (enabled != null)
-		{
-			builder.append("[enabled=" + enabled + "]");
-		}
-		if (focusable != null)
-		{
-			builder.append("[focusable=" + focusable + "]");
-		}
-		if (focused != null)
-		{
-			builder.append("[focused=" + focused + "]");
-		}
-		if (longClickable != null)
-		{
-			builder.append("[long-clickable=" + longClickable + "]");
-		}
-		if (password != null)
-		{
-			builder.append("[password=" + password + "]");
-		}
-		if (scrollable != null)
-		{
-			builder.append("[scrollable=" + scrollable + "]");
-		}
-		if (selected != null)
-		{
-			builder.append("[selected=" + selected + "]");
+			Object selectionExpression = attributeProjectionMapEntry.getValue().getKey();
+			if (selectionExpression != null)
+			{
+				CssAttribute attribute = attributeProjectionMapEntry.getKey();
+				UiElementSelectionOption selectionOption = attributeProjectionMapEntry.getValue().getValue();
+				builder.append(selectionOption.constructAttributeSelector(attribute, selectionExpression));
+			}
 		}
 
-		String query = builder.toString();
-		return query;
+		return builder.toString();
+	}
+
+	private boolean shouldSkipAttribute(CssAttribute attribute, Object value)
+	{
+		// Apparently empty strings cause crashes
+		return attribute.getAttributeType().equals(String.class) && ((String) value).isEmpty();
+	}
+
+	private Object getGenericValue(CssAttribute attribute, Class<?> clazz)
+	{
+		if (!attributeProjectionMap.containsKey(attribute))
+		{
+			return null;
+		}
+		if (attribute.getAttributeType().equals(clazz))
+		{
+			return attributeProjectionMap.get(attribute).getKey();
+		}
+		else
+		{
+			throw new IllegalArgumentException("Trying to get boolean value of non-boolean attribute " + attribute);
+		}
+	}
+
+	private Object determineAttributeValue(CssAttribute cssAttribute, String value)
+	{
+		if (cssAttribute.getAttributeType().equals(String.class))
+		{
+			return value;
+		}
+		if (cssAttribute.getAttributeType().equals(Integer.class))
+		{
+			return Integer.parseInt(value);
+		}
+		if (cssAttribute.getAttributeType().equals(Boolean.class))
+		{
+			return value.equals("true");
+		}
+		if (cssAttribute.getAttributeType().equals(Bounds.class))
+		{
+			return UiElementBoundsParser.parse(value);
+		}
+		throw new IllegalArgumentException("Constructing ui element selector with attribute of unsupported type "
+				+ cssAttribute.getAttributeType());
 	}
 }

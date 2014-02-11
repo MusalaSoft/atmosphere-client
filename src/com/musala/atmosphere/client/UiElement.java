@@ -7,20 +7,21 @@ import java.util.Map;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.musala.atmosphere.client.exceptions.ActionFailedException;
 import com.musala.atmosphere.client.exceptions.InvalidElementActionException;
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.geometry.Bounds;
 import com.musala.atmosphere.client.geometry.Point;
+import com.musala.atmosphere.client.uiutils.CssAttribute;
+import com.musala.atmosphere.client.uiutils.UiElementSelector;
 import com.musala.atmosphere.client.uiutils.UiXmlParser;
 
 /**
  * Used to access and manipulate certain views on the testing device, for example tapping, double-taping or holding
  * finger on given widget.
- * 
+ *
  * @author georgi.gaydarov
- * 
+ *
  */
 public class UiElement
 {
@@ -35,70 +36,70 @@ public class UiElement
 
 	private org.jsoup.nodes.Node representedNodeJSoup;
 
-	private UiElementAttributes elementAttributes;
+	private UiElementSelector elementSelector;
 
 	private Device onDevice;
 
 	/**
 	 * Constructor for element creation via a XPath query.
-	 * 
+	 *
 	 * @param representingNode
 	 * @param onDevice
 	 */
 	UiElement(Node representingNode, Device onDevice)
 	{
-		underlyingNodeType = ElementNodeType.XPATH_NODE;
-		representedNodeXPath = representingNode;
+		this.underlyingNodeType = ElementNodeType.XPATH_NODE;
+		this.representedNodeXPath = representingNode;
 		Map<String, String> nodeAttributesMap = UiXmlParser.getAttributeMapOfNode(representingNode);
-		elementAttributes = new UiElementAttributes(nodeAttributesMap);
+		this.elementSelector = new UiElementSelector(nodeAttributesMap);
 		this.onDevice = onDevice;
 	}
 
 	/**
 	 * Constructor for element creation via a JSoup query.
-	 * 
+	 *
 	 * @param representingNode
 	 * @param onDevice
 	 */
 	UiElement(org.jsoup.nodes.Node representingNode, Device onDevice)
 	{
-		underlyingNodeType = ElementNodeType.JSOUP_NODE;
-		representedNodeJSoup = representingNode;
+		this.underlyingNodeType = ElementNodeType.JSOUP_NODE;
+		this.representedNodeJSoup = representingNode;
 		Map<String, String> nodeAttributesMap = UiXmlParser.getAttributeMapOfNode(representingNode);
-		elementAttributes = new UiElementAttributes(nodeAttributesMap);
+		this.elementSelector = new UiElementSelector(nodeAttributesMap);
 		this.onDevice = onDevice;
 	}
 
 	/**
 	 * Refreshes and then returns the current UI element's attributes data container.
-	 * 
-	 * @return a {@link UiElementAttributes UiElementAttributes} instance.
+	 *
+	 * @return a {@link UiElementSelector} instance.
 	 */
-	public UiElementAttributes getElementAttributes()
+	public UiElementSelector getElementSelector()
 	{
-		UiElementAttributes result = getElementAttributes(true);
+		UiElementSelector result = getElementSelector(true);
 		return result;
 	}
 
 	/**
 	 * Returns the current UI element's attributes data container.
-	 * 
+	 *
 	 * @param refresh
 	 *        - boolean indicating if the attributes should be refreshed prior to returning.
-	 * @return a {@link UiElementAttributes UiElementAttributes} instance.
+	 * @return a {@link UiElementSelector} instance.
 	 */
-	public UiElementAttributes getElementAttributes(boolean refresh)
+	public UiElementSelector getElementSelector(boolean refresh)
 	{
 		if (refresh)
 		{
 			revalidateThrowing();
 		}
-		return elementAttributes;
+		return elementSelector;
 	}
 
 	/**
 	 * Simulates tapping on a relative point in the current UI element.
-	 * 
+	 *
 	 * @param point
 	 *        - the relative point that will be added to the upper left corner's coordinates.
 	 * @param revalidateElement
@@ -112,7 +113,7 @@ public class UiElement
 			revalidateThrowing();
 		}
 
-		Bounds elementBounds = elementAttributes.getBounds();
+		Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
 		Point tapPoint = elementBounds.getUpperLeftCorner();
 		tapPoint.addVector(point);
 
@@ -128,7 +129,7 @@ public class UiElement
 
 	/**
 	 * Checks if the current UI element is still valid and if so, simulates tapping on a relative point in it.
-	 * 
+	 *
 	 * @param point
 	 *        - the relative point that will be added to the upper left corner's coordinates.
 	 * @return <code>true</code> if the tapping is successful, <code>false</code> if it fails.
@@ -140,14 +141,14 @@ public class UiElement
 
 	/**
 	 * Simulates tapping on the current UI Element.
-	 * 
+	 *
 	 * @param revalidateElement
 	 *        - boolean indicating if the element should be revalidated prior to tapping.
 	 * @return <code>true</code> if the tapping is successful, <code>false</code> if it fails.
 	 */
 	public boolean tap(boolean revalidateElement)
 	{
-		Bounds elementBounds = elementAttributes.getBounds();
+		Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
 		Point centerPoint = elementBounds.getCenter();
 		Point tapPoint = elementBounds.getRelativePoint(centerPoint);
 
@@ -156,7 +157,7 @@ public class UiElement
 
 	/**
 	 * Checks if the current UI element is still valid and if so, simulates tapping on it.
-	 * 
+	 *
 	 * @param revalidateElement
 	 *        - boolean indicating if the element should be revalidated prior to tapping.
 	 * @return <code>true</code> if the tapping is successful, <code>false</code> if it fails.
@@ -168,7 +169,7 @@ public class UiElement
 
 	/**
 	 * Used to get list of children of the given UI Element. Works only for ViewGroups.
-	 * 
+	 *
 	 * @return List with all the UI elements that inherit from this UI element or empty List if such don't exist.
 	 */
 	public List<UiElement> getChildren()
@@ -225,7 +226,7 @@ public class UiElement
 
 	/**
 	 * Simulates holding finger on the screen.
-	 * 
+	 *
 	 * @return <code>true</code> if the holding is successful, <code>false</code> if it fails.
 	 */
 	public boolean hold()
@@ -236,7 +237,7 @@ public class UiElement
 
 	/**
 	 * Simulates double-tapping on the given UI element.
-	 * 
+	 *
 	 * @return <code>true</code> if the double tapping is successful, <code>false</code> if it fails.
 	 */
 	public boolean doubleTap()
@@ -248,7 +249,7 @@ public class UiElement
 	/**
 	 * Simulates dragging the UI widget until his ( which corner exactly? ) upper-left corner stands at position
 	 * (toX,toY) on the screen.
-	 * 
+	 *
 	 * @param toX
 	 * @param toY
 	 * @return <code>true</code> if the dragging is successful, <code>false</code> if it fails.
@@ -262,7 +263,7 @@ public class UiElement
 	/**
 	 * Inputs text into the UI Element, <b> if it supports text input </b> with interval in milliseconds between the
 	 * input of each letter.
-	 * 
+	 *
 	 * @param text
 	 *        - text to be input.
 	 * @param intervalInMs
@@ -280,7 +281,7 @@ public class UiElement
 	/**
 	 * Checks if the current UI element is still valid and if so, inputs text into it <b>if it supports text input</b>
 	 * with interval in milliseconds between the input of each letter.
-	 * 
+	 *
 	 * @param text
 	 *        - text to be input.
 	 * @param intervalInMs
@@ -294,7 +295,7 @@ public class UiElement
 
 	/**
 	 * Inputs text into the UI Element <b>if it supports text input</b>.
-	 * 
+	 *
 	 * @param text
 	 *        - text to be input.
 	 * @param revalidateElement
@@ -308,7 +309,7 @@ public class UiElement
 
 	/**
 	 * Checks if the current UI element is still valid and if so, inputs text into it <b>if it supports text input</b>.
-	 * 
+	 *
 	 * @param text
 	 *        - text to be input.
 	 * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
@@ -320,7 +321,7 @@ public class UiElement
 
 	/**
 	 * Focuses the current element.
-	 * 
+	 *
 	 * @param revalidateElement
 	 *        - boolean indicating if the element should be revalidated prior to focusing.
 	 * @return <code>true</code> if the focusing is successful, <code>false</code> if it fails.
@@ -332,11 +333,11 @@ public class UiElement
 			revalidateThrowing();
 		}
 
-		if (!elementAttributes.isFocusable())
+		if (!elementSelector.getBooleanValue(CssAttribute.FOCUSABLE))
 		{
 			throw new InvalidElementActionException("Attempting to focus a non-focusable element.");
 		}
-		if (elementAttributes.isFocused())
+		if (elementSelector.getBooleanValue(CssAttribute.FOCUSED))
 		{
 			return true;
 		}
@@ -346,7 +347,7 @@ public class UiElement
 
 		if (revalidate())
 		{
-			if (!elementAttributes.isFocused())
+			if (!elementSelector.getBooleanValue(CssAttribute.FOCUSED))
 			{
 				return false;
 			}
@@ -356,7 +357,7 @@ public class UiElement
 
 	/**
 	 * Checks if the current UI element is still valid and if so, focuses it.
-	 * 
+	 *
 	 * @return <code>true</code> if the focusing is successful, <code>false</code> if it fails.
 	 */
 	public boolean focus()
@@ -366,12 +367,12 @@ public class UiElement
 
 	private void revalidateThrowing()
 	{
-		String thisElementQuery = elementAttributes.buildCssQuery();
+		String thisElementQuery = elementSelector.buildCssQuery();
 		Screen newScreen = onDevice.getActiveScreen();
 		try
 		{
 			UiElement thisElementRefetched = newScreen.getElementByCSS(thisElementQuery);
-			elementAttributes = thisElementRefetched.getElementAttributes(false);
+			elementSelector = thisElementRefetched.getElementSelector(false);
 		}
 		catch (UiElementFetchingException e)
 		{
@@ -382,7 +383,7 @@ public class UiElement
 
 	/**
 	 * Checks if the current element is still valid (on the screen) and updates it's attributes container.
-	 * 
+	 *
 	 * @return true if the current element is still valid, false otherwise.
 	 */
 	public boolean revalidate()

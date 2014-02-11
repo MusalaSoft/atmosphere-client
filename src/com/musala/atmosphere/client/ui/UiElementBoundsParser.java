@@ -8,16 +8,16 @@ import com.musala.atmosphere.client.geometry.Point;
 
 /**
  * Houses {@link #parse(String) parse(elementBounds)}.
- * 
+ *
  * @author georgi.gaydarov
- * 
+ *
  */
 public class UiElementBoundsParser
 {
 	/**
 	 * Converts a UI element bounds in the format <b>[startX,startY][endX,endY]</b> (fetched from the UI XML file) to a
 	 * Pair&lt;Point, Point;&gt; format.
-	 * 
+	 *
 	 * @param bounds
 	 *        String to be parsed.
 	 * @return bounds pair.

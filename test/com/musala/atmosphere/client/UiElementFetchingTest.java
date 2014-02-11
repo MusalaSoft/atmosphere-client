@@ -21,6 +21,8 @@ import org.junit.Test;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.geometry.Bounds;
 import com.musala.atmosphere.client.geometry.Point;
+import com.musala.atmosphere.client.uiutils.CssAttribute;
+import com.musala.atmosphere.client.uiutils.UiElementSelectionOption;
 import com.musala.atmosphere.client.uiutils.UiElementSelector;
 
 public class UiElementFetchingTest
@@ -55,10 +57,10 @@ public class UiElementFetchingTest
 		final String desiredElementContentDescription = "derp";
 
 		UiElement element = screen.getElementByCSS("hierarchy > *[class=" + desiredElementClass + "]");
-		UiElementAttributes attributes = element.getElementAttributes(false);
+		UiElementSelector selector = element.getElementSelector(false);
 
 		assertEquals(	"Desired element was not fetched correctly.",
-						attributes.getContentDescription(),
+						selector.getStringValue(CssAttribute.CONTENT_DESCRIPTION),
 						desiredElementContentDescription);
 	}
 
@@ -70,9 +72,11 @@ public class UiElementFetchingTest
 
 		UiElement element = screen.getElementByXPath("//hierarchy/*[@content-desc='" + desiredElementContentDescription
 				+ "']");
-		UiElementAttributes attributes = element.getElementAttributes(false);
+		UiElementSelector selector = element.getElementSelector(false);
 
-		assertEquals("Desired element was not fetched correctly.", attributes.getClassName(), desiredElementClass);
+		assertEquals(	"Desired element was not fetched correctly.",
+						selector.getStringValue(CssAttribute.CLASS_NAME),
+						desiredElementClass);
 	}
 
 	@Test
@@ -82,11 +86,16 @@ public class UiElementFetchingTest
 		final String desiredElementClass = "android.widget.FrameLayout";
 
 		UiElementSelector selector = new UiElementSelector();
-		selector.setContentDescription(desiredElementContentDescription);
+		selector.addSelectionAttribute(	CssAttribute.CONTENT_DESCRIPTION,
+										UiElementSelectionOption.EQUALS,
+										desiredElementContentDescription);
 		UiElement element = screen.getElement(selector);
-		UiElementAttributes attributes = element.getElementAttributes(false);
 
-		assertEquals("Desired element was not fetched correctly.", attributes.getClassName(), desiredElementClass);
+		selector = element.getElementSelector(false);
+
+		assertEquals(	"Desired element was not fetched correctly.",
+						selector.getStringValue(CssAttribute.CLASS_NAME),
+						desiredElementClass);
 	}
 
 	@Test(expected = UiElementFetchingException.class)
@@ -95,8 +104,10 @@ public class UiElementFetchingTest
 		final String desiredElementClass = "android.widget.FrameLayout";
 
 		UiElementSelector selector = new UiElementSelector();
-		selector.setClassName(desiredElementClass);
-		UiElement element = screen.getElement(selector);
+		selector.addSelectionAttribute(	CssAttribute.CLASS_NAME,
+										UiElementSelectionOption.EQUALS,
+										desiredElementClass);
+		screen.getElement(selector);
 	}
 
 	@Test(expected = UiElementFetchingException.class)
@@ -104,14 +115,13 @@ public class UiElementFetchingTest
 	{
 		final String desiredElementContentDescription = "derp";
 
-		UiElement element = screen.getElementByXPath("//hierarchy/nonexistent[@content-desc='"
-				+ desiredElementContentDescription + "']");
+		screen.getElementByXPath("//hierarchy/nonexistent[@content-desc='" + desiredElementContentDescription + "']");
 	}
 
 	@Test(expected = UiElementFetchingException.class)
 	public void multipleFoundByCSSTest() throws UiElementFetchingException
 	{
-		UiElement element = screen.getElementByCSS("node");
+		screen.getElementByCSS("node");
 	}
 
 	@Test
@@ -130,7 +140,9 @@ public class UiElementFetchingTest
 		final String desiredElementClass = "android.widget.FrameLayout";
 
 		UiElementSelector selector = new UiElementSelector();
-		selector.setClassName(desiredElementClass);
+		selector.addSelectionAttribute(	CssAttribute.CLASS_NAME,
+										UiElementSelectionOption.EQUALS,
+										desiredElementClass);
 		List<UiElement> elements = screen.getElements(selector);
 
 		assertEquals("Desired elements were not fetched correctly.", elements.size(), 4);
@@ -139,7 +151,7 @@ public class UiElementFetchingTest
 	@Test(expected = UiElementFetchingException.class)
 	public void getElementsByCSSExceptionTest() throws UiElementFetchingException
 	{
-		UiElement element = screen.getElementByCSS("nonexistent");
+		screen.getElementByCSS("nonexistent");
 	}
 
 	@Test
@@ -148,7 +160,9 @@ public class UiElementFetchingTest
 		final String desiredElementContentDescription = "derp";
 
 		UiElementSelector selector = new UiElementSelector();
-		selector.setContentDescription(desiredElementContentDescription);
+		selector.addSelectionAttribute(	CssAttribute.CONTENT_DESCRIPTION,
+										UiElementSelectionOption.EQUALS,
+										desiredElementContentDescription);
 		UiElement element = screen.getElement(selector);
 
 		element.tap(false);

@@ -3,15 +3,12 @@ package com.musala.atmosphere.client.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import org.junit.After;
 import org.junit.Test;
 
-import com.musala.atmosphere.client.exceptions.MissingServerAnnotationException;
-
 /**
- * 
+ *
  * @author yordan.petrov
- * 
+ *
  */
 public class ClassLocatorTest
 {

@@ -13,8 +13,6 @@ import java.rmi.RemoteException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.SmsMessage;
@@ -25,9 +23,9 @@ import com.musala.atmosphere.commons.beans.PhoneNumber;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 
 /**
- * 
+ *
  * @author yordan.petrov
- * 
+ *
  */
 public class ReconnectDeviceTest
 {

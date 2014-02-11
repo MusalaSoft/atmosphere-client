@@ -708,9 +708,10 @@ public class Device
 
 			// Transfer the installation file from the current machine to the device
 			byte[] buffer = new byte[MAX_BUFFER_SIZE];
+			FileInputStream fileReaderFromApk = null;
 			try
 			{
-				FileInputStream fileReaderFromApk = new FileInputStream(path);
+				fileReaderFromApk = new FileInputStream(path);
 				LOGGER.info("Transferring installation file...");
 				// number of characters until the end of file
 				int numberOfCharactersLeft = fileReaderFromApk.available();
@@ -750,6 +751,20 @@ public class Device
 				}
 
 				throw e;
+			}
+			finally
+			{
+				if (fileReaderFromApk != null)
+				{
+					try
+					{
+						fileReaderFromApk.close();
+					}
+					catch (IOException e)
+					{
+						// Nothing can be done here anymore
+					}
+				}
 			}
 
 			// Install

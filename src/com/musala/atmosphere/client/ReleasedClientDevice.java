@@ -8,6 +8,7 @@ import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.commons.ConnectionType;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.SmsMessage;
+import com.musala.atmosphere.commons.TelephonyInformation;
 import com.musala.atmosphere.commons.beans.BatteryState;
 import com.musala.atmosphere.commons.beans.DeviceAcceleration;
 import com.musala.atmosphere.commons.beans.DeviceOrientation;
@@ -23,9 +24,9 @@ import com.musala.atmosphere.commons.util.Pair;
  * An instance of this class is used when a deivce allocated to a Client is released. The methods in this class throw
  * {@link DeviceReleasedException DeviceReleasedException} whenever some of them are called and thus notify the user
  * that he or she is trying to use a device that has been released (and can not be used anymore).
- *
+ * 
  * @author valyo.yolovski
- *
+ * 
  */
 class ReleasedClientDevice implements IClientDevice
 {
@@ -340,5 +341,15 @@ class ReleasedClientDevice implements IClientDevice
 			RemoteException
 	{
 		throwDeviceReleasedException();
+	}
+
+	@Override
+	public TelephonyInformation getTelephonyInformation(long invocationPasskey)
+		throws InvalidPasskeyException,
+			CommandFailedException,
+			RemoteException
+	{
+		throwDeviceReleasedException();
+		return null;
 	}
 }

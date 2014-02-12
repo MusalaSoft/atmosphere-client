@@ -23,9 +23,9 @@ import com.musala.atmosphere.commons.beans.PhoneNumber;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 
 /**
- *
+ * 
  * @author yordan.petrov
- *
+ * 
  */
 public class ReconnectDeviceTest
 {
@@ -64,6 +64,7 @@ public class ReconnectDeviceTest
 		doThrow(new RemoteException()).when(mockedClientDevice).acceptCall((PhoneNumber) any(), anyLong());
 		doThrow(new RemoteException()).when(mockedClientDevice).holdCall((PhoneNumber) any(), anyLong());
 		doThrow(new RemoteException()).when(mockedClientDevice).cancelCall((PhoneNumber) any(), anyLong());
+		doThrow(new RemoteException()).when(mockedClientDevice).getTelephonyInformation(anyLong());
 
 		mockedServerConnectionHandler = mock(ServerConnectionHandler.class);
 
@@ -266,5 +267,11 @@ public class ReconnectDeviceTest
 	{
 		PhoneNumber phoneNumber = new PhoneNumber("123");
 		testDevice.cancelCall(phoneNumber);
+	}
+
+	@Test(expected = DeviceReleasedException.class)
+	public void testThrowsExceptionOnGetTelephonyInformation()
+	{
+		testDevice.getTelephonyInformation();
 	}
 }

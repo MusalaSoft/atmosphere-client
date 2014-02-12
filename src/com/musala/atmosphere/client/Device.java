@@ -27,6 +27,7 @@ import com.musala.atmosphere.commons.ConnectionType;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.SmsMessage;
+import com.musala.atmosphere.commons.TelephonyInformation;
 import com.musala.atmosphere.commons.beans.BatteryState;
 import com.musala.atmosphere.commons.beans.DeviceAcceleration;
 import com.musala.atmosphere.commons.beans.DeviceOrientation;
@@ -41,9 +42,9 @@ import com.musala.atmosphere.commons.util.IntentBuilder.IntentAction;
 
 /**
  * Android device representing class.
- *
+ * 
  * @author vladimir.vladimirov
- *
+ * 
  */
 public class Device
 {
@@ -71,7 +72,7 @@ public class Device
 
 	/**
 	 * Constructor that creates a usable Device object by a given IClientDevice, it's invocation passkey.
-	 *
+	 * 
 	 * @param iClientDevice
 	 * @param devicePasskey
 	 * @param serverConnectionHandler
@@ -91,7 +92,7 @@ public class Device
 
 	/**
 	 * Gets the device information about this device.
-	 *
+	 * 
 	 * @return {@link DeviceInformation DeviceInformation} structure with information for the testing device,<br>
 	 *         <code>null</code> if getting device information fails.
 	 */
@@ -116,7 +117,7 @@ public class Device
 
 	/**
 	 * Gets current orientation in space of this device.
-	 *
+	 * 
 	 * @return {@link DeviceOrientation DeviceOrientation} of the testing device,<br>
 	 *         <code>null</code> if getting device orientation fails.
 	 */
@@ -147,7 +148,7 @@ public class Device
 	/**
 	 * Sets new orientation in space of this device.<br>
 	 * Can only be applied on <b>emulators</b>.
-	 *
+	 * 
 	 * @param deviceOrientation
 	 *        - new {@link DeviceOrientation DeviceOrientation} to be set.
 	 * @return <code>true</code> if the orientation setting is successful, <code>false</code> if it fails.
@@ -182,7 +183,7 @@ public class Device
 	/**
 	 * Changes the screen auto rotation of this device.<br>
 	 * Controls whether the accelerometer will be used to change screen orientation.
-	 *
+	 * 
 	 * @param autoRotation
 	 *        - <code>false</code> - disables screen auto rotation; <code>true</code> - enables screen auto rotation.
 	 * @return <code>true</code> if the auto rotation setting is successful, <code>false</code> if it fails.
@@ -221,7 +222,7 @@ public class Device
 	/**
 	 * Sets new screen orientation for this device.<br>
 	 * Implicitly turns off screen auto rotation.
-	 *
+	 * 
 	 * @param screenOrientation
 	 *        - new {@link ScreenOrientation ScreenOrientation} to be set.
 	 * @return <code>true</code> if the screen orientation setting is successful, <code>false</code> if it fails.
@@ -259,7 +260,7 @@ public class Device
 	/**
 	 * Sets new acceleration for this device.<br>
 	 * Can only be applied on <b>emulators</b>.
-	 *
+	 * 
 	 * @param deviceAcceleration
 	 *        - new {@link DeviceAcceleration DeviceAcceleration} to be set.
 	 * @return <code>true</code> if the acceleration setting is successful, <code>false</code> if it fails.
@@ -290,7 +291,7 @@ public class Device
 
 	/**
 	 * Gets current acceleration of this device.
-	 *
+	 * 
 	 * @return {@link DeviceAcceleration DeviceAcceleration} of the device,<br>
 	 *         <code>null</code> if getting acceleration fails.
 	 */
@@ -320,7 +321,7 @@ public class Device
 
 	/**
 	 * Gets the current battery charge level of this device.
-	 *
+	 * 
 	 * @return Battery level of the device in percents,<br>
 	 *         <code>null</code> if getting battery level fails.
 	 */
@@ -351,7 +352,7 @@ public class Device
 	 * Sets the battery charge level of this device.<br>
 	 * <i>On real device, sets the battery level only for limited time, until Android BatteryManager updates the battery
 	 * information.</i>
-	 *
+	 * 
 	 * @param batteryLevel
 	 *        - new battery level in percent to be set.
 	 * @return <code>true</code> if the battery level setting is successful, <code>false</code> if it fails.
@@ -383,7 +384,7 @@ public class Device
 
 	/**
 	 * Gets the current battery state of this device.
-	 *
+	 * 
 	 * @return Battery state of the device,<br>
 	 *         <code>null</code> if getting battery state fails.
 	 */
@@ -414,7 +415,7 @@ public class Device
 	 * Sets the battery state of this device.<br>
 	 * <i>On real device, sets the battery state only for limited time, until Android BatteryManager updates the battery
 	 * information.</i>
-	 *
+	 * 
 	 * @param batteryState
 	 *        - new {@link BatteryState} to be set.
 	 * @return <code>true</code> if the battery state setting is successful, <code>false</code> if it fails.
@@ -445,7 +446,7 @@ public class Device
 
 	/**
 	 * Gets the current connection state of this device to external power source.
-	 *
+	 * 
 	 * @return <code>true</code> if the device is connected to a power source.<br>
 	 *         <code>false</code> if device is not connected to a power source,<br>
 	 *         <code>null</code> if getting power state fails.
@@ -477,7 +478,7 @@ public class Device
 	 * Sets the connection state of this device to external power source.<br>
 	 * <i>On real device, sets the power state only for limited time, until Android BatteryManager updates the power
 	 * connection state information.</i>
-	 *
+	 * 
 	 * @param state
 	 *        - <code>true</code> for connected to AC power adapter, <code>false</code> for disconnected power state.
 	 * @return <code>true</code> if the power state setting is successful, <code>false</code> if it fails.
@@ -535,7 +536,7 @@ public class Device
 	 * Sets the airplane mode state for this device.<br>
 	 * <i><b>Warning:</b> enabling airplane mode on emulator disconnects it from ATMOSPHERE Agent and this emulator can
 	 * be connected back only after Agent restart.</i>
-	 *
+	 * 
 	 * @param airplaneMode
 	 *        - <code>true</code> to enter device in airplane mode, <code>false</code> to exit device from airplane
 	 *        mode.
@@ -594,7 +595,7 @@ public class Device
 
 	/**
 	 * Gets screenshot of this device's active screen.
-	 *
+	 * 
 	 * @return byte buffer, containing captured device screen,<br>
 	 *         <code>null</code> if getting screenshot fails.<br>
 	 *         It can be subsequently dumped to a file and directly opened as a PNG image.
@@ -624,7 +625,7 @@ public class Device
 
 	/**
 	 * Gets screenshot of this device's active screen and saves it as an image file at a specified location.
-	 *
+	 * 
 	 * @param pathToImageFile
 	 *        - location at which the screenshot image file should be saved.
 	 * @return <code>true</code> if the getting screenshot is successful, <code>false</code> if it fails.
@@ -648,7 +649,7 @@ public class Device
 
 	/**
 	 * Gets the currently active {@link Screen Screen} of this device.
-	 *
+	 * 
 	 * @return {@link Screen Screen} instance.<br>
 	 *         <code>null</code> if getting active screen fails.
 	 */
@@ -683,7 +684,7 @@ public class Device
 
 	/**
 	 * Installs a specified Android application file on this device.<br>
-	 *
+	 * 
 	 * @param path
 	 *        - location of the file to be installed.
 	 * @return <code>true</code> if the APK installation is successful, <code>false</code> if it fails.
@@ -817,13 +818,13 @@ public class Device
 
 	/*
 	 * public State dumpCurrentState() { return IClientDevice.dumpCurrentState(); }
-	 *
+	 * 
 	 * public void restoreState(State state) { IClientDevice.restoreState(state); }
 	 */
 
 	/**
 	 * Redirects specific IP address to another IP address.
-	 *
+	 * 
 	 * @param toIp
 	 * @param toNewIp
 	 * @return <code>true</code> if the connection redirection is successful, <code>false</code> if it fails.
@@ -836,7 +837,7 @@ public class Device
 
 	/**
 	 * Simulates random finger actions on the screen of this device.
-	 *
+	 * 
 	 * @return <code>true</code> if the random multi-touch event execution is successful, <code>false</code> if it
 	 *         fails.
 	 */
@@ -848,7 +849,7 @@ public class Device
 
 	/**
 	 * Executes user-described gesture on this device.
-	 *
+	 * 
 	 * @param gesture
 	 *        - the gesture to be executed.
 	 */
@@ -875,10 +876,10 @@ public class Device
 
 	/**
 	 * Executes a simple tap on the screen of this device at a specified location point.
-	 *
+	 * 
 	 * @param tapPoint
 	 *        - {@link Point Point} on the screen to tap on.
-	 *
+	 * 
 	 * @return <code>true</code> if tapping screen is successful, <code>false</code> if it fails.
 	 */
 	public boolean tapScreenLocation(Point tapPoint)
@@ -910,14 +911,14 @@ public class Device
 
 	/**
 	 * Starts an Activity from a package on this device.
-	 *
+	 * 
 	 * @param packageName
 	 *        - package name from which an activity should be started.
 	 * @param activityName
 	 *        - activity name to be started. Expects either absolute name or a name starting with dot (.), relative to
 	 *        the packageName.
 	 * @return <code>true</code> if the activity start is successful, <code>false</code> if it fails.
-	 *
+	 * 
 	 * @throws ActivityStartingException
 	 */
 	public boolean startActivity(String packageName, String activityName) throws ActivityStartingException
@@ -927,7 +928,7 @@ public class Device
 
 	/**
 	 * Starts an Activity from a package on this device.
-	 *
+	 * 
 	 * @param packageName
 	 *        - package name from which an activity should be started.
 	 * @param activityName
@@ -978,7 +979,7 @@ public class Device
 
 	/**
 	 * Changes the lock state of this device.
-	 *
+	 * 
 	 * @param state
 	 *        - desired lock state of the device; <code>true</code> - lock the device, <code>false</code> - unlock the
 	 *        device.
@@ -1003,7 +1004,7 @@ public class Device
 
 	/**
 	 * Checks if this device is in a WAKE state.<br>
-	 *
+	 * 
 	 * @return <code>true</code> if the device is awake.<br>
 	 *         <code>false</code> otherwise.
 	 */
@@ -1039,7 +1040,7 @@ public class Device
 
 	/**
 	 * Checks if this device is locked.
-	 *
+	 * 
 	 * @return <code>true</code> if the device is locked.<br>
 	 *         <code>false</code> otherwise.
 	 */
@@ -1070,7 +1071,7 @@ public class Device
 
 	/**
 	 * Presses hardware button on this device.
-	 *
+	 * 
 	 * @param keyCode
 	 *        - button key code as specified by the Android KeyEvent KEYCODE_ constants.
 	 * @return <code>true</code> if the hardware button press is successful, <code>false</code> if it fails.
@@ -1103,7 +1104,7 @@ public class Device
 
 	/**
 	 * Presses hardware button on this device.
-	 *
+	 * 
 	 * @param button
 	 *        - {@link HardwareButton HardwareButton} to be pressed.
 	 * @return <code>true</code> if the button press is successful, <code>false</code> if it fails.
@@ -1117,7 +1118,7 @@ public class Device
 	/**
 	 * Inputs text on this device through the AtmosphereIME.<br>
 	 * Element on device's screen, that accepts text input should be preselected.
-	 *
+	 * 
 	 * @param text
 	 *        - text to be input.
 	 * @param interval
@@ -1175,7 +1176,7 @@ public class Device
 	/**
 	 * Inputs text on this device through the AtmosphereIME.<br>
 	 * Element on device's screen, that accepts text input should be preselected.
-	 *
+	 * 
 	 * @param text
 	 *        - text to be input.
 	 * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
@@ -1188,7 +1189,7 @@ public class Device
 	/**
 	 * Sets the mobile data state of this device.<br>
 	 * Can only be applied on <b>emulators</b>.
-	 *
+	 * 
 	 * @param state
 	 *        - {@link MobileDataState} to set.
 	 * @return <code>true</code> if the mobile data state setting is successful, <code>false</code> if it fails.
@@ -1220,7 +1221,7 @@ public class Device
 
 	/**
 	 * Gets the current network connection type of this device.
-	 *
+	 * 
 	 * @return {@link ConnectionType},<br>
 	 *         <code>null</code> if getting connection type fails.
 	 */
@@ -1250,7 +1251,7 @@ public class Device
 	/**
 	 * Gets the current mobile data state of this device.<br>
 	 * Can only be applied on <b>emulators</b>.
-	 *
+	 * 
 	 * @return {@link MobileDataState},<br>
 	 *         <code>null</code> if getting mobile data state fails.
 	 */
@@ -1279,7 +1280,7 @@ public class Device
 
 	/**
 	 * Sets the WiFi state of this device.
-	 *
+	 * 
 	 * @param state
 	 *        - <code>true</code> enables WiFi; <code>false</code> disables WiFi.
 	 * @return <code>true</code> if the WiFi state setting is successful, <code>false</code> if it fails.
@@ -1312,7 +1313,7 @@ public class Device
 	/**
 	 * Sends SMS to this device.<br>
 	 * Can only be applied on <b>emulators</b>.
-	 *
+	 * 
 	 * @param smsMessage
 	 *        - {@link SmsMessage}, that will be sent to the device.
 	 * @return <code>true</code> if the SMS receiving is successful, <code>false</code> if it fails.
@@ -1345,7 +1346,7 @@ public class Device
 	/**
 	 * This device receives a call.<br>
 	 * Can only be applied on <b>emulators</b>.
-	 *
+	 * 
 	 * @param phoneNumber
 	 *        - {@link PhoneNumber}, that will be sent to the device.
 	 * @return <code>true</code> if the call receiving is successful, <code>false</code> if it fails.
@@ -1378,7 +1379,7 @@ public class Device
 	/**
 	 * Accepts a call to this device.<br>
 	 * Can only be applied on <b>emulators</b>.
-	 *
+	 * 
 	 * @param phoneNumber
 	 *        - {@link PhoneNumber}, that calls the device.
 	 * @return <code>true</code> if the accepting call is successful, <code>false</code> if it fails.
@@ -1410,7 +1411,7 @@ public class Device
 
 	/**
 	 * Accepts call to this device.<br>
-	 *
+	 * 
 	 * @return <code>true</code> if the accepting call is successful, <code>false</code> if it fails.
 	 */
 	public boolean acceptCall()
@@ -1421,7 +1422,7 @@ public class Device
 	/**
 	 * Holds a call to this device.<br>
 	 * Can only be applied on <b>emulators</b>.
-	 *
+	 * 
 	 * @param phoneNumber
 	 *        - {@link PhoneNumber}, that calls the device.
 	 * @return <code>true</code> if the holding call is successful, <code>false</code> if it fails.
@@ -1454,7 +1455,7 @@ public class Device
 	/**
 	 * Cancels a call to this device.<br>
 	 * Can only be applied on <b>emulators</b>.
-	 *
+	 * 
 	 * @param phoneNumber
 	 *        - {@link PhoneNumber}, that calls the device.
 	 * @return <code>true</code> if the canceling call is successful, <code>false</code> if it fails.
@@ -1486,7 +1487,7 @@ public class Device
 
 	/**
 	 * Declines a call to this device.<br>
-	 *
+	 * 
 	 * @return <code>true</code> if the denying call is successful, <code>false</code> if it fails.
 	 */
 	public boolean declineCall()
@@ -1495,8 +1496,38 @@ public class Device
 	}
 
 	/**
+	 * Obtains information about the telephony services on the device.
+	 * 
+	 * @return {@link TelephonyInformation} instance.
+	 */
+	public TelephonyInformation getTelephonyInformation()
+	{
+		TelephonyInformation telephonyInformation = null;
+
+		try
+		{
+			telephonyInformation = wrappedClientDevice.getTelephonyInformation(invocationPasskey);
+		}
+		catch (RemoteException e)
+		{
+			handleLostConnection();
+		}
+		catch (CommandFailedException e)
+		{
+			LOGGER.error("Getting telephony information from testing device failed.", e);
+		}
+		catch (InvalidPasskeyException e)
+		{
+			LOGGER.error("Getting telephony information was rejected by the server side.", e);
+			throw new DeviceInvocationRejectedException(e);
+		}
+
+		return telephonyInformation;
+	}
+
+	/**
 	 * Attempts to reconnect to the ATMOSPHERE server.
-	 *
+	 * 
 	 * @throws ServerConnectionFailedException
 	 * @throws DeviceReleasedException
 	 */

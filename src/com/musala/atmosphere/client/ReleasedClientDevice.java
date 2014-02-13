@@ -68,7 +68,7 @@ class ReleasedClientDevice implements IClientDevice
 	}
 
 	@Override
-	public void appendToApk(byte[] bytes, long invocationPasskey)
+	public void appendToApk(byte[] bytes, long invocationPasskey, int length)
 		throws RemoteException,
 			IOException,
 			InvalidPasskeyException

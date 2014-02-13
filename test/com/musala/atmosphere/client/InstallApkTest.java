@@ -1,6 +1,8 @@
 package com.musala.atmosphere.client;
 
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -13,7 +15,6 @@ import java.rmi.RemoteException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.assertFalse;
 
 import com.musala.atmosphere.client.util.ServerAnnotationProperties;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
@@ -62,7 +63,7 @@ public class InstallApkTest
 	@Test
 	public void appendingErrorTest() throws Exception
 	{
-		doThrow(new RemoteException()).when(innerClientDeviceMock).appendToApk((byte[]) any(), anyLong());
+		doThrow(new RemoteException()).when(innerClientDeviceMock).appendToApk((byte[]) any(), anyLong(), anyInt());
 		// FIXME: This should be revised!
 		// assertFalse(device.installAPK(PATH_TO_APK_FILE));
 		// verify(innerClientDeviceMock, times(1)).appendToApk((byte[]) any(), anyLong());

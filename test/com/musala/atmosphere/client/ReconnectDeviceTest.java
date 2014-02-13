@@ -23,9 +23,9 @@ import com.musala.atmosphere.commons.beans.PhoneNumber;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 
 /**
- * 
+ *
  * @author yordan.petrov
- * 
+ *
  */
 public class ReconnectDeviceTest
 {

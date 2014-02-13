@@ -7,9 +7,9 @@ import java.util.List;
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.commons.ConnectionType;
 import com.musala.atmosphere.commons.DeviceInformation;
+import com.musala.atmosphere.commons.PowerProperties;
 import com.musala.atmosphere.commons.SmsMessage;
 import com.musala.atmosphere.commons.TelephonyInformation;
-import com.musala.atmosphere.commons.beans.BatteryState;
 import com.musala.atmosphere.commons.beans.DeviceAcceleration;
 import com.musala.atmosphere.commons.beans.DeviceOrientation;
 import com.musala.atmosphere.commons.beans.MobileDataState;
@@ -149,7 +149,7 @@ class ReleasedClientDevice implements IClientDevice
 	}
 
 	@Override
-	public void setBatteryLevel(int level, long invocationPasskey)
+	public void setPowerProperties(PowerProperties properties, long invocationPasskey)
 		throws RemoteException,
 			CommandFailedException,
 			InvalidPasskeyException
@@ -159,51 +159,13 @@ class ReleasedClientDevice implements IClientDevice
 	}
 
 	@Override
-	public int getBatteryLevel(long invocationPasskey)
-		throws RemoteException,
-			CommandFailedException,
-			InvalidPasskeyException
-	{
-		throwDeviceReleasedException();
-		return 0;
-	}
-
-	@Override
-	public void setBatteryState(BatteryState state, long invocationPasskey)
-		throws RemoteException,
-			CommandFailedException,
-			InvalidPasskeyException
-	{
-		throwDeviceReleasedException();
-	}
-
-	@Override
-	public BatteryState getBatteryState(long invocationPasskey)
+	public PowerProperties getPowerProperties(long invocationPasskey)
 		throws RemoteException,
 			CommandFailedException,
 			InvalidPasskeyException
 	{
 		throwDeviceReleasedException();
 		return null;
-	}
-
-	@Override
-	public boolean getPowerState(long invocationPasskey)
-		throws RemoteException,
-			CommandFailedException,
-			InvalidPasskeyException
-	{
-		throwDeviceReleasedException();
-		return false;
-	}
-
-	@Override
-	public void setPowerState(boolean state, long invocationPasskey)
-		throws CommandFailedException,
-			RemoteException,
-			InvalidPasskeyException
-	{
-		throwDeviceReleasedException();
 	}
 
 	@Override

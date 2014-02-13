@@ -2,7 +2,6 @@ package com.musala.atmosphere.client;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -14,9 +13,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
+import com.musala.atmosphere.commons.PowerProperties;
 import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.SmsMessage;
-import com.musala.atmosphere.commons.beans.BatteryState;
 import com.musala.atmosphere.commons.beans.DeviceAcceleration;
 import com.musala.atmosphere.commons.beans.DeviceOrientation;
 import com.musala.atmosphere.commons.beans.PhoneNumber;
@@ -39,9 +38,7 @@ public class ReconnectDeviceTest
 	public static void setUp() throws Exception
 	{
 		mockedClientDevice = mock(IClientDevice.class);
-		doThrow(new RemoteException()).when(mockedClientDevice).getBatteryLevel(anyLong());
-		doThrow(new RemoteException()).when(mockedClientDevice).getBatteryState(anyLong());
-		doThrow(new RemoteException()).when(mockedClientDevice).getPowerState(anyLong());
+		doThrow(new RemoteException()).when(mockedClientDevice).getPowerProperties(anyLong());
 		doThrow(new RemoteException()).when(mockedClientDevice).initApkInstall(anyLong());
 		doThrow(new RemoteException()).when(mockedClientDevice).executeShellCommand(anyString(), anyLong());
 		doThrow(new RemoteException()).when(mockedClientDevice).getUiXml(anyLong());
@@ -55,16 +52,14 @@ public class ReconnectDeviceTest
 																				anyLong());
 		doThrow(new RemoteException()).when(mockedClientDevice).setDeviceOrientation(	any(DeviceOrientation.class),
 																						anyLong());
-		doThrow(new RemoteException()).when(mockedClientDevice).setBatteryState(any(BatteryState.class), anyLong());
-		doThrow(new RemoteException()).when(mockedClientDevice).setBatteryLevel(anyInt(), anyLong());
-		doThrow(new RemoteException()).when(mockedClientDevice).setPowerState(anyBoolean(), anyLong());
+		doThrow(new RemoteException()).when(mockedClientDevice).setPowerProperties(	any(PowerProperties.class),
+																					anyLong());
 		doThrow(new RemoteException()).when(mockedClientDevice).setWiFi(anyBoolean(), anyLong());
 		doThrow(new RemoteException()).when(mockedClientDevice).receiveSms((SmsMessage) any(), anyLong());
 		doThrow(new RemoteException()).when(mockedClientDevice).receiveCall((PhoneNumber) any(), anyLong());
 		doThrow(new RemoteException()).when(mockedClientDevice).acceptCall((PhoneNumber) any(), anyLong());
 		doThrow(new RemoteException()).when(mockedClientDevice).holdCall((PhoneNumber) any(), anyLong());
 		doThrow(new RemoteException()).when(mockedClientDevice).cancelCall((PhoneNumber) any(), anyLong());
-		doThrow(new RemoteException()).when(mockedClientDevice).getTelephonyInformation(anyLong());
 
 		mockedServerConnectionHandler = mock(ServerConnectionHandler.class);
 
@@ -74,19 +69,7 @@ public class ReconnectDeviceTest
 	@Test(expected = DeviceReleasedException.class)
 	public void testThrowsExceptionOnGetBatteryLevel()
 	{
-		testDevice.getBatteryLevel();
-	}
-
-	@Test(expected = DeviceReleasedException.class)
-	public void testThrowsExceptionOnGetBatteryState()
-	{
-		testDevice.getBatteryState();
-	}
-
-	@Test(expected = DeviceReleasedException.class)
-	public void testThrowsExceptionOnGetPowerState()
-	{
-		testDevice.getPowerState();
+		testDevice.getPowerProperties();
 	}
 
 	@Test(expected = DeviceReleasedException.class)
@@ -200,19 +183,7 @@ public class ReconnectDeviceTest
 	@Test(expected = DeviceReleasedException.class)
 	public void testThrowsExceptionOnSetBatteryState()
 	{
-		testDevice.setBatteryState(BatteryState.CHARGING);
-	}
-
-	@Test(expected = DeviceReleasedException.class)
-	public void testThrowsExceptionOnSetBatteryLevel()
-	{
-		testDevice.setBatteryLevel(11);
-	}
-
-	@Test(expected = DeviceReleasedException.class)
-	public void testThrowsExceptionOnSetPowerState()
-	{
-		testDevice.setPowerState(true);
+		testDevice.setPowerProperties(new PowerProperties());
 	}
 
 	@Test(expected = DeviceReleasedException.class)
@@ -267,11 +238,5 @@ public class ReconnectDeviceTest
 	{
 		PhoneNumber phoneNumber = new PhoneNumber("123");
 		testDevice.cancelCall(phoneNumber);
-	}
-
-	@Test(expected = DeviceReleasedException.class)
-	public void testThrowsExceptionOnGetTelephonyInformation()
-	{
-		testDevice.getTelephonyInformation();
 	}
 }

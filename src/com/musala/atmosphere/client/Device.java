@@ -22,6 +22,7 @@ import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.client.util.settings.AndroidGlobalSettings;
 import com.musala.atmosphere.client.util.settings.AndroidSystemSettings;
 import com.musala.atmosphere.client.util.settings.DeviceSettingsManager;
+import com.musala.atmosphere.client.util.settings.SettingsParsingException;
 import com.musala.atmosphere.commons.ConnectionType;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.PowerProperties;
@@ -380,6 +381,36 @@ public class Device {
         }
 
         return true;
+    }
+
+    /**
+     * Gets the airplane mode state of this device.<br>
+     * 
+     * @return <code>true</code> if the airplane mode is on, <code>false</code> if it's off or getting airplane mode
+     *         fails.
+     */
+    public boolean getAirplaneMode() {
+        DeviceInformation deviceInformation = getInformation();
+        int apiLevel = deviceInformation.getApiLevel();
+        int airplaneMode = 0;
+
+        try {
+            if (apiLevel >= 17) {
+                airplaneMode = deviceSettings.getInt(AndroidGlobalSettings.AIRPLANE_MODE_ON);
+            } else {
+                airplaneMode = deviceSettings.getInt(AndroidSystemSettings.AIRPLANE_MODE_ON);
+            }
+        } catch (RemoteException e) {
+            handleLostConnection();
+            return false;
+        } catch (CommandFailedException | SettingsParsingException e) {
+            LOGGER.error("Getting device airplane mode failed.", e);
+            return false;
+        } catch (InvalidPasskeyException e) {
+            LOGGER.error("Getting airplane mode was rejected by the server side.", e);
+            throw new DeviceInvocationRejectedException(e);
+        }
+        return airplaneMode == 1;
     }
 
     /**

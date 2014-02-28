@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.musala.atmosphere.client.util.ServerAnnotationProperties;
 import com.musala.atmosphere.commons.RoutingAction;
@@ -57,6 +58,7 @@ public class InstallApkTest {
 
     @Test
     public void appendingErrorTest() throws Exception {
+        Mockito.doReturn(null).when(innerClientDeviceMock).route(anyLong(), eq(RoutingAction.APK_INIT_INSTALL));
         doThrow(new CommandFailedException()).when(innerClientDeviceMock).route(anyLong(),
                                                                                 eq(RoutingAction.APK_APPEND_DATA),
                                                                                 any(),

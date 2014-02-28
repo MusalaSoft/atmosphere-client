@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -15,17 +14,16 @@ import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
-import com.musala.atmosphere.client.exceptions.DeviceInvocationRejectedException;
-import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
-import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
 import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.client.util.settings.AndroidGlobalSettings;
 import com.musala.atmosphere.client.util.settings.AndroidSystemSettings;
 import com.musala.atmosphere.client.util.settings.DeviceSettingsManager;
+import com.musala.atmosphere.client.util.settings.IAndroidSettings;
 import com.musala.atmosphere.client.util.settings.SettingsParsingException;
 import com.musala.atmosphere.commons.ConnectionType;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.PowerProperties;
+import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.SmsMessage;
 import com.musala.atmosphere.commons.TelephonyInformation;
@@ -33,7 +31,6 @@ import com.musala.atmosphere.commons.beans.DeviceAcceleration;
 import com.musala.atmosphere.commons.beans.DeviceOrientation;
 import com.musala.atmosphere.commons.beans.MobileDataState;
 import com.musala.atmosphere.commons.beans.PhoneNumber;
-import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.gesture.Gesture;
@@ -61,13 +58,11 @@ public class Device {
 
     private static final String LOCKED_CHECK_STRING = "mLockScreenShown true";
 
-    private IClientDevice wrappedClientDevice;
-
-    private final long invocationPasskey;
-
     private DeviceSettingsManager deviceSettings;
 
     private ServerConnectionHandler serverConnectionHandler;
+
+    private DeviceCommunicator communicator;
 
     /**
      * Constructor that creates a usable Device object by a given IClientDevice, it's invocation passkey.
@@ -76,15 +71,18 @@ public class Device {
      * @param devicePasskey
      * @param serverConnectionHandler
      */
-    Device(IClientDevice iClientDevice, long devicePasskey, ServerConnectionHandler serverConnectionHandler) {
-        wrappedClientDevice = iClientDevice;
-        invocationPasskey = devicePasskey;
+    Device(IClientDevice clientDevice, long devicePasskey, ServerConnectionHandler serverConnectionHandler) {
         this.serverConnectionHandler = serverConnectionHandler;
-        deviceSettings = new DeviceSettingsManager(wrappedClientDevice, invocationPasskey);
+        communicator = new DeviceCommunicator(clientDevice, devicePasskey);
+        deviceSettings = new DeviceSettingsManager(communicator);
     }
 
     void release() {
-        wrappedClientDevice = new ReleasedClientDevice();
+        communicator.release();
+    }
+
+    DeviceCommunicator getCommunicator() {
+        return communicator;
     }
 
     /**
@@ -94,15 +92,7 @@ public class Device {
      *         <code>null</code> if getting device information fails.
      */
     public DeviceInformation getInformation() {
-        DeviceInformation wrappedDeviceInformation = null;
-        try {
-            wrappedDeviceInformation = wrappedClientDevice.getDeviceInformation(invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Getting device information was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
+        DeviceInformation wrappedDeviceInformation = (DeviceInformation) communicator.sendAction(RoutingAction.GET_DEVICE_INFORMATION);
         return wrappedDeviceInformation;
     }
 
@@ -113,18 +103,7 @@ public class Device {
      *         <code>null</code> if getting device orientation fails.
      */
     public DeviceOrientation getDeviceOrientation() {
-        DeviceOrientation deviceOrientation = null;
-        try {
-            deviceOrientation = wrappedClientDevice.getDeviceOrientation(invocationPasskey);
-
-        } catch (RemoteException e) {
-            handleLostConnection();
-        } catch (CommandFailedException e) {
-            LOGGER.error("Getting device orientation failed.", e);
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Getting device orientation was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
+        DeviceOrientation deviceOrientation = (DeviceOrientation) communicator.sendAction(RoutingAction.GET_DEVICE_ORIENTATION);
         return deviceOrientation;
     }
 
@@ -139,19 +118,8 @@ public class Device {
      */
     @Deprecated
     public boolean setDeviceOrientation(DeviceOrientation deviceOrientation) {
-        try {
-            wrappedClientDevice.setDeviceOrientation(deviceOrientation, invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (CommandFailedException e) {
-            LOGGER.error("Setting device orientation failed.", e);
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Setting device orientation was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
-
+        communicator.sendAction(RoutingAction.SET_ORIENTATION, deviceOrientation);
+        // TODO validation maybe?
         return true;
     }
 
@@ -164,23 +132,10 @@ public class Device {
      * @return <code>true</code> if the auto rotation setting is successful, <code>false</code> if it fails.
      */
     public boolean setAutoRotation(boolean autoRotation) {
-        try {
-            if (autoRotation) {
-                deviceSettings.putInt(AndroidSystemSettings.ACCELEROMETER_ROTATION, 1);
-            } else {
-                deviceSettings.putInt(AndroidSystemSettings.ACCELEROMETER_ROTATION, 0);
-            }
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Setting auto rotation was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        } catch (CommandFailedException e) {
-            LOGGER.error("Setting device auto rotation failed.", e);
-            return false;
-        }
-        return true;
+        int autoRotationInt = autoRotation ? 1 : 0;
+        boolean success = deviceSettings.putInt(AndroidSystemSettings.ACCELEROMETER_ROTATION, autoRotationInt);
+
+        return success;
     }
 
     /**
@@ -192,24 +147,15 @@ public class Device {
      * @return <code>true</code> if the screen orientation setting is successful, <code>false</code> if it fails.
      */
     public boolean setScreenOrientation(ScreenOrientation screenOrientation) {
-        try {
-            if (!setAutoRotation(false)) {
-                LOGGER.error("Screen orientation was not set due to setting auto rotation failure.");
-                return false;
-            }
-            deviceSettings.putInt(AndroidSystemSettings.USER_ROTATION, screenOrientation.getOrientationNumber());
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Setting screen orientation was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        } catch (CommandFailedException e) {
-            LOGGER.error("Setting screen orientation failed.", e);
+
+        if (!setAutoRotation(false)) {
+            LOGGER.error("Screen orientation was not set due to setting auto rotation failure.");
             return false;
         }
+        boolean success = deviceSettings.putInt(AndroidSystemSettings.USER_ROTATION,
+                                                screenOrientation.getOrientationNumber());
 
-        return true;
+        return success;
     }
 
     /**
@@ -221,19 +167,8 @@ public class Device {
      * @return <code>true</code> if the acceleration setting is successful, <code>false</code> if it fails.
      */
     public boolean setAcceleration(DeviceAcceleration deviceAcceleration) {
-        try {
-            wrappedClientDevice.setAcceleration(deviceAcceleration, invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (CommandFailedException e) {
-            LOGGER.error("Setting device acceleration failed.", e);
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Setting acceleration was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
-        return true;
+        Object result = communicator.sendAction(RoutingAction.SET_ACCELERATION, deviceAcceleration);
+        return result == DeviceCommunicator.VOID_SUCCESS;
     }
 
     /**
@@ -243,18 +178,7 @@ public class Device {
      *         <code>null</code> if getting acceleration fails.
      */
     public DeviceAcceleration getDeviceAcceleration() {
-        DeviceAcceleration deviceAcceleration = null;
-        try {
-            deviceAcceleration = wrappedClientDevice.getDeviceAcceleration(invocationPasskey);
-
-        } catch (RemoteException e) {
-            handleLostConnection();
-        } catch (CommandFailedException e) {
-            LOGGER.error("Getting device acceleration failed.", e);
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Getting acceleration was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
+        DeviceAcceleration deviceAcceleration = (DeviceAcceleration) communicator.sendAction(RoutingAction.GET_DEVICE_ACCELERATION);
         return deviceAcceleration;
     }
 
@@ -265,17 +189,7 @@ public class Device {
      * @return a filled {@link PowerProperties} instance (or <code>null</code> if fetching the environment fails).
      */
     public PowerProperties getPowerProperties() {
-        PowerProperties result = null;
-        try {
-            result = wrappedClientDevice.getPowerProperties(invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-        } catch (CommandFailedException e) {
-            LOGGER.error("Getting device power-related environment properties failed.", e);
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Getting device power-related environment properties was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
+        PowerProperties result = (PowerProperties) communicator.sendAction(RoutingAction.GET_POWER_PROPERTIES);
         return result;
     }
 
@@ -289,44 +203,9 @@ public class Device {
      * @return <code>true</code> if the environment manipulation is successful, <code>false</code> otherwise.
      */
     public boolean setPowerProperties(PowerProperties properties) {
-        try {
-            wrappedClientDevice.setPowerProperties(properties, invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-        } catch (CommandFailedException e) {
-            LOGGER.error("Setting device power-related environment properties failed.", e);
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Setting device power-related environment properties was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
-
-        return true;
+        Object result = communicator.sendAction(RoutingAction.SET_POWER_PROPERTIES, properties);
+        return result == DeviceCommunicator.VOID_SUCCESS;
     }
-
-    // /**
-    // * Gets network speeds of testing device
-    // *
-    // * @return - triple of ints meaning < uploadSpeed, downloadSpeed, latency >
-    // * @throws RemoteException
-    // */
-    // Triple<Integer> getNetworkSpeed() throws RemoteException
-    // {
-    // // TODO implement device.getNetworkSpeed
-    // return null;
-    // }
-
-    // /**
-    // * Sets network speed
-    // *
-    // * @param upload
-    // * @param download
-    // * @param latency
-    // */
-    // public void setNetworkSpeed(int upload, int download, int latency)
-    // {
-    // // TODO implement device.setNetworkSpeed
-    // }
 
     /**
      * Sets the airplane mode state for this device.<br>
@@ -342,7 +221,6 @@ public class Device {
         DeviceInformation deviceInformation = getInformation();
         int apiLevel = deviceInformation.getApiLevel();
         boolean isEmulator = deviceInformation.isEmulator();
-
         if (isEmulator) {
             LOGGER.error("Enabling airplane mode on emulator disconnects it from ATMOSPHERE Agent and this emulator can be connected back only after Agent restart. Setting airplane mode for emulators is prohibited.");
             return false;
@@ -356,28 +234,21 @@ public class Device {
 
         final String INTENT_COMMAND_RESPONSE = "Broadcast completed: result=0";
 
-        try {
-            if (apiLevel >= 17) {
-                deviceSettings.putInt(AndroidGlobalSettings.AIRPLANE_MODE_ON, airplaneModeIntValue);
-            } else {
-                deviceSettings.putInt(AndroidSystemSettings.AIRPLANE_MODE_ON, airplaneModeIntValue);
-            }
+        IAndroidSettings airplaneSetting = apiLevel >= 17 ? AndroidGlobalSettings.AIRPLANE_MODE_ON
+                : AndroidSystemSettings.AIRPLANE_MODE_ON;
 
-            String intentCommandResponse = wrappedClientDevice.executeShellCommand(intentCommand, invocationPasskey);
-            Pattern intentCommandResponsePattern = Pattern.compile(INTENT_COMMAND_RESPONSE);
-            Matcher intentCommandResponseMatcher = intentCommandResponsePattern.matcher(intentCommandResponse);
-            if (!intentCommandResponseMatcher.find()) {
-                throw new CommandFailedException("Broadcasting notification intent failed.");
-            }
-        } catch (RemoteException e) {
-            handleLostConnection();
+        boolean success = deviceSettings.putInt(airplaneSetting, airplaneModeIntValue);
+        if (!success) {
             return false;
-        } catch (CommandFailedException e) {
-            LOGGER.error("Setting device airplane mode failed.", e);
+        }
+
+        String intentCommandResponse = (String) communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND,
+                                                                        intentCommand);
+        Pattern intentCommandResponsePattern = Pattern.compile(INTENT_COMMAND_RESPONSE);
+        Matcher intentCommandResponseMatcher = intentCommandResponsePattern.matcher(intentCommandResponse);
+        if (!intentCommandResponseMatcher.find()) {
+            LOGGER.error("Broadcasting notification intent failed.");
             return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Setting airplane mode was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
         }
 
         return true;
@@ -386,31 +257,22 @@ public class Device {
     /**
      * Gets the airplane mode state of this device.<br>
      * 
-     * @return <code>true</code> if the airplane mode is on, <code>false</code> if it's off or getting airplane mode
-     *         fails.
+     * @return <code>true</code> if the airplane mode is on, <code>false</code> if it's off and <code>null</code> if
+     *         getting airplane mode fails.
      */
-    public boolean getAirplaneMode() {
+    public Boolean getAirplaneMode() {
         DeviceInformation deviceInformation = getInformation();
         int apiLevel = deviceInformation.getApiLevel();
-        int airplaneMode = 0;
+
+        IAndroidSettings airplaneSetting = apiLevel >= 17 ? AndroidGlobalSettings.AIRPLANE_MODE_ON
+                : AndroidSystemSettings.AIRPLANE_MODE_ON;
 
         try {
-            if (apiLevel >= 17) {
-                airplaneMode = deviceSettings.getInt(AndroidGlobalSettings.AIRPLANE_MODE_ON);
-            } else {
-                airplaneMode = deviceSettings.getInt(AndroidSystemSettings.AIRPLANE_MODE_ON);
-            }
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (CommandFailedException | SettingsParsingException e) {
-            LOGGER.error("Getting device airplane mode failed.", e);
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Getting airplane mode was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
+            int airplaneMode = deviceSettings.getInt(AndroidSystemSettings.AIRPLANE_MODE_ON);
+            return airplaneMode == 1;
+        } catch (SettingsParsingException e) {
+            return null;
         }
-        return airplaneMode == 1;
     }
 
     /**
@@ -421,17 +283,7 @@ public class Device {
      *         It can be subsequently dumped to a file and directly opened as a PNG image.
      */
     public byte[] getScreenshot() {
-        byte[] screenshot = null;
-        try {
-            screenshot = wrappedClientDevice.getScreenshot(invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-        } catch (CommandFailedException e) {
-            LOGGER.error("Fetching device screenshot failed.", e);
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Getting screenshot was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
+        byte[] screenshot = (byte[]) communicator.sendAction(RoutingAction.GET_SCREENSHOT);
         return screenshot;
     }
 
@@ -462,17 +314,8 @@ public class Device {
      *         <code>null</code> if getting active screen fails.
      */
     public Screen getActiveScreen() {
-        String uiHierarchy = null;
-        try {
-            uiHierarchy = wrappedClientDevice.getUiXml(invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-        } catch (CommandFailedException e) {
-            LOGGER.error("Getting device active screen failed.", e);
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Getting active screen was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
+        String uiHierarchy = (String) communicator.sendAction(RoutingAction.GET_UI_XML_DUMP);
+
         if (uiHierarchy == null) {
             return null;
         }
@@ -489,15 +332,7 @@ public class Device {
      * @return <code>true</code> if the APK installation is successful, <code>false</code> if it fails.
      */
     public boolean installAPK(String path) {
-        try {
-            return doApkInstallation(path);
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("APK installation was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
+        return doApkInstallation(path);
     }
 
     /**
@@ -506,18 +341,17 @@ public class Device {
      * @param path
      *        - location of the file to be installed.
      * @return <code>true</code> if the APK installation is successful, <code>false</code> if it fails.
-     * @throws InvalidPasskeyException
-     *         in case of {@link #wrappedClientDevice} using invalid pass key.
-     * @throws RemoteException
-     *         In case of problem with communication to the device.
      */
-    private boolean doApkInstallation(String path) throws InvalidPasskeyException, RemoteException {
+    private boolean doApkInstallation(String path) {
         // A string that will be used to tell which step of installation was reached
         String currentInstallationStepDescription = null;
         FileInputStream fileReaderFromApk = null;
         try {
             currentInstallationStepDescription = "Create file for storing the apk";
-            wrappedClientDevice.initApkInstall(invocationPasskey);
+            Object response = communicator.sendAction(RoutingAction.APK_INIT_INSTALL);
+            if (response != DeviceCommunicator.VOID_SUCCESS) {
+                throw communicator.getLastException();
+            }
 
             currentInstallationStepDescription = "Locating the file to store the apk in";
             // Transfer the installation file from the current machine to the device
@@ -528,21 +362,25 @@ public class Device {
             LOGGER.info(currentInstallationStepDescription);
             int readBytes;
             while ((readBytes = fileReaderFromApk.read(buffer)) >= 0) {
-                wrappedClientDevice.appendToApk(buffer, invocationPasskey, readBytes);
+                response = communicator.sendAction(RoutingAction.APK_APPEND_DATA, buffer, readBytes);
+                if (response != DeviceCommunicator.VOID_SUCCESS) {
+                    throw communicator.getLastException();
+                }
             }
 
             currentInstallationStepDescription = "Installing transferred file";
             LOGGER.info(currentInstallationStepDescription);
-            wrappedClientDevice.buildAndInstallApk(invocationPasskey);
+            response = communicator.sendAction(RoutingAction.APK_BUILD_AND_INSTALL);
+            if (response != DeviceCommunicator.VOID_SUCCESS) {
+                throw communicator.getLastException();
+            }
+
             LOGGER.info("File installation successfull.");
-        } catch (RemoteException e) {
-            // This exception will be handled on higher level.
-            throw e;
         } catch (IOException | CommandFailedException e) {
-            String message = String.format("Exception occurred while '%s'", currentInstallationStepDescription);
+            String message = String.format("Exception occurred while '%s'.", currentInstallationStepDescription);
             LOGGER.fatal(message, e);
             // This method should work even if the apk file was not created at all.
-            wrappedClientDevice.discardApk(invocationPasskey);
+            communicator.sendAction(RoutingAction.APK_DISCARD);
             return false;
         } finally {
             if (fileReaderFromApk != null) {
@@ -556,12 +394,6 @@ public class Device {
         }
         return true;
     }
-
-    /*
-     * public State dumpCurrentState() { return IClientDevice.dumpCurrentState(); }
-     * 
-     * public void restoreState(State state) { IClientDevice.restoreState(state); }
-     */
 
     /**
      * Redirects specific IP address to another IP address.
@@ -593,16 +425,7 @@ public class Device {
      *        - the gesture to be executed.
      */
     public void executeGesture(Gesture gesture) {
-        try {
-            wrappedClientDevice.executeGesture(gesture, invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-        } catch (CommandFailedException e) {
-            LOGGER.error("Gesture execution failed.", e);
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Tapping screen location was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
+        communicator.sendAction(RoutingAction.PLAY_GESTURE, gesture);
     }
 
     /**
@@ -617,19 +440,9 @@ public class Device {
         int tapPointX = tapPoint.getX();
         int tapPointY = tapPoint.getY();
         String query = "input tap " + tapPointX + " " + tapPointY;
-        try {
-            wrappedClientDevice.executeShellCommand(query, invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (CommandFailedException e) {
-            LOGGER.error("Device screen tap failed.", e);
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Tapping screen location was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
-        return true;
+
+        communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, query);
+        return communicator.getLastException() == null;
     }
 
     /**
@@ -670,20 +483,10 @@ public class Device {
         IntentBuilder intentBuilder = new IntentBuilder(IntentAction.START_COMPONENT);
         intentBuilder.putComponent(packageName + "/" + activityName);
         String query = intentBuilder.buildIntentCommand();
-        String response = null;
-        try {
-            response = wrappedClientDevice.executeShellCommand(query, invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (CommandFailedException e) {
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Starting activity location was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
+        String response = (String) communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, query);
 
-        if (response.contains("Error: Activity class")) {
+        if (response == null || response.contains("Error: Activity class")) {
+            // FIXME TBD should this method return false or should it throw an exception?
             throw new ActivityStartingException("The passed package or Activity was not found.");
         }
         return true;
@@ -713,25 +516,18 @@ public class Device {
      * Checks if this device is in a WAKE state.<br>
      * 
      * @return <code>true</code> if the device is awake.<br>
-     *         <code>false</code> otherwise.
+     *         <code>false</code> if the device is asleep.<br>
+     *         <code>null</code> if the check failed.
      */
-    public boolean isAwake() {
-        String dump = "";
-        try {
-            dump = wrappedClientDevice.executeShellCommand(AWAKE_STATUS_DUMP_COMMAND, invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-        } catch (CommandFailedException e) {
-            LOGGER.error("Fetching device wake state failed.", e);
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Obtaining awake state was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
+    public Boolean isAwake() {
+        String dump = (String) communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, AWAKE_STATUS_DUMP_COMMAND);
+        if (communicator.getLastException() != null) {
+            return null;
         }
 
         Pattern awakeAPI16Pattern = Pattern.compile(AWAKE_CHECK_EXPRESSION_API_16);
         Matcher awakeAPI16Matcher = awakeAPI16Pattern.matcher(dump);
         boolean awakeAPI16 = awakeAPI16Matcher.find();
-
         boolean awakeAPI17 = dump.contains(AWAKE_CHECK_STRING_API_17);
 
         return awakeAPI16 || awakeAPI17;
@@ -741,21 +537,14 @@ public class Device {
      * Checks if this device is locked.
      * 
      * @return <code>true</code> if the device is locked.<br>
-     *         <code>false</code> otherwise.
+     *         <code>false</code> if the device is unlocked. <br>
+     *         <code>null</code> if the check fails.
      */
-    public boolean isLocked() {
-        String dump = "";
-        try {
-            dump = wrappedClientDevice.executeShellCommand(LOCKED_STATUS_DUMP_COMMAND, invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-        } catch (CommandFailedException e) {
-            LOGGER.error("Fetching device lock state failed.", e);
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Obtaining lock state was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
+    public Boolean isLocked() {
+        String dump = (String) communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, LOCKED_STATUS_DUMP_COMMAND);
+        if (communicator.getLastException() != null) {
+            return null;
         }
-
         boolean locked = dump.contains(LOCKED_CHECK_STRING);
         return locked;
     }
@@ -769,20 +558,9 @@ public class Device {
      */
     public boolean pressButton(int keyCode) {
         String query = "input keyevent " + Integer.toString(keyCode);
-        try {
-            wrappedClientDevice.executeShellCommand(query, invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (CommandFailedException e) {
-            LOGGER.error("Sending key input failed.", e);
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Button press was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
+        communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, query);
 
-        return true;
+        return communicator.getLastException() == null;
     }
 
     /**
@@ -828,20 +606,9 @@ public class Device {
         }
 
         String builtCommand = intentBuilder.buildIntentCommand();
-        try {
-            wrappedClientDevice.executeShellCommand(builtCommand, invocationPasskey);
-        } catch (CommandFailedException e) {
-            LOGGER.error("Sending text input failed.", e);
-            return false;
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Text input was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
+        communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, builtCommand);
 
-        return true;
+        return communicator.getLastException() == null;
     }
 
     /**
@@ -865,20 +632,9 @@ public class Device {
      * @return <code>true</code> if the mobile data state setting is successful, <code>false</code> if it fails.
      */
     public boolean setMobileDataState(MobileDataState state) {
-        try {
-            wrappedClientDevice.setMobileDataState(state, invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (CommandFailedException e) {
-            LOGGER.error("Setting mobile data state failed.", e);
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Setting mobile data state was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
+        Object result = communicator.sendAction(RoutingAction.SET_MOBILE_DATA_STATE, state);
 
-        return true;
+        return result == DeviceCommunicator.VOID_SUCCESS;
     }
 
     /**
@@ -888,17 +644,7 @@ public class Device {
      *         <code>null</code> if getting connection type fails.
      */
     public ConnectionType getConnectionType() {
-        ConnectionType type = null;
-        try {
-            type = wrappedClientDevice.getConnectionType(invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-        } catch (CommandFailedException e) {
-            LOGGER.error("Fetching device connection type failed.", e);
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Getting connection type was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
+        ConnectionType type = (ConnectionType) communicator.sendAction(RoutingAction.GET_CONNECTION_TYPE);
         return type;
     }
 
@@ -910,17 +656,7 @@ public class Device {
      *         <code>null</code> if getting mobile data state fails.
      */
     public MobileDataState getMobileDataState() {
-        MobileDataState state = null;
-        try {
-            state = wrappedClientDevice.getMobileDataState(invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-        } catch (CommandFailedException e) {
-            LOGGER.error("Fetching device connection type failed.", e);
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Getting mobile data state was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
+        MobileDataState state = (MobileDataState) communicator.sendAction(RoutingAction.GET_MOBILE_DATA_STATE);
         return state;
     }
 
@@ -932,20 +668,8 @@ public class Device {
      * @return <code>true</code> if the WiFi state setting is successful, <code>false</code> if it fails.
      */
     public boolean setWiFi(boolean state) {
-        try {
-            wrappedClientDevice.setWiFi(state, invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (CommandFailedException e) {
-            LOGGER.error("Setting device WiFi state failed.", e);
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Setting WiFi state was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
-
-        return true;
+        Object result = communicator.sendAction(RoutingAction.SET_WIFI_STATE, state);
+        return result == DeviceCommunicator.VOID_SUCCESS;
     }
 
     /**
@@ -957,20 +681,8 @@ public class Device {
      * @return <code>true</code> if the SMS receiving is successful, <code>false</code> if it fails.
      */
     public boolean receiveSms(SmsMessage smsMessage) {
-        try {
-            wrappedClientDevice.receiveSms(smsMessage, invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (CommandFailedException e) {
-            LOGGER.error("Sending SMS to the testing device failed.", e);
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Receiving SMS was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
-
-        return true;
+        Object result = communicator.sendAction(RoutingAction.SMS_RECEIVE, smsMessage);
+        return result == DeviceCommunicator.VOID_SUCCESS;
     }
 
     /**
@@ -982,20 +694,8 @@ public class Device {
      * @return <code>true</code> if the call receiving is successful, <code>false</code> if it fails.
      */
     public boolean receiveCall(PhoneNumber phoneNumber) {
-        try {
-            wrappedClientDevice.receiveCall(phoneNumber, invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (CommandFailedException e) {
-            LOGGER.error("Sending call to the testing device failed.", e);
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Receiving call was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
-
-        return true;
+        Object result = communicator.sendAction(RoutingAction.CALL_RECEIVE, phoneNumber);
+        return result == DeviceCommunicator.VOID_SUCCESS;
     }
 
     /**
@@ -1007,20 +707,8 @@ public class Device {
      * @return <code>true</code> if the accepting call is successful, <code>false</code> if it fails.
      */
     public boolean acceptCall(PhoneNumber phoneNumber) {
-        try {
-            wrappedClientDevice.acceptCall(phoneNumber, invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (CommandFailedException e) {
-            LOGGER.error("Accepting call to the testing device failed.", e);
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Accepting call was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
-
-        return true;
+        Object result = communicator.sendAction(RoutingAction.CALL_ACCEPT, phoneNumber);
+        return result == DeviceCommunicator.VOID_SUCCESS;
     }
 
     /**
@@ -1041,20 +729,8 @@ public class Device {
      * @return <code>true</code> if the holding call is successful, <code>false</code> if it fails.
      */
     public boolean holdCall(PhoneNumber phoneNumber) {
-        try {
-            wrappedClientDevice.holdCall(phoneNumber, invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (CommandFailedException e) {
-            LOGGER.error("Holding call to the testing device failed.", e);
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Holding call was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
-
-        return true;
+        Object result = communicator.sendAction(RoutingAction.CALL_HOLD, phoneNumber);
+        return result == DeviceCommunicator.VOID_SUCCESS;
     }
 
     /**
@@ -1066,20 +742,8 @@ public class Device {
      * @return <code>true</code> if the canceling call is successful, <code>false</code> if it fails.
      */
     public boolean cancelCall(PhoneNumber phoneNumber) {
-        try {
-            wrappedClientDevice.cancelCall(phoneNumber, invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-            return false;
-        } catch (CommandFailedException e) {
-            LOGGER.error("Canceling call to the testing device failed.", e);
-            return false;
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Canceling call was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
-
-        return true;
+        Object result = communicator.sendAction(RoutingAction.CALL_CANCEL, phoneNumber);
+        return result == DeviceCommunicator.VOID_SUCCESS;
     }
 
     /**
@@ -1097,38 +761,7 @@ public class Device {
      * @return {@link TelephonyInformation} instance.
      */
     public TelephonyInformation getTelephonyInformation() {
-        TelephonyInformation telephonyInformation = null;
-
-        try {
-            telephonyInformation = wrappedClientDevice.getTelephonyInformation(invocationPasskey);
-        } catch (RemoteException e) {
-            handleLostConnection();
-        } catch (CommandFailedException e) {
-            LOGGER.error("Getting telephony information from testing device failed.", e);
-        } catch (InvalidPasskeyException e) {
-            LOGGER.error("Getting telephony information was rejected by the server side.", e);
-            throw new DeviceInvocationRejectedException(e);
-        }
-
+        TelephonyInformation telephonyInformation = (TelephonyInformation) communicator.sendAction(RoutingAction.GET_TELEPHONY_INFO);
         return telephonyInformation;
-    }
-
-    /**
-     * Attempts to reconnect to the ATMOSPHERE server.
-     * 
-     * @throws ServerConnectionFailedException
-     * @throws DeviceReleasedException
-     */
-    private void handleLostConnection() {
-        try {
-            serverConnectionHandler.connect();
-        } catch (ServerConnectionFailedException e) {
-            throw e;
-        }
-
-        String message = "Reconnecting to server succeeded, but the device was already released.";
-
-        LOGGER.fatal(message);
-        throw new DeviceReleasedException(message);
     }
 }

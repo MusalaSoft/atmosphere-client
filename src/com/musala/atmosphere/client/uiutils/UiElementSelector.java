@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.musala.atmosphere.client.geometry.Bounds;
-import com.musala.atmosphere.client.ui.UiElementBoundsParser;
 import com.musala.atmosphere.commons.util.Pair;
 
 /**

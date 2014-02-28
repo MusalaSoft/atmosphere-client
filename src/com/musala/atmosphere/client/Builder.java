@@ -23,184 +23,159 @@ import com.musala.atmosphere.commons.util.Pair;
  * 
  * @author vladimir.vladimirov
  */
-public class Builder
-{
-	private static final Logger LOGGER = Logger.getLogger(Builder.class.getCanonicalName());
+public class Builder {
+    private static final Logger LOGGER = Logger.getLogger(Builder.class.getCanonicalName());
 
-	private static Map<ServerConnectionProperties, Builder> builders = new HashMap<ServerConnectionProperties, Builder>();
+    private static Map<ServerConnectionProperties, Builder> builders = new HashMap<ServerConnectionProperties, Builder>();
 
-	private IClientBuilder clientBuilder;
+    private IClientBuilder clientBuilder;
 
-	private Registry serverRmiRegistry;
+    private Registry serverRmiRegistry;
 
-	private Map<Device, DeviceAllocationInformation> deviceToDescriptor = new HashMap<Device, DeviceAllocationInformation>();
+    private Map<Device, DeviceAllocationInformation> deviceToDescriptor = new HashMap<Device, DeviceAllocationInformation>();
 
-	private ServerConnectionHandler serverConnectionHandler;
+    private ServerConnectionHandler serverConnectionHandler;
 
-	/**
-	 * Initializes {@link Builder} and connects to Server through given {@link ServerConnectionHandler}.
-	 * 
-	 * @param serverConnectionHandler
-	 */
-	private Builder(ServerConnectionHandler serverConnectionHandler)
-	{
+    /**
+     * Initializes {@link Builder} and connects to Server through given {@link ServerConnectionHandler}.
+     * 
+     * @param serverConnectionHandler
+     */
+    private Builder(ServerConnectionHandler serverConnectionHandler) {
 
-		this.serverConnectionHandler = serverConnectionHandler;
-		Pair<IClientBuilder, Registry> builderRegistryPair = serverConnectionHandler.connect();
+        this.serverConnectionHandler = serverConnectionHandler;
+        Pair<IClientBuilder, Registry> builderRegistryPair = serverConnectionHandler.connect();
 
-		clientBuilder = builderRegistryPair.getKey();
-		serverRmiRegistry = builderRegistryPair.getValue();
-	}
+        clientBuilder = builderRegistryPair.getKey();
+        serverRmiRegistry = builderRegistryPair.getValue();
+    }
 
-	/**
-	 * Gets the {@link Builder Builder} instance for the annotated Server address.
-	 * 
-	 * @return {@link Builder Builder} instance.
-	 */
-	public static Builder getInstance()
-	{
-		ServerAnnotationProperties serverAnnotationProperties = new ServerAnnotationProperties();
-		Builder builder = builders.get(serverAnnotationProperties);
+    /**
+     * Gets the {@link Builder Builder} instance for the annotated Server address.
+     * 
+     * @return {@link Builder Builder} instance.
+     */
+    public static Builder getInstance() {
+        ServerAnnotationProperties serverAnnotationProperties = new ServerAnnotationProperties();
+        Builder builder = builders.get(serverAnnotationProperties);
 
-		if (builder == null)
-		{
-			synchronized (Builder.class)
-			{
-				builder = builders.get(serverAnnotationProperties);
+        if (builder == null) {
+            synchronized (Builder.class) {
+                builder = builders.get(serverAnnotationProperties);
 
-				if (builder == null)
-				{
-					ServerConnectionHandler serverConnectionHandler = new ServerConnectionHandler(serverAnnotationProperties);
+                if (builder == null) {
+                    ServerConnectionHandler serverConnectionHandler = new ServerConnectionHandler(serverAnnotationProperties);
 
-					builder = new Builder(serverConnectionHandler);
-					LOGGER.info("Builder instance has been created.");
-					builders.put(serverAnnotationProperties, builder);
-				}
+                    builder = new Builder(serverConnectionHandler);
+                    LOGGER.info("Builder instance has been created.");
+                    builders.put(serverAnnotationProperties, builder);
+                }
 
-			}
-		}
+            }
+        }
 
-		return builder;
-	}
+        return builder;
+    }
 
-	/**
-	 * Gets the {@link Builder Builder} instance for the given {@link ServerConnectionProperties}
-	 * 
-	 * @return {@link Builder Builder} instance.
-	 */
-	public static Builder getInstance(ServerConnectionProperties serverConnectionProperties)
-	{
-		Builder builder = builders.get(serverConnectionProperties);
+    /**
+     * Gets the {@link Builder Builder} instance for the given {@link ServerConnectionProperties}
+     * 
+     * @return {@link Builder Builder} instance.
+     */
+    public static Builder getInstance(ServerConnectionProperties serverConnectionProperties) {
+        Builder builder = builders.get(serverConnectionProperties);
 
-		if (builder == null)
-		{
-			synchronized (Builder.class)
-			{
-				builder = builders.get(serverConnectionProperties);
+        if (builder == null) {
+            synchronized (Builder.class) {
+                builder = builders.get(serverConnectionProperties);
 
-				if (builder == null)
-				{
-					ServerConnectionHandler serverConnectionHandler = new ServerConnectionHandler(serverConnectionProperties);
+                if (builder == null) {
+                    ServerConnectionHandler serverConnectionHandler = new ServerConnectionHandler(serverConnectionProperties);
 
-					builder = new Builder(serverConnectionHandler);
-					LOGGER.info("Builder instance has been created.");
-					builders.put(serverConnectionProperties, builder);
-				}
-			}
-		}
+                    builder = new Builder(serverConnectionHandler);
+                    LOGGER.info("Builder instance has been created.");
+                    builders.put(serverConnectionProperties, builder);
+                }
+            }
+        }
 
-		return builder;
-	}
+        return builder;
+    }
 
-	/**
-	 * Gets a {@link Device Device} instance with given {@link DeviceParameters DeviceParameters}.
-	 * 
-	 * @param deviceParameters
-	 *        - required device parameters.
-	 * @return a {@link Device Device} instance.
-	 */
-	public Device getDevice(DeviceParameters deviceParameters)
-	{
-		try
-		{
-			DeviceAllocationInformation deviceDescriptor = clientBuilder.allocateDevice(deviceParameters);
+    /**
+     * Gets a {@link Device Device} instance with given {@link DeviceParameters DeviceParameters}.
+     * 
+     * @param deviceParameters
+     *        - required device parameters.
+     * @return a {@link Device Device} instance.
+     */
+    public Device getDevice(DeviceParameters deviceParameters) {
+        try {
+            DeviceAllocationInformation deviceDescriptor = clientBuilder.allocateDevice(deviceParameters);
 
-			String deviceProxyRmiId = deviceDescriptor.getProxyRmiId();
-			LOGGER.info("Fetched device with proxy RMI id: " + deviceProxyRmiId + ".");
+            String deviceProxyRmiId = deviceDescriptor.getProxyRmiId();
+            LOGGER.info("Fetched device with proxy RMI id: " + deviceProxyRmiId + ".");
 
-			IClientDevice iClientDevice = (IClientDevice) serverRmiRegistry.lookup(deviceProxyRmiId);
-			long passkey = deviceDescriptor.getProxyPasskey();
+            IClientDevice iClientDevice = (IClientDevice) serverRmiRegistry.lookup(deviceProxyRmiId);
+            long passkey = deviceDescriptor.getProxyPasskey();
 
-			Device device = new Device(iClientDevice, passkey, serverConnectionHandler);
-			deviceToDescriptor.put(device, deviceDescriptor);
-			return device;
-		}
-		catch (RemoteException | NotBoundException e)
-		{
-			LOGGER.error("Fetching Device failed (server connection failure).", e);
-			throw new ServerConnectionFailedException("Fetching Device failed (server connection failure).", e);
-		}
-	}
+            Device device = new Device(iClientDevice, passkey, serverConnectionHandler);
+            deviceToDescriptor.put(device, deviceDescriptor);
+            return device;
+        } catch (RemoteException | NotBoundException e) {
+            LOGGER.error("Fetching Device failed (server connection failure).", e);
+            throw new ServerConnectionFailedException("Fetching Device failed (server connection failure).", e);
+        }
+    }
 
-	/**
-	 * Releases previously allocated to a device.
-	 * 
-	 * @param device
-	 *        - device to be released.
-	 */
-	public void releaseDevice(Device device)
-	{
-		DeviceAllocationInformation deviceDescriptor = deviceToDescriptor.get(device);
-		String deviceRmiId = deviceDescriptor.getProxyRmiId();
+    /**
+     * Releases previously allocated to a device.
+     * 
+     * @param device
+     *        - device to be released.
+     */
+    public void releaseDevice(Device device) {
+        DeviceAllocationInformation deviceDescriptor = deviceToDescriptor.get(device);
+        String deviceRmiId = deviceDescriptor.getProxyRmiId();
 
-		try
-		{
-			deviceToDescriptor.remove(device);
-			device.release();
-			clientBuilder.releaseDevice(deviceDescriptor);
-		}
-		catch (RemoteException e)
-		{
-			LOGGER.error("Could not release Device (connection failure).", e);
-			throw new ServerConnectionFailedException("Could not release Device (connection failure).", e);
-		}
-		catch (InvalidPasskeyException e)
-		{
-			// We did not have the correct passkey. The device most likely timed out and got freed to be used by someone
-			// else. So nothing to do here.
-		}
+        try {
+            deviceToDescriptor.remove(device);
+            device.release();
+            clientBuilder.releaseDevice(deviceDescriptor);
+        } catch (RemoteException e) {
+            LOGGER.error("Could not release Device (connection failure).", e);
+            throw new ServerConnectionFailedException("Could not release Device (connection failure).", e);
+        } catch (InvalidPasskeyException e) {
+            // We did not have the correct passkey. The device most likely timed out and got freed to be used by someone
+            // else. So nothing to do here.
+        }
 
-		LOGGER.info(deviceRmiId + " is released.");
-	}
+        LOGGER.info(deviceRmiId + " is released.");
+    }
 
-	/**
-	 * Releases all allocated devices.
-	 */
-	public void releaseAllDevices()
-	{
-		for (Device device : deviceToDescriptor.keySet())
-		{
-			releaseDevice(device);
-		}
-	}
+    /**
+     * Releases all allocated devices.
+     */
+    public void releaseAllDevices() {
+        for (Device device : deviceToDescriptor.keySet()) {
+            releaseDevice(device);
+        }
+    }
 
-	/**
-	 * Gets the {@link ServerConnectionProperties} that are used for connection.
-	 * 
-	 * @return the {@link ServerConnectionProperties} that are used for connection.
-	 */
-	public ServerConnectionProperties getServerConnectionProperties()
-	{
-		return serverConnectionHandler.getServerConnectionProperties();
-	}
+    /**
+     * Gets the {@link ServerConnectionProperties} that are used for connection.
+     * 
+     * @return the {@link ServerConnectionProperties} that are used for connection.
+     */
+    public ServerConnectionProperties getServerConnectionProperties() {
+        return serverConnectionHandler.getServerConnectionProperties();
+    }
 
-	@Override
-	protected void finalize()
-	{
-		synchronized (Builder.class)
-		{
-			releaseAllDevices();
-			builders.remove(getServerConnectionProperties());
-		}
-	}
+    @Override
+    protected void finalize() {
+        synchronized (Builder.class) {
+            releaseAllDevices();
+            builders.remove(getServerConnectionProperties());
+        }
+    }
 }

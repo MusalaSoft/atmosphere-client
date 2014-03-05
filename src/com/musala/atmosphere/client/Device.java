@@ -58,6 +58,8 @@ public class Device {
 
     private static final String LOCKED_CHECK_STRING = "mLockScreenShown true";
 
+    private static final String SAMSUNG_MANUFACTURER_LOWERCASE = "samsung";
+
     private DeviceSettingsManager deviceSettings;
 
     private ServerConnectionHandler serverConnectionHandler;
@@ -268,7 +270,7 @@ public class Device {
                 : AndroidSystemSettings.AIRPLANE_MODE_ON;
 
         try {
-            int airplaneMode = deviceSettings.getInt(AndroidSystemSettings.AIRPLANE_MODE_ON);
+            int airplaneMode = deviceSettings.getInt(airplaneSetting);
             return airplaneMode == 1;
         } catch (SettingsParsingException e) {
             return null;
@@ -495,13 +497,24 @@ public class Device {
     /**
      * Changes the lock state of this device.
      * 
+     * 
+     * 
      * @param state
      *        - desired lock state of the device; <code>true</code> - lock the device, <code>false</code> - unlock the
      *        device.
      * @return <code>true</code> if the lock state setting is successful, <code>false</code> if it fails.
      */
     public boolean setLocked(boolean state) {
-        if (state) {
+        DeviceInformation deviceInformation = getInformation();
+        String deviceManufacturer = deviceInformation.getManufacturer();
+        // There is a different logic for Samsung devices because of they specific locking and unlocking.
+        if (deviceManufacturer.toLowerCase().equals(SAMSUNG_MANUFACTURER_LOWERCASE)) {
+            boolean lockTerms = state && isAwake();
+            boolean unlockTerms = !state && !isAwake();
+            if (lockTerms || unlockTerms) {
+                return pressButton(HardwareButton.POWER);
+            }
+        } else if (state) {
             return isLocked() || pressButton(HardwareButton.POWER);
         } else {
             if (!isLocked()) {
@@ -510,6 +523,7 @@ public class Device {
             boolean isAwake = isAwake() || pressButton(HardwareButton.POWER);
             return isAwake && pressButton(HardwareButton.MENU);
         }
+        return false;
     }
 
     /**

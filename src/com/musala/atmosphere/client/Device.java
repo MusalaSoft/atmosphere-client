@@ -28,6 +28,7 @@ import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.SmsMessage;
 import com.musala.atmosphere.commons.TelephonyInformation;
 import com.musala.atmosphere.commons.beans.DeviceAcceleration;
+import com.musala.atmosphere.commons.beans.DeviceMagneticField;
 import com.musala.atmosphere.commons.beans.DeviceOrientation;
 import com.musala.atmosphere.commons.beans.MobileDataState;
 import com.musala.atmosphere.commons.beans.PhoneNumber;
@@ -170,6 +171,19 @@ public class Device {
      */
     public boolean setAcceleration(DeviceAcceleration deviceAcceleration) {
         Object result = communicator.sendAction(RoutingAction.SET_ACCELERATION, deviceAcceleration);
+        return result == DeviceCommunicator.VOID_SUCCESS;
+    }
+
+    /**
+     * Sets new magnetic field for this device.<br>
+     * Can only be applied on <b>emulators</b>.
+     * 
+     * @param deviceMagneticField
+     *        - new {@link DeviceMagneticField DeviceMagneticField} to be set.
+     * @return <code>true</code> if the magnetic field setting is successful, <code>false</code> if it fails.
+     */
+    public boolean setMagneticField(DeviceMagneticField deviceMagneticField) {
+        Object result = communicator.sendAction(RoutingAction.SET_MAGNETIC_FIELD, deviceMagneticField);
         return result == DeviceCommunicator.VOID_SUCCESS;
     }
 

@@ -25,131 +25,121 @@ import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
  * @author georgi.gaydarov
  * 
  */
-public class UiXmlParser
-{
-	/**
-	 * Gets a {@link Node Node} from a {@link Document Document} by a XPath query.
-	 * 
-	 * @param domDocument
-	 *        document to search in.
-	 * @param xPathQuery
-	 *        XPath type node selecting query.
-	 * @return the found {@link Node Node} object.
-	 * @throws UiElementFetchingException
-	 * @throws XPathExpressionException
-	 */
-	public static Node getXPathNode(Document domDocument, String xPathQuery)
-		throws UiElementFetchingException,
-			XPathExpressionException
-	{
-		XPath x = XPathFactory.newInstance().newXPath();
-		XPathExpression expression = x.compile(xPathQuery);
+public class UiXmlParser {
+    /**
+     * Gets a {@link Node Node} from a {@link Document Document} by a XPath query.
+     * 
+     * @param domDocument
+     *        document to search in.
+     * @param xPathQuery
+     *        XPath type node selecting query.
+     * @return the found {@link Node Node} object.
+     * @throws UiElementFetchingException
+     * @throws XPathExpressionException
+     */
+    public static Node getXPathNode(Document domDocument, String xPathQuery)
+        throws UiElementFetchingException,
+            XPathExpressionException {
+        XPath x = XPathFactory.newInstance().newXPath();
+        XPathExpression expression = x.compile(xPathQuery);
 
-		NodeList nodeList = (NodeList) expression.evaluate(domDocument, XPathConstants.NODESET);
-		int foundElements = 0;
-		if (nodeList == null || (foundElements = nodeList.getLength()) == 0)
-		{
-			throw new UiElementFetchingException("No element found for the passed XPath expression.");
-		}
-		if (foundElements > 1)
-		{
-			throw new UiElementFetchingException("Found " + foundElements
-					+ " elements that match the element selecting query. Please be more specific.");
-		}
+        NodeList nodeList = (NodeList) expression.evaluate(domDocument, XPathConstants.NODESET);
+        int foundElements = 0;
+        if (nodeList == null || nodeList.getLength() == 0) {
+            throw new UiElementFetchingException("No element found for the XPath expression .");
+        }
+        foundElements = nodeList.getLength();
+        if (foundElements > 1) {
+            throw new UiElementFetchingException("Found " + foundElements
+                    + " elements that match the element selecting query. Please be more specific.");
+        }
 
-		return nodeList.item(0);
-	}
+        return nodeList.item(0);
+    }
 
-	/**
-	 * Returns all attributes of an XPath {@link Node Node} object.
-	 * 
-	 * @param node
-	 * @return the object attribute map.
-	 */
-	public static Map<String, String> getAttributeMapOfNode(Node node)
-	{
-		Map<String, String> nodeAttributeMap = new HashMap<String, String>();
-		NamedNodeMap xPathAttributeMap = node.getAttributes();
-		for (int i = 0; i < xPathAttributeMap.getLength(); i++)
-		{
-			Node attribute = xPathAttributeMap.item(i);
-			if (attribute.getNodeType() != Node.ATTRIBUTE_NODE)
-			{
-				continue;
-			}
-			nodeAttributeMap.put(attribute.getNodeName(), attribute.getNodeValue());
-		}
+    /**
+     * Returns all attributes of an XPath {@link Node Node} object.
+     * 
+     * @param node
+     * @return the object attribute map.
+     */
+    public static Map<String, String> getAttributeMapOfNode(Node node) {
+        Map<String, String> nodeAttributeMap = new HashMap<String, String>();
+        NamedNodeMap xPathAttributeMap = node.getAttributes();
+        for (int i = 0; i < xPathAttributeMap.getLength(); i++) {
+            Node attribute = xPathAttributeMap.item(i);
+            if (attribute.getNodeType() != Node.ATTRIBUTE_NODE) {
+                continue;
+            }
+            nodeAttributeMap.put(attribute.getNodeName(), attribute.getNodeValue());
+        }
 
-		return nodeAttributeMap;
-	}
+        return nodeAttributeMap;
+    }
 
-	/**
-	 * Gets a {@link org.jsoup.nodes.Node Node} from a {@link org.jsoup.nodes.Document Document} by a JSoup query.
-	 * 
-	 * @param document
-	 *        document to search in.
-	 * @param query
-	 *        JSoup type element selecting query.
-	 * @return the found {@link org.jsoup.nodes.Node Node} object.
-	 * @throws UiElementFetchingException
-	 */
-	public static org.jsoup.nodes.Node getJSoupNode(org.jsoup.nodes.Document document, String query)
-		throws UiElementFetchingException
-	{
-		Elements elements = document.select(query);
-		int foundElements = elements.size();
-		if (foundElements == 0)
-		{
-			throw new UiElementFetchingException("No element found for the passed JSoup expression.");
-		}
-		if (foundElements > 1)
-		{
-			throw new UiElementFetchingException("Found " + foundElements
-					+ " elements that match the element selecting query. Please be more specific.");
-		}
+    /**
+     * Gets a {@link org.jsoup.nodes.Node Node} from a {@link org.jsoup.nodes.Document Document} by a JSoup query.
+     * 
+     * @param document
+     *        document to search in.
+     * @param query
+     *        JSoup type element selecting query.
+     * @return the found {@link org.jsoup.nodes.Node Node} object.
+     * @throws UiElementFetchingException
+     */
+    public static org.jsoup.nodes.Node getJSoupNode(org.jsoup.nodes.Document document, String query)
+        throws UiElementFetchingException {
+        Elements elements = document.select(query);
+        int foundElements = elements.size();
+        if (foundElements == 0) {
+            String exceptionMessage = String.format("No element found for the JSoup expression: \"%s\"", query);
+            throw new UiElementFetchingException(exceptionMessage);
+        }
+        if (foundElements > 1) {
+            String exceptionMessage = String.format("Found %d elements that match the query \"%s\". Please be more specific.",
+                                                    foundElements,
+                                                    query);
+            throw new UiElementFetchingException(exceptionMessage);
+        }
 
-		org.jsoup.nodes.Node node = elements.get(0);
-		return node;
-	}
+        org.jsoup.nodes.Node node = elements.get(0);
+        return node;
+    }
 
-	/**
-	 * Gets an {@link org.jsoup.select.Elements Elements} object from a {@link org.jsoup.nodes.Document Document} by a JSoup query.
-	 * Elements contains all elements of type {@link org.jsoup.nodes.Node Node} found by the query.
-	 *
-	 * @param document
-	 *        document to search in.
-	 * @param query
-	 *        JSoup type element selecting query.
-	 * @return the found {@link org.jsoup.select.Elements Elements}.
-	 * @throws UiElementFetchingException
-	 */
-	public static Elements getJSoupElements(org.jsoup.nodes.Document document, String query)
-		throws UiElementFetchingException
-	{
-		Elements elements = document.select(query);
-		int foundElements = elements.size();
-		if (foundElements == 0)
-		{
-			throw new UiElementFetchingException("No element found for the passed JSoup expression.");
-		}
-		return elements;
-	}
+    /**
+     * Gets an {@link org.jsoup.select.Elements Elements} object from a {@link org.jsoup.nodes.Document Document} by a
+     * JSoup query. Elements contains all elements of type {@link org.jsoup.nodes.Node Node} found by the query.
+     * 
+     * @param document
+     *        document to search in.
+     * @param query
+     *        JSoup type element selecting query.
+     * @return the found {@link org.jsoup.select.Elements Elements}.
+     * @throws UiElementFetchingException
+     */
+    public static Elements getJSoupElements(org.jsoup.nodes.Document document, String query)
+        throws UiElementFetchingException {
+        Elements elements = document.select(query);
+        int foundElements = elements.size();
+        if (foundElements == 0) {
+            throw new UiElementFetchingException("No element found for the passed JSoup expression.");
+        }
+        return elements;
+    }
 
-	/**
-	 * Returns all attributes of an JSoup {@link org.jsoup.nodes.Node Node} object.
-	 *
-	 * @param node
-	 * @return the object attribute map.
-	 */
-	public static Map<String, String> getAttributeMapOfNode(org.jsoup.nodes.Node node)
-	{
-		Map<String, String> nodeAttributeMap = new HashMap<String, String>();
-		Attributes nodeAttributes = node.attributes();
-		for (Attribute attribute : nodeAttributes)
-		{
-			nodeAttributeMap.put(attribute.getKey(), attribute.getValue());
-		}
-		return nodeAttributeMap;
-	}
+    /**
+     * Returns all attributes of an JSoup {@link org.jsoup.nodes.Node Node} object.
+     * 
+     * @param node
+     * @return the object attribute map.
+     */
+    public static Map<String, String> getAttributeMapOfNode(org.jsoup.nodes.Node node) {
+        Map<String, String> nodeAttributeMap = new HashMap<String, String>();
+        Attributes nodeAttributes = node.attributes();
+        for (Attribute attribute : nodeAttributes) {
+            nodeAttributeMap.put(attribute.getKey(), attribute.getValue());
+        }
+        return nodeAttributeMap;
+    }
 
 }

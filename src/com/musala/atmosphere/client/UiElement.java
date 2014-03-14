@@ -16,6 +16,7 @@ import com.musala.atmosphere.client.uiutils.CssAttribute;
 import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
 import com.musala.atmosphere.client.uiutils.UiElementSelector;
 import com.musala.atmosphere.client.uiutils.UiXmlParser;
+import com.musala.atmosphere.client.util.settings.ElementValidationType;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.ui.UiElementDescriptor;
 
@@ -44,6 +45,8 @@ public class UiElement {
 
     private DeviceCommunicator communicator;
 
+    private ElementValidationType validationType;
+
     /**
      * Constructor for element creation via a XPath query.
      * 
@@ -56,7 +59,8 @@ public class UiElement {
         Map<String, String> nodeAttributesMap = UiXmlParser.getAttributeMapOfNode(representingNode);
         this.elementSelector = new UiElementSelector(nodeAttributesMap);
         this.onDevice = onDevice;
-        communicator = onDevice.getCommunicator();
+        this.communicator = onDevice.getCommunicator();
+        this.validationType = ElementValidationType.MANUAL;
     }
 
     /**
@@ -71,29 +75,38 @@ public class UiElement {
         Map<String, String> nodeAttributesMap = UiXmlParser.getAttributeMapOfNode(representingNode);
         this.elementSelector = new UiElementSelector(nodeAttributesMap);
         this.onDevice = onDevice;
+        this.communicator = onDevice.getCommunicator();
+        this.validationType = ElementValidationType.MANUAL;
     }
 
     /**
-     * Refreshes and then returns the current UI element's attributes data container.
+     * Sets the level of element validity verification of the given UI element before operating with it.
      * 
-     * @return a {@link UiElementSelector} instance.
+     * @param validation
+     *        - the way of how the UiElement should be checked for validity - manually by the QA, or automatically, just
+     *        before an operation with it arises.
      */
-    public UiElementSelector getElementSelector() {
-        UiElementSelector result = getElementSelector(true);
-        return result;
+    public void setValidationType(ElementValidationType validation) {
+        validationType = validation;
+    }
+
+    /**
+     * Returns an element that shows how the type the validity of the given {@link UiElement} is done - manually or
+     * automatically.
+     * 
+     * @return - an {@link ElementValidationType} instance.
+     */
+    public ElementValidationType getValidationType() {
+        return validationType;
     }
 
     /**
      * Returns the current UI element's attributes data container.
      * 
-     * @param refresh
-     *        - boolean indicating if the attributes should be refreshed prior to returning.
      * @return a {@link UiElementSelector} instance.
      */
-    public UiElementSelector getElementSelector(boolean refresh) {
-        if (refresh) {
-            revalidateThrowing();
-        }
+    public UiElementSelector getElementSelector() {
+        innerRevalidation();
         return elementSelector;
     }
 
@@ -102,15 +115,10 @@ public class UiElement {
      * 
      * @param point
      *        - the relative point that will be added to the upper left corner's coordinates.
-     * @param revalidateElement
-     *        - boolean indicating if the element should be revalidated prior to tapping.
      * @return <code>true</code> if the tapping is successful, <code>false</code> if it fails.
      */
-    public boolean tap(Point point, boolean revalidateElement) {
-        if (revalidateElement) {
-            revalidateThrowing();
-        }
-
+    public boolean tap(Point point) {
+        innerRevalidation();
         Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
         Point tapPoint = elementBounds.getUpperLeftCorner();
         tapPoint.addVector(point);
@@ -123,40 +131,16 @@ public class UiElement {
     }
 
     /**
-     * Checks if the current UI element is still valid and if so, simulates tapping on a relative point in it.
-     * 
-     * @param point
-     *        - the relative point that will be added to the upper left corner's coordinates.
-     * @return <code>true</code> if the tapping is successful, <code>false</code> if it fails.
-     */
-    public boolean tap(Point point) {
-        return tap(point, true);
-    }
-
-    /**
      * Simulates tapping on the current UI Element.
      * 
-     * @param revalidateElement
-     *        - boolean indicating if the element should be revalidated prior to tapping.
      * @return <code>true</code> if the tapping is successful, <code>false</code> if it fails.
      */
-    public boolean tap(boolean revalidateElement) {
+    public boolean tap() {
         Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
         Point centerPoint = elementBounds.getCenter();
         Point tapPoint = elementBounds.getRelativePoint(centerPoint);
 
-        return tap(tapPoint, revalidateElement);
-    }
-
-    /**
-     * Checks if the current UI element is still valid and if so, simulates tapping on it.
-     * 
-     * @param revalidateElement
-     *        - boolean indicating if the element should be revalidated prior to tapping.
-     * @return <code>true</code> if the tapping is successful, <code>false</code> if it fails.
-     */
-    public boolean tap() {
-        return tap(true);
+        return tap(tapPoint);
     }
 
     /**
@@ -239,7 +223,7 @@ public class UiElement {
         return false;
     }
 
-    public boolean clearText(boolean revalidate) {
+    public boolean clearText() {
         // TODO validate when an element can get it's text cleared
         // if (!elementSelector.getBooleanValue(CssAttribute.))
         // {
@@ -247,16 +231,10 @@ public class UiElement {
         // }
         // FIXME fix this method when the UIAutomator internal exception problem is solved.
 
-        if (revalidate) {
-            revalidateThrowing();
-        }
+        innerRevalidation();
         UiElementDescriptor descriptor = UiElementAttributeExtractor.extract(elementSelector);
         Object response = communicator.sendAction(RoutingAction.CLEAR_FIELD, descriptor);
         return response == DeviceCommunicator.VOID_SUCCESS;
-    }
-
-    public boolean clearText() {
-        return clearText(true);
     }
 
     /**
@@ -271,23 +249,10 @@ public class UiElement {
      *        - boolean indicating if the element should be revalidated prior to text inputting.
      * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
      */
-    public boolean inputText(String text, int intervalInMs, boolean revalidateElement) {
-        focus(revalidateElement);
-        return onDevice.inputText(text, intervalInMs);
-    }
-
-    /**
-     * Checks if the current UI element is still valid and if so, inputs text into it <b>if it supports text input</b>
-     * with interval in milliseconds between the input of each letter.
-     * 
-     * @param text
-     *        - text to be input.
-     * @param intervalInMs
-     *        - interval in milliseconds between the input of each letter.
-     * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
-     */
     public boolean inputText(String text, int intervalInMs) {
-        return inputText(text, intervalInMs, true);
+        innerRevalidation();
+        focus();
+        return onDevice.inputText(text, intervalInMs);
     }
 
     /**
@@ -295,36 +260,19 @@ public class UiElement {
      * 
      * @param text
      *        - text to be input.
-     * @param revalidateElement
-     *        - boolean indicating if the element should be revalidated prior to text inputting.
-     * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
-     */
-    public boolean inputText(String text, boolean revalidateElement) {
-        return inputText(text, 0, revalidateElement);
-    }
-
-    /**
-     * Checks if the current UI element is still valid and if so, inputs text into it <b>if it supports text input</b>.
-     * 
-     * @param text
-     *        - text to be input.
      * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
      */
     public boolean inputText(String text) {
-        return inputText(text, true);
+        return inputText(text, 0);
     }
 
     /**
      * Focuses the current element.
      * 
-     * @param revalidateElement
-     *        - boolean indicating if the element should be revalidated prior to focusing.
      * @return <code>true</code> if the focusing is successful, <code>false</code> if it fails.
      */
-    public boolean focus(boolean revalidateElement) {
-        if (revalidateElement) {
-            revalidateThrowing();
-        }
+    public boolean focus() {
+        innerRevalidation();
 
         if (!elementSelector.getBooleanValue(CssAttribute.FOCUSABLE)) {
             throw new InvalidElementActionException("Attempting to focus a non-focusable element.");
@@ -334,7 +282,7 @@ public class UiElement {
         }
 
         // The element is already validated if the flag is set, so no need to validate it again.
-        tap(false);
+        tap();
 
         if (revalidate()) {
             if (!elementSelector.getBooleanValue(CssAttribute.FOCUSED)) {
@@ -342,27 +290,6 @@ public class UiElement {
             }
         }
         return true;
-    }
-
-    /**
-     * Checks if the current UI element is still valid and if so, focuses it.
-     * 
-     * @return <code>true</code> if the focusing is successful, <code>false</code> if it fails.
-     */
-    public boolean focus() {
-        return focus(true);
-    }
-
-    private void revalidateThrowing() {
-        String thisElementQuery = elementSelector.buildCssQuery();
-        Screen newScreen = onDevice.getActiveScreen();
-        try {
-            UiElement thisElementRefetched = newScreen.getElementByCSS(thisElementQuery);
-            elementSelector = thisElementRefetched.getElementSelector(false);
-        } catch (UiElementFetchingException e) {
-            // If fetching this element resulted in fetching exception, it is no longer valid.
-            throw new StaleElementReferenceException("Element revalidation failed.", e);
-        }
     }
 
     /**
@@ -376,6 +303,25 @@ public class UiElement {
             return true;
         } catch (StaleElementReferenceException e) {
             return false;
+        }
+    }
+
+    void innerRevalidation() {
+        // Should be invoked exactly once in all public methods, whether its directly or indirectly
+        if (validationType == ElementValidationType.ALWAYS) {
+            revalidateThrowing();
+        }
+    }
+
+    private void revalidateThrowing() {
+        String thisElementQuery = elementSelector.buildCssQuery();
+        Screen newScreen = onDevice.getActiveScreen();
+        try {
+            UiElement thisElementRefetched = newScreen.getElementByCSS(thisElementQuery);
+            elementSelector = thisElementRefetched.getElementSelector();
+        } catch (UiElementFetchingException e) {
+            // If fetching this element resulted in fetching exception, it is no longer valid.
+            throw new StaleElementReferenceException("Element revalidation failed.", e);
         }
     }
 }

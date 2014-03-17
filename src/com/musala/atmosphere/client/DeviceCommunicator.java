@@ -101,6 +101,7 @@ public class DeviceCommunicator {
         // } catch (ServerConnectionFailedException e) {
         // throw e;
         // }
+        // FIXME handle lost connection
 
         // this message is disinforming and points to an error, which is not occuring!
         // String message = "Reconnecting to server succeeded, but the device was already released.";

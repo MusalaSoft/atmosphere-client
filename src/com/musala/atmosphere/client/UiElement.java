@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -46,6 +47,10 @@ public class UiElement {
     private DeviceCommunicator communicator;
 
     private ElementValidationType validationType;
+
+    private static final Logger LOGGER = Logger.getLogger(UiElement.class);
+
+    private static final long UI_ELEMENT_OPERATION_WAIT_TIME = 500;
 
     /**
      * Constructor for element creation via a XPath query.
@@ -124,7 +129,9 @@ public class UiElement {
         tapPoint.addVector(point);
 
         if (elementBounds.contains(tapPoint)) {
-            return onDevice.tapScreenLocation(tapPoint);
+            boolean isElementTapped = onDevice.tapScreenLocation(tapPoint);
+            finalizeUiElementOperation();
+            return isElementTapped;
         } else {
             throw new IllegalArgumentException("Point " + point + " not in element bounds.");
         }
@@ -234,6 +241,9 @@ public class UiElement {
         innerRevalidation();
         UiElementDescriptor descriptor = UiElementAttributeExtractor.extract(elementSelector);
         Object response = communicator.sendAction(RoutingAction.CLEAR_FIELD, descriptor);
+
+        finalizeUiElementOperation();
+
         return response == DeviceCommunicator.VOID_SUCCESS;
     }
 
@@ -252,7 +262,9 @@ public class UiElement {
     public boolean inputText(String text, int intervalInMs) {
         innerRevalidation();
         focus();
-        return onDevice.inputText(text, intervalInMs);
+        boolean success = onDevice.inputText(text, intervalInMs);
+        finalizeUiElementOperation();
+        return success;
     }
 
     /**
@@ -283,6 +295,8 @@ public class UiElement {
 
         // The element is already validated if the flag is set, so no need to validate it again.
         tap();
+
+        finalizeUiElementOperation();
 
         if (revalidate()) {
             if (!elementSelector.getBooleanValue(CssAttribute.FOCUSED)) {
@@ -322,6 +336,16 @@ public class UiElement {
         } catch (UiElementFetchingException e) {
             // If fetching this element resulted in fetching exception, it is no longer valid.
             throw new StaleElementReferenceException("Element revalidation failed.", e);
+        }
+    }
+
+    private void finalizeUiElementOperation() {
+        // Should be invoked exactly once in the end of all element-operating methods, whether
+        // its directly or indirectly invoked.
+        try {
+            Thread.sleep(UI_ELEMENT_OPERATION_WAIT_TIME);
+        } catch (InterruptedException e) {
+            LOGGER.info(e);
         }
     }
 }

@@ -10,6 +10,7 @@ import org.w3c.dom.NodeList;
 
 import com.musala.atmosphere.client.exceptions.InvalidElementActionException;
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
+import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.geometry.Bounds;
 import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.client.uiutils.CssAttribute;
@@ -52,19 +53,6 @@ public class UiElement {
 
     private static final long UI_ELEMENT_OPERATION_WAIT_TIME = 500;
 
-    private UiElementValidator validator = new UiElementValidator();
-
-    private boolean isStale = false;
-
-    private UiElement(Map<String, String> nodeAttributesMap, Device onDevice) {
-        elementSelector = new UiElementSelector(nodeAttributesMap);
-        this.onDevice = onDevice;
-        communicator = onDevice.getCommunicator();
-        validationType = ElementValidationType.MANUAL;
-        validator = onDevice.getUiValidator();
-        validator.addElementForValidation(this);
-    }
-
     /**
      * Constructor for element creation via a XPath query.
      * 
@@ -72,9 +60,13 @@ public class UiElement {
      * @param onDevice
      */
     UiElement(Node representingNode, Device onDevice) {
-        this(UiXmlParser.getAttributeMapOfNode(representingNode), onDevice);
-        underlyingNodeType = ElementNodeType.XPATH_NODE;
-        representedNodeXPath = representingNode;
+        this.underlyingNodeType = ElementNodeType.XPATH_NODE;
+        this.representedNodeXPath = representingNode;
+        Map<String, String> nodeAttributesMap = UiXmlParser.getAttributeMapOfNode(representingNode);
+        this.elementSelector = new UiElementSelector(nodeAttributesMap);
+        this.onDevice = onDevice;
+        this.communicator = onDevice.getCommunicator();
+        this.validationType = ElementValidationType.MANUAL;
     }
 
     /**
@@ -84,9 +76,13 @@ public class UiElement {
      * @param onDevice
      */
     UiElement(org.jsoup.nodes.Node representingNode, Device onDevice) {
-        this(UiXmlParser.getAttributeMapOfNode(representingNode), onDevice);
-        underlyingNodeType = ElementNodeType.JSOUP_NODE;
-        representedNodeJSoup = representingNode;
+        this.underlyingNodeType = ElementNodeType.JSOUP_NODE;
+        this.representedNodeJSoup = representingNode;
+        Map<String, String> nodeAttributesMap = UiXmlParser.getAttributeMapOfNode(representingNode);
+        this.elementSelector = new UiElementSelector(nodeAttributesMap);
+        this.onDevice = onDevice;
+        this.communicator = onDevice.getCommunicator();
+        this.validationType = ElementValidationType.MANUAL;
     }
 
     /**
@@ -235,11 +231,6 @@ public class UiElement {
         return false;
     }
 
-    /**
-     * Clears the contents of this element.
-     * 
-     * @return boolean indicating if this action was successful.
-     */
     public boolean clearText() {
         // TODO validate when an element can get it's text cleared
         // if (!elementSelector.getBooleanValue(CssAttribute.))
@@ -336,33 +327,31 @@ public class UiElement {
      * @return true if the current element is still valid, false otherwise.
      */
     public boolean revalidate() {
-        if (!isStale) {
-            validator.forceRevalidation();
-            // if this element is no longer valid, the revalidation procedure will have set it to stale.
+        try {
+            revalidateThrowing();
+            return true;
+        } catch (StaleElementReferenceException e) {
+            return false;
         }
-        return isStale;
     }
 
-    /**
-     * Should be invoked exactly once in all public methods, whether its directly or indirectly
-     */
-    private void innerRevalidation() {
+    void innerRevalidation() {
+        // Should be invoked exactly once in all public methods, whether its directly or indirectly
         if (validationType == ElementValidationType.ALWAYS) {
             revalidateThrowing();
         }
     }
 
     private void revalidateThrowing() {
-        if (revalidate()) {
-            throw new StaleElementReferenceException("Element revalidation failed. This element is most likely not present on the screen anymore.");
+        String thisElementQuery = elementSelector.buildCssQuery();
+        Screen newScreen = onDevice.getActiveScreen();
+        try {
+            UiElement thisElementRefetched = newScreen.getElementByCSS(thisElementQuery);
+            elementSelector = thisElementRefetched.getElementSelector();
+        } catch (UiElementFetchingException e) {
+            // If fetching this element resulted in fetching exception, it is no longer valid.
+            throw new StaleElementReferenceException("Element revalidation failed.", e);
         }
-    }
-
-    /**
-     * Used by the {@link UiElementValidator} to mark this element as stale.
-     */
-    void setAsStale() {
-        isStale = true;
     }
 
     private void finalizeUiElementOperation() {

@@ -10,7 +10,6 @@ import org.w3c.dom.NodeList;
 
 import com.musala.atmosphere.client.exceptions.InvalidElementActionException;
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
-import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.geometry.Bounds;
 import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.client.uiutils.CssAttribute;
@@ -19,6 +18,7 @@ import com.musala.atmosphere.client.uiutils.UiElementSelector;
 import com.musala.atmosphere.client.uiutils.UiXmlParser;
 import com.musala.atmosphere.client.util.settings.ElementValidationType;
 import com.musala.atmosphere.commons.RoutingAction;
+import com.musala.atmosphere.commons.beans.SwipeDirection;
 import com.musala.atmosphere.commons.ui.UiElementDescriptor;
 
 /**
@@ -52,6 +52,19 @@ public class UiElement {
 
     private static final long UI_ELEMENT_OPERATION_WAIT_TIME = 500;
 
+    private UiElementValidator validator = new UiElementValidator();
+
+    private boolean isStale = false;
+
+    private UiElement(Map<String, String> nodeAttributesMap, Device onDevice) {
+        elementSelector = new UiElementSelector(nodeAttributesMap);
+        this.onDevice = onDevice;
+        communicator = onDevice.getCommunicator();
+        validationType = ElementValidationType.MANUAL;
+        validator = onDevice.getUiValidator();
+        validator.addElementForValidation(this);
+    }
+
     /**
      * Constructor for element creation via a XPath query.
      * 
@@ -59,13 +72,9 @@ public class UiElement {
      * @param onDevice
      */
     UiElement(Node representingNode, Device onDevice) {
-        this.underlyingNodeType = ElementNodeType.XPATH_NODE;
-        this.representedNodeXPath = representingNode;
-        Map<String, String> nodeAttributesMap = UiXmlParser.getAttributeMapOfNode(representingNode);
-        this.elementSelector = new UiElementSelector(nodeAttributesMap);
-        this.onDevice = onDevice;
-        this.communicator = onDevice.getCommunicator();
-        this.validationType = ElementValidationType.MANUAL;
+        this(UiXmlParser.getAttributeMapOfNode(representingNode), onDevice);
+        underlyingNodeType = ElementNodeType.XPATH_NODE;
+        representedNodeXPath = representingNode;
     }
 
     /**
@@ -75,13 +84,9 @@ public class UiElement {
      * @param onDevice
      */
     UiElement(org.jsoup.nodes.Node representingNode, Device onDevice) {
-        this.underlyingNodeType = ElementNodeType.JSOUP_NODE;
-        this.representedNodeJSoup = representingNode;
-        Map<String, String> nodeAttributesMap = UiXmlParser.getAttributeMapOfNode(representingNode);
-        this.elementSelector = new UiElementSelector(nodeAttributesMap);
-        this.onDevice = onDevice;
-        this.communicator = onDevice.getCommunicator();
-        this.validationType = ElementValidationType.MANUAL;
+        this(UiXmlParser.getAttributeMapOfNode(representingNode), onDevice);
+        underlyingNodeType = ElementNodeType.JSOUP_NODE;
+        representedNodeJSoup = representingNode;
     }
 
     /**
@@ -230,6 +235,11 @@ public class UiElement {
         return false;
     }
 
+    /**
+     * Clears the contents of this element.
+     * 
+     * @return boolean indicating if this action was successful.
+     */
     public boolean clearText() {
         // TODO validate when an element can get it's text cleared
         // if (!elementSelector.getBooleanValue(CssAttribute.))
@@ -279,6 +289,20 @@ public class UiElement {
     }
 
     /**
+     * Swipes this element in a given direction.
+     * 
+     * @param direction
+     *        - a {@link SwipeDirection} enum instance, describing the direction this element should be swiped in.
+     * @return boolean indicating if this action was successful.
+     */
+    public boolean swipe(SwipeDirection direction) {
+        innerRevalidation();
+        UiElementDescriptor descriptor = UiElementAttributeExtractor.extract(elementSelector);
+        Object response = communicator.sendAction(RoutingAction.ELEMENT_SWIPE, descriptor, direction);
+        return response == DeviceCommunicator.VOID_SUCCESS;
+    }
+
+    /**
      * Focuses the current element.
      * 
      * @return <code>true</code> if the focusing is successful, <code>false</code> if it fails.
@@ -312,31 +336,33 @@ public class UiElement {
      * @return true if the current element is still valid, false otherwise.
      */
     public boolean revalidate() {
-        try {
-            revalidateThrowing();
-            return true;
-        } catch (StaleElementReferenceException e) {
-            return false;
+        if (!isStale) {
+            validator.forceRevalidation();
+            // if this element is no longer valid, the revalidation procedure will have set it to stale.
         }
+        return isStale;
     }
 
-    void innerRevalidation() {
-        // Should be invoked exactly once in all public methods, whether its directly or indirectly
+    /**
+     * Should be invoked exactly once in all public methods, whether its directly or indirectly
+     */
+    private void innerRevalidation() {
         if (validationType == ElementValidationType.ALWAYS) {
             revalidateThrowing();
         }
     }
 
     private void revalidateThrowing() {
-        String thisElementQuery = elementSelector.buildCssQuery();
-        Screen newScreen = onDevice.getActiveScreen();
-        try {
-            UiElement thisElementRefetched = newScreen.getElementByCSS(thisElementQuery);
-            elementSelector = thisElementRefetched.getElementSelector();
-        } catch (UiElementFetchingException e) {
-            // If fetching this element resulted in fetching exception, it is no longer valid.
-            throw new StaleElementReferenceException("Element revalidation failed.", e);
+        if (revalidate()) {
+            throw new StaleElementReferenceException("Element revalidation failed. This element is most likely not present on the screen anymore.");
         }
+    }
+
+    /**
+     * Used by the {@link UiElementValidator} to mark this element as stale.
+     */
+    void setAsStale() {
+        isStale = true;
     }
 
     private void finalizeUiElementOperation() {

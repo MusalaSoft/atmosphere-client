@@ -65,6 +65,15 @@ public class Screen {
 
         // JSoup Document building
         jSoupDocument = Jsoup.parse(screenXml);
+
+        onDevice.getUiValidator().setActiveScreen(this);
+    }
+
+    void updateScreen() {
+        Screen newScreen = onDevice.getActiveScreen();
+        screenXml = newScreen.screenXml;
+        xPathDomDocument = newScreen.xPathDomDocument;
+        jSoupDocument = newScreen.jSoupDocument;
     }
 
     /**

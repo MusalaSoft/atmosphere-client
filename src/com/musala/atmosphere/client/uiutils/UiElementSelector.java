@@ -84,6 +84,28 @@ public class UiElementSelector {
     }
 
     /**
+     * Adds new selection argument for this ui element selector with selection option that is
+     * {@link UiElementSelectionOption#EQUALS}.
+     * <p>
+     * Example usage would be:
+     * <p>
+     * <code>
+     * uiElementSelector.addSelectionAttribute(SupportedCssAttribute.CHECKABLE, true);
+     * </code>
+     *
+     * @param attribute
+     *        The attribute for which to add selection expression. If selection expression already existed for the
+     *        attribute it will be replaced.
+     * @param value
+     *        The value to be used in the selection expression. Empty strings will not be added as expressions.
+     * @throws IllegalArgumentException
+     *         In case the supplied value does not match the type of the specified attribute.
+     */
+    public void addSelectionAttribute(CssAttribute attribute, Object value) {
+        addSelectionAttribute(attribute, UiElementSelectionOption.EQUALS, value);
+    }
+
+    /**
      * Use the method to get the value of boolean attribute selection argument
      * 
      * @param attribute

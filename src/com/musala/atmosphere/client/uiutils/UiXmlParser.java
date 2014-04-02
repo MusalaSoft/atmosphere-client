@@ -92,7 +92,7 @@ public class UiXmlParser {
         Elements elements = document.select(query);
         int foundElements = elements.size();
         if (foundElements == 0) {
-            String exceptionMessage = String.format("No element found for the JSoup expression: \"%s\"", query);
+            String exceptionMessage = String.format("No element found for the JSoup CSS expression: \"%s\"", query);
             throw new UiElementFetchingException(exceptionMessage);
         }
         if (foundElements > 1) {

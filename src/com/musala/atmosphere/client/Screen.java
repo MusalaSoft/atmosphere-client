@@ -65,6 +65,19 @@ public class Screen {
 
         // JSoup Document building
         jSoupDocument = Jsoup.parse(screenXml);
+
+        onDevice.getUiValidator().setActiveScreen(this);
+    }
+
+    /**
+     * Updates the current {@link Screen} instance to contain the newest possible device screen information. Equivalent
+     * to reinvoking the {@link Device#getActiveScreen()} method.
+     */
+    public void updateScreen() {
+        Screen newScreen = onDevice.getActiveScreen();
+        screenXml = newScreen.screenXml;
+        xPathDomDocument = newScreen.xPathDomDocument;
+        jSoupDocument = newScreen.jSoupDocument;
     }
 
     /**
@@ -211,5 +224,23 @@ public class Screen {
             // no elements were found by the supplied text
             return false;
         }
+    }
+
+    /**
+     * Checks if an element is present in the current {@link Screen} instance.
+     * 
+     * @param query
+     *        - the CSS element query to be checked for matches.
+     * @return <b><true/b> if the element is present, <b>false</b> otherwise.
+     */
+    public boolean containsElementByCSS(String query) {
+        Elements elements = null;
+        try {
+            elements = UiXmlParser.getJSoupElements(jSoupDocument, query);
+        } catch (UiElementFetchingException e) {
+            return false;
+        }
+
+        return elements.size() > 0;
     }
 }

@@ -1,104 +1,106 @@
 package com.musala.atmosphere.client;
 
-import static org.mockito.Mockito.doThrow;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.io.InputStream;
 import java.util.Scanner;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
-import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
-import com.musala.atmosphere.client.geometry.Bounds;
-import com.musala.atmosphere.client.geometry.Point;
-import com.musala.atmosphere.client.uiutils.CssAttribute;
-import com.musala.atmosphere.client.uiutils.UiElementSelectionOption;
-import com.musala.atmosphere.client.uiutils.UiElementSelector;
+import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
 
 public class UiElementRevalidationTest {
-    private static final String TEST_XML = "testXml.xml";
+    private static final String POPULATED_TEST_XML = "testXml.xml";
 
-    private UiElement spyUiElement;
+    private static final String UNPOPULATED_TEST_XML = "testXml2.xml";
 
-    private Screen uiScreen;
+    private Device usedDevice;
 
-    @Test(expected = RuntimeException.class)
-    public void testTapInvalidElement() throws UiElementFetchingException {
-        initializeNonfocusableElement();
-        doThrow(new RuntimeException()).when(spyUiElement).innerRevalidation();
+    private UiElementValidator validator;
 
-        final int numberOfTaps = 10;
+    @Before
+    public void setUp() {
+        usedDevice = mock(Device.class);
+        validator = new UiElementValidator();
 
-        for (int taps = 0; taps < numberOfTaps; taps++) {
-            spyUiElement.tap();
-        }
-
-        verify(spyUiElement, times(1)).innerRevalidation();
+        Mockito.when(usedDevice.getUiValidator()).thenReturn(validator);
     }
 
     @Test
-    public void testTap() throws UiElementFetchingException {
-        initializeNonfocusableElement();
-        spyUiElement.tap();
-        verify(spyUiElement, times(1)).innerRevalidation();
+    public void testRevalidationWithValidElement() throws Throwable {
+        Mockito.when(usedDevice.getActiveScreen()).then(new Answer<Screen>() {
+            @Override
+            public Screen answer(InvocationOnMock invocation) throws Throwable {
+                return createPopulatedScreen();
+            }
+        });
+
+        Screen populated = createPopulatedScreen();
+
+        UiElement element = populated.getElementByCSS("[text=CoolStory]");
+        UiElement element2 = populated.getElementByCSS("[bounds=[0,55][240,320]][class=android.view.View]");
+
+        assertTrue("Element revalidation should have resulted in element still present.", element.revalidate());
+        assertTrue("Element revalidation should have resulted in element still present.", element2.revalidate());
     }
 
     @Test
-    public void testTapPoint() throws UiElementFetchingException {
-        initializeNonfocusableElement();
-        Point tappedPoint = new Point(12, 23);
-        final int numberOfTaps = 10;
+    public void testRevalidationWithInvalidElement() throws Throwable {
+        Mockito.when(usedDevice.getActiveScreen()).then(new Answer<Screen>() {
+            @Override
+            public Screen answer(InvocationOnMock invocation) throws Throwable {
+                return createUnpopulatedScreen();
+            }
+        });
 
-        for (int taps = 0; taps < numberOfTaps; taps++) {
-            spyUiElement.tap(tappedPoint);
-        }
+        Screen populated = createPopulatedScreen();
 
-        verify(spyUiElement, times(numberOfTaps)).innerRevalidation();
+        UiElement element = populated.getElementByCSS("[text=CoolStory]");
+        UiElement element2 = populated.getElementByCSS("[bounds=[0,55][240,320]][class=android.view.View]");
+
+        assertTrue("Element revalidation should have resulted in element still present.", element.revalidate());
+        assertFalse("Element revalidation should have resulted in element not present anymore.", element2.revalidate());
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testClearTextInvalidElement() throws UiElementFetchingException {
-        initializeNonfocusableElement();
-        doThrow(new RuntimeException()).when(spyUiElement).innerRevalidation();
-        spyUiElement.clearText();
+    @Test(expected = StaleElementReferenceException.class)
+    public void testCrossRevalidation() throws Throwable {
+        Mockito.when(usedDevice.getActiveScreen()).then(new Answer<Screen>() {
+            @Override
+            public Screen answer(InvocationOnMock invocation) throws Throwable {
+                return createUnpopulatedScreen();
+            }
+        });
+
+        Screen populated = createPopulatedScreen();
+        UiElement element = populated.getElementByCSS("[text=CoolStory]");
+        UiElement element2 = populated.getElementByCSS("[bounds=[0,55][240,320]][class=android.view.View]");
+
+        assertTrue("Element revalidation should have resulted in element still present.", element.revalidate());
+        element2.tap(); // should be cross-revalidated and result in an exception.
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testInputTextStringIntInvalidElement() throws UiElementFetchingException {
-        initializeNonfocusableElement();
-        doThrow(new RuntimeException()).when(spyUiElement).innerRevalidation();
-        spyUiElement.inputText("sample message", 10);
+    private Screen createPopulatedScreen() {
+        return createScreen(POPULATED_TEST_XML);
     }
 
-    private void initializeNonfocusableElement() throws UiElementFetchingException {
-
-        uiScreen = readSampleScreen();
-
-        final String desiredElementClass = "android.widget.FrameLayout";
-
-        UiElementSelector selector = new UiElementSelector();
-        selector.addSelectionAttribute(CssAttribute.CLASS_NAME, UiElementSelectionOption.EQUALS, desiredElementClass);
-        Point upperLeftCorner = new Point(0, 0);
-        Point lowerRightCorner = new Point(240, 320);
-        selector.addSelectionAttribute(CssAttribute.BOUNDS,
-                                       UiElementSelectionOption.EQUALS,
-                                       new Bounds(upperLeftCorner, lowerRightCorner));
-
-        spyUiElement = spy(uiScreen.getElement(selector));
+    private Screen createUnpopulatedScreen() {
+        return createScreen(UNPOPULATED_TEST_XML);
     }
 
-    private Screen readSampleScreen() {
-        InputStream testXmlInput = this.getClass().getResourceAsStream(TEST_XML);
+    private Screen createScreen(String xmlName) {
+        InputStream testXmlInput = this.getClass().getResourceAsStream(xmlName);
         Scanner scanXml = new Scanner(testXmlInput);
         scanXml.useDelimiter("\\A"); // read all text regex pattern
         String xmlFileContents = scanXml.next();
         scanXml.close();
-        Device mockDevice = mock(Device.class);
 
-        Screen screen = new Screen(mockDevice, xmlFileContents);
+        Screen screen = new Screen(usedDevice, xmlFileContents);
         return screen;
     }
 

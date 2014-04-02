@@ -67,6 +67,8 @@ public class Device {
 
     private DeviceCommunicator communicator;
 
+    private UiElementValidator validator;
+
     /**
      * Constructor that creates a usable Device object by a given IClientDevice, it's invocation passkey.
      * 
@@ -75,6 +77,7 @@ public class Device {
      * @param serverConnectionHandler
      */
     Device(IClientDevice clientDevice, long devicePasskey, ServerConnectionHandler serverConnectionHandler) {
+        validator = new UiElementValidator();
         this.serverConnectionHandler = serverConnectionHandler;
         communicator = new DeviceCommunicator(clientDevice, devicePasskey);
         deviceSettings = new DeviceSettingsManager(communicator);
@@ -86,6 +89,10 @@ public class Device {
 
     DeviceCommunicator getCommunicator() {
         return communicator;
+    }
+
+    UiElementValidator getUiValidator() {
+        return validator;
     }
 
     /**

@@ -17,6 +17,7 @@ import javax.xml.xpath.XPathExpressionException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.geometry.Bounds;
@@ -35,6 +36,9 @@ public class UiElementFetchingTest {
     @Before
     public void setUp() throws Exception {
         device = mock(Device.class);
+        UiElementValidator validator = new UiElementValidator();
+        Mockito.when(device.getUiValidator()).thenReturn(validator);
+
         InputStream testXmlInput = this.getClass().getResourceAsStream(TEST_XML);
         Scanner scanXml = new Scanner(testXmlInput);
         scanXml.useDelimiter("\\A"); // read all text regex pattern

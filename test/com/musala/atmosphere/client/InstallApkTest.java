@@ -14,6 +14,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import com.musala.atmosphere.client.util.ServerAnnotationProperties;
 import com.musala.atmosphere.commons.RoutingAction;
@@ -58,11 +60,28 @@ public class InstallApkTest {
 
     @Test
     public void appendingErrorTest() throws Exception {
-        Mockito.doReturn(null).when(innerClientDeviceMock).route(anyLong(), eq(RoutingAction.APK_INIT_INSTALL));
-        doThrow(new CommandFailedException()).when(innerClientDeviceMock).route(anyLong(),
-                                                                                eq(RoutingAction.APK_APPEND_DATA),
-                                                                                any(),
-                                                                                anyInt());
+        Answer<Object> routeAnswer = new Answer<Object>() {
+
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                RoutingAction action = (RoutingAction) args[1];
+                switch (action) {
+                    case APK_INIT_INSTALL:
+                        return null;
+                    case APK_APPEND_DATA:
+                        throw new CommandFailedException();
+                    default:
+                        break;
+                }
+                return null;
+            }
+        };
+        Mockito.doAnswer(routeAnswer).when(innerClientDeviceMock).route(anyLong(), any(RoutingAction.class));
+        Mockito.doAnswer(routeAnswer)
+               .when(innerClientDeviceMock)
+               .route(anyLong(), any(RoutingAction.class), any(), anyInt());
+
         // FIXME: This should be revised!
         assertFalse(device.installAPK(PATH_TO_APK_FILE));
         verify(innerClientDeviceMock, times(1)).route(anyLong(), eq(RoutingAction.APK_APPEND_DATA), any(), anyLong());

@@ -23,7 +23,7 @@ import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 
 public class InstallApkTest {
-    private final String PATH_TO_APK_FILE = "./object-browser.apk";
+    private final String PATH_TO_APK_FILE = "object-browser.apk";
 
     private final String PATH_TO_NOT_EXISTING_APK_FILE = "E:\\NoExistingFolder\\NotExistingFile.apk";
 
@@ -83,7 +83,7 @@ public class InstallApkTest {
                .route(anyLong(), any(RoutingAction.class), any(), anyInt());
 
         // FIXME: This should be revised!
-        assertFalse(device.installAPK(PATH_TO_APK_FILE));
+        assertFalse(device.installAPK(getClass().getResource(PATH_TO_APK_FILE).getFile()));
         verify(innerClientDeviceMock, times(1)).route(anyLong(), eq(RoutingAction.APK_APPEND_DATA), any(), anyLong());
     }
 

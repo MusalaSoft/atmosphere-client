@@ -10,6 +10,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.net.URLDecoder;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,7 +85,10 @@ public class InstallApkTest {
                .route(anyLong(), any(RoutingAction.class), any(), anyInt());
 
         // FIXME: This should be revised!
-        assertFalse(device.installAPK(getClass().getResource(PATH_TO_APK_FILE).getFile()));
+        String file = getClass().getResource(PATH_TO_APK_FILE).getFile();
+        // Decoding the url encoded values
+        file = URLDecoder.decode(file, "UTF-8");
+        assertFalse(device.installAPK(file));
         verify(innerClientDeviceMock, times(1)).route(anyLong(), eq(RoutingAction.APK_APPEND_DATA), any(), anyLong());
     }
 

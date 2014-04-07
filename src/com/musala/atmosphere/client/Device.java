@@ -516,6 +516,19 @@ public class Device {
     }
 
     /**
+     * Starts an application on the device.
+     * 
+     * @param packageName 
+     *        - name of the application's package
+     * @return <code>true</code> if the application launch is successful and <code>false</code> otherwise
+     */
+    public boolean startApplication(String packageName) {
+        boolean response = (boolean) communicator.sendAction(RoutingAction.START_APP, packageName);
+
+        return response;
+    }
+
+    /**
      * Changes the lock state of this device.
      * 
      * 

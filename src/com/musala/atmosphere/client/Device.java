@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.geometry.Point;
+import com.musala.atmosphere.client.uiutils.GestureCreator;
 import com.musala.atmosphere.client.util.settings.AndroidGlobalSettings;
 import com.musala.atmosphere.client.util.settings.AndroidSystemSettings;
 import com.musala.atmosphere.client.util.settings.DeviceSettingsManager;
@@ -595,6 +596,20 @@ public class Device {
         }
         boolean locked = dump.contains(LOCKED_CHECK_STRING);
         return locked;
+    }
+
+    /**
+     * Simulates a double tap on the specified point.
+     * 
+     * @param point
+     *        - the point to be tapped
+     * @return <code>true</code> if the double tap is successful, <code>false</code> if it fails.
+     */
+    public boolean doubleTap(Point point) {
+        Gesture doubleTap = GestureCreator.createDoubleTap(point.getX(), point.getY());
+        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, doubleTap);
+
+        return response == DeviceCommunicator.VOID_SUCCESS;
     }
 
     /**

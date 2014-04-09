@@ -218,8 +218,33 @@ public class UiElement {
      * @return <code>true</code> if the double tapping is successful, <code>false</code> if it fails.
      */
     public boolean doubleTap() {
-        // TODO implement uiElement.doubleTap()
-        return false;
+        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Point centerPoint = elementBounds.getCenter();
+        Point tapPoint = elementBounds.getRelativePoint(centerPoint);
+
+        return doubleTap(tapPoint);
+    }
+
+    /**
+     * Simulates double-tapping on a point in the given UI element.
+     * 
+     * @param point
+     *        - the point to be tapped
+     * @return <code>true</code> if the double tapping is successful, <code>false</code> if it fails.
+     */
+    public boolean doubleTap(Point point) {
+        innerRevalidation();
+        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Point tapPoint = elementBounds.getUpperLeftCorner();
+        tapPoint.addVector(point);
+
+        if (elementBounds.contains(tapPoint)) {
+            boolean isElementTapped = onDevice.doubleTap(tapPoint);
+            finalizeUiElementOperation();
+            return isElementTapped;
+        } else {
+            throw new IllegalArgumentException("Point " + point + " not in element bounds.");
+        }
     }
 
     /**

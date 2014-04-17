@@ -33,11 +33,13 @@ import com.musala.atmosphere.commons.beans.DeviceMagneticField;
 import com.musala.atmosphere.commons.beans.DeviceOrientation;
 import com.musala.atmosphere.commons.beans.MobileDataState;
 import com.musala.atmosphere.commons.beans.PhoneNumber;
+import com.musala.atmosphere.commons.beans.SwipeDirection;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.gesture.Gesture;
 import com.musala.atmosphere.commons.util.IntentBuilder;
 import com.musala.atmosphere.commons.util.IntentBuilder.IntentAction;
+import com.musala.atmosphere.commons.util.Pair;
 
 /**
  * Android device representing class.
@@ -519,7 +521,7 @@ public class Device {
     /**
      * Starts an application on the device.
      * 
-     * @param packageName 
+     * @param packageName
      *        - name of the application's package
      * @return <code>true</code> if the application launch is successful and <code>false</code> otherwise
      */
@@ -608,6 +610,25 @@ public class Device {
     public boolean doubleTap(Point point) {
         Gesture doubleTap = GestureCreator.createDoubleTap(point.getX(), point.getY());
         Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, doubleTap);
+
+        return response == DeviceCommunicator.VOID_SUCCESS;
+    }
+
+    /**
+     * Simulates a swipe from a point to another unknown point.
+     * 
+     * @param point
+     *        - the starting point.
+     * @return <code>true</code> if the swipe is successful, <code>false</code> if it fails.
+     */
+    public boolean swipe(Point point, SwipeDirection swipeDirection) {
+        DeviceInformation information = getInformation();
+        Pair<Integer, Integer> resolution = information.getResolution();
+        Gesture swipe = GestureCreator.createSwipe((float) 1.0 * point.getX(),
+                                                   (float) 1.0 * point.getY(),
+                                                   swipeDirection,
+                                                   resolution);
+        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, swipe);
 
         return response == DeviceCommunicator.VOID_SUCCESS;
     }

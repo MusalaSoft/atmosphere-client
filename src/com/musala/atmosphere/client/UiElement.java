@@ -314,17 +314,32 @@ public class UiElement {
     }
 
     /**
+     * Simulates swiping.
+     * 
+     * @param swipeDirection
+     *        - a {@link SwipeDirection} enum instance, describing the direction this element should be swiped in.
+     * @return <code>true</code> if the swiping is successful, <code>false</code> if it fails.
+     */
+    public boolean swipe(SwipeDirection swipeDirection) {
+        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Point centerPoint = elementBounds.getCenter();
+
+        return swipe(centerPoint, swipeDirection);
+    }
+
+    /**
      * Swipes this element in a given direction.
      * 
      * @param direction
      *        - a {@link SwipeDirection} enum instance, describing the direction this element should be swiped in.
+     * @param point
+     *        -a {@link Point} the point from which the swipe start.
      * @return boolean indicating if this action was successful.
      */
-    public boolean swipe(SwipeDirection direction) {
+    public boolean swipe(Point point, SwipeDirection direction) {
         innerRevalidation();
-        UiElementDescriptor descriptor = UiElementAttributeExtractor.extract(elementSelector);
-        Object response = communicator.sendAction(RoutingAction.ELEMENT_SWIPE, descriptor, direction);
-        return response == DeviceCommunicator.VOID_SUCCESS;
+        boolean response = onDevice.swipe(point, direction);
+        return response;
     }
 
     /**

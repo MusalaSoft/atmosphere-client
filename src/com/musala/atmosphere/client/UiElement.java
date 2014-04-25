@@ -248,6 +248,53 @@ public class UiElement {
     }
 
     /**
+     * Simulates a pinch in on the element. NOTE emulator devices may not detect pinch gestures on UI elements with size
+     * smaller than 100x100dp.
+     * 
+     * @return <code>true</code> if the pinch in is successful, <code>false</code> if it fails.
+     */
+    public boolean pinchIn() {
+        innerRevalidation();
+
+        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        final int BOUNDS_OFFSET_DENOMINATOR = 10;
+        final int WIDTH_OFFSET = elementBounds.getWidth() / BOUNDS_OFFSET_DENOMINATOR;
+        final int HEIGHT_OFFSET = elementBounds.getHeight() / BOUNDS_OFFSET_DENOMINATOR;
+
+        // starting the pinch at a distance from the exact bounds of the element so that it will not affect other UI
+        // elements
+        Point lowerRight = elementBounds.getLowerRightCorner();
+        int firstFingerInitialX = lowerRight.getX() - WIDTH_OFFSET;
+        int firstFingerInitialY = lowerRight.getY() - HEIGHT_OFFSET;
+        Point firstFingerInitial = new Point(firstFingerInitialX, firstFingerInitialY);
+
+        Point upperLeft = elementBounds.getUpperLeftCorner();
+        int secondFingerInitialX = upperLeft.getX() + WIDTH_OFFSET;
+        int secondFingerInitialY = upperLeft.getY() + HEIGHT_OFFSET;
+        Point secondFingerInitial = new Point(secondFingerInitialX, secondFingerInitialY);
+
+        boolean result = onDevice.pinchIn(firstFingerInitial, secondFingerInitial);
+        return result;
+    }
+
+    /**
+     * Simulates a pinch out on the element. NOTE emulator devices may not detect pinch gestures on UI elements with
+     * size smaller than 100x100dp.
+     * 
+     * @return <code>true</code> if the pinch out is successful, <code>false</code> if it fails.
+     */
+    public boolean pinchOut() {
+        innerRevalidation();
+
+        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Point firstFingerEnd = elementBounds.getUpperLeftCorner();
+        Point secondFingerEnd = elementBounds.getLowerRightCorner();
+
+        boolean result = onDevice.pinchOut(firstFingerEnd, secondFingerEnd);
+        return result;
+    }
+
+    /**
      * Simulates dragging the UI widget until his ( which corner exactly? ) upper-left corner stands at position
      * (toX,toY) on the screen.
      * 
@@ -258,6 +305,35 @@ public class UiElement {
     public boolean drag(int toX, int toY) {
         // TODO implement uiElement.drag()
         return false;
+    }
+
+    /**
+     * Simulates swiping.
+     * 
+     * @param swipeDirection
+     *        - a {@link SwipeDirection} enum instance, describing the direction this element should be swiped in.
+     * @return <code>true</code> if the swiping is successful, <code>false</code> if it fails.
+     */
+    public boolean swipe(SwipeDirection swipeDirection) {
+        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Point centerPoint = elementBounds.getCenter();
+
+        return swipe(centerPoint, swipeDirection);
+    }
+
+    /**
+     * Swipes this element in a given direction.
+     * 
+     * @param direction
+     *        - a {@link SwipeDirection} enum instance, describing the direction this element should be swiped in.
+     * @param point
+     *        -a {@link Point} the point from which the swipe start.
+     * @return boolean indicating if this action was successful.
+     */
+    public boolean swipe(Point point, SwipeDirection direction) {
+        innerRevalidation();
+        boolean response = onDevice.swipe(point, direction);
+        return response;
     }
 
     /**
@@ -314,35 +390,6 @@ public class UiElement {
     }
 
     /**
-     * Simulates swiping.
-     * 
-     * @param swipeDirection
-     *        - a {@link SwipeDirection} enum instance, describing the direction this element should be swiped in.
-     * @return <code>true</code> if the swiping is successful, <code>false</code> if it fails.
-     */
-    public boolean swipe(SwipeDirection swipeDirection) {
-        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
-        Point centerPoint = elementBounds.getCenter();
-
-        return swipe(centerPoint, swipeDirection);
-    }
-
-    /**
-     * Swipes this element in a given direction.
-     * 
-     * @param direction
-     *        - a {@link SwipeDirection} enum instance, describing the direction this element should be swiped in.
-     * @param point
-     *        -a {@link Point} the point from which the swipe start.
-     * @return boolean indicating if this action was successful.
-     */
-    public boolean swipe(Point point, SwipeDirection direction) {
-        innerRevalidation();
-        boolean response = onDevice.swipe(point, direction);
-        return response;
-    }
-
-    /**
      * Focuses the current element.
      * 
      * @return <code>true</code> if the focusing is successful, <code>false</code> if it fails.
@@ -357,7 +404,8 @@ public class UiElement {
             return true;
         }
 
-        // The element is already validated if the flag is set, so no need to validate it again.
+        // The element is already validated if the flag is set, so no need to
+        // validate it again.
         tap();
 
         finalizeUiElementOperation();
@@ -378,7 +426,8 @@ public class UiElement {
     public boolean revalidate() {
         if (!isStale) {
             validator.forceRevalidation();
-            // if this element is no longer valid, the revalidation procedure will have set it to stale.
+            // if this element is no longer valid, the revalidation procedure
+            // will have set it to stale.
         }
         return !isStale;
     }
@@ -410,8 +459,8 @@ public class UiElement {
     }
 
     private void finalizeUiElementOperation() {
-        // Should be invoked exactly once in the end of all element-operating methods, whether
-        // its directly or indirectly invoked.
+        // Should be invoked exactly once in the end of all element-operating
+        // methods, whether its directly or indirectly invoked.
         try {
             Thread.sleep(UI_ELEMENT_OPERATION_WAIT_TIME);
         } catch (InterruptedException e) {

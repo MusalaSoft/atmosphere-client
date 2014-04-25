@@ -128,7 +128,7 @@ public class Bounds
 	 * 
 	 * @return
 	 */
-	int getHeight()
+	public int getHeight()
 	{
 		return height;
 	}

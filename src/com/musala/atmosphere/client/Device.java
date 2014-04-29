@@ -52,13 +52,7 @@ public class Device {
 
     private static final Logger LOGGER = Logger.getLogger(Device.class.getCanonicalName());
 
-    private static final String AWAKE_STATUS_DUMP_COMMAND = "dumpsys power";
-
     private static final String LOCKED_STATUS_DUMP_COMMAND = "dumpsys activity";
-
-    private static final String AWAKE_CHECK_STRING_API_17 = " mWakefulness=Awake";
-
-    private static final String AWAKE_CHECK_EXPRESSION_API_16 = "mPowerState=[1-9]\\d*";
 
     private static final String LOCKED_CHECK_STRING = "mLockScreenShown true";
 
@@ -449,20 +443,10 @@ public class Device {
      * 
      * @return <code>true</code> if the device is awake.<br>
      *         <code>false</code> if the device is asleep.<br>
-     *         <code>null</code> if the check failed.
      */
-    public Boolean isAwake() {
-        String dump = (String) communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, AWAKE_STATUS_DUMP_COMMAND);
-        if (communicator.getLastException() != null) {
-            return null;
-        }
-
-        Pattern awakeAPI16Pattern = Pattern.compile(AWAKE_CHECK_EXPRESSION_API_16);
-        Matcher awakeAPI16Matcher = awakeAPI16Pattern.matcher(dump);
-        boolean awakeAPI16 = awakeAPI16Matcher.find();
-        boolean awakeAPI17 = dump.contains(AWAKE_CHECK_STRING_API_17);
-
-        return awakeAPI16 || awakeAPI17;
+    public boolean isAwake() {
+        boolean response = (boolean) communicator.sendAction(RoutingAction.GET_AWAKE_STATUS);
+        return response;
     }
 
     /**

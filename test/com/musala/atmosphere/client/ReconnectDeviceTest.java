@@ -82,6 +82,7 @@ public class ReconnectDeviceTest {
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
                                                                       eq(RoutingAction.CALL_CANCEL),
                                                                       any(PhoneNumber.class));
+        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.GET_AWAKE_STATUS));
 
         mockedServerConnectionHandler = mock(ServerConnectionHandler.class);
 

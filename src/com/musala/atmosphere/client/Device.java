@@ -58,6 +58,12 @@ public class Device {
 
     private static final String SAMSUNG_MANUFACTURER_LOWERCASE = "samsung";
 
+    /**
+     * Default timeout for the hold phase from long click gesture. It needs to be more than the system long click
+     * timeout which varies from device to device, but is usually around 1 second.
+     */
+    public static final int LONG_PRESS_DEFAULT_TIMEOUT = 1500; // ms
+
     private DeviceSettingsManager deviceSettings;
 
     private ServerConnectionHandler serverConnectionHandler;
@@ -893,6 +899,34 @@ public class Device {
 
         communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, query);
         return communicator.getLastException() == null;
+    }
+
+    /**
+     * Executes long press on point on the screen with given coordinates and (default) timeout for the gesture
+     * {@value #LONG_PRESS_DEFAULT_TIMEOUT} ms.
+     * 
+     * @param pressPoint
+     *        - {@link Point point} on the screen where the long press should be executed.
+     * @return - true, if operation is successful, and false otherwise.
+     */
+    public boolean longPress(Point pressPoint) {
+        return longPress(pressPoint, LONG_PRESS_DEFAULT_TIMEOUT);
+    }
+
+    /**
+     * Executes long press on point on the screen with given coordinates and timeout for the gesture in ms.
+     * 
+     * @param pressPoint
+     *        - {@link Point point} on the screen where the long press should be executed.
+     * @param timeout
+     *        - the time in ms, showing how long should the holding part of the gesture continues.
+     * @return - true, if operation is successful, and false otherwise.
+     */
+    public boolean longPress(Point pressPoint, int timeout) {
+        Gesture longPress = GestureCreator.createLongPress(pressPoint.getX(), pressPoint.getY(), timeout);
+        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, longPress);
+
+        return response == DeviceCommunicator.VOID_SUCCESS;
     }
 
     /**

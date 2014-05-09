@@ -138,7 +138,8 @@ public class UiElement {
             finalizeUiElementOperation();
             return isElementTapped;
         } else {
-            throw new IllegalArgumentException("Point " + point + " not in element bounds.");
+            String message = String.format("Point %s not in element bounds.", point.toString());
+            throw new IllegalArgumentException(message);
         }
     }
 
@@ -243,7 +244,8 @@ public class UiElement {
             finalizeUiElementOperation();
             return isElementTapped;
         } else {
-            throw new IllegalArgumentException("Point " + point + " not in element bounds.");
+            String message = String.format("Point %s not in element bounds.", point.toString());
+            throw new IllegalArgumentException(message);
         }
     }
 
@@ -416,6 +418,60 @@ public class UiElement {
             }
         }
         return true;
+    }
+
+    /**
+     * Simulates long press on the given element with default timeout value.
+     * 
+     * @see Device#LONG_PRESS_DEFAULT_TIMEOUT
+     * @return true, if operation is successful, and false otherwise.
+     */
+    public boolean longPress() {
+        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Point centerPoint = elementBounds.getCenter();
+        Point tapPoint = elementBounds.getRelativePoint(centerPoint);
+
+        return longPress(tapPoint, Device.LONG_PRESS_DEFAULT_TIMEOUT);
+    }
+
+    /**
+     * Simulates long press on the given element with passed timeout value.
+     * 
+     * @param timeout
+     *        - time in ms for which the element should be held.
+     * @return true, if operation is successful, and false otherwise.
+     */
+    public boolean longPress(int timeout) {
+        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Point centerPoint = elementBounds.getCenter();
+        Point tapPoint = elementBounds.getRelativePoint(centerPoint);
+
+        return longPress(tapPoint, timeout);
+    }
+
+    /**
+     * Simulates long press on given point inside the current {@link UiElement uielement} for given time.
+     * 
+     * @param innerPoint
+     *        - point, representing the relative coordinates of the point for long press, inside the element's bounds.
+     * @param timeout
+     *        - time in ms for which the element should be held.
+     * @return true, if operation is successful, and false otherwise.
+     */
+    public boolean longPress(Point innerPoint, int timeout) {
+        innerRevalidation();
+        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Point longPressPoint = elementBounds.getUpperLeftCorner();
+        longPressPoint.addVector(innerPoint);
+
+        if (elementBounds.contains(longPressPoint)) {
+            boolean isElementTapped = onDevice.longPress(longPressPoint, timeout);
+            finalizeUiElementOperation();
+            return isElementTapped;
+        } else {
+            String message = String.format("Point %s not in element bounds.", innerPoint.toString());
+            throw new IllegalArgumentException(message);
+        }
     }
 
     /**

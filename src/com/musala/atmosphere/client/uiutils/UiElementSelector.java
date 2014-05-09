@@ -11,7 +11,6 @@ import com.musala.atmosphere.commons.util.Pair;
  * Selector class for screen UI elements, used to search for a specific element with given attributes.
  * 
  * @author georgi.gaydarov
- * @author vladimir.vladimirov
  * 
  */
 public class UiElementSelector {

@@ -157,4 +157,26 @@ public class GestureCreator {
 
         return scroll;
     }
+
+    /**
+     * Defines a {@link Timeline} for a long press gesture.
+     * 
+     * @param x
+     *        - the x coordinate of the tap point;
+     * @param y
+     *        - the y coordinate of the tap point;
+     * @param timeout
+     *        - the time in ms for which the point should stay pressed.
+     * @return a {@link Timeline} representing a long press.
+     */
+    public static Gesture createLongPress(int x, int y, int timeout) {
+
+        Timeline pressTimeline = new Timeline();
+        pressTimeline.add(new Anchor(x, y, 0));
+        pressTimeline.add(new Anchor(x, y, timeout));
+
+        Gesture longPress = new Gesture();
+        longPress.add(pressTimeline);
+        return longPress;
+    }
 }

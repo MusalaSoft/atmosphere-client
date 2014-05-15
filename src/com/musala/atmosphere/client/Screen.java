@@ -22,9 +22,12 @@ import org.xml.sax.SAXException;
 
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.uiutils.CssAttribute;
+import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
 import com.musala.atmosphere.client.uiutils.UiElementSelectionOption;
 import com.musala.atmosphere.client.uiutils.UiElementSelector;
 import com.musala.atmosphere.client.uiutils.UiXmlParser;
+import com.musala.atmosphere.commons.RoutingAction;
+import com.musala.atmosphere.commons.ui.UiElementDescriptor;
 
 /**
  * Class that holds a device screen information.
@@ -44,6 +47,8 @@ public class Screen {
 
     private org.jsoup.nodes.Document jSoupDocument;
 
+    private DeviceCommunicator communicator;
+
     /**
      * 
      * @param onDevice
@@ -51,6 +56,7 @@ public class Screen {
      */
     Screen(Device onDevice, String uiHierarchyXml) {
         this.onDevice = onDevice;
+        communicator = onDevice.getCommunicator();
         screenXml = uiHierarchyXml;
 
         // XPath DOM Document building
@@ -242,5 +248,22 @@ public class Screen {
         }
 
         return elements.size() > 0;
+    }
+
+    /**
+     * Waits for the existence of a given UiElement with a given timeout.
+     * 
+     * @param selector
+     *        - the selector of the given UI element.
+     * 
+     * @param timeout
+     *        - the given timeout.
+     * 
+     * @return boolean indicating if this action was successful.
+     */
+    public boolean waitForElementExists(UiElementSelector selector, Long timeout) {
+        UiElementDescriptor descriptor = UiElementAttributeExtractor.extract(selector);
+        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_EXISTS, descriptor, timeout);
+        return response;
     }
 }

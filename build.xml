@@ -2,7 +2,7 @@
 <project basedir="." default="build" name="AtmosphereClientCode">
     <import file="../common-build.xml"/>
 
-    <property name="dependency.projects" value="AtmosphereCommons,AtmosphereCSCommons,AtmosphereMacroCommons"/>
+    <property name="dependency.projects" value="AtmosphereCommons,AtmosphereCSCommons"/>
 
     <target name="init-tests">
         <mkdir dir="${testclasses.dir}"/>

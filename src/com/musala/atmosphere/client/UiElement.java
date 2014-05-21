@@ -204,6 +204,16 @@ public class UiElement {
     }
 
     /**
+     * Used to get the text of the given Ui element.
+     * 
+     * @return String with the text of this Ui element.
+     */
+    public String getText() {
+        String text = elementSelector.getStringValue(CssAttribute.TEXT);
+        return text;
+    }
+
+    /**
      * Simulates holding finger on the screen.
      * 
      * @return <code>true</code> if the holding is successful, <code>false</code> if it fails.

@@ -359,6 +359,23 @@ public class Device {
     }
 
     /**
+     * Gets a {@link ScreenOrientation} instance that contains information about the orientation of the screen.
+     * 
+     * @return a filled {@link ScreenOrientation} instance.
+     */
+    public ScreenOrientation getScreenOrientation() {
+        ScreenOrientation screenOrientation = null;
+        try {
+            int obtainedScreenOrientationValue = deviceSettings.getInt(AndroidSystemSettings.USER_ROTATION);
+            screenOrientation = ScreenOrientation.getValueOfInt(obtainedScreenOrientationValue);
+        } catch (SettingsParsingException e) {
+            String message = "Failed to get screen orientation.";
+            LOGGER.error(message, e);
+        }
+        return screenOrientation;
+    }
+
+    /**
      * Obtains information about the telephony services on the device.
      * 
      * @return {@link TelephonyInformation} instance.

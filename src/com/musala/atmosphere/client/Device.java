@@ -390,6 +390,25 @@ public class Device {
     }
 
     /**
+     * Returns device auto rotation state.
+     * 
+     * @return <code>true</code> if the auto rotation is on , <code>false</code> if it's not,<code>null</code> if the
+     *         method failed to get device auto rotation state.
+     */
+    public Boolean isAutoRotationOn() {
+        Boolean isAutoRotationOn = null;
+        try {
+            int autoRotationVelue = deviceSettings.getInt(AndroidSystemSettings.ACCELEROMETER_ROTATION);
+            isAutoRotationOn = autoRotationVelue == 1 ? true : false;
+
+        } catch (SettingsParsingException e) {
+            String message = "Failed to get device auto rotation.";
+            LOGGER.error(message, e);
+        }
+        return isAutoRotationOn;
+    }
+
+    /**
      * Holds a call to this device.<br>
      * Can only be applied on <b>emulators</b>.
      * 

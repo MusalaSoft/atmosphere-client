@@ -1,12 +1,9 @@
 package com.musala.atmosphere.client;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import com.musala.atmosphere.client.exceptions.InvalidElementActionException;
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
@@ -29,28 +26,28 @@ import com.musala.atmosphere.commons.ui.UiElementDescriptor;
  * 
  */
 public class UiElement {
-    private enum ElementNodeType {
+    protected enum ElementNodeType {
         XPATH_NODE,
         JSOUP_NODE;
     }
 
-    private ElementNodeType underlyingNodeType;
+    private static final long UI_ELEMENT_OPERATION_WAIT_TIME = 500;
 
-    private Node representedNodeXPath;
+    private static final Logger LOGGER = Logger.getLogger(UiElement.class);
 
-    private org.jsoup.nodes.Node representedNodeJSoup;
+    protected ElementNodeType underlyingNodeType;
+
+    protected Node representedNodeXPath;
+
+    protected org.jsoup.nodes.Node representedNodeJSoup;
+
+    protected Device onDevice;
 
     private UiElementSelector elementSelector;
-
-    private Device onDevice;
 
     private DeviceCommunicator communicator;
 
     private ElementValidationType validationType;
-
-    private static final Logger LOGGER = Logger.getLogger(UiElement.class);
-
-    private static final long UI_ELEMENT_OPERATION_WAIT_TIME = 500;
 
     private UiElementValidator validator = new UiElementValidator();
 
@@ -87,6 +84,24 @@ public class UiElement {
         this(UiXmlParser.getAttributeMapOfNode(representingNode), onDevice);
         underlyingNodeType = ElementNodeType.JSOUP_NODE;
         representedNodeJSoup = representingNode;
+    }
+
+    UiElement(UiElement uiElement) {
+        Map<String, String> nodeAttributesMap;
+        if (uiElement.underlyingNodeType == ElementNodeType.JSOUP_NODE) {
+            nodeAttributesMap = UiXmlParser.getAttributeMapOfNode(uiElement.representedNodeJSoup);
+            representedNodeJSoup = uiElement.representedNodeJSoup;
+        } else {
+            nodeAttributesMap = UiXmlParser.getAttributeMapOfNode(uiElement.representedNodeXPath);
+            representedNodeXPath = uiElement.representedNodeXPath;
+        }
+        underlyingNodeType = uiElement.underlyingNodeType;
+        elementSelector = new UiElementSelector(nodeAttributesMap);
+        this.onDevice = uiElement.onDevice;
+        communicator = onDevice.getCommunicator();
+        validationType = ElementValidationType.MANUAL;
+        validator = onDevice.getUiValidator();
+        validator.addElementForValidation(this);
     }
 
     /**
@@ -154,53 +169,6 @@ public class UiElement {
         Point tapPoint = elementBounds.getRelativePoint(centerPoint);
 
         return tap(tapPoint);
-    }
-
-    /**
-     * Used to get list of children of the given UI Element. Works only for ViewGroups.
-     * 
-     * @return List with all the UI elements that inherit from this UI element or empty List if such don't exist.
-     */
-    public List<UiElement> getChildren() {
-        List<UiElement> result;
-        if (underlyingNodeType == ElementNodeType.XPATH_NODE) {
-            result = getChildrenForXPath();
-        } else {
-            result = getChildrenForJSoup();
-        }
-        return result;
-    }
-
-    private List<UiElement> getChildrenForXPath() {
-        NodeList nodeChildren = representedNodeXPath.getChildNodes();
-        List<UiElement> result = new LinkedList<UiElement>();
-
-        for (int i = 0; i < nodeChildren.getLength(); i++) {
-            Node childNode = nodeChildren.item(i);
-            if (childNode.getNodeType() != Node.ELEMENT_NODE) {
-                continue;
-            }
-            UiElement childElement = new UiElement(childNode, onDevice);
-            result.add(childElement);
-        }
-
-        return result;
-    }
-
-    private List<UiElement> getChildrenForJSoup() {
-        List<org.jsoup.nodes.Node> nodeChildren = representedNodeJSoup.childNodes();
-        List<UiElement> result = new LinkedList<UiElement>();
-
-        for (org.jsoup.nodes.Node childNode : nodeChildren) {
-            // This is a workaround to check if the child node is an element
-            if (childNode.attr("bounds") == null) {
-                continue;
-            }
-            UiElement childElement = new UiElement(childNode, onDevice);
-            result.add(childElement);
-        }
-
-        return result;
     }
 
     /**

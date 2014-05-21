@@ -121,7 +121,7 @@ public class UiElementFetchingTest {
     public void getElementsByCSSTest() throws UiElementFetchingException {
         final String desiredElementClass = "android.widget.FrameLayout";
 
-        List<UiElement> elements = screen.getElementsByCSS("[class=" + desiredElementClass + "]");
+        List<UiElement> elements = screen.getAllElementsByCSS("[class=" + desiredElementClass + "]");
 
         assertEquals("Desired elements were not fetched correctly.", elements.size(), 4);
     }

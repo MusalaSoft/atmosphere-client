@@ -1,6 +1,8 @@
 package com.musala.atmosphere.client.uiutils;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.xpath.XPath;
@@ -89,12 +91,8 @@ public class UiXmlParser {
      */
     public static org.jsoup.nodes.Node getJSoupNode(org.jsoup.nodes.Document document, String query)
         throws UiElementFetchingException {
-        Elements elements = document.select(query);
+        List<org.jsoup.nodes.Node> elements = getAllJSoupNodes(document, query);
         int foundElements = elements.size();
-        if (foundElements == 0) {
-            String exceptionMessage = String.format("No element found for the JSoup CSS expression: \"%s\"", query);
-            throw new UiElementFetchingException(exceptionMessage);
-        }
         if (foundElements > 1) {
             String exceptionMessage = String.format("Found %d elements that match the query \"%s\". Please be more specific.",
                                                     foundElements,
@@ -104,6 +102,31 @@ public class UiXmlParser {
 
         org.jsoup.nodes.Node node = elements.get(0);
         return node;
+    }
+
+    /**
+     * Gets a List<{@link org.jsoup.nodes.Node Node}> from a {@link org.jsoup.nodes.Document Document} by a JSoup query.
+     * 
+     * @param document
+     *        document to search in.
+     * @param query
+     *        JSoup type element selecting query.
+     * @return - list with all found {@link org.jsoup.nodes.Node Node} objects.
+     * @throws UiElementFetchingException
+     *         - when no elements are found for the passed JSoup expression.
+     */
+    public static List<org.jsoup.nodes.Node> getAllJSoupNodes(org.jsoup.nodes.Document document, String query)
+        throws UiElementFetchingException {
+        Elements elements = document.select(query);
+
+        if (elements.isEmpty()) {
+            String exceptionMessage = "No elements found for the passed JSoup expression.";
+            throw new UiElementFetchingException(exceptionMessage);
+        }
+
+        List<org.jsoup.nodes.Node> allNodes = new LinkedList<>();
+        allNodes.addAll(elements);
+        return allNodes;
     }
 
     /**

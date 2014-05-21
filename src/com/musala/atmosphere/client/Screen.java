@@ -152,7 +152,7 @@ public class Screen {
      * @return List containing all found elements of type {@link UiElement UiElement}.
      * @throws UiElementFetchingException
      */
-    public List<UiElement> getElementsByCSS(String query) throws UiElementFetchingException {
+    public List<UiElement> getAllElementsByCSS(String query) throws UiElementFetchingException {
         List<UiElement> uiElementList = new ArrayList<UiElement>();
 
         Elements elements = UiXmlParser.getJSoupElements(jSoupDocument, query);
@@ -174,7 +174,7 @@ public class Screen {
      */
     public List<UiElement> getElements(UiElementSelector selector) throws UiElementFetchingException {
         String cssQuery = selector.buildCssQuery();
-        List<UiElement> result = getElementsByCSS(cssQuery);
+        List<UiElement> result = getAllElementsByCSS(cssQuery);
         return result;
     }
 
@@ -265,5 +265,51 @@ public class Screen {
         UiElementDescriptor descriptor = UiElementAttributeExtractor.extract(selector);
         boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_EXISTS, descriptor, timeout);
         return response;
+    }
+
+    /**
+     * Searches for given UI Collection in the current screen XML structure using a {@link UiElementSelector
+     * UiElementSelector} instance.
+     * 
+     * @param selector
+     *        - object of type {@link UiElementSelector}.
+     * @return the requested {@link UiCollection UiCollection}.
+     * @throws UiElementFetchingException
+     */
+    public UiCollection getCollectionBySelector(UiElementSelector selector) throws UiElementFetchingException {
+        String cssQuery = selector.buildCssQuery();
+        UiCollection result = getCollectionByCSS(cssQuery);
+        return result;
+    }
+
+    /**
+     * Searches for given UI Collection in the current screen XML structure using CSS.
+     * 
+     * @param query
+     *        - CSS selector query.
+     * @return the requested {@link UiCollection UiCollection}.
+     * @throws UiElementFetchingException
+     */
+    public UiCollection getCollectionByCSS(String cssQuery) throws UiElementFetchingException {
+        org.jsoup.nodes.Node node = UiXmlParser.getJSoupNode(jSoupDocument, cssQuery);
+        UiCollection returnElement = new UiCollection(node, onDevice);
+        return returnElement;
+    }
+
+    /**
+     * Searches for given UI Collection in the current screen XML structure using XPath.
+     * 
+     * @param query
+     *        XPath query.
+     * @return the requested {@link UiCollection UiCollection}.
+     * @throws XPathExpressionException
+     * @throws UiElementFetchingException
+     */
+    public UiCollection getCollectionByXPath(String xPathQuery)
+        throws UiElementFetchingException,
+            XPathExpressionException {
+        Node node = UiXmlParser.getXPathNode(xPathDomDocument, xPathQuery);
+        UiCollection returnElement = new UiCollection(node, onDevice);
+        return returnElement;
     }
 }

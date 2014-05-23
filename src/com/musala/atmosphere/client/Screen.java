@@ -114,6 +114,20 @@ public class Screen {
     }
 
     /**
+     * Searches for given ScrollableView in the current screen XML structure using CSS
+     * 
+     * @param query
+     *        CSS selector query
+     * @return the requested ScrollableView
+     * @throws UiElementFetchingException
+     */
+    public ScrollableView getScrollableViewtByCSS(String query) throws UiElementFetchingException {
+        org.jsoup.nodes.Node node = UiXmlParser.getJSoupNode(jSoupDocument, query);
+        ScrollableView returnElement = new ScrollableView(node, onDevice);
+        return returnElement;
+    }
+
+    /**
      * Searches for given UI element in the current screen XML structure using XPath.
      * 
      * @param query
@@ -140,6 +154,21 @@ public class Screen {
     public UiElement getElement(UiElementSelector selector) throws UiElementFetchingException {
         String cssQuery = selector.buildCssQuery();
         UiElement result = getElementByCSS(cssQuery);
+        return result;
+    }
+
+    /**
+     * Searches for given ScrollableView in the current screen XML structure using a {@link UiElementSelector
+     * UiElementSelector} instance.
+     * 
+     * @param selector
+     *        - object of type {@link UiElementSelector}
+     * @return the requested {@link ScrollableView ScrollableView}
+     * @throws UiElementFetchingException
+     */
+    public ScrollableView getScrollableView(UiElementSelector selector) throws UiElementFetchingException {
+        String cssQuery = selector.buildCssQuery();
+        ScrollableView result = getScrollableViewtByCSS(cssQuery);
         return result;
     }
 

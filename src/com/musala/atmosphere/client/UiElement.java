@@ -31,21 +31,21 @@ public class UiElement {
         JSOUP_NODE;
     }
 
+    protected ElementNodeType underlyingNodeType;
+
     private static final long UI_ELEMENT_OPERATION_WAIT_TIME = 500;
+
+    protected Node representedNodeXPath;
 
     private static final Logger LOGGER = Logger.getLogger(UiElement.class);
 
-    protected ElementNodeType underlyingNodeType;
-
-    protected Node representedNodeXPath;
+    protected UiElementSelector elementSelector;
 
     protected org.jsoup.nodes.Node representedNodeJSoup;
 
     protected Device onDevice;
 
-    private UiElementSelector elementSelector;
-
-    private DeviceCommunicator communicator;
+    protected DeviceCommunicator communicator;
 
     private ElementValidationType validationType;
 
@@ -53,7 +53,7 @@ public class UiElement {
 
     private boolean isStale = false;
 
-    private UiElement(Map<String, String> nodeAttributesMap, Device onDevice) {
+    protected UiElement(Map<String, String> nodeAttributesMap, Device onDevice) {
         elementSelector = new UiElementSelector(nodeAttributesMap);
         this.onDevice = onDevice;
         communicator = onDevice.getCommunicator();
@@ -68,7 +68,7 @@ public class UiElement {
      * @param representingNode
      * @param onDevice
      */
-    UiElement(Node representingNode, Device onDevice) {
+    protected UiElement(Node representingNode, Device onDevice) {
         this(UiXmlParser.getAttributeMapOfNode(representingNode), onDevice);
         underlyingNodeType = ElementNodeType.XPATH_NODE;
         representedNodeXPath = representingNode;
@@ -80,7 +80,7 @@ public class UiElement {
      * @param representingNode
      * @param onDevice
      */
-    UiElement(org.jsoup.nodes.Node representingNode, Device onDevice) {
+    protected UiElement(org.jsoup.nodes.Node representingNode, Device onDevice) {
         this(UiXmlParser.getAttributeMapOfNode(representingNode), onDevice);
         underlyingNodeType = ElementNodeType.JSOUP_NODE;
         representedNodeJSoup = representingNode;

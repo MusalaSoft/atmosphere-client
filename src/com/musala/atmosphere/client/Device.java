@@ -137,7 +137,7 @@ public class Device {
      *        - location of the file to be installed.
      * @return <code>true</code> if the APK installation is successful, <code>false</code> if it fails.
      */
-    private boolean doApkInstallation(String path) {
+    private boolean doApkInstallation(String path, boolean shouldForceInstall) {
         // A string that will be used to tell which step of installation was
         // reached
         String currentInstallationStepDescription = null;
@@ -167,7 +167,7 @@ public class Device {
 
             currentInstallationStepDescription = "Installing transferred file";
             LOGGER.info(currentInstallationStepDescription);
-            response = communicator.sendAction(RoutingAction.APK_BUILD_AND_INSTALL);
+            response = communicator.sendAction(RoutingAction.APK_BUILD_AND_INSTALL, shouldForceInstall);
             if (response != DeviceCommunicator.VOID_SUCCESS) {
                 throw communicator.getLastException();
             }
@@ -477,7 +477,20 @@ public class Device {
      * @return <code>true</code> if the APK installation is successful, <code>false</code> if it fails.
      */
     public boolean installAPK(String path) {
-        return doApkInstallation(path);
+        return doApkInstallation(path, false);
+    }
+
+    /**
+     * Installs a specified Android application file on this device.<br>
+     * 
+     * @param path
+     *        - location of the file to be installed.
+     * @param shouldForceInstall
+     *        - Indicates whether a force install should be performed
+     * @return <code>true</code> if the APK installation is successful, <code>false</code> if it fails.
+     */
+    public boolean installAPK(String path, boolean shouldForceInstall) {
+        return doApkInstallation(path, shouldForceInstall);
     }
 
     /**

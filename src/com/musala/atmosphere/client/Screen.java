@@ -290,7 +290,7 @@ public class Screen {
      * 
      * @return boolean indicating if this action was successful.
      */
-    public boolean waitForElementExists(UiElementSelector selector, Long timeout) {
+    public boolean waitForElementExists(UiElementSelector selector, Integer timeout) {
         UiElementDescriptor descriptor = UiElementAttributeExtractor.extract(selector);
         boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_EXISTS, descriptor, timeout);
         return response;

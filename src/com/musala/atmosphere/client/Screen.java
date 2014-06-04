@@ -297,6 +297,23 @@ public class Screen {
     }
 
     /**
+     * Waits for a window content update event to occur. If a package name for the window is specified, but the current
+     * window does not have the same package name, the function returns immediately.
+     * 
+     * @param packageName
+     *        - the specified window package name (can be null). If null, a window update from any front-end window will
+     *        end the wait
+     * @param timeout
+     *        - the timeout of the operation
+     * @return <code>true</code> if a window update occurred, <code>false</code> if timeout has elapsed or if the
+     *         current window does not have the specified package name
+     */
+    public boolean waitForWindowUpdate(String packageName, int timeout) {
+        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_WINDOW_UPDATE, packageName, timeout);
+        return response;
+    }
+
+    /**
      * Searches for given UI Collection in the current screen XML structure using a {@link UiElementSelector
      * UiElementSelector} instance.
      * 

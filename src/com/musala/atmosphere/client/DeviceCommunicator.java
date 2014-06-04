@@ -70,6 +70,7 @@ public class DeviceCommunicator {
      */
     public Object sendAction(RoutingAction action, Object... args) {
         lastSentActionException = null;
+
         try {
             Object response = wrappedClientDevice.route(invocationPasskey, action, args);
             if (response == null) {
@@ -86,6 +87,7 @@ public class DeviceCommunicator {
             LOGGER.error("Executing action was rejected by the server.", e);
             throw new DeviceInvocationRejectedException(e);
         }
+        
         return null;
     }
 

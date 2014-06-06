@@ -1,5 +1,7 @@
 package com.musala.atmosphere.client.exceptions;
 
+import com.musala.atmosphere.commons.exceptions.AtmosphereRuntimeException;
+
 /**
  * This exception is thrown when the Client tries to install application on a device, but a fatal error occurs and the
  * installation fails.
@@ -7,24 +9,20 @@ package com.musala.atmosphere.client.exceptions;
  * @author vladimir.vladimirov
  * 
  */
-public class ApkInstallationFailedException extends RuntimeException
-{
-	/**
-	 * auto generated serialization id
-	 */
-	private static final long serialVersionUID = -4948287126155328678L;
+public class ApkInstallationFailedException extends AtmosphereRuntimeException {
+    /**
+     * auto generated serialization id
+     */
+    private static final long serialVersionUID = -4948287126155328678L;
 
-	public ApkInstallationFailedException()
-	{
-	}
+    public ApkInstallationFailedException() {
+    }
 
-	public ApkInstallationFailedException(String message)
-	{
-		super(message);
-	}
+    public ApkInstallationFailedException(String message) {
+        super(message);
+    }
 
-	public ApkInstallationFailedException(String message, Throwable inner)
-	{
-		super(message, inner);
-	}
+    public ApkInstallationFailedException(String message, Throwable inner) {
+        super(message, inner);
+    }
 }

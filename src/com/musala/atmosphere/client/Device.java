@@ -1001,4 +1001,16 @@ public class Device {
                                                              resolution.getValue()));
         }
     }
+
+    /**
+     * Check if there are running processes on the device with the given package
+     * 
+     * @param packageName
+     *        - package of the process that we want to check
+     * @return - true, if there are running process and false otherwise
+     */
+
+    public boolean isProcessRunning(String packageName) {
+        return (boolean) communicator.sendAction(RoutingAction.GET_PROCESS_RUNNING, packageName);
+    }
 }

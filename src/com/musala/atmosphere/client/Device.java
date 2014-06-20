@@ -1013,4 +1013,18 @@ public class Device {
     public boolean isProcessRunning(String packageName) {
         return (boolean) communicator.sendAction(RoutingAction.GET_PROCESS_RUNNING, packageName);
     }
+
+    /**
+     * ForceStops all the processes containing the given package.
+     * 
+     * @param packageName
+     *        - package of the processes that we want to stop.
+     * @return - true, if execution of the command is successful, and false otherwise.
+     * 
+     * @note - doesn't work for system processes in the Android OS such as phone, sms, etc.
+     */
+    public boolean forceStopProcess(String packageName) {
+        Object response = communicator.sendAction(RoutingAction.FORCE_STOP_PROCESS, packageName);
+        return response == DeviceCommunicator.VOID_SUCCESS;
+    }
 }

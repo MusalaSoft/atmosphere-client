@@ -1,12 +1,22 @@
 package com.musala.atmosphere.client;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.musala.atmosphere.client.exceptions.InvalidElementActionException;
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
+import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.geometry.Bounds;
 import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.client.uiutils.CssAttribute;
@@ -500,5 +510,49 @@ public class UiElement {
         } catch (InterruptedException e) {
             LOGGER.info(e);
         }
+    }
+
+    /**
+     * Gets all child UiElements that matched the query
+     * 
+     * @param xPathQuery
+     *        XPath type node selecting query.
+     * @return Returns all the children of the UiElement that matched the xPathQuery
+     * @throws XPathExpressionException
+     * @throws UiElementFetchingException
+     * @throws ParserConfigurationException
+     */
+    public List<UiElement> getChildren(String xPathQuery)
+        throws XPathExpressionException,
+            UiElementFetchingException,
+            ParserConfigurationException {
+
+        // Creating new Document
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document newDocument = builder.newDocument();
+
+        // Importing the node of the UiElement in the new Document
+        // We can't use the Node directly a new Node instance is needed
+        Node importedNode = newDocument.importNode(representedNodeXPath, true);
+        newDocument.appendChild(importedNode);
+
+        // Constructing the UiElements by given xPathNode
+        NodeList matchedNodes = UiXmlParser.getXPathNodeChildren(newDocument, xPathQuery);
+        List<UiElement> matchedChildrenNodes = new LinkedList<UiElement>();
+        for (int i = 0; i < matchedNodes.getLength(); i++) {
+            Node childNode = matchedNodes.item(i);
+            if (!childNode.isEqualNode(representedNodeXPath)) {
+                UiElement returnElement = new UiElement(childNode, onDevice);
+                matchedChildrenNodes.add(returnElement);
+            }
+        }
+        
+        if (matchedChildrenNodes == null || matchedChildrenNodes.size() == 0) {
+            throw new UiElementFetchingException("No elements found for the XPath expression .");
+        }
+        
+        return matchedChildrenNodes;
     }
 }

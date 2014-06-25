@@ -165,4 +165,28 @@ public class UiXmlParser {
         return nodeAttributeMap;
     }
 
+    /**
+     * Gets a NodeList of all the Nodes that matched the query
+     * 
+     * @param domDocument
+     *        document to search in.
+     * @param xPathQuery
+     *        XPath type node selecting query.
+     * @return NodeList containing all Nodes that matched the query
+     * @throws UiElementFetchingException
+     * @throws XPathExpressionException
+     */
+    public static NodeList getXPathNodeChildren(Document domDocument, String xPathQuery)
+        throws UiElementFetchingException,
+            XPathExpressionException {
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        XPathExpression expression = xPath.compile(xPathQuery);
+
+        NodeList nodeListResults = (NodeList) expression.evaluate(domDocument, XPathConstants.NODESET);
+        if (nodeListResults == null || nodeListResults.getLength() == 0) {
+            throw new UiElementFetchingException("No elements found for the XPath expression .");
+        }
+        return nodeListResults;
+    }
+
 }

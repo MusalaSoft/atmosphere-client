@@ -30,6 +30,8 @@ public class CssToXPathConverter {
 
     private final static String EQUAL_FORMATTER = "%s[@%s='%s']";
 
+    private final static String XPATH_QUERY_FORMATTER = "//*%s";
+
     /**
      * Divides the CSS Query to property selectors
      * 
@@ -134,6 +136,8 @@ public class CssToXPathConverter {
                 throw new InvalidCssQueryException();
             }
         }
+
+        xpathQuery = String.format(XPATH_QUERY_FORMATTER, xpathQuery);
 
         return xpathQuery.toString();
     }

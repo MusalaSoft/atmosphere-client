@@ -16,12 +16,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.InvalidElementActionException;
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.geometry.Bounds;
 import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.client.uiutils.CssAttribute;
+import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
 import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
 import com.musala.atmosphere.client.uiutils.UiElementSelector;
 import com.musala.atmosphere.client.uiutils.UiXmlParser;
@@ -556,6 +558,27 @@ public class UiElement {
         }
 
         return matchedChildrenNodes;
+    }
+
+    /**
+     * Gets all child UiElements that match the given CSS query
+     * 
+     * @param cssQuery
+     *        - a string representing a CSS Query
+     * @return Returns all children of the UiElement that match the given CSS query
+     * @throws InvalidCssQueryException
+     * @throws XPathExpressionException
+     * @throws UiElementFetchingException
+     * @throws ParserConfigurationException
+     */
+    public List<UiElement> getChildrenByCssQuery(String cssQuery)
+        throws InvalidCssQueryException,
+            XPathExpressionException,
+            UiElementFetchingException,
+            ParserConfigurationException {
+        String convertedXPathQuery = CssToXPathConverter.convertCssToXPath(cssQuery);
+
+        return getChildren(convertedXPathQuery);
     }
 
     @Override

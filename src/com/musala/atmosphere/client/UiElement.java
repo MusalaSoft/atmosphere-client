@@ -9,6 +9,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -548,11 +550,30 @@ public class UiElement {
                 matchedChildrenNodes.add(returnElement);
             }
         }
-        
+
         if (matchedChildrenNodes == null || matchedChildrenNodes.size() == 0) {
             throw new UiElementFetchingException("No elements found for the XPath expression .");
         }
-        
+
         return matchedChildrenNodes;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null) {
+            return false;
+        }
+        if (getClass() != object.getClass()) {
+            return false;
+        }
+
+        UiElement uiElement = (UiElement) object;
+
+        return new EqualsBuilder().append(elementSelector, uiElement.elementSelector).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(elementSelector).toHashCode();
     }
 }

@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import com.musala.atmosphere.client.geometry.Bounds;
 import com.musala.atmosphere.commons.util.Pair;
 
@@ -91,7 +94,7 @@ public class UiElementSelector {
      * <code>
      * uiElementSelector.addSelectionAttribute(SupportedCssAttribute.CHECKABLE, true);
      * </code>
-     *
+     * 
      * @param attribute
      *        The attribute for which to add selection expression. If selection expression already existed for the
      *        attribute it will be replaced.
@@ -207,5 +210,24 @@ public class UiElementSelector {
         }
         throw new IllegalArgumentException("Constructing ui element selector with attribute of unsupported type "
                 + cssAttribute.getAttributeType());
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null) {
+            return false;
+        }
+        if (getClass() != object.getClass()) {
+            return false;
+        }
+
+        UiElementSelector uiElementSelector = (UiElementSelector) object;
+
+        return new EqualsBuilder().append(attributeProjectionMap, uiElementSelector.attributeProjectionMap).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(attributeProjectionMap).toHashCode();
     }
 }

@@ -116,6 +116,6 @@ public class UiElementGetChildrenByCssQueryTest {
             ParserConfigurationException {
         UiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
 
-        parentUiElement.getChildrenByCssQuery(CSS_QUERY_FOR_UNEXISTING_CHILDREN_ELEMENTS);
+        parentUiElement.getChildrenByCssQuery(CSS_QUERY_FOR_NON_CHILDREN_ELEMENT);
     }
 }

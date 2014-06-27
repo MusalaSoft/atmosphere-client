@@ -24,11 +24,11 @@ public class CssToXPathConverter {
 
     private final static String REGEX_FOR_CSS_QUERY_WITH_WORD_MATCH = ".+~=.+";
 
-    private final static String CONTAINS_FORMATTER = "%s[contains(@%s,%s)]";
+    private final static String CONTAINS_FORMATTER = "%s[contains(@%s,'%s')]";
 
     private final static String WORD_MATCH_FORMATTER = "%s[contains(concat(' ', @%s, ' '), ' %s ')]";
 
-    private final static String EQUAL_FORMATTER = "%s[@%s=%s]";
+    private final static String EQUAL_FORMATTER = "%s[@%s='%s']";
 
     /**
      * Divides the CSS Query to property selectors
@@ -118,10 +118,7 @@ public class CssToXPathConverter {
                 selectionExpression = attributeNameAndSelectionExpression[1];
 
                 if (isAttributeStringOfTheEnumeration(attributeName)) {
-                    xpathQuery = String.format(WORD_MATCH_FORMATTER,
-                                               xpathQuery,
-                                               attributeName,
-                                               selectionExpression.substring(1, selectionExpression.length() - 1));
+                    xpathQuery = String.format(WORD_MATCH_FORMATTER, xpathQuery, attributeName, selectionExpression);
                 }
 
             } else if (partOfCssQuery.matches(REGEX_FOR_CSS_QUERY_WITH_EQUAL)) {

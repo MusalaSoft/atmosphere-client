@@ -1,7 +1,7 @@
 package com.musala.atmosphere.client;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 
 import java.io.InputStream;
@@ -21,7 +21,7 @@ public class UiElementEqualsTest {
 
     private static final String FIRST_CSS_QUERY = "[index=1][class=android.widget.FrameLayout][bounds=[0,55][240,320]]";
 
-    private static final String FIRST_XPATH_QUERY = "//hierarchy//*[@class='android.widget.FrameLayout'][@index='1'][@bounds='[0,55][240,320]']";
+    private static final String FIRST_XPATH_QUERY = "//*[@class='android.widget.FrameLayout'][@index='1'][@bounds='[0,55][240,320]']";
 
     private static final String SECOND_CSS_QUERY = "[index=0][content-desc=derp]";
 
@@ -56,6 +56,6 @@ public class UiElementEqualsTest {
         UiElement firstUiElement = screen.getElementByCSS(FIRST_CSS_QUERY);
         UiElement secondUiElement = screen.getElementByCSS(SECOND_CSS_QUERY);
 
-        assertNotEquals("UiElements are equal.", firstUiElement, secondUiElement);
+        assertFalse("UiElements are equal.", firstUiElement.equals(secondUiElement));
     }
 }

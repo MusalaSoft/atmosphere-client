@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import java.io.InputStream;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -18,7 +19,17 @@ public class UiElementGetChildrenTest {
 
     private static final String TEST_XML = "testXml3.xml";
 
-    private static final String XPATH_SELECTOR_LINEAR_LAYOUT_NOTE = "//node[@class='android.widget.LinearLayout' and @package='com.example.coolstory' and @content-desc='derp']";
+    private static final String XPATH_SELECTOR_LINEAR_LAYOUT_PARENT = "//node[@class='android.widget.LinearLayout' and @package='com.example.coolstory' and @content-desc='derp']";
+
+    private static final String XPATH_SELECTOR_IMAGE_VIEW = "//node[@class='android.widget.ImageView']";
+
+    private static final String XPATH_SELECTOR_NONEXISTEND_NODE = "//node[@class='android.widget.ImageView' and @content-desc='nonexistent']";
+
+    private static final String XPATH_SELECTOR_FRAME_LAYOUT = "//node[@index=1 and @class='android.widget.FrameLayout' and @package='com.example.coolstory']";
+
+    private static final String XPATH_SELECTOR_FRAME_LAYOUT_FIRST_CHILD = "//node[@index=1 and @text='text' and @class='android.widget.FrameLayout' and @package='com.example.coolstory']";
+
+    private static final String XPATH_SELECTOR_FRAME_LAYOUT_SECOND_CHILD = "//node[@index=1 and @text='' and @class='android.widget.FrameLayout' and @package='com.example.coolstory']";
 
     private Screen screen;
 
@@ -43,40 +54,40 @@ public class UiElementGetChildrenTest {
 
     @Test
     public void testGetChildrenByxPathSelector() throws Exception {
-        UiElement linearLayout = screen.getElementByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_NOTE);
-        final int EXPECTED_CHILDREN = 1;
-        String xPathSelectorChildren = "//node[@class='android.widget.ImageView']";
-        List<UiElement> children = linearLayout.getChildren(xPathSelectorChildren);
-        assertEquals("Incorrect number of found children for xPath.", EXPECTED_CHILDREN, children.size());
-        final int EXPECTED_CHILDREN_FRAME = 2;
-        String xPathelectorChildrenFrame = "//node[@text='text' and @class='android.widget.FrameLayout']";
-        List<UiElement> childrenFrame = linearLayout.getChildren(xPathelectorChildrenFrame);
-        assertEquals("Incorrect number of found children for xPath", EXPECTED_CHILDREN_FRAME, childrenFrame.size());
+        UiElement linearLayoutParent = screen.getElementByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_PARENT);
+
+        UiElement firstAndOnlyExpectedChild = screen.getElementByXPath(XPATH_SELECTOR_IMAGE_VIEW);
+        List<UiElement> expectedChildrenList = new LinkedList<UiElement>();
+        expectedChildrenList.add(firstAndOnlyExpectedChild);
+
+        List<UiElement> returnedChildrenList = linearLayoutParent.getChildren(XPATH_SELECTOR_IMAGE_VIEW);
+        assertEquals("The returned UiElements are not as expected", expectedChildrenList, returnedChildrenList);
     }
 
     @Test(expected = UiElementFetchingException.class)
     public void testGetChildrenGetParentNote() throws Exception {
-        UiElement linearLayout = screen.getElementByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_NOTE);
-        final int EXPECTED_CHILDREN = 0;
-        List<UiElement> children = linearLayout.getChildren(XPATH_SELECTOR_LINEAR_LAYOUT_NOTE);
-        assertEquals("Incorrect number of found children for xPath.", EXPECTED_CHILDREN, children.size());
+        UiElement linearLayoutParentNode = screen.getElementByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_PARENT);
+        linearLayoutParentNode.getChildren(XPATH_SELECTOR_LINEAR_LAYOUT_PARENT);
     }
 
     @Test(expected = UiElementFetchingException.class)
     public void testGetChildrenNone() throws Exception {
-        UiElement linearLayout = screen.getElementByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_NOTE);
-
-        String xPathSelectorChildren = "//node[@class='android.widget.ImageView' and @content-desc='nonexistent']";
-        linearLayout.getChildren(xPathSelectorChildren);
+        UiElement linearLayoutParent = screen.getElementByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_PARENT);
+        linearLayoutParent.getChildren(XPATH_SELECTOR_NONEXISTEND_NODE);
     }
 
     @Test
     public void testGetChildrenDifferentLevels() throws Exception {
-        UiElement linearLayout = screen.getElementByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_NOTE);
-        final int EXPECTED_CHILDREN = 8;
-        String xPathSelectorChildren = "//node[@class='android.widget.FrameLayout' and @package='com.example.coolstory']";
-        List<UiElement> children = linearLayout.getChildren(xPathSelectorChildren);
-        assertEquals("Incorrect number of found children for xPath.", EXPECTED_CHILDREN, children.size());
+        UiElement linearLayoutParent = screen.getElementByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_PARENT);
 
+        UiElement firstExpectedChild = screen.getElementByXPath(XPATH_SELECTOR_FRAME_LAYOUT_FIRST_CHILD);
+        UiElement secondExpectedChild = screen.getElementByXPath(XPATH_SELECTOR_FRAME_LAYOUT_SECOND_CHILD);
+
+        List<UiElement> ExpectedChildrenList = new LinkedList<UiElement>();
+        ExpectedChildrenList.add(firstExpectedChild);
+        ExpectedChildrenList.add(secondExpectedChild);
+
+        List<UiElement> returnedChildrenList = linearLayoutParent.getChildren(XPATH_SELECTOR_FRAME_LAYOUT);
+        assertEquals("The returned UiElements are not as expected", ExpectedChildrenList, returnedChildrenList);
     }
 }

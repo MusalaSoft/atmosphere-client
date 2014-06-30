@@ -11,21 +11,20 @@ import java.lang.annotation.RetentionPolicy;
  * 
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Server
-{
-	/**
-	 * IP address of the server.
-	 */
-	String ip();
+public @interface Server {
+    /**
+     * IP address of the server.
+     */
+    String ip();
 
-	/**
-	 * Port of the server.
-	 */
-	int port();
+    /**
+     * Port of the server.
+     */
+    int port();
 
-	/**
-	 * Maximum attempts to connect to server. Used on initial connect to server and when link to the server was lost. If
-	 * zero or negative, then only one attempt is made to connect.
-	 */
-	int connectionRetryLimit();
+    /**
+     * Maximum attempts to connect to server. Used on initial connect to server and when link to the server was lost. If
+     * zero or negative, then only one attempt is made to connect.
+     */
+    int connectionRetryLimit();
 }

@@ -11,29 +11,25 @@ package com.musala.atmosphere.client.util.settings;
  * @author nikola.taushanov
  * 
  */
-public enum AndroidSecureSettings implements IAndroidSettings
-{
-	// TODO: Implement someday when required.
-	NONE("");
+public enum AndroidSecureSettings implements IAndroidSettings {
+    // TODO: Implement someday when required.
+    NONE("");
 
-	private String settingName;
+    private String settingName;
 
-	private static final String CONTENT_URI = "content://settings/secure";
+    private static final String CONTENT_URI = "content://settings/secure";
 
-	private AndroidSecureSettings(String settingName)
-	{
-		this.settingName = settingName;
-	}
+    private AndroidSecureSettings(String settingName) {
+        this.settingName = settingName;
+    }
 
-	@Override
-	public String toString()
-	{
-		return settingName;
-	}
+    @Override
+    public String toString() {
+        return settingName;
+    }
 
-	@Override
-	public String getContentUri()
-	{
-		return CONTENT_URI;
-	}
+    @Override
+    public String getContentUri() {
+        return CONTENT_URI;
+    }
 }

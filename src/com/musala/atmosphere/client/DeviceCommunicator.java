@@ -87,7 +87,7 @@ public class DeviceCommunicator {
             LOGGER.error("Executing action was rejected by the server.", e);
             throw new DeviceInvocationRejectedException(e);
         }
-        
+
         return null;
     }
 

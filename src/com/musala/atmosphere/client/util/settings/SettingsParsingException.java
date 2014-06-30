@@ -6,17 +6,14 @@ package com.musala.atmosphere.client.util.settings;
  * @author nikola.taushanov
  * 
  */
-public class SettingsParsingException extends Exception
-{
-	private static final long serialVersionUID = -7142031090292495482L;
+public class SettingsParsingException extends Exception {
+    private static final long serialVersionUID = -7142031090292495482L;
 
-	public SettingsParsingException(String message)
-	{
-		super(message);
-	}
+    public SettingsParsingException(String message) {
+        super(message);
+    }
 
-	public SettingsParsingException(String message, Throwable cause)
-	{
-		super(message, cause);
-	}
+    public SettingsParsingException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

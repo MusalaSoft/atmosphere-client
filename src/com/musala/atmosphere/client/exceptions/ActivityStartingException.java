@@ -6,25 +6,21 @@ package com.musala.atmosphere.client.exceptions;
  * @author georgi.gaydarov
  * 
  */
-public class ActivityStartingException extends Exception
-{
+public class ActivityStartingException extends Exception {
 
-	/**
-	 * auto generated serialization id
-	 */
-	private static final long serialVersionUID = 1928725919257296196L;
+    /**
+     * auto generated serialization id
+     */
+    private static final long serialVersionUID = 1928725919257296196L;
 
-	public ActivityStartingException()
-	{
-	}
+    public ActivityStartingException() {
+    }
 
-	public ActivityStartingException(String message)
-	{
-		super(message);
-	}
+    public ActivityStartingException(String message) {
+        super(message);
+    }
 
-	public ActivityStartingException(String message, Throwable inner)
-	{
-		super(message, inner);
-	}
+    public ActivityStartingException(String message, Throwable inner) {
+        super(message, inner);
+    }
 }

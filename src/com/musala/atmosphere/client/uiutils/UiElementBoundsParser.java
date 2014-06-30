@@ -37,8 +37,7 @@ public class UiElementBoundsParser {
 
             Bounds result = new Bounds(first, second);
             return result;
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("'" + bounds + "' is not in the required format.");
         }
     }

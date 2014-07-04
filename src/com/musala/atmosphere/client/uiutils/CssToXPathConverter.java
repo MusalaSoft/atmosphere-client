@@ -32,6 +32,10 @@ public class CssToXPathConverter {
 
     private final static String XPATH_QUERY_FORMATTER = "//*%s";
 
+    private final static String SPLIT_NODE_REGEX = " > ";
+
+    private final static String INITIAL_NODE_FORMATTER = "%s/%s";
+
     /**
      * Divides the CSS Query to property selectors
      * 
@@ -83,6 +87,26 @@ public class CssToXPathConverter {
     }
 
     /**
+     * Converts the initial node query of a CSS query to that of an XPath query
+     * 
+     * @param separatedInitialNode
+     *        - the separated initial node that needs to be converted
+     * @return the converted XPath initial node
+     */
+    public static String convertInitialNode(String separatedInitialNode) {
+        if (separatedInitialNode.length() == 0)
+            return "";
+
+        String[] initialNodeParts = separatedInitialNode.split(SPLIT_NODE_REGEX);
+        String initialNode = "/";
+        for (String initialNodePart : initialNodeParts) {
+            initialNode = String.format(INITIAL_NODE_FORMATTER, initialNode, initialNodePart);
+        }
+
+        return initialNode;
+    }
+
+    /**
      * The method converts a given CSS query to an equivalent XPath query
      * 
      * @param cssQuery
@@ -91,11 +115,22 @@ public class CssToXPathConverter {
      * @throws InvalidCssQueryException
      */
     public static String convertCssToXPath(String cssQuery) throws InvalidCssQueryException {
+        // separates the initial node from the attributes query
+        String separatedInitialNode = null;
+        int indexOfSeparation;
+        for (indexOfSeparation = 0; indexOfSeparation < cssQuery.length(); indexOfSeparation++) {
+            if (cssQuery.charAt(indexOfSeparation) == '[') {
+                break;
+            }
+        }
+        separatedInitialNode = cssQuery.substring(0, indexOfSeparation);
+        cssQuery = cssQuery.substring(indexOfSeparation, cssQuery.length());
+
         if (!isCssQueryValid(cssQuery)) {
             throw new InvalidCssQueryException("The given CSS query is not valid.");
         }
 
-        String xpathQuery = "";
+        String xpathQuery = convertInitialNode(separatedInitialNode);
 
         List<String> dividedCssQuery = divideCssQuery(cssQuery);
         String[] attributeNameAndSelectionExpression = new String[2];
@@ -137,7 +172,8 @@ public class CssToXPathConverter {
             }
         }
 
-        xpathQuery = String.format(XPATH_QUERY_FORMATTER, xpathQuery);
+        if (xpathQuery.charAt(0) == '[')
+            xpathQuery = String.format(XPATH_QUERY_FORMATTER, xpathQuery);
 
         return xpathQuery.toString();
     }

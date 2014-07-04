@@ -88,18 +88,6 @@ public class UiElement {
         representedNodeXPath = representingNode;
     }
 
-    /**
-     * Constructor for element creation via a JSoup query.
-     * 
-     * @param representingNode
-     * @param onDevice
-     */
-    protected UiElement(org.jsoup.nodes.Node representingNode, Device onDevice) {
-        this(UiXmlParser.getAttributeMapOfNode(representingNode), onDevice);
-        underlyingNodeType = ElementNodeType.JSOUP_NODE;
-        representedNodeJSoup = representingNode;
-    }
-
     UiElement(UiElement uiElement) {
         Map<String, String> nodeAttributesMap;
         if (uiElement.underlyingNodeType == ElementNodeType.JSOUP_NODE) {

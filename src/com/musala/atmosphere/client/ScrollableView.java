@@ -1,8 +1,14 @@
 package com.musala.atmosphere.client;
 
+import java.util.List;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
 import org.w3c.dom.Node;
 
-import com.musala.atmosphere.client.uiutils.CssAttribute;
+import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
+import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
 import com.musala.atmosphere.client.uiutils.UiElementSelector;
 import com.musala.atmosphere.commons.RoutingAction;
@@ -23,10 +29,6 @@ public class ScrollableView extends UiCollection {
     private boolean isVertical = true;
 
     ScrollableView(Node representingNode, Device onDevice) {
-        super(representingNode, onDevice);
-    }
-
-    ScrollableView(org.jsoup.nodes.Node representingNode, Device onDevice) {
         super(representingNode, onDevice);
     }
 
@@ -59,7 +61,7 @@ public class ScrollableView extends UiCollection {
      * @return true on scrolled else false
      */
     public boolean scrollToEnd(Integer maxSwipes, Integer steps) {
-        return scrollToPosition(maxSwipes, steps, ScrollDirection.SCROLL_TO_END);
+        return scroll(maxSwipes, steps, ScrollDirection.SCROLL_TO_END);
     }
 
     /**
@@ -73,7 +75,7 @@ public class ScrollableView extends UiCollection {
      * @return true on scrolled else false
      */
     public boolean scrollToBeginning(Integer maxSwipes, Integer steps) {
-        return scrollToPosition(maxSwipes, steps, ScrollDirection.SCROLL_TO_BEGINNING);
+        return scroll(maxSwipes, steps, ScrollDirection.SCROLL_TO_BEGINNING);
     }
 
     // TODO: Use optional null parameter instead of 0, when the class is created.
@@ -87,7 +89,7 @@ public class ScrollableView extends UiCollection {
      * @return true on scrolled else false
      */
     public boolean scrollToBeginning(Integer maxSwipes) {
-        return scrollToPosition(maxSwipes, 0, ScrollDirection.SCROLL_TO_BEGINNING);
+        return scroll(maxSwipes, 0, ScrollDirection.SCROLL_TO_BEGINNING);
     }
 
     /**
@@ -99,7 +101,7 @@ public class ScrollableView extends UiCollection {
      * @return true on scrolled else false
      */
     public boolean scrollToEnd(Integer maxSwipes) {
-        return scrollToPosition(maxSwipes, 0, ScrollDirection.SCROLL_TO_END);
+        return scroll(maxSwipes, 0, ScrollDirection.SCROLL_TO_END);
     }
 
     /**
@@ -111,7 +113,7 @@ public class ScrollableView extends UiCollection {
      * @return true if scrolled and false if can't scroll anymore
      */
     public boolean scrollBackward(int steps) {
-        return scrollToPosition(0, steps, ScrollDirection.SCROLL_BACKWARD);
+        return scroll(0, steps, ScrollDirection.SCROLL_BACKWARD);
     }
 
     /**
@@ -123,7 +125,7 @@ public class ScrollableView extends UiCollection {
      * @return true if scrolled and false if can't scroll anymore
      */
     public boolean scrollForward(int steps) {
-        return scrollToPosition(0, steps, ScrollDirection.SCROLL_FORWARD);
+        return scroll(0, steps, ScrollDirection.SCROLL_FORWARD);
     }
 
     /**
@@ -134,7 +136,7 @@ public class ScrollableView extends UiCollection {
      * @return true if scrolled and false if can't scroll anymore
      */
     public boolean scrollBackward() {
-        return scrollToPosition(0, 0, ScrollDirection.SCROLL_BACKWARD);
+        return scroll(0, 0, ScrollDirection.SCROLL_BACKWARD);
     }
 
     /**
@@ -145,51 +147,23 @@ public class ScrollableView extends UiCollection {
      * @return true if scrolled and false if can't scroll anymore
      */
     public boolean scrollForward() {
-        return scrollToPosition(0, 0, ScrollDirection.SCROLL_FORWARD);
+        return scroll(0, 0, ScrollDirection.SCROLL_FORWARD);
     }
 
     /**
-     * Performs a swipe up on the UI element until the requested text is visible or until swipe attempts have been
-     * exhausted.
+     * Method that scrolls in the given direction
      * 
-     * @param text
-     *        text to search
-     * @return true if the text is found else false
+     * @param maxSwipes
+     *        - maximum number of swipes to perform a scroll action
+     * @param maxSteps
+     *        - maximum number of steps, used to control the speed
+     * @param scrollDirection
+     * @return true if the scroll was successful, false if it was not
      */
-    public boolean scrollTextIntoView(String text) {
-        UiElementSelector textViewSelector = new UiElementSelector();
-        textViewSelector.addSelectionAttribute(CssAttribute.TEXT, text);
-
-        return scrollIntoView(textViewSelector);
-    }
-
-    /**
-     * Perform a scroll search for a UI element matching the {@link UiElementSelector} innerViewselector argument
-     * 
-     * @param innerViewSelector
-     *        UI selector representing the view into which will be scrolled
-     * @return true if item is found else false
-     */
-    public boolean scrollIntoView(UiElementSelector innerViewSelector) {
-        // FIXME current implementation invokes scrollIntoView from UiScrollable in uiautomator.
-        // Think of a better solution, because in case of a view with horizontal orientation that method has a strange
-        // behavior, when the orientation is vertical the the element seemed to be found but false is returned.
-        UiElementDescriptor viewDescriptor = UiElementAttributeExtractor.extract(elementSelector);
-
-        UiElementDescriptor innerViewDescriptor = UiElementAttributeExtractor.extract(innerViewSelector);
-
-        boolean response = (boolean) communicator.sendAction(RoutingAction.SCROLL_INTO_VIEW,
-                                                             viewDescriptor,
-                                                             innerViewDescriptor,
-                                                             isVertical);
-        return response;
-
-    }
-
-    private boolean scrollToPosition(Integer maxSwipes, Integer maxSteps, ScrollDirection scrollAction) {
+    private boolean scroll(Integer maxSwipes, Integer maxSteps, ScrollDirection scrollDirection) {
         UiElementDescriptor viewDescriptor = UiElementAttributeExtractor.extract(elementSelector);
         boolean response = (boolean) communicator.sendAction(RoutingAction.SCROLL_TO_DIRECTION,
-                                                             scrollAction,
+                                                             scrollDirection,
                                                              viewDescriptor,
                                                              maxSwipes,
                                                              maxSteps,
@@ -198,4 +172,101 @@ public class ScrollableView extends UiCollection {
         return response;
     }
 
+    /**
+     * Finds a specific element in ScrollableView corresponding to the given selector using scrolling if necessary
+     * 
+     * @param maxSwipes
+     *        - the maximum number of swipes to perform a scroll action
+     * @param innerViewSelector
+     *        - the corresponding selector
+     * @return true if the method finds the element corresponding to the selector, false if it does not find it
+     * @throws XPathExpressionException
+     * @throws InvalidCssQueryException
+     * @throws ParserConfigurationException
+     */
+    public boolean scrollToElementBySelector(Integer maxSwipes, UiElementSelector innerViewSelector)
+        throws XPathExpressionException,
+            InvalidCssQueryException,
+            ParserConfigurationException {
+        String cssQuery = innerViewSelector.buildCssQuery();
+        Screen deviceActiveScreen = onDevice.getActiveScreen();
+        UiElementSelector scrollableViewSelector = this.getElementSelector();
+        ScrollableView updatedScrollableView = null;
+
+        this.scrollToBeginning(maxSwipes);
+
+        for (int i = 0; i < maxSwipes; i++) {
+            try {
+                deviceActiveScreen.updateScreen();
+                updatedScrollableView = deviceActiveScreen.getScrollableView(scrollableViewSelector);
+                updatedScrollableView.getChildrenByCssQuery(cssQuery);
+
+                return true;
+            } catch (UiElementFetchingException expection) {
+                if (!this.scrollForward()) {
+                    return false;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Tries to find an UI element in the view without the usage of scroll and taps on it.
+     * 
+     * @param innerViewSelector
+     *        - the corresponding selector
+     * @return true if you can find and tap on an element in ScrollableView corresponding to the given selector without
+     *         scrolling, false if you cannot
+     * @throws XPathExpressionException
+     * @throws InvalidCssQueryException
+     * @throws UiElementFetchingException
+     * @throws ParserConfigurationException
+     */
+    public boolean tapElementBySelectorWithoutScrolling(UiElementSelector innerViewSelector)
+        throws XPathExpressionException,
+            InvalidCssQueryException,
+            UiElementFetchingException,
+            ParserConfigurationException {
+        String cssQuery = innerViewSelector.buildCssQuery();
+
+        try {
+            List<UiElement> innerViewChildren = this.getChildrenByCssQuery(cssQuery);
+
+            return innerViewChildren.get(0).tap();
+        } catch (UiElementFetchingException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Tries to find an UI element in the view with the usage of scroll and taps on it.
+     * 
+     * @param innerViewSelector
+     *        - the corresponding selector
+     * @return true if you can find and tap on an element in ScrollableView corresponding to the given selector with
+     *         scrolling, false if you cannot
+     * @throws XPathExpressionException
+     * @throws InvalidCssQueryException
+     * @throws ParserConfigurationException
+     * @throws UiElementFetchingException
+     */
+    public boolean tapElementBySelectorWithScrolling(Integer maxSwipes, UiElementSelector innerViewSelector)
+        throws XPathExpressionException,
+            InvalidCssQueryException,
+            ParserConfigurationException,
+            UiElementFetchingException {
+        if (!scrollToElementBySelector(maxSwipes, innerViewSelector)) {
+            return false;
+        }
+
+        Screen deviceActiveScreen = onDevice.getActiveScreen();
+        String cssQuery = innerViewSelector.buildCssQuery();
+        UiElementSelector scrollableViewSelector = this.getElementSelector();
+        ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollableViewSelector);
+        List<UiElement> innerViewChildren = updatedScrollableView.getChildrenByCssQuery(cssQuery);
+
+        return innerViewChildren.get(0).tap();
+    }
 }

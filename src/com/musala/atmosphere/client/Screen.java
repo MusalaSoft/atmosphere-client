@@ -17,11 +17,14 @@ import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.uiutils.CssAttribute;
+import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
 import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
 import com.musala.atmosphere.client.uiutils.UiElementSelectionOption;
 import com.musala.atmosphere.client.uiutils.UiElementSelector;
@@ -106,11 +109,15 @@ public class Screen {
      *        - CSS selector query.
      * @return the requested {@link UiElement UiElement}.
      * @throws UiElementFetchingException
+     * @throws InvalidCssQueryException
+     * @throws XPathExpressionException
      */
-    public UiElement getElementByCSS(String query) throws UiElementFetchingException {
-        org.jsoup.nodes.Node node = UiXmlParser.getJSoupNode(jSoupDocument, query);
-        UiElement returnElement = new UiElement(node, onDevice);
-        return returnElement;
+    public UiElement getElementByCSS(String query)
+        throws UiElementFetchingException,
+            InvalidCssQueryException,
+            XPathExpressionException {
+        String xpathQuery = CssToXPathConverter.convertCssToXPath(query);
+        return getElementByXPath(xpathQuery);
     }
 
     /**
@@ -120,11 +127,32 @@ public class Screen {
      *        CSS selector query
      * @return the requested ScrollableView
      * @throws UiElementFetchingException
+     * @throws InvalidCssQueryException
+     * @throws XPathExpressionException
      */
-    public ScrollableView getScrollableViewtByCSS(String query) throws UiElementFetchingException {
-        org.jsoup.nodes.Node node = UiXmlParser.getJSoupNode(jSoupDocument, query);
-        ScrollableView returnElement = new ScrollableView(node, onDevice);
-        return returnElement;
+    public ScrollableView getScrollableViewtByCSS(String query)
+        throws UiElementFetchingException,
+            InvalidCssQueryException,
+            XPathExpressionException {
+        String xpathQuery = CssToXPathConverter.convertCssToXPath(query);
+        return getScrollableViewByXPath(xpathQuery);
+    }
+
+    /**
+     * Searches for given ScrollableView in the current screen XML structure using XPath
+     * 
+     * @param query
+     *        - an XPath query
+     * @return the requested ScrollableView
+     * @throws XPathExpressionException
+     * @throws UiElementFetchingException
+     */
+    public ScrollableView getScrollableViewByXPath(String query)
+        throws XPathExpressionException,
+            UiElementFetchingException {
+        Node node = UiXmlParser.getXPathNode(xPathDomDocument, query);
+        ScrollableView scrollableView = new ScrollableView(node, onDevice);
+        return scrollableView;
     }
 
     /**
@@ -150,8 +178,13 @@ public class Screen {
      *        - object of type {@link UiElementSelector}.
      * @return the requested {@link UiElement UiElement}.
      * @throws UiElementFetchingException
+     * @throws InvalidCssQueryException
+     * @throws XPathExpressionException
      */
-    public UiElement getElement(UiElementSelector selector) throws UiElementFetchingException {
+    public UiElement getElement(UiElementSelector selector)
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         String cssQuery = selector.buildCssQuery();
         UiElement result = getElementByCSS(cssQuery);
         return result;
@@ -165,8 +198,13 @@ public class Screen {
      *        - object of type {@link UiElementSelector}
      * @return the requested {@link ScrollableView ScrollableView}
      * @throws UiElementFetchingException
+     * @throws InvalidCssQueryException
+     * @throws XPathExpressionException
      */
-    public ScrollableView getScrollableView(UiElementSelector selector) throws UiElementFetchingException {
+    public ScrollableView getScrollableView(UiElementSelector selector)
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         String cssQuery = selector.buildCssQuery();
         ScrollableView result = getScrollableViewtByCSS(cssQuery);
         return result;
@@ -180,13 +218,20 @@ public class Screen {
      *        - CSS selector query.
      * @return List containing all found elements of type {@link UiElement UiElement}.
      * @throws UiElementFetchingException
+     * @throws InvalidCssQueryException
+     * @throws XPathExpressionException
      */
-    public List<UiElement> getAllElementsByCSS(String query) throws UiElementFetchingException {
+    public List<UiElement> getAllElementsByCSS(String query)
+        throws UiElementFetchingException,
+            InvalidCssQueryException,
+            XPathExpressionException {
         List<UiElement> uiElementList = new ArrayList<UiElement>();
+        String xPathQuery = CssToXPathConverter.convertCssToXPath(query);
 
-        Elements elements = UiXmlParser.getJSoupElements(jSoupDocument, query);
-        for (org.jsoup.nodes.Node node : elements) {
-            UiElement returnElement = new UiElement(node, onDevice);
+        NodeList xPathNodeList = UiXmlParser.getXPathNodeChildren(xPathDomDocument, xPathQuery);
+        for (int index = 0; index < xPathNodeList.getLength(); index++) {
+            Node xPathNode = xPathNodeList.item(index);
+            UiElement returnElement = new UiElement(xPathNode, onDevice);
             uiElementList.add(returnElement);
         }
         return uiElementList;
@@ -200,8 +245,13 @@ public class Screen {
      *        - object of type {@link UiElementSelector}.
      * @return List containing all found elements of type {@link UiElement UiElement}.
      * @throws UiElementFetchingException
+     * @throws InvalidCssQueryException
+     * @throws XPathExpressionException
      */
-    public List<UiElement> getElements(UiElementSelector selector) throws UiElementFetchingException {
+    public List<UiElement> getElements(UiElementSelector selector)
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         String cssQuery = selector.buildCssQuery();
         List<UiElement> result = getAllElementsByCSS(cssQuery);
         return result;
@@ -214,8 +264,13 @@ public class Screen {
      *        - search text.
      * @return <code>true</code> if the tapping of element is successful, <code>false</code> if it fails.
      * @throws UiElementFetchingException
+     * @throws InvalidCssQueryException
+     * @throws XPathExpressionException
      */
-    public boolean tapElementWithText(String text) throws UiElementFetchingException {
+    public boolean tapElementWithText(String text)
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         return tapElementWithText(text, 0);
     }
 
@@ -228,8 +283,13 @@ public class Screen {
      *        - determines which element to tap if multiple matches exist; zero based index.
      * @return <code>true</code> if the tapping of element is successful, <code>false</code> if it fails.
      * @throws UiElementFetchingException
+     * @throws InvalidCssQueryException
+     * @throws XPathExpressionException
      */
-    public boolean tapElementWithText(String text, int match) throws UiElementFetchingException {
+    public boolean tapElementWithText(String text, int match)
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         UiElementSelector selector = new UiElementSelector();
         selector.addSelectionAttribute(CssAttribute.TEXT, UiElementSelectionOption.EQUALS, text);
         List<UiElement> elementList = getElements(selector);
@@ -248,8 +308,10 @@ public class Screen {
      * @param text
      *        - search text.
      * @return - true if element with supplied search text exists on screen.
+     * @throws InvalidCssQueryException
+     * @throws XPathExpressionException
      */
-    public boolean hasElementWithText(String text) {
+    public boolean hasElementWithText(String text) throws XPathExpressionException, InvalidCssQueryException {
         try {
             UiElementSelector selector = new UiElementSelector();
             selector.addSelectionAttribute(CssAttribute.TEXT, UiElementSelectionOption.EQUALS, text);
@@ -338,8 +400,13 @@ public class Screen {
      *        - object of type {@link UiElementSelector}.
      * @return the requested {@link UiCollection UiCollection}.
      * @throws UiElementFetchingException
+     * @throws InvalidCssQueryException
+     * @throws XPathExpressionException
      */
-    public UiCollection getCollectionBySelector(UiElementSelector selector) throws UiElementFetchingException {
+    public UiCollection getCollectionBySelector(UiElementSelector selector)
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         String cssQuery = selector.buildCssQuery();
         UiCollection result = getCollectionByCSS(cssQuery);
         return result;
@@ -352,11 +419,15 @@ public class Screen {
      *        - CSS selector query.
      * @return the requested {@link UiCollection UiCollection}.
      * @throws UiElementFetchingException
+     * @throws InvalidCssQueryException
+     * @throws XPathExpressionException
      */
-    public UiCollection getCollectionByCSS(String cssQuery) throws UiElementFetchingException {
-        org.jsoup.nodes.Node node = UiXmlParser.getJSoupNode(jSoupDocument, cssQuery);
-        UiCollection returnElement = new UiCollection(node, onDevice);
-        return returnElement;
+    public UiCollection getCollectionByCSS(String cssQuery)
+        throws UiElementFetchingException,
+            InvalidCssQueryException,
+            XPathExpressionException {
+        String xPathQuery = CssToXPathConverter.convertCssToXPath(cssQuery);
+        return getCollectionByXPath(xPathQuery);
     }
 
     /**

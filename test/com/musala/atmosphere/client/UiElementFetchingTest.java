@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.geometry.Bounds;
 import com.musala.atmosphere.client.geometry.Point;
@@ -52,7 +53,7 @@ public class UiElementFetchingTest {
     }
 
     @Test
-    public void getByCSSTest() throws UiElementFetchingException {
+    public void getByCSSTest() throws UiElementFetchingException, XPathExpressionException, InvalidCssQueryException {
         final String desiredElementClass = "android.widget.FrameLayout";
         final String desiredElementContentDescription = "derp";
 
@@ -79,7 +80,10 @@ public class UiElementFetchingTest {
     }
 
     @Test
-    public void getBySelectorTest() throws UiElementFetchingException {
+    public void getBySelectorTest()
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         final String desiredElementContentDescription = "derp";
         final String desiredElementClass = "android.widget.FrameLayout";
 
@@ -97,7 +101,10 @@ public class UiElementFetchingTest {
     }
 
     @Test(expected = UiElementFetchingException.class)
-    public void multipleFoundBySelectorTest() throws UiElementFetchingException {
+    public void multipleFoundBySelectorTest()
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         final String desiredElementClass = "android.widget.FrameLayout";
 
         UiElementSelector selector = new UiElementSelector();
@@ -113,12 +120,18 @@ public class UiElementFetchingTest {
     }
 
     @Test(expected = UiElementFetchingException.class)
-    public void multipleFoundByCSSTest() throws UiElementFetchingException {
+    public void multipleFoundByCSSTest()
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         screen.getElementByCSS("node");
     }
 
     @Test
-    public void getElementsByCSSTest() throws UiElementFetchingException {
+    public void getElementsByCSSTest()
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         final String desiredElementClass = "android.widget.FrameLayout";
 
         List<UiElement> elements = screen.getAllElementsByCSS("[class=" + desiredElementClass + "]");
@@ -127,7 +140,7 @@ public class UiElementFetchingTest {
     }
 
     @Test
-    public void getElementsTest() throws UiElementFetchingException {
+    public void getElementsTest() throws UiElementFetchingException, XPathExpressionException, InvalidCssQueryException {
         final String desiredElementClass = "android.widget.FrameLayout";
 
         UiElementSelector selector = new UiElementSelector();
@@ -138,12 +151,15 @@ public class UiElementFetchingTest {
     }
 
     @Test(expected = UiElementFetchingException.class)
-    public void getElementsByCSSExceptionTest() throws UiElementFetchingException {
+    public void getElementsByCSSExceptionTest()
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         screen.getElementByCSS("nonexistent");
     }
 
     @Test
-    public void tapElementTest() throws UiElementFetchingException {
+    public void tapElementTest() throws UiElementFetchingException, XPathExpressionException, InvalidCssQueryException {
         final String desiredElementContentDescription = "derp";
 
         UiElementSelector selector = new UiElementSelector();
@@ -176,29 +192,44 @@ public class UiElementFetchingTest {
     }
 
     @Test
-    public void tapElementWithTextTest() throws UiElementFetchingException {
+    public void tapElementWithTextTest()
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         screen.tapElementWithText("CoolStory", 0);
 
         verify(device, times(1)).tapScreenLocation(any(Point.class));
     }
 
     @Test(expected = UiElementFetchingException.class)
-    public void tapElementWithTextNotEnoughElementsTest() throws UiElementFetchingException {
+    public void tapElementWithTextNotEnoughElementsTest()
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         screen.tapElementWithText("CoolStory", 1);
     }
 
     @Test(expected = UiElementFetchingException.class)
-    public void tapElementWithTextNoElementsTest() throws UiElementFetchingException {
+    public void tapElementWithTextNoElementsTest()
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         screen.tapElementWithText("CoolStory1");
     }
 
     @Test
-    public void hasElementWithTextTest() throws UiElementFetchingException {
+    public void hasElementWithTextTest()
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         assertTrue("Expected to find an element, but did not find one", screen.hasElementWithText("CoolStory"));
     }
 
     @Test
-    public void hasElementWithTextNegativeTest() throws UiElementFetchingException {
+    public void hasElementWithTextNegativeTest()
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         assertFalse("Expected not to find element, but found one", screen.hasElementWithText("CoolStory1"));
     }
 }

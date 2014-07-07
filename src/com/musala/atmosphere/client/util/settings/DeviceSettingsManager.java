@@ -112,7 +112,7 @@ public class DeviceSettingsManager {
     public long getLong(IAndroidSettings setting) throws SettingsParsingException {
         String settingStringValue = getSetting(setting);
         try {
-            long settingValue = Long.parseLong(settingStringValue, 0);
+            long settingValue = Long.parseLong(settingStringValue);
             return settingValue;
         } catch (NumberFormatException e) {
             throw new SettingsParsingException(e.getMessage());

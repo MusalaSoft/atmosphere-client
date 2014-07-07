@@ -1043,4 +1043,26 @@ public class Device {
         Object response = communicator.sendAction(RoutingAction.STOP_BACKGROUND_PROCESS, packageName);
         return response == DeviceCommunicator.VOID_SUCCESS;
     }
+
+    /**
+     * Sets the timeout in the system settings, after which the screen is turned off.
+     * 
+     * @param screenOffTimeout
+     *        - timeout in milliseconds, after which the screen is turned off.
+     * @return true if the given screen off timeout is successfully set.
+     * @Note On emulators the screen is only dimmed.
+     */
+    public boolean setScreenOffTimeout(long screenOffTimeout) {
+        return deviceSettings.putLong(AndroidSystemSettings.SCREEN_OFF_TIMEOUT, screenOffTimeout);
+    }
+
+    /**
+     * Gets the timeout from the system settings, after which the screen is turned off.
+     * 
+     * @return timeout in milliseconds, after which the screen is turned off.
+     * @throws SettingsParsingException
+     */
+    public long getScreenOffTimeout() throws SettingsParsingException {
+        return deviceSettings.getLong(AndroidSystemSettings.SCREEN_OFF_TIMEOUT, 0);
+    }
 }

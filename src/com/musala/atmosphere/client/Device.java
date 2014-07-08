@@ -1045,6 +1045,15 @@ public class Device {
     }
 
     /**
+     * Opens the notification bar on the device.
+     * 
+     * @return true if the opening of the notification bar was successful, false otherwise
+     */
+    public boolean openNotificationBar() {
+        return (boolean) communicator.sendAction(RoutingAction.OPEN_NOTIFICATION_BAR);
+    }
+
+    /**
      * Sets the timeout in the system settings, after which the screen is turned off.
      * 
      * @param screenOffTimeout

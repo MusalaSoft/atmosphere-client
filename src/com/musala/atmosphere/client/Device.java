@@ -1054,6 +1054,15 @@ public class Device {
     }
 
     /**
+     * Opens the quick settings on the device.
+     * 
+     * @return true if the opening of the quick settings was successful, false otherwise
+     */
+    public boolean openQuickSettings() {
+        return (boolean) communicator.sendAction(RoutingAction.OPEN_QUICK_SETTINGS);
+    }
+
+    /**
      * Sets the timeout in the system settings, after which the screen is turned off.
      * 
      * @param screenOffTimeout

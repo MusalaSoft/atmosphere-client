@@ -37,6 +37,8 @@ public enum XPathAttribute {
     PACKAGE_NAME(String.class, "package"),
     /** Value denoting the XPath 'password' attribute. Type of needed value Boolean. */
     PASSWORD(Boolean.class, "password"),
+    /** Value denoting the CSS 'resource-id' attribute. Type of needed value String. */
+    RESOURCE_ID(String.class, "resource-id"),
     /** Value denoting the XPath 'scrollable' attribute. Type of needed value Boolean. */
     SCROLLABLE(Boolean.class, "scrollable"),
     /** Value denoting the XPath 'selected' attribute. Type of needed value Boolean. */

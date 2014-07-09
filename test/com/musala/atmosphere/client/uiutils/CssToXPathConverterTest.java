@@ -14,7 +14,7 @@ import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
  */
 public class CssToXPathConverterTest {
 
-    private final static String VALID_CSS_QUERY = "[resource_id=12321][checkable=false][content-desc~=word][class=com.musala.bam][class*=com.musala][bounds=[0,2][4,5]][index=2]";
+    private final static String VALID_CSS_QUERY = "[resour_id=12321][checkable=false][content-desc~=word][class=com.musala.bam][class*=com.musala][bounds=[0,2][4,5]][index=2]";
 
     private final static String EXPECTED_XPATH_QUERY = "//*[@checkable='false'][contains(concat(' ', @content-desc, ' '), ' word ')][@class='com.musala.bam'][contains(@class,'com.musala')][@bounds='[0,2][4,5]'][@index='2']";
 

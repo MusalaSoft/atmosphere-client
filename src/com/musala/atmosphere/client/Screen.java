@@ -42,6 +42,8 @@ import com.musala.atmosphere.commons.ui.UiElementDescriptor;
 public class Screen {
     private static final Logger LOGGER = Logger.getLogger(Screen.class.getCanonicalName());
 
+    private static final String TIME_PICKER_WIDGET = "android.widget.TimePicker";
+
     private String screenXml;
 
     private Device onDevice;
@@ -324,6 +326,25 @@ public class Screen {
     }
 
     /**
+     * Gets a the time picker currently on screen.
+     * 
+     * @return a {@link TimePicker} object representing the time picker widget on screen.
+     * @throws UiElementFetchingException
+     */
+
+    public TimePicker getTimePicker() throws UiElementFetchingException {
+        UiElementSelector timePickerSelector = new UiElementSelector();
+        timePickerSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, TIME_PICKER_WIDGET);
+        try {
+            getElement(timePickerSelector);
+        } catch (UiElementFetchingException | XPathExpressionException | InvalidCssQueryException e) {
+            throw new UiElementFetchingException("No time picker is currently available on the screen.");
+        }
+
+        return new TimePicker(communicator);
+    }
+
+    /**
      * Checks if an element is present in the current {@link Screen} instance.
      * 
      * @param query
@@ -446,4 +467,5 @@ public class Screen {
         UiCollection returnElement = new UiCollection(node, onDevice);
         return returnElement;
     }
+
 }

@@ -14,6 +14,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
+import com.musala.atmosphere.client.util.settings.ElementValidationType;
 
 public class UiElementRevalidationTest {
     private static final String POPULATED_TEST_XML = "testXml.xml";
@@ -82,6 +83,7 @@ public class UiElementRevalidationTest {
         UiElement element2 = populated.getElementByCSS("[bounds=[0,55][240,320]][class=android.view.View]");
 
         assertTrue("Element revalidation should have resulted in element still present.", element.revalidate());
+        element2.setValidationType(ElementValidationType.ALWAYS);
         element2.tap(); // should be cross-revalidated and result in an exception.
     }
 

@@ -24,13 +24,10 @@ import com.musala.atmosphere.client.geometry.Bounds;
 import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.client.uiutils.CssAttribute;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
-import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
 import com.musala.atmosphere.client.uiutils.UiElementSelector;
 import com.musala.atmosphere.client.uiutils.UiXmlParser;
 import com.musala.atmosphere.client.util.settings.ElementValidationType;
-import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
-import com.musala.atmosphere.commons.ui.UiElementDescriptor;
 
 /**
  * Used to access and manipulate certain views on the testing device, for example tapping, double-taping or holding
@@ -44,6 +41,12 @@ public class UiElement {
         XPATH_NODE,
         JSOUP_NODE;
     }
+
+    private static final String CUT_BUTTON_CONTENT_DESCRIPTION = "Cut";
+
+    private static final String TEXT_VIEW_CLASS_NAME = "android.widget.TextView";
+
+    private static final String SELECT_ALL_CONTENT_DESCRIPTION = "Select all";
 
     protected ElementNodeType underlyingNodeType;
 
@@ -256,6 +259,7 @@ public class UiElement {
         Point secondFingerInitial = new Point(secondFingerInitialX, secondFingerInitialY);
 
         boolean result = onDevice.pinchIn(firstFingerInitial, secondFingerInitial);
+
         return result;
     }
 
@@ -322,22 +326,58 @@ public class UiElement {
      * Clears the contents of this element.
      * 
      * @return boolean indicating if this action was successful.
+     * @throws InvalidCssQueryException
+     * @throws XPathExpressionException
+     * @throws UiElementFetchingException.
      */
-    public boolean clearText() {
+    public boolean clearText() throws UiElementFetchingException, XPathExpressionException, InvalidCssQueryException {
         // TODO validate when an element can get it's text cleared
-        // if (!elementSelector.getBooleanValue(CssAttribute.))
-        // {
-        // throw new InvalidElementActionException("Cannot to clear a non-clickable element.");
-        // }
-        // FIXME fix this method when the UIAutomator internal exception problem is solved.
-
         innerRevalidation();
-        UiElementDescriptor descriptor = UiElementAttributeExtractor.extract(elementSelector);
-        Object response = communicator.sendAction(RoutingAction.CLEAR_FIELD, descriptor);
+        ElementValidationType originalValidationType = getValidationType();
+        setValidationType(validationType.MANUAL);
 
-        finalizeUiElementOperation();
+        Screen screen = onDevice.getActiveScreen();
+        // A point which shows where to tap on the element to focused it. We choose the upper left corner of the element
+        // as a default
+        // point.
+        Point upperLeftCorner = new Point(0, 0);
 
-        return response == DeviceCommunicator.VOID_SUCCESS;
+        if (!tap(upperLeftCorner)) {
+            return false;
+        }
+
+        // We need to input a text at first, because when you double tap on an empty space you can't select the whole
+        // text.
+        final String textToInputOnFirstLine = "cut";
+        if (!inputText(textToInputOnFirstLine)) {
+            return false;
+        }
+
+        if (!doubleTap()) {
+            return false;
+        }
+
+        screen.updateScreen();
+
+        UiElementSelector selectAllSelector = new UiElementSelector();
+        selectAllSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, TEXT_VIEW_CLASS_NAME);
+        selectAllSelector.addSelectionAttribute(CssAttribute.CONTENT_DESCRIPTION, SELECT_ALL_CONTENT_DESCRIPTION);
+
+        UiElement selectAllButton = screen.getElement(selectAllSelector);
+
+        if (!selectAllButton.tap()) {
+            return false;
+        }
+
+        UiElementSelector cutButtonSelector = new UiElementSelector();
+        cutButtonSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, TEXT_VIEW_CLASS_NAME);
+        cutButtonSelector.addSelectionAttribute(CssAttribute.CONTENT_DESCRIPTION, CUT_BUTTON_CONTENT_DESCRIPTION);
+
+        UiElement cutButton = screen.getElement(cutButtonSelector);
+
+        setValidationType(originalValidationType);
+
+        return cutButton.tap();
     }
 
     /**
@@ -472,11 +512,10 @@ public class UiElement {
      * Should be invoked exactly once in all public methods, whether its directly or indirectly
      */
     private void innerRevalidation() {
-        if (isStale) {
-            throw new StaleElementReferenceException("Element revalidation failed. This element is most likely not present on the screen anymore.");
-        }
-
         if (validationType == ElementValidationType.ALWAYS) {
+            if (isStale) {
+                throw new StaleElementReferenceException("Element revalidation failed. This element is most likely not present on the screen anymore.");
+            }
             revalidateThrowing();
         }
     }

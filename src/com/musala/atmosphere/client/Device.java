@@ -1083,4 +1083,22 @@ public class Device {
     public long getScreenOffTimeout() throws SettingsParsingException {
         return deviceSettings.getLong(AndroidSystemSettings.SCREEN_OFF_TIMEOUT, 0);
     }
+
+    /**
+     * Sets a default keyboard by given ID
+     * 
+     * @return true if setting the IME is successful and false otherwise.
+     */
+    public boolean setDefaultIME(String keyboardID) {
+        return (boolean) communicator.sendAction(RoutingAction.SET_DEFAULT_INPUT_METHOD, keyboardID);
+    }
+
+    /**
+     * Sets the Atmosphere IME keyboard as default
+     * 
+     * @return true if setting the IME is successful and false otherwise.
+     */
+    public boolean setAtmosphereIME() {
+        return (boolean) communicator.sendAction(RoutingAction.SET_ATMOSPHERE_IME_AS_DEFAULT);
+    }
 }

@@ -40,6 +40,8 @@ import com.musala.atmosphere.commons.ui.UiElementDescriptor;
  */
 
 public class Screen {
+    public static final int WAIT_AND_GET_DEFAULT_TIMEOUT = 10000;
+
     private static final Logger LOGGER = Logger.getLogger(Screen.class.getCanonicalName());
 
     private static final String TIME_PICKER_WIDGET = "android.widget.TimePicker";
@@ -210,6 +212,52 @@ public class Screen {
         String cssQuery = selector.buildCssQuery();
         ScrollableView result = getScrollableViewtByCSS(cssQuery);
         return result;
+    }
+
+    /**
+     * Waits for an element matching the given selector to appear with a given timeout. If the element appears on
+     * screen, returns it.
+     * 
+     * @param selector
+     *        - an {@link UiElementSelector} describing the desired element
+     * @param waitTimeout
+     *        - a timeout for the wait operation
+     * @return an {@link UiElement} matching the passed selector
+     * @throws UiElementFetchingException
+     * @throws InvalidCssQueryException
+     * @throws XPathExpressionException
+     */
+    public UiElement getElementWhenPresent(UiElementSelector selector, int waitTimeout)
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
+        boolean isElementPresent = waitForElementExists(selector, waitTimeout);
+
+        if (isElementPresent) {
+            updateScreen();
+            UiElement selectedElement = getElement(selector);
+            return selectedElement;
+        } else {
+            throw new UiElementFetchingException("Waiting for an element matching the selector timed out, but still no such element was present.");
+        }
+    }
+
+    /**
+     * Waits for an element matching the given selector to appear on screen. If the element appears on screen, returns
+     * it. Uses the value specified in {@link #WAIT_AND_GET_DEFAULT_TIMEOUT} as a timeout for the wait operation.
+     * 
+     * @param selector
+     *        - an {@link UiElementSelector} describing the desired element
+     * @return an {@link UiElement} matching the passed selector
+     * @throws UiElementFetchingException
+     * @throws InvalidCssQueryException
+     * @throws XPathExpressionException
+     */
+    public UiElement getElementWhenPresent(UiElementSelector selector)
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
+        return getElementWhenPresent(selector, WAIT_AND_GET_DEFAULT_TIMEOUT);
     }
 
     /**

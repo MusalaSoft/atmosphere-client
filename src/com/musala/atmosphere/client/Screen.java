@@ -97,8 +97,10 @@ public class Screen {
      * Saves the underlying device UI XML into a file.
      * 
      * @param path
-     *        - file to which the UI XML should be saved.
+     *        - full path to file in which the UI XML should be saved.
      * @throws FileNotFoundException
+     *         when the passed argument does not denote already existing and writable file or such can not be created
+     *         for some reason
      */
     public void exportToXml(String path) throws FileNotFoundException {
         PrintStream export = new PrintStream(path);
@@ -112,14 +114,17 @@ public class Screen {
      * @param query
      *        - CSS selector query.
      * @return the requested {@link UiElement UiElement}.
-     * @throws UiElementFetchingException
      * @throws InvalidCssQueryException
+     *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws UiElementFetchingException
+     *         if no elements or more than 1 are found for the passed query
      */
     public UiElement getElementByCSS(String query)
-        throws UiElementFetchingException,
-            InvalidCssQueryException,
-            XPathExpressionException {
+        throws InvalidCssQueryException,
+            XPathExpressionException,
+            UiElementFetchingException {
         String xpathQuery = CssToXPathConverter.convertCssToXPath(query);
         return getElementByXPath(xpathQuery);
     }
@@ -130,9 +135,12 @@ public class Screen {
      * @param query
      *        CSS selector query
      * @return the requested ScrollableView
-     * @throws UiElementFetchingException
      * @throws InvalidCssQueryException
+     *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws UiElementFetchingException
+     *         if no elements or more than 1 are found for the passed query
      */
     public ScrollableView getScrollableViewtByCSS(String query)
         throws UiElementFetchingException,
@@ -149,7 +157,9 @@ public class Screen {
      *        - an XPath query
      * @return the requested ScrollableView
      * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
+     *         if no elements or more than 1 are found for the passed query
      */
     public ScrollableView getScrollableViewByXPath(String query)
         throws XPathExpressionException,
@@ -166,7 +176,9 @@ public class Screen {
      *        XPath query.
      * @return the requested {@link UiElement UiElement}.
      * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
+     *         if no elements or more than 1 are found for the passed query
      */
     public UiElement getElementByXPath(String query) throws XPathExpressionException, UiElementFetchingException {
         Node node = UiXmlParser.getXPathNode(xPathDomDocument, query);
@@ -179,11 +191,14 @@ public class Screen {
      * UiElementSelector} instance.
      * 
      * @param selector
-     *        - object of type {@link UiElementSelector}.
+     *        - {@link UiElementSelector} object that contains all the selection criteria for the required elements.
      * @return the requested {@link UiElement UiElement}.
-     * @throws UiElementFetchingException
      * @throws InvalidCssQueryException
+     *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws UiElementFetchingException
+     *         if no elements or more than 1 are found for the passed query
      */
     public UiElement getElement(UiElementSelector selector)
         throws UiElementFetchingException,
@@ -199,11 +214,14 @@ public class Screen {
      * UiElementSelector} instance.
      * 
      * @param selector
-     *        - object of type {@link UiElementSelector}
+     *        - {@link UiElementSelector} object that contains all the selection criteria for the required elements.
      * @return the requested {@link ScrollableView ScrollableView}
-     * @throws UiElementFetchingException
      * @throws InvalidCssQueryException
+     *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws UiElementFetchingException
+     *         if no elements or more than 1 are found for the passed query
      */
     public ScrollableView getScrollableView(UiElementSelector selector)
         throws UiElementFetchingException,
@@ -223,9 +241,12 @@ public class Screen {
      * @param waitTimeout
      *        - a timeout for the wait operation
      * @return an {@link UiElement} matching the passed selector
-     * @throws UiElementFetchingException
      * @throws InvalidCssQueryException
+     *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws UiElementFetchingException
+     *         if no elements or more than 1 are found for the passed query
      */
     public UiElement getElementWhenPresent(UiElementSelector selector, int waitTimeout)
         throws UiElementFetchingException,
@@ -249,9 +270,12 @@ public class Screen {
      * @param selector
      *        - an {@link UiElementSelector} describing the desired element
      * @return an {@link UiElement} matching the passed selector
-     * @throws UiElementFetchingException
      * @throws InvalidCssQueryException
+     *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws UiElementFetchingException
+     *         if no elements or more than 1 are found for the passed query
      */
     public UiElement getElementWhenPresent(UiElementSelector selector)
         throws UiElementFetchingException,
@@ -267,9 +291,12 @@ public class Screen {
      * @param query
      *        - CSS selector query.
      * @return List containing all found elements of type {@link UiElement UiElement}.
-     * @throws UiElementFetchingException
      * @throws InvalidCssQueryException
+     *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws UiElementFetchingException
+     *         if no elements or more than 1 are found for the passed query
      */
     public List<UiElement> getAllElementsByCSS(String query)
         throws UiElementFetchingException,
@@ -292,11 +319,14 @@ public class Screen {
      * UiElementSelector}. Returns a list of all found elements having the used selector.
      * 
      * @param selector
-     *        - object of type {@link UiElementSelector}.
+     *        - {@link UiElementSelector} object that contains all the selection criteria for the required elements.
      * @return List containing all found elements of type {@link UiElement UiElement}.
-     * @throws UiElementFetchingException
      * @throws InvalidCssQueryException
+     *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws UiElementFetchingException
+     *         if no elements or more than 1 are found for the passed query
      */
     public List<UiElement> getElements(UiElementSelector selector)
         throws UiElementFetchingException,
@@ -313,13 +343,16 @@ public class Screen {
      * @param text
      *        - search text.
      * @return <code>true</code> if the tapping of element is successful, <code>false</code> if it fails.
-     * @throws UiElementFetchingException
      * @throws InvalidCssQueryException
+     *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws UiElementFetchingException
+     *         if no elements or more than 1 are found for the passed query
      */
     public boolean tapElementWithText(String text)
-        throws UiElementFetchingException,
-            XPathExpressionException,
+        throws XPathExpressionException,
+            UiElementFetchingException,
             InvalidCssQueryException {
         return tapElementWithText(text, 0);
     }
@@ -332,9 +365,12 @@ public class Screen {
      * @param match
      *        - determines which element to tap if multiple matches exist; zero based index.
      * @return <code>true</code> if the tapping of element is successful, <code>false</code> if it fails.
-     * @throws UiElementFetchingException
      * @throws InvalidCssQueryException
+     *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws UiElementFetchingException
+     *         if no elements or more than 1 are found for the passed query
      */
     public boolean tapElementWithText(String text, int match)
         throws UiElementFetchingException,
@@ -359,7 +395,9 @@ public class Screen {
      *        - search text.
      * @return - true if element with supplied search text exists on screen.
      * @throws InvalidCssQueryException
+     *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
      */
     public boolean hasElementWithText(String text) throws XPathExpressionException, InvalidCssQueryException {
         try {
@@ -374,10 +412,11 @@ public class Screen {
     }
 
     /**
-     * Gets a the time picker currently on screen.
+     * Gets an instance for android TimePicker widgets.
      * 
-     * @return a {@link TimePicker} object representing the time picker widget on screen.
+     * @return a {@link TimePicker} object representing the only time picker widget on screen.
      * @throws UiElementFetchingException
+     *         if no active time pickers are found in the screen or there are more than 1 time pickers
      */
 
     public TimePicker getTimePicker() throws UiElementFetchingException {
@@ -396,8 +435,8 @@ public class Screen {
      * Checks if an element is present in the current {@link Screen} instance.
      * 
      * @param query
-     *        - the CSS element query to be checked for matches.
-     * @return <b><true/b> if the element is present, <b>false</b> otherwise.
+     *        - the CSS element query with all selection criteria for the searched element.
+     * @return <b><true/b> if the element is present in the screen, <b>false</b> otherwise.
      */
     public boolean containsElementByCSS(String query) {
         Elements elements = null;
@@ -466,11 +505,14 @@ public class Screen {
      * UiElementSelector} instance.
      * 
      * @param selector
-     *        - object of type {@link UiElementSelector}.
+     *        - {@link UiElementSelector} object that contains all the selection criteria for the required elements.
      * @return the requested {@link UiCollection UiCollection}.
-     * @throws UiElementFetchingException
      * @throws InvalidCssQueryException
+     *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws UiElementFetchingException
+     *         if no elements or more than 1 are found for the passed query
      */
     public UiCollection getCollectionBySelector(UiElementSelector selector)
         throws UiElementFetchingException,
@@ -487,14 +529,17 @@ public class Screen {
      * @param query
      *        - CSS selector query.
      * @return the requested {@link UiCollection UiCollection}.
-     * @throws UiElementFetchingException
      * @throws InvalidCssQueryException
+     *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws UiElementFetchingException
+     *         if no elements or more than 1 are found for the passed query
      */
     public UiCollection getCollectionByCSS(String cssQuery)
-        throws UiElementFetchingException,
-            InvalidCssQueryException,
-            XPathExpressionException {
+        throws InvalidCssQueryException,
+            XPathExpressionException,
+            UiElementFetchingException {
         String xPathQuery = CssToXPathConverter.convertCssToXPath(cssQuery);
         return getCollectionByXPath(xPathQuery);
     }
@@ -506,7 +551,9 @@ public class Screen {
      *        XPath query.
      * @return the requested {@link UiCollection UiCollection}.
      * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
+     *         if no elements or more than 1 are found for the passed query
      */
     public UiCollection getCollectionByXPath(String xPathQuery)
         throws UiElementFetchingException,

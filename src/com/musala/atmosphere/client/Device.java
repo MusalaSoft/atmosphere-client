@@ -87,7 +87,7 @@ public class Device {
     }
 
     /**
-     * Accepts call to this device.<br>
+     * Accepts call to this device.
      * 
      * @return <code>true</code> if the accepting call is successful, <code>false</code> if it fails.
      */
@@ -220,8 +220,8 @@ public class Device {
     /**
      * Gets the currently active {@link Screen Screen} of this device.
      * 
-     * @return {@link Screen Screen} instance.<br>
-     *         <code>null</code> if getting active screen fails.
+     * @return {@link Screen} instance, representing the active screen of this device or <code>null</code> if getting
+     *         active screen fails.
      */
     public Screen getActiveScreen() {
         String uiHierarchy = (String) communicator.sendAction(RoutingAction.GET_UI_XML_DUMP);
@@ -262,8 +262,10 @@ public class Device {
     /**
      * Gets the current network connection type of this device.
      * 
-     * @return {@link ConnectionType},<br>
-     *         <code>null</code> if getting connection type fails.
+     * @return the {@link ConnectionType type} of the network on this device, or <code>null</code> if getting connection
+     *         type fails.
+     * @see ConnectionType
+     * 
      */
     public ConnectionType getConnectionType() {
         ConnectionType type = (ConnectionType) communicator.sendAction(RoutingAction.GET_CONNECTION_TYPE);
@@ -273,8 +275,9 @@ public class Device {
     /**
      * Gets current acceleration of this device.
      * 
-     * @return {@link DeviceAcceleration DeviceAcceleration} of the device,<br>
-     *         <code>null</code> if getting acceleration fails.
+     * @return the movement {@link DeviceAcceleration vector} of this device in the space or <code>null</code> if
+     *         getting acceleration fails.
+     * @see DeviceAcceleration
      */
     public DeviceAcceleration getDeviceAcceleration() {
         DeviceAcceleration deviceAcceleration = (DeviceAcceleration) communicator.sendAction(RoutingAction.GET_DEVICE_ACCELERATION);
@@ -293,7 +296,8 @@ public class Device {
     }
 
     /**
-     * Gets the device information about this device.
+     * Provides information about device physical properties, such as type (tablet or emulator), dpi, resolution,
+     * android API level, manufacturer, camera presence and others.
      * 
      * @return {@link DeviceInformation DeviceInformation} structure with information for the testing device,<br>
      *         <code>null</code> if getting device information fails.
@@ -307,8 +311,9 @@ public class Device {
      * Gets the current mobile data state of this device.<br>
      * Can only be applied on <b>emulators</b>.
      * 
-     * @return {@link MobileDataState},<br>
-     *         <code>null</code> if getting mobile data state fails.
+     * @return the {@link MobileDataState state} of mobile data on this device or <code>null</code> if getting mobile
+     *         data state fails.
+     * @see MobileDataState
      */
     public MobileDataState getMobileDataState() {
         MobileDataState state = (MobileDataState) communicator.sendAction(RoutingAction.GET_MOBILE_DATA_STATE);
@@ -361,7 +366,8 @@ public class Device {
     /**
      * Gets a {@link ScreenOrientation} instance that contains information about the orientation of the screen.
      * 
-     * @return a filled {@link ScreenOrientation} instance.
+     * @return {@link ScreenOrientation object} that shows how android elements are rotated on the screen.
+     * @see ScreenOrientation
      */
     public ScreenOrientation getScreenOrientation() {
         ScreenOrientation screenOrientation = null;
@@ -422,8 +428,9 @@ public class Device {
     }
 
     /**
-     * Inputs text on this device through the AtmosphereIME.<br>
-     * Element on device's screen, that accepts text input should be preselected.
+     * Inputs text directly on the device, in the element on focus, if possible. It is user's responsibility to focus an
+     * editable android widget using {@link Device#tapScreenLocation(Point) Device.tapScreenLocation()},
+     * {@link UiElement#tap() UiElement.tap()} or {@link UiElement#focus() UiElement.focus()} methods.
      * 
      * @param text
      *        - text to be input.
@@ -434,8 +441,9 @@ public class Device {
     }
 
     /**
-     * Inputs text on this device through the AtmosphereIME.<br>
-     * Element on device's screen, that accepts text input should be preselected.
+     * Simulates text typing in the element on focus for this device. It is user's responsibility to focus an editable
+     * android widget using {@link Device#tapScreenLocation(Point) Device.tapScreenLocation()}, {@link UiElement#tap()
+     * UiElement.tap()} or {@link UiElement#focus() UiElement.focus()} methods.
      * 
      * @param text
      *        - text to be input.
@@ -625,7 +633,9 @@ public class Device {
      * Redirects specific IP address to another IP address.
      * 
      * @param toIp
+     *        - IP which will receive requests.
      * @param toNewIp
+     *        - another IP to which the received requests from the first IP should be redirected.
      * @return <code>true</code> if the connection redirection is successful, <code>false</code> if it fails.
      */
     public boolean redirectConnection(String toIp, String toNewIp) {
@@ -845,6 +855,7 @@ public class Device {
      * @return <code>true</code> if the activity start is successful, <code>false</code> if it fails.
      * 
      * @throws ActivityStartingException
+     *         when the activity can't be started.
      */
     public boolean startActivity(String packageName, String activityName) throws ActivityStartingException {
         return startActivity(packageName, activityName, true);
@@ -862,6 +873,7 @@ public class Device {
      *        - if <code>true</code>, unlocks the device before starting the activity.
      * @return <code>true</code> if the activity start is successful, <code>false</code> if it fails.
      * @throws ActivityStartingException
+     *         when the package or activity is invalid.
      */
     public boolean startActivity(String packageName, String activityName, boolean unlockDevice)
         throws ActivityStartingException {
@@ -1078,9 +1090,8 @@ public class Device {
      * Gets the timeout from the system settings, after which the screen is turned off.
      * 
      * @return timeout in milliseconds, after which the screen is turned off.
-     * @throws SettingsParsingException
      */
-    public long getScreenOffTimeout() throws SettingsParsingException {
+    public long getScreenOffTimeout() {
         return deviceSettings.getLong(AndroidSystemSettings.SCREEN_OFF_TIMEOUT, 0);
     }
 

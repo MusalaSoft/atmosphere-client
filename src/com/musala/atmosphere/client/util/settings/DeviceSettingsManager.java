@@ -23,8 +23,10 @@ public class DeviceSettingsManager {
      * Retrieves a single setting value as floating point number or returns default value if it is not found.
      * 
      * @param setting
+     *        - android setting.
      * @param defaultValue
-     * @return
+     *        - default value which should be returned if the retrieving fails.
+     * @return Floating point number if the retrieving succeed, defaultValue if it fails.
      */
 
     public float getFloat(IAndroidSettings setting, float defaultValue) {
@@ -40,8 +42,10 @@ public class DeviceSettingsManager {
      * Retrieves a single setting value as floating point number.
      * 
      * @param setting
-     * @return
+     *        - android setting..
+     * @return Floating point number if the retrieving succeed.
      * @throws SettingsParsingException
+     *         - Retrieving the single setting value as floating point number failed.
      */
     public float getFloat(IAndroidSettings setting) throws SettingsParsingException {
         String settingStringValue = getSetting(setting);
@@ -57,8 +61,10 @@ public class DeviceSettingsManager {
      * Retrieves a single setting value as integer or returns default value if it is not found.
      * 
      * @param setting
+     *        - android setting.
      * @param defaultValue
-     * @return the value of the setting or the default value.
+     *        - default value which should be returned if the retrieving fails.
+     * @return The single setting value as integer if retrieving succeed, defaultValue if it fails.
      */
     public int getInt(IAndroidSettings setting, int defaultValue) {
         try {
@@ -73,8 +79,10 @@ public class DeviceSettingsManager {
      * Retrieves a single setting value as integer.
      * 
      * @param setting
-     * @return
+     *        - android setting.
+     * @return The single setting value as integer if the retrieving succeed.
      * @throws SettingsParsingException
+     *         - Retrieving the single setting value as integer failed.
      */
     public int getInt(IAndroidSettings setting) throws SettingsParsingException {
         String settingStringValue = getSetting(setting);
@@ -90,8 +98,10 @@ public class DeviceSettingsManager {
      * Retrieves a single setting value as long or returns default value if it is not found.
      * 
      * @param setting
+     *        - android setting.
      * @param defaultValue
-     * @return the value of the setting or the default value.
+     *        - default value which should be returned if the retrieving fails.
+     * @return The single setting value as long if retrieving succeed, defaultValue if it fails.
      */
     public long getLong(IAndroidSettings setting, long defaultValue) {
         try {
@@ -106,8 +116,10 @@ public class DeviceSettingsManager {
      * Retrieves a single setting value as long.
      * 
      * @param setting
-     * @return the value of the setting.
-     * @throws SettingsParsingExceptionn
+     *        - android setting.
+     * @return The single setting value as long if the retrieving succeed.
+     * @throws SettingsParsingException
+     *         - Retrieving the single setting value as long failed.
      */
     public long getLong(IAndroidSettings setting) throws SettingsParsingException {
         String settingStringValue = getSetting(setting);
@@ -123,7 +135,10 @@ public class DeviceSettingsManager {
      * Retrieves a single setting value as String or returns default value if it is not found.
      * 
      * @param setting
-     * @return the string value of the setting or <code>null</code> if the fetching was not successful.
+     *        - android setting.
+     * @param defaultValue
+     *        - default value which should be returned if the retrieving fails.
+     * @return The string value of the setting or defaultValue if the fetching was not successful.
      */
     public String getString(IAndroidSettings setting, String defaultValue) {
         String settingValue = getSetting(setting);
@@ -139,7 +154,8 @@ public class DeviceSettingsManager {
      * Retrieves a single setting value as String.
      * 
      * @param setting
-     * @return the string value of the setting or <code>null</code> if the fetching was not successful.
+     *        - android setting.
+     * @return The string value of the setting or <code>null</code> if the fetching was not successful.
      */
     public String getString(IAndroidSettings setting) {
         String settingValue = getSetting(setting);
@@ -150,7 +166,9 @@ public class DeviceSettingsManager {
      * Updates a single settings value as a floating point number.
      * 
      * @param setting
+     *        - android setting.
      * @param value
+     *        - value to be set.
      * @result boolean indicating whether the updating was successful.
      */
     public boolean putFloat(IAndroidSettings setting, float value) {
@@ -161,7 +179,9 @@ public class DeviceSettingsManager {
      * Updates a single settings value as integer.
      * 
      * @param setting
+     *        - android setting.
      * @param value
+     *        - value to be set.
      * @result boolean indicating whether the updating was successful.
      */
     public boolean putInt(IAndroidSettings setting, int value) {
@@ -172,7 +192,9 @@ public class DeviceSettingsManager {
      * Updates a single settings value as long.
      * 
      * @param setting
+     *        - android setting.
      * @param value
+     *        - value to be set.
      * @result boolean indicating whether the updating was successful.
      */
     public boolean putLong(IAndroidSettings setting, long value) {
@@ -183,7 +205,9 @@ public class DeviceSettingsManager {
      * Updates a single settings value as String.
      * 
      * @param setting
+     *        - android setting.
      * @param value
+     *        - value to be set.
      * @result boolean indicating whether the updating was successful.
      */
     public boolean putString(IAndroidSettings setting, String value) {

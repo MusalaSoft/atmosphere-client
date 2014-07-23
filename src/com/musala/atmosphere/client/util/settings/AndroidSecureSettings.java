@@ -13,6 +13,9 @@ package com.musala.atmosphere.client.util.settings;
  */
 public enum AndroidSecureSettings implements IAndroidSettings {
     // TODO: Implement someday when required.
+    /**
+     * None value.
+     */
     NONE("");
 
     private String settingName;
@@ -23,11 +26,17 @@ public enum AndroidSecureSettings implements IAndroidSettings {
         this.settingName = settingName;
     }
 
+    /**
+     * @return the name of the enum constant
+     */
     @Override
     public String toString() {
         return settingName;
     }
 
+    /**
+     * @return the uniform resource identifier
+     */
     @Override
     public String getContentUri() {
         return CONTENT_URI;

@@ -237,11 +237,17 @@ public enum AndroidGlobalSettings implements IAndroidSettings {
         this.settingName = settingName;
     }
 
+    /**
+     * @return the name of the enum constant
+     */
     @Override
     public String toString() {
         return settingName;
     }
 
+    /**
+     * @return the uniform resource identifier
+     */
     @Override
     public String getContentUri() {
         return CONTENT_URI;

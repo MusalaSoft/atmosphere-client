@@ -124,7 +124,8 @@ public class UiElement {
      * Returns an element that shows how the type the validity of the given {@link UiElement} is done - manually or
      * automatically.
      * 
-     * @return - an {@link ElementValidationType} instance.
+     * @return - an {@link ElementValidationType} instance, denoting whether this UiElement is updated automatically
+     *         when the screen changes, or the user should update its screen regularly.
      */
     public ElementValidationType getValidationType() {
         return validationType;
@@ -133,7 +134,7 @@ public class UiElement {
     /**
      * Returns the current UI element's attributes data container.
      * 
-     * @return a {@link UiElementSelector} instance.
+     * @return a {@link UiElementSelector} instance, containing all attributes of this UiElement.
      */
     public UiElementSelector getElementSelector() {
         innerRevalidation();
@@ -164,7 +165,7 @@ public class UiElement {
     }
 
     /**
-     * Simulates tapping on the current UI Element.
+     * Simulates tapping in the center of this UI Element.
      * 
      * @return <code>true</code> if the tapping is successful, <code>false</code> if it fails.
      */
@@ -177,9 +178,9 @@ public class UiElement {
     }
 
     /**
-     * Used to get the text of the given Ui element.
+     * Used to get the text of this UiElement.
      * 
-     * @return String with the text of this Ui element.
+     * @return <code>String</code> with the content of the text property of this UiElement.
      */
     public String getText() {
         String text = elementSelector.getStringValue(CssAttribute.TEXT);
@@ -187,17 +188,17 @@ public class UiElement {
     }
 
     /**
-     * Simulates holding finger on the screen.
+     * Simulates holding finger in the center of this UiElement. <i><b>Warning: method not yet implemented!</b></i>
      * 
      * @return <code>true</code> if the holding is successful, <code>false</code> if it fails.
      */
     public boolean hold() {
-        // TODO implement uiElement.hold()
+        // TODO implement uiElement.hold() and update the java doc
         return false;
     }
 
     /**
-     * Simulates double-tapping on the given UI element.
+     * Simulates double-tapping in the center of this UiElement.
      * 
      * @return <code>true</code> if the double tapping is successful, <code>false</code> if it fails.
      */
@@ -210,10 +211,12 @@ public class UiElement {
     }
 
     /**
-     * Simulates double-tapping on a point in the given UI element.
+     * Simulates double-tapping on a point in this UiElement.
      * 
      * @param point
-     *        - the point to be tapped
+     *        - a {@link Point} object, representing the relative coordinates of the point to tap inside this UiElement.
+     *        <i><b><u>Note</u></b>: the point with relative coordinates (0,0) denotes the upper-left corner of the
+     *        UiElement</i>
      * @return <code>true</code> if the double tapping is successful, <code>false</code> if it fails.
      */
     public boolean doubleTap(Point point) {
@@ -281,11 +284,13 @@ public class UiElement {
     }
 
     /**
-     * Simulates dragging the UI widget until his ( which corner exactly? ) upper-left corner stands at position
-     * (toX,toY) on the screen.
+     * Simulates dragging the UI widget until his upper-left corner stands at position (toX,toY) on the screen.
+     * <i><b>Warning: method not yet implemented!</b></i>
      * 
      * @param toX
+     *        - X-coordinate of the upper-left corner of the UI widget after the dragging is done
      * @param toY
+     *        - Y-coordinate of the upper-left corner of the UI widget after the dragging is done
      * @return <code>true</code> if the dragging is successful, <code>false</code> if it fails.
      */
     public boolean drag(int toX, int toY) {
@@ -294,10 +299,10 @@ public class UiElement {
     }
 
     /**
-     * Simulates swiping.
+     * Simulates swiping this UiElement.
      * 
      * @param swipeDirection
-     *        - a {@link SwipeDirection} enum instance, describing the direction this element should be swiped in.
+     *        - a {@link SwipeDirection}, describing the direction of the swipe.
      * @return <code>true</code> if the swiping is successful, <code>false</code> if it fails.
      */
     public boolean swipe(SwipeDirection swipeDirection) {
@@ -308,12 +313,12 @@ public class UiElement {
     }
 
     /**
-     * Swipes this element in a given direction.
+     * Swipes this element in particular direction.
      * 
-     * @param direction
-     *        - a {@link SwipeDirection} enum instance, describing the direction this element should be swiped in.
      * @param point
      *        -a {@link Point} the point from which the swipe start.
+     * @param direction
+     *        - a {@link SwipeDirection}, describing the direction of the swipe.
      * @return boolean indicating if this action was successful.
      */
     public boolean swipe(Point point, SwipeDirection direction) {
@@ -327,10 +332,13 @@ public class UiElement {
      * 
      * @return boolean indicating if this action was successful.
      * @throws InvalidCssQueryException
+     *         if element is searched by invalid CSS query
+     * @throws UiElementFetchingException
+     *         if element could not be found
      * @throws XPathExpressionException
-     * @throws UiElementFetchingException.
+     *         if element is searched by invalid XPath query
      */
-    public boolean clearText() throws UiElementFetchingException, XPathExpressionException, InvalidCssQueryException {
+    public boolean clearText() throws XPathExpressionException, UiElementFetchingException, InvalidCssQueryException {
         // TODO validate when an element can get it's text cleared
         innerRevalidation();
         ElementValidationType originalValidationType = getValidationType();
@@ -441,10 +449,10 @@ public class UiElement {
     }
 
     /**
-     * Simulates long press on the given element with default timeout value.
+     * Simulates long press on the current element with default timeout value.
      * 
-     * @see Device#LONG_PRESS_DEFAULT_TIMEOUT
      * @return true, if operation is successful, and false otherwise.
+     * @see Device#LONG_PRESS_DEFAULT_TIMEOUT
      */
     public boolean longPress() {
         Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
@@ -455,7 +463,7 @@ public class UiElement {
     }
 
     /**
-     * Simulates long press on the given element with passed timeout value.
+     * Simulates long press on the current element with passed timeout value.
      * 
      * @param timeout
      *        - time in ms for which the element should be held.
@@ -544,14 +552,17 @@ public class UiElement {
     }
 
     /**
-     * Gets all child UiElements that matched the query
+     * Gets all child {@link UiElement UiElements} that match the passed query.
      * 
      * @param xPathQuery
      *        XPath type node selecting query.
      * @return Returns all the children of the UiElement that matched the xPathQuery
-     * @throws XPathExpressionException
      * @throws UiElementFetchingException
+     *         if no appropriate UiElements are found
+     * @throws XPathExpressionException
+     *         if the passed XPath query is invalid
      * @throws ParserConfigurationException
+     *         if an error with internal XPath configuration occurs
      */
     public List<UiElement> getChildren(String xPathQuery)
         throws XPathExpressionException,
@@ -594,9 +605,13 @@ public class UiElement {
      *        - a string representing a CSS Query
      * @return Returns all children of the UiElement that match the given CSS query
      * @throws InvalidCssQueryException
-     * @throws XPathExpressionException
+     *         if element is searched by invalid CSS query
      * @throws UiElementFetchingException
+     *         if element could not be found
+     * @throws XPathExpressionException
+     *         if element is searched by invalid XPath query
      * @throws ParserConfigurationException
+     *         if an error with internal XPath configuration occurs
      */
     public List<UiElement> getChildrenByCssQuery(String cssQuery)
         throws InvalidCssQueryException,
@@ -608,6 +623,17 @@ public class UiElement {
         return getChildren(convertedXPathQuery);
     }
 
+    /**
+     * Checks if this {@link UiElement} has the same properties as the passed one.
+     * 
+     * @param object
+     *        - the {@link UiElement} for comparision
+     * 
+     * @return <code>true</code>, if this UiElement has the same properties as the passed <code>object</code> and
+     *         <code>false</code> if the passed object is not an {@link UiElement} or differs from this
+     *         {@link UiElement}
+     * @see EqualsBuilder
+     */
     @Override
     public boolean equals(Object object) {
         if (object == null) {
@@ -622,6 +648,12 @@ public class UiElement {
         return new EqualsBuilder().append(elementSelector, uiElement.elementSelector).isEquals();
     }
 
+    /**
+     * Returns a hash code for this value.
+     * 
+     * @return - the hashcode of this object.
+     * @see HashCodeBuilder
+     */
     @Override
     public int hashCode() {
         return new HashCodeBuilder().append(elementSelector).toHashCode();

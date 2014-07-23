@@ -4,8 +4,8 @@ import com.musala.atmosphere.client.UiElement;
 import com.musala.atmosphere.commons.exceptions.AtmosphereRuntimeException;
 
 /**
- * Thrown when an action is being executed on a {@link UiElement UiElement} instance if the action is inadequate for the
- * element.
+ * Thrown when we want to execute an action on a {@link UiElement UiElement} instance that is inadequate for the element
+ * like executing clicking or focusing on an non clickable or non-focusable {@link UiElement UiElement}.
  * 
  * @author georgi.gaydarov
  * 

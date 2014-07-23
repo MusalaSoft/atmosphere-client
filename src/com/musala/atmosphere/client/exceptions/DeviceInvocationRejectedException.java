@@ -3,7 +3,8 @@ package com.musala.atmosphere.client.exceptions;
 import com.musala.atmosphere.commons.exceptions.AtmosphereRuntimeException;
 
 /**
- * Thrown when the invocation on the server's device representation object was rejected.
+ * Thrown when the invocation on the server's device representation object was rejected. This exception is usually
+ * thrown when invalid passKey is given or the server release the device.
  * 
  * @author georgi.gaydarov
  * 

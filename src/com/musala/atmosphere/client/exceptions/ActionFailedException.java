@@ -3,7 +3,7 @@ package com.musala.atmosphere.client.exceptions;
 import com.musala.atmosphere.commons.exceptions.AtmosphereRuntimeException;
 
 /**
- * Thrown when an action invocation failed.
+ * Thrown when an action invocation failed like getting Time or Date value or parsing date.
  * 
  * @author georgi.gaydarov
  * 

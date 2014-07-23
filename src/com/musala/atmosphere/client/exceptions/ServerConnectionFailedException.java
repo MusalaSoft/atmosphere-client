@@ -11,6 +11,9 @@ import com.musala.atmosphere.commons.exceptions.AtmosphereRuntimeException;
  * 
  */
 public class ServerConnectionFailedException extends AtmosphereRuntimeException {
+    /**
+     * auto generated serialization id
+     */
     private static final long serialVersionUID = -4528263673224194846L;
 
     public ServerConnectionFailedException() {

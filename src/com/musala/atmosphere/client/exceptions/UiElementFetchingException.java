@@ -3,7 +3,9 @@ package com.musala.atmosphere.client.exceptions;
 import com.musala.atmosphere.client.UiElement;
 
 /**
- * Thrown when a method that attempts to fetch a {@link UiElement UiElement} does not succeed for some reason.
+ * Thrown when a method that attempts to fetch a {@link UiElement UiElement} does not succeed for some reason like the
+ * wanted {@link UiElement UiElement} does not exist on the current screen, the given xPath or Css are invalid or there
+ * are two or more {@link UiElement UiElement} with the wanted characteristic.
  * 
  * @author georgi.gaydarov
  * 

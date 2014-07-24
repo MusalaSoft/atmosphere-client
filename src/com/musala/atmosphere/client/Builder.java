@@ -40,6 +40,7 @@ public class Builder {
      * Initializes {@link Builder} and connects to Server through given {@link ServerConnectionHandler}.
      * 
      * @param serverConnectionHandler
+     *        - the given {@link ServerConnectionHandler}.
      */
     private Builder(ServerConnectionHandler serverConnectionHandler) {
 
@@ -53,7 +54,7 @@ public class Builder {
     /**
      * Gets the {@link Builder Builder} instance for the annotated Server address.
      * 
-     * @return {@link Builder Builder} instance.
+     * @return {@link Builder Builder} instance for the annotated Server address.
      */
     public static Builder getInstance() {
         ServerAnnotationProperties serverAnnotationProperties = new ServerAnnotationProperties();
@@ -80,7 +81,10 @@ public class Builder {
     /**
      * Gets the {@link Builder Builder} instance for the given {@link ServerConnectionProperties}
      * 
-     * @return {@link Builder Builder} instance.
+     * @param serverConnectionProperties
+     *        - the given server connection properties.
+     * 
+     * @return {@link Builder Builder} instance for the given server connection properties.
      */
     public static Builder getInstance(ServerConnectionProperties serverConnectionProperties) {
         Builder builder = builders.get(serverConnectionProperties);
@@ -106,8 +110,8 @@ public class Builder {
      * Gets a {@link Device Device} instance with given {@link DeviceParameters DeviceParameters}.
      * 
      * @param deviceParameters
-     *        - required device parameters.
-     * @return a {@link Device Device} instance.
+     *        - required {@link DeviceParameters} needed to construct new {@link Device Device} instance.
+     * @return a {@link Device Device} instance with a given device parameters.
      */
     public Device getDevice(DeviceParameters deviceParameters) {
         try {
@@ -129,7 +133,7 @@ public class Builder {
     }
 
     /**
-     * Releases previously allocated to a device.
+     * Releases a given device.
      * 
      * @param device
      *        - device to be released.

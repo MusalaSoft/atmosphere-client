@@ -43,15 +43,17 @@ public class DeviceCommunicator {
     }
 
     /**
-     * Replaces the underlying client device so no further invocation can be possible.
+     * Release the underlying client device so no further invocation can be possible.
      */
     public void release() {
         wrappedClientDevice = new ReleasedClientDevice();
     }
 
     /**
+     * Shows the exception that was thrown during the last action if such exception occurred.
+     * 
      * @return the {@link CommandFailedException} instance that was thrown during the last action if such exception
-     *         occured, <code>null</code> otherwise.
+     *         occurred, <code>null</code> otherwise.
      */
     public CommandFailedException getLastException() {
         return lastSentActionException;

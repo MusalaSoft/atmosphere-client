@@ -233,10 +233,16 @@ public class ScrollableView extends UiCollection {
         throws XPathExpressionException,
             ParserConfigurationException,
             InvalidCssQueryException {
-        String cssQuery = innerViewSelector.buildCssQuery();
+    	 String cssQuery = innerViewSelector.buildCssQuery();
+         Screen deviceActiveScreen = onDevice.getActiveScreen();
+         UiElementSelector scrollableViewSelector = this.getElementSelector();
+         ScrollableView updatedScrollableView = null;
 
         try {
-            List<UiElement> innerViewChildren = this.getChildrenByCssQuery(cssQuery);
+        	deviceActiveScreen.updateScreen();
+            updatedScrollableView = deviceActiveScreen.getScrollableView(scrollableViewSelector);
+                
+            List<UiElement> innerViewChildren = updatedScrollableView.getChildrenByCssQuery(cssQuery);
 
             return innerViewChildren.get(0).tap();
         } catch (UiElementFetchingException e) {

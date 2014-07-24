@@ -428,7 +428,7 @@ public class Screen {
             throw new UiElementFetchingException("No time picker is currently available on the screen.");
         }
 
-        return new TimePicker(communicator);
+        return new TimePicker(this);
     }
 
     /**

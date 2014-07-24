@@ -58,7 +58,7 @@ public class ScrollableView extends UiCollection {
      *        used to control the speed
      * @param maxSwipes
      *        maximum swipes to perform a scroll action
-     * @return true on scrolled else false
+     * @return true if the scroll to the end was successful, false otherwise
      */
     public boolean scrollToEnd(Integer maxSwipes, Integer steps) {
         return scroll(maxSwipes, steps, ScrollDirection.SCROLL_TO_END);
@@ -72,7 +72,7 @@ public class ScrollableView extends UiCollection {
      *        used to control the speed
      * @param maxSwipes
      *        maximum swipes to perform a scroll action
-     * @return true on scrolled else false
+     * @return true if the scroll to the beginning was successful, false otherwise
      */
     public boolean scrollToBeginning(Integer maxSwipes, Integer steps) {
         return scroll(maxSwipes, steps, ScrollDirection.SCROLL_TO_BEGINNING);
@@ -82,11 +82,11 @@ public class ScrollableView extends UiCollection {
 
     /**
      * Scrolls to the beginning of a scrollable UI element. The beginning could be the top most in case of vertical
-     * controls or the left most for horizontal controls. A default value for the steps count will be used.
+     * controls or the left most for horizontal controls. A default value (55) for the steps count will be used.
      * 
      * @param maxSwipes
      *        maximum swipes to perform a scroll action
-     * @return true on scrolled else false
+     * @return true if the scroll to the beginning was successful, false otherwise
      */
     public boolean scrollToBeginning(Integer maxSwipes) {
         return scroll(maxSwipes, 0, ScrollDirection.SCROLL_TO_BEGINNING);
@@ -94,11 +94,11 @@ public class ScrollableView extends UiCollection {
 
     /**
      * Scrolls to the end of a scrollable UI element. The end could be the bottom most in case of vertical controls or
-     * the right most for horizontal controls. A default value for the steps count will be used.
+     * the right most for horizontal controls. A default value (55) for the steps count will be used.
      * 
      * @param maxSwipes
      *        maximum swipes to perform a scroll action
-     * @return true on scrolled else false
+     * @return true if the scroll to the end was successful, false otherwise
      */
     public boolean scrollToEnd(Integer maxSwipes) {
         return scroll(maxSwipes, 0, ScrollDirection.SCROLL_TO_END);
@@ -110,7 +110,7 @@ public class ScrollableView extends UiCollection {
      * 
      * @param steps
      *        used to control the speed
-     * @return true if scrolled and false if can't scroll anymore
+     * @return true if the backward scroll was successful, false otherwise
      */
     public boolean scrollBackward(int steps) {
         return scroll(0, steps, ScrollDirection.SCROLL_BACKWARD);
@@ -122,7 +122,7 @@ public class ScrollableView extends UiCollection {
      * 
      * @param steps
      *        used to control the speed
-     * @return true if scrolled and false if can't scroll anymore
+     * @return true if the forward scroll was successful, false otherwise
      */
     public boolean scrollForward(int steps) {
         return scroll(0, steps, ScrollDirection.SCROLL_FORWARD);
@@ -130,10 +130,10 @@ public class ScrollableView extends UiCollection {
 
     /**
      * Perform a scroll backward. If this view is set to vertical then the scroll will be executed from bottom to top.
-     * If this view is set to horizontal then the scroll will be executed from right to left. A default value for the
-     * steps count will be used.
+     * If this view is set to horizontal then the scroll will be executed from right to left. A default value (55) for
+     * the steps count will be used.
      * 
-     * @return true if scrolled and false if can't scroll anymore
+     * @return true if the backward scroll was successful, false otherwise
      */
     public boolean scrollBackward() {
         return scroll(0, 0, ScrollDirection.SCROLL_BACKWARD);
@@ -141,10 +141,10 @@ public class ScrollableView extends UiCollection {
 
     /**
      * Perform a scroll forward. If this view is set to vertical then the scroll will be executed from top to bottom. If
-     * this view is set to horizontal then the scroll will be executed from left to right. A default value for the steps
-     * count will be used.
+     * this view is set to horizontal then the scroll will be executed from left to right. A default value (55) for the
+     * steps count will be used.
      * 
-     * @return true if scrolled and false if can't scroll anymore
+     * @return true if the forward scroll was successful, false otherwise
      */
     public boolean scrollForward() {
         return scroll(0, 0, ScrollDirection.SCROLL_FORWARD);
@@ -178,11 +178,14 @@ public class ScrollableView extends UiCollection {
      * @param maxSwipes
      *        - the maximum number of swipes to perform a scroll action
      * @param innerViewSelector
-     *        - the corresponding selector
+     *        - a {@link UiElementSelector} that needs to match a certain element in the scrollable view
      * @return true if the method finds the element corresponding to the selector, false if it does not find it
      * @throws XPathExpressionException
+     *         - if the XPath expression resulting from the conversion of the {@link UiElementSelector} is invalid
      * @throws InvalidCssQueryException
+     *         - if the CSS query corresponding to the {@link UiElementSelector} is invalid
      * @throws ParserConfigurationException
+     *         - if an error with internal XPath configuration occurs
      */
     public boolean scrollToElementBySelector(Integer maxSwipes, UiElementSelector innerViewSelector)
         throws XPathExpressionException,
@@ -216,19 +219,20 @@ public class ScrollableView extends UiCollection {
      * Tries to find an UI element in the view without the usage of scroll and taps on it.
      * 
      * @param innerViewSelector
-     *        - the corresponding selector
+     *        - a {@link UiElementSelector} that needs to match a certain element in the scrollable view
      * @return true if you can find and tap on an element in ScrollableView corresponding to the given selector without
      *         scrolling, false if you cannot
      * @throws XPathExpressionException
+     *         - if the XPath expression resulting from the conversion of the {@link UiElementSelector} is invalid
      * @throws InvalidCssQueryException
-     * @throws UiElementFetchingException
+     *         - if the CSS query corresponding to the {@link UiElementSelector} is invalid
      * @throws ParserConfigurationException
+     *         - if an error with internal XPath configuration occurs
      */
     public boolean tapElementBySelectorWithoutScrolling(UiElementSelector innerViewSelector)
         throws XPathExpressionException,
-            InvalidCssQueryException,
-            UiElementFetchingException,
-            ParserConfigurationException {
+            ParserConfigurationException,
+            InvalidCssQueryException {
         String cssQuery = innerViewSelector.buildCssQuery();
 
         try {
@@ -243,14 +247,20 @@ public class ScrollableView extends UiCollection {
     /**
      * Tries to find an UI element in the view with the usage of scroll and taps on it.
      * 
+     * @param maxSwipes
+     *        - the maximum number of swipes to perform a scroll action
      * @param innerViewSelector
-     *        - the corresponding selector
+     *        - a {@link UiElementSelector} that needs to match a certain element in the scrollable view
      * @return true if you can find and tap on an element in ScrollableView corresponding to the given selector with
      *         scrolling, false if you cannot
      * @throws XPathExpressionException
+     *         - if the XPath expression resulting from the conversion of the {@link UiElementSelector} is invalid
      * @throws InvalidCssQueryException
+     *         - if the CSS query corresponding to the {@link UiElementSelector} is invalid
      * @throws ParserConfigurationException
+     *         - if an error with internal XPath configuration occurs
      * @throws UiElementFetchingException
+     *         - if the UI element could not be found
      */
     public boolean tapElementBySelectorWithScrolling(Integer maxSwipes, UiElementSelector innerViewSelector)
         throws XPathExpressionException,

@@ -7,7 +7,7 @@ import com.musala.atmosphere.client.geometry.Bounds;
 import com.musala.atmosphere.client.geometry.Point;
 
 /**
- * Houses {@link #parse(String) parse(elementBounds)}.
+ * Manages some of the UiElement Bounds functionality like parsing String of Bounds into Bounds pair.
  * 
  * @author georgi.gaydarov
  * 
@@ -18,8 +18,8 @@ public class UiElementBoundsParser {
      * Pair&lt;Point, Point;&gt; format.
      * 
      * @param bounds
-     *        String to be parsed.
-     * @return bounds pair.
+     *        String containing UiElement bounds to be parsed.
+     * @return Bounds pair containing the UiElement bounds.
      */
     public static Bounds parse(String bounds) {
         final String BOUNDS_STRING_PATTERN = "\\[(-*\\d+),(-*\\d+)\\]\\[(-*\\d+),(-*\\d+)\\]";

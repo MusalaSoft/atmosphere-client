@@ -3,7 +3,7 @@ package com.musala.atmosphere.client.uiutils;
 import com.musala.atmosphere.commons.ui.UiElementDescriptor;
 
 /**
- * Houses {@link #extract(UiElementSelectorTest)}.
+ * Manages the extracting of the attributes from a UiElementSelector instance to a simpler data container.
  * 
  * @author georgi.gaydarov
  * 
@@ -14,8 +14,8 @@ public class UiElementAttributeExtractor {
      * {@link UiElementDescriptor}.
      * 
      * @param selector
-     *        - selector instance.
-     * @return a populated with the selector's attributes {@link UiElementDescriptor} instance.
+     *        - selector instance from which we get the attributes.
+     * @return a {@link UiElementDescriptor} instance containing the {@link UiElementSelector} attributes.
      */
     public static UiElementDescriptor extract(UiElementSelector selector) {
         UiElementDescriptor descriptor = new UiElementDescriptor();

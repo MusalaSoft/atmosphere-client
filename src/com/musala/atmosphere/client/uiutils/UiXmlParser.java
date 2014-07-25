@@ -32,12 +32,14 @@ public class UiXmlParser {
      * Gets a {@link Node Node} from a {@link Document Document} by a XPath query.
      * 
      * @param domDocument
-     *        document to search in.
+     *        document containing a nodes which represent screen elements.
      * @param xPathQuery
      *        XPath type node selecting query.
      * @return the found {@link Node Node} object.
      * @throws UiElementFetchingException
+     *         if there are no nodes in the document to be found by the given xPathQuery or the xPathQuery is invalid.
      * @throws XPathExpressionException
+     *         if the given xPathQuery is invalid.
      */
     public static Node getXPathNode(Document domDocument, String xPathQuery)
         throws UiElementFetchingException,
@@ -63,6 +65,7 @@ public class UiXmlParser {
      * Returns all attributes of an XPath {@link Node Node} object.
      * 
      * @param node
+     *        a node which contains all attributes.
      * @return the object attribute map.
      */
     public static Map<String, String> getAttributeMapOfNode(Node node) {
@@ -83,11 +86,12 @@ public class UiXmlParser {
      * Gets a {@link org.jsoup.nodes.Node Node} from a {@link org.jsoup.nodes.Document Document} by a JSoup query.
      * 
      * @param document
-     *        document to search in.
+     *        document containing a nodes which represent screen elements.
      * @param query
      *        JSoup type element selecting query.
      * @return the found {@link org.jsoup.nodes.Node Node} object.
      * @throws UiElementFetchingException
+     *         - if there are no elements that match the JSoup query.
      */
     public static org.jsoup.nodes.Node getJSoupNode(org.jsoup.nodes.Document document, String query)
         throws UiElementFetchingException {
@@ -108,7 +112,7 @@ public class UiXmlParser {
      * Gets a List<{@link org.jsoup.nodes.Node Node}> from a {@link org.jsoup.nodes.Document Document} by a JSoup query.
      * 
      * @param document
-     *        document to search in.
+     *        document containing a nodes which represent screen elements.
      * @param query
      *        JSoup type element selecting query.
      * @return - list with all found {@link org.jsoup.nodes.Node Node} objects.
@@ -134,11 +138,12 @@ public class UiXmlParser {
      * JSoup query. Elements contains all elements of type {@link org.jsoup.nodes.Node Node} found by the query.
      * 
      * @param document
-     *        document to search in.
+     *        document containing a nodes which represent screen elements.
      * @param query
      *        JSoup type element selecting query.
      * @return the found {@link org.jsoup.select.Elements Elements}.
      * @throws UiElementFetchingException
+     *         - when no elements are found for the passed JSoup expression.
      */
     public static Elements getJSoupElements(org.jsoup.nodes.Document document, String query)
         throws UiElementFetchingException {
@@ -154,6 +159,7 @@ public class UiXmlParser {
      * Returns all attributes of an JSoup {@link org.jsoup.nodes.Node Node} object.
      * 
      * @param node
+     *        - contains the attributes of an Jsoup OObject.
      * @return the object attribute map.
      */
     public static Map<String, String> getAttributeMapOfNode(org.jsoup.nodes.Node node) {
@@ -169,12 +175,14 @@ public class UiXmlParser {
      * Gets a NodeList of all the Nodes that matched the query
      * 
      * @param domDocument
-     *        document to search in.
+     *        document containing a nodes which represent screen elements.
      * @param xPathQuery
      *        XPath type node selecting query.
      * @return NodeList containing all Nodes that matched the query
      * @throws UiElementFetchingException
+     *         - when no elements are found for the passed XPath query.
      * @throws XPathExpressionException
+     *         - if the given XPath is invalid.
      */
     public static NodeList getXPathNodeChildren(Document domDocument, String xPathQuery)
         throws UiElementFetchingException,

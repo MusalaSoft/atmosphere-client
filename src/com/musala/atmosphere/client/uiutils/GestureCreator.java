@@ -29,7 +29,7 @@ public class GestureCreator {
      *        - the x coordinate of the tap point
      * @param y
      *        - the y coordinate of the tap point
-     * @return a {@link Gesture} that is a double tap
+     * @return a {@link Gesture} that represents a double tap on a device
      */
     public static Gesture createDoubleTap(float x, float y) {
         Gesture doubleTap = new Gesture();
@@ -54,7 +54,7 @@ public class GestureCreator {
      *        - the initial position of the first finger performing the gesture
      * @param secondFingerInitial
      *        - the initial position of the second finger performing the gesture
-     * @return a pinch in {@link Gesture}
+     * @return a {@link Gesture} that represents pinch in on a device.
      */
     public static Gesture createPinchIn(Point firstFingerInitial, Point secondFingerInitial) {
         // calculating the point where the two fingers will meet
@@ -79,7 +79,7 @@ public class GestureCreator {
      *        - the point where the first finger will be at the end of the pinch
      * @param secondFingerEnd
      *        - the point where the second finger will be at the end of the pinch
-     * @return a pinch out {@link Gesture}
+     * @return a {@link Gesture} that represents pinch out on a device.
      */
     public static Gesture createPinchOut(Point firstFingerEnd, Point secondFingerEnd) {
         // calculating the start point of the gesture
@@ -106,7 +106,7 @@ public class GestureCreator {
      *        - the direction of the swipe
      * @param resolution
      *        - this is a pair which present the resolution of the screen
-     * @return a {@link Gesture} that is a swipe
+     * @return a {@link Gesture} that represents swipe on a device.
      */
     public static Gesture createSwipe(Point startPoint, SwipeDirection swipeDirection, Pair<Integer, Integer> resolution) {
         int endX = startPoint.getX();
@@ -145,7 +145,7 @@ public class GestureCreator {
      *        - the end point of the motion
      * @param duration
      *        - the duration of the scroll motion in milliseconds
-     * @return a {@link Timeline} representing a scroll motion
+     * @return a {@link Timeline} representing a scroll motion on a device.
      */
     private static Timeline createScrollMovement(Point from, Point to, int duration) {
         Timeline scroll = new Timeline();
@@ -159,7 +159,9 @@ public class GestureCreator {
     }
 
     /**
-     * Defines a {@link Timeline} for a long press gesture.
+     * Defines a {@link Timeline} for a long press gesture. A {@link Timeline} represents a single finger gesture which
+     * contains the {@link Anchor Anchor} points that the current pointer will traverse and represent a long press on a
+     * Device.
      * 
      * @param x
      *        - the x coordinate of the tap point;
@@ -167,7 +169,7 @@ public class GestureCreator {
      *        - the y coordinate of the tap point;
      * @param timeout
      *        - the time in ms for which the point should stay pressed.
-     * @return a {@link Timeline} representing a long press.
+     * @return a {@link Timeline} representing a long press on a device.
      */
     public static Gesture createLongPress(int x, int y, int timeout) {
 

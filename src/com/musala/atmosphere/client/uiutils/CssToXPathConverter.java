@@ -40,7 +40,7 @@ public class CssToXPathConverter {
      * Divides the CSS Query to property selectors
      * 
      * @param cssQuery
-     *        - a CSS query
+     *        - a CSS query to be divided.
      * @return A list consisting of the divided CSS Query
      */
     private static List<String> divideCssQuery(String cssQuery) {
@@ -68,7 +68,7 @@ public class CssToXPathConverter {
      * Check if the given CSS Query is valid
      * 
      * @param cssQuery
-     *        - a CSS query
+     *        - a CssQuery which will be checked if it is valid.
      * @return true if the CSS query is valid, false if it is not
      */
     private static boolean isCssQueryValid(String cssQuery) {
@@ -110,9 +110,10 @@ public class CssToXPathConverter {
      * The method converts a given CSS query to an equivalent XPath query
      * 
      * @param cssQuery
-     *        - a CSS Query
+     *        - a CSS Query which will be converted into XPath query.
      * @return An XPath query resulted from the conversion of the CSS query
      * @throws InvalidCssQueryException
+     *         if the given CssQuery is invalid or does not contains the needed requirements for the regex to work.
      */
     public static String convertCssToXPath(String cssQuery) throws InvalidCssQueryException {
         // separates the initial node from the attributes query

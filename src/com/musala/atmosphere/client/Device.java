@@ -64,13 +64,13 @@ public class Device {
      */
     public static final int LONG_PRESS_DEFAULT_TIMEOUT = 1500; // ms
 
-    private DeviceSettingsManager deviceSettings;
+    private final DeviceSettingsManager deviceSettings;
 
-    private ServerConnectionHandler serverConnectionHandler;
+    private final ServerConnectionHandler serverConnectionHandler;
 
-    private DeviceCommunicator communicator;
+    private final DeviceCommunicator communicator;
 
-    private UiElementValidator validator;
+    private final UiElementValidator validator;
 
     /**
      * Constructor that creates a usable Device object by a given IClientDevice, it's invocation passkey.
@@ -923,8 +923,23 @@ public class Device {
             setLocked(false);
         }
 
-        boolean response = (boolean) communicator.sendAction(RoutingAction.START_APP, packageName);
+        Boolean response = (Boolean) communicator.sendAction(RoutingAction.START_APP, packageName);
+
         return response;
+    }
+
+    /**
+     * Uninstalls an application from the device.
+     * 
+     * @param packageName
+     *        - name of the application's package
+     * 
+     * @return <code>true</code> if the application was successfully uninstalled, <code>false</code> otherwise
+     */
+    public boolean uninstallApplication(String packageName) {
+        Object response = communicator.sendAction(RoutingAction.UNINSTALL_APP, packageName);
+
+        return response == DeviceCommunicator.VOID_SUCCESS;
     }
 
     /**

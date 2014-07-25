@@ -20,8 +20,11 @@ public class Bounds {
      * Creates new Bounds instance given upper left corner, width and height.
      * 
      * @param upperLeftCorner
+     *        - the upper left corner of the bounds
      * @param width
+     *        - the width of the bounds
      * @param height
+     *        - the height of the bounds
      */
     public Bounds(Point upperLeftCorner, int width, int height) {
         this.upperLeftCorner = new Point(upperLeftCorner);
@@ -33,7 +36,9 @@ public class Bounds {
      * Creates new Bounds instance given upper left and lower right corners.
      * 
      * @param upperLeftCorner
+     *        - the upper left corner of the bounds
      * @param lowerRightCorner
+     *        - the lower left corner of the bounds
      */
     public Bounds(Point upperLeftCorner, Point lowerRightCorner) {
         int calculatedWidth = lowerRightCorner.getX() - upperLeftCorner.getX();
@@ -47,7 +52,7 @@ public class Bounds {
     /**
      * Gets upper left corner.
      * 
-     * @return
+     * @return the upper left corner of the bounds
      */
     public Point getUpperLeftCorner() {
         return new Point(upperLeftCorner);
@@ -57,6 +62,7 @@ public class Bounds {
      * Sets upper left corner.
      * 
      * @param upperLeftCorner
+     *        - the upper left corner of the bounds
      */
     public void setUpperLeftCorner(Point upperLeftCorner) {
         this.upperLeftCorner = new Point(upperLeftCorner);
@@ -65,7 +71,7 @@ public class Bounds {
     /**
      * Gets upper right corner.
      * 
-     * @return
+     * @return the upper right corner of the bounds
      */
     public Point getUpperRightCorner() {
         int upperRightCornerX = upperLeftCorner.getX() + width;
@@ -77,7 +83,7 @@ public class Bounds {
     /**
      * Gets lower left corner.
      * 
-     * @return
+     * @return the lower left corner of the bounds
      */
     public Point getLowerLeftCorner() {
         int lowerLeftCornerX = upperLeftCorner.getX();
@@ -89,7 +95,7 @@ public class Bounds {
     /**
      * Gets lower right corner.
      * 
-     * @return
+     * @return the lower right corner of the bounds
      */
     public Point getLowerRightCorner() {
         int lowerRightCornerX = upperLeftCorner.getX() + width;
@@ -101,7 +107,7 @@ public class Bounds {
     /**
      * Gets bounds width.
      * 
-     * @return
+     * @return the width of the bounds
      */
     public int getWidth() {
         return width;
@@ -111,6 +117,7 @@ public class Bounds {
      * Sets bounds width.
      * 
      * @param width
+     *        - the width of the bounds
      */
     public void setWidth(int width) {
         this.width = width;
@@ -119,7 +126,7 @@ public class Bounds {
     /**
      * Gets bounds height.
      * 
-     * @return
+     * @return the height of the bounds
      */
     public int getHeight() {
         return height;
@@ -129,6 +136,7 @@ public class Bounds {
      * Sets bounds height.
      * 
      * @param height
+     *        - the height of the bounds
      */
     public void setHeight(int height) {
         this.height = height;
@@ -137,7 +145,7 @@ public class Bounds {
     /**
      * Gets bounds center.
      * 
-     * @return
+     * @return the center point of the bounds
      */
     public Point getCenter() {
         int centerX = upperLeftCorner.getX() + width / 2;
@@ -149,7 +157,7 @@ public class Bounds {
     /**
      * Gets bounds diagonal length.
      * 
-     * @return
+     * @return the diagonal length of the bounds
      */
     public double getDiagonalLength() {
         int diagonalLengthSquare = width * width + height * height;
@@ -158,10 +166,11 @@ public class Bounds {
     }
 
     /**
-     * Returns true if bounds contain point.
+     * Check if a {@link Point} is inside the bounds.
      * 
      * @param point
-     * @return
+     *        - a {@link Point} that needs to be contained in the bounds
+     * @return true if the bounds contain the point, false otherwise
      */
     public boolean contains(Point point) {
         Point lowerRightCorner = getLowerRightCorner();
@@ -172,10 +181,11 @@ public class Bounds {
     }
 
     /**
-     * Returns true if bounds contain bounds.
+     * Check if certain {@link Bounds} parameter is inside the bounds.
      * 
      * @param bounds
-     * @return
+     *        - a {@link Bounds} parameter that needs to be contained in the bounds
+     * @return true if the bounds contain the bounds parameter, false otherwise
      */
     public boolean contains(Bounds bounds) {
         Point boundsUpperLeftCorner = bounds.getUpperLeftCorner();
@@ -192,7 +202,8 @@ public class Bounds {
      * Gets the given point equivalent relative to the bounds upper left corner.
      * 
      * @param point
-     * @return
+     *        - a {@link Point} for which to get the point equivalent relative to the bounds upper left corner
+     * @return the point equivalent relative to the bounds upper left corner
      */
     public Point getRelativePoint(Point point) {
         int relativePointX = point.getX() - upperLeftCorner.getX();
@@ -206,7 +217,8 @@ public class Bounds {
      * Gets the given bounds equivalent relative to the bounds upper left corner;
      * 
      * @param bounds
-     * @return
+     *        - {@link Bounds} for which to get the relative bounds to the bounds upper left corner
+     * @return the bounds equivalent relative to the bounds upper left corner
      */
     public Bounds getRelativeBounds(Bounds bounds) {
         Point boundsUpperLeftCorner = bounds.getUpperLeftCorner();

@@ -42,6 +42,7 @@ public class Point {
      * Creates Point object by given Point object. Sets the X and Y values to be equal to the parameter's.
      * 
      * @param point
+     *        - a {@link Point} needed for the constructor
      */
     public Point(Point point) {
         this(point.getX(), point.getY());
@@ -112,7 +113,9 @@ public class Point {
      * Returns the 2D distance to a set of given coordinates x and y.
      * 
      * @param toX
+     *        - value of the X coordinate to which we find the distance
      * @param toY
+     *        - value of the Y coordinate to which we find the distance
      * @return - the 2D distance to the given set of coordinates.
      */
     public double distance(int toX, int toY) {
@@ -140,7 +143,7 @@ public class Point {
      *        - start point of the vector.
      * @param pointB
      *        - end point of the vector.
-     * @return - the coordinates of a vector with start point A and end point B.
+     * @return the coordinates of a vector with start point A and end point B.
      */
     public static Point getVector(Point pointA, Point pointB) {
         int vectorX = pointB.getX() - pointA.getX();
@@ -150,9 +153,9 @@ public class Point {
     }
 
     /**
-     * Returns true if the Point represents a zero vector.
+     * Checks if the Point represents a zero vector.
      * 
-     * @return
+     * @return true if the Point represents a zero vector, false otherwise
      */
     public boolean isZeroVector() {
         return x == 0 && y == 0;

@@ -3,7 +3,8 @@ package com.musala.atmosphere.client.util;
 import com.musala.atmosphere.commons.util.ConnectionProperties;
 
 /**
- * Class containing information about a connection to server.
+ * Class containing information about a connection to server. Extends the {@link ConnectionProperties} where a
+ * description of the override functions can be found.
  * 
  * @author yordan.petrov
  * 

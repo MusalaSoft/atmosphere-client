@@ -178,6 +178,42 @@ public class UiElement {
     }
 
     /**
+     * Searches for a child UI element that corresponds to the given {@link UiElementSelector} and taps on it.
+     * 
+     * @param selector
+     *        - a {@link UiElementSelector} that needs to match a certain child UI element
+     * @return true if the tap on the child UI element was successful, false otherwise
+     * @throws UiElementFetchingException
+     *         - if the UI element could not be found
+     * @throws XPathExpressionException
+     *         - if the XPath expression resulting from the conversion of the {@link UiElementSelector} is invalid
+     * @throws InvalidCssQueryException
+     *         - if the CSS query corresponding to the {@link UiElementSelector} is invalid
+     * @throws ParserConfigurationException
+     *         - if an error with internal XPath configuration occurs
+     */
+    public boolean tapOnChildElement(UiElementSelector selector)
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException,
+            ParserConfigurationException {
+        String cssQuery = selector.buildCssQuery();
+        List<UiElement> childrenElements = getChildrenByCssQuery(cssQuery);
+
+        if (childrenElements.isEmpty()) {
+            throw new UiElementFetchingException("No child element corresponding to the given selector was found.");
+        }
+
+        if (childrenElements.size() > 1) {
+            throw new UiElementFetchingException("More than one child element corresponding to the given selector was found.");
+        }
+
+        UiElement elementToTapOn = childrenElements.get(0);
+
+        return elementToTapOn.tap();
+    }
+
+    /**
      * Used to get the text of this UiElement.
      * 
      * @return <code>String</code> with the content of the text property of this UiElement.

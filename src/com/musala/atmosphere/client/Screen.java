@@ -46,6 +46,8 @@ public class Screen {
 
     private static final String TIME_PICKER_WIDGET = "android.widget.TimePicker";
 
+    private static final String DATE_PICKER_WIDGET = "android.widget.DatePicker";
+
     private String screenXml;
 
     private final Device onDevice;
@@ -449,6 +451,26 @@ public class Screen {
         }
 
         return new TimePicker(this);
+    }
+
+    /**
+     * Gets the date picker currently on screen.
+     * 
+     * @return a {@link DatePicker} object representing the time picker widget on screen.
+     * @throws UiElementFetchingException
+     *         if there is no date picker available on the screen.
+     */
+
+    public DatePicker getDatePicker() throws UiElementFetchingException {
+        UiElementSelector timePickerSelector = new UiElementSelector();
+        timePickerSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, DATE_PICKER_WIDGET);
+        try {
+            getElement(timePickerSelector);
+        } catch (UiElementFetchingException | XPathExpressionException | InvalidCssQueryException e) {
+            throw new UiElementFetchingException("No date picker is currently available on the screen.");
+        }
+
+        return new DatePicker(this);
     }
 
     /**

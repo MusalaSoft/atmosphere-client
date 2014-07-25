@@ -48,13 +48,13 @@ public class Screen {
 
     private String screenXml;
 
-    private Device onDevice;
+    private final Device onDevice;
 
     private Document xPathDomDocument;
 
     private org.jsoup.nodes.Document jSoupDocument;
 
-    private DeviceCommunicator communicator;
+    private final DeviceCommunicator communicator;
 
     /**
      * 
@@ -288,7 +288,7 @@ public class Screen {
      * Searches for UI elements in the current screen XML structure using given CSS. Returns a list of all found
      * elements having the used CSS.
      * 
-     * @param query
+     * @param cssQuery
      *        - CSS selector query.
      * @return List containing all found elements of type {@link UiElement UiElement}.
      * @throws InvalidCssQueryException
@@ -298,19 +298,39 @@ public class Screen {
      * @throws UiElementFetchingException
      *         if no elements or more than 1 are found for the passed query
      */
-    public List<UiElement> getAllElementsByCSS(String query)
+    public List<UiElement> getAllElementsByCSS(String cssQuery)
         throws UiElementFetchingException,
             InvalidCssQueryException,
             XPathExpressionException {
-        List<UiElement> uiElementList = new ArrayList<UiElement>();
-        String xPathQuery = CssToXPathConverter.convertCssToXPath(query);
+        String xPathQuery = CssToXPathConverter.convertCssToXPath(cssQuery);
 
+        return getAllElementsByXPath(xPathQuery);
+    }
+
+    /**
+     * Searches for UI elements in the current screen XML structure using given XPath. Returns a list of all found
+     * elements having the used XPath.
+     * 
+     * @param xPathQuery
+     *        - an XPath query that should match the elements
+     * @return List containing all found elements of type {@link UiElement UiElement}.
+     * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws UiElementFetchingException
+     *         if no elements or more than 1 are found for the passed query
+     */
+    public List<UiElement> getAllElementsByXPath(String xPathQuery)
+        throws XPathExpressionException,
+            UiElementFetchingException {
+        List<UiElement> uiElementList = new ArrayList<UiElement>();
         NodeList xPathNodeList = UiXmlParser.getXPathNodeChildren(xPathDomDocument, xPathQuery);
+
         for (int index = 0; index < xPathNodeList.getLength(); index++) {
             Node xPathNode = xPathNodeList.item(index);
             UiElement returnElement = new UiElement(xPathNode, onDevice);
             uiElementList.add(returnElement);
         }
+
         return uiElementList;
     }
 

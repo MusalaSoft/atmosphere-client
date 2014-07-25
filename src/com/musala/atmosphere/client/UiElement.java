@@ -663,7 +663,7 @@ public class UiElement {
      * Checks if this {@link UiElement} has the same properties as the passed one.
      * 
      * @param object
-     *        - the {@link UiElement} for comparision
+     *        - the {@link UiElement} for comparison
      * 
      * @return <code>true</code>, if this UiElement has the same properties as the passed <code>object</code> and
      *         <code>false</code> if the passed object is not an {@link UiElement} or differs from this

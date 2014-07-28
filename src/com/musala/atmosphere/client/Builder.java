@@ -68,7 +68,8 @@ public class Builder {
                     ServerConnectionHandler serverConnectionHandler = new ServerConnectionHandler(serverAnnotationProperties);
 
                     builder = new Builder(serverConnectionHandler);
-                    LOGGER.info("Builder instance has been created.");
+                    String message = "Builder instance has been created.";
+                    LOGGER.info(message);
                     builders.put(serverAnnotationProperties, builder);
                 }
 
@@ -97,7 +98,8 @@ public class Builder {
                     ServerConnectionHandler serverConnectionHandler = new ServerConnectionHandler(serverConnectionProperties);
 
                     builder = new Builder(serverConnectionHandler);
-                    LOGGER.info("Builder instance has been created.");
+                    String message = "Builder instance has been created.";
+                    LOGGER.info(message);
                     builders.put(serverConnectionProperties, builder);
                 }
             }
@@ -118,7 +120,8 @@ public class Builder {
             DeviceAllocationInformation deviceDescriptor = clientBuilder.allocateDevice(deviceParameters);
 
             String deviceProxyRmiId = deviceDescriptor.getProxyRmiId();
-            LOGGER.info("Fetched device with proxy RMI id: " + deviceProxyRmiId + ".");
+            String messageReleasedDevice = String.format("Fetched device with proxy RMI ID: %s .", deviceProxyRmiId);
+            LOGGER.info(messageReleasedDevice);
 
             IClientDevice iClientDevice = (IClientDevice) serverRmiRegistry.lookup(deviceProxyRmiId);
             long passkey = deviceDescriptor.getProxyPasskey();
@@ -127,8 +130,9 @@ public class Builder {
             deviceToDescriptor.put(device, deviceDescriptor);
             return device;
         } catch (RemoteException | NotBoundException e) {
-            LOGGER.error("Fetching Device failed (server connection failure).", e);
-            throw new ServerConnectionFailedException("Fetching Device failed (server connection failure).", e);
+            String message = "Fetching Device failed (server connection failure).";
+            LOGGER.error(message, e);
+            throw new ServerConnectionFailedException(message, e);
         }
     }
 
@@ -147,14 +151,15 @@ public class Builder {
             device.release();
             clientBuilder.releaseDevice(deviceDescriptor);
         } catch (RemoteException e) {
-            LOGGER.error("Could not release Device (connection failure).", e);
-            throw new ServerConnectionFailedException("Could not release Device (connection failure).", e);
+            String message = "Could not release Device (connection failure).";
+            LOGGER.error(message, e);
+            throw new ServerConnectionFailedException(message, e);
         } catch (InvalidPasskeyException e) {
             // We did not have the correct passkey. The device most likely timed out and got freed to be used by someone
             // else. So nothing to do here.
         }
-
-        LOGGER.info(deviceRmiId + " is released.");
+        String messageReleasedDevice = String.format("Fetched device with proxy RMI ID: %s .", deviceRmiId);
+        LOGGER.info(messageReleasedDevice);
     }
 
     /**

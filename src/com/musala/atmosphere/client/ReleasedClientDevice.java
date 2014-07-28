@@ -2,6 +2,8 @@ package com.musala.atmosphere.client;
 
 import java.rmi.RemoteException;
 
+import org.apache.log4j.Logger;
+
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
@@ -17,11 +19,15 @@ import com.musala.atmosphere.commons.exceptions.CommandFailedException;
  * 
  */
 class ReleasedClientDevice implements IClientDevice {
+    private static final Logger LOGGER = Logger.getLogger(ReleasedClientDevice.class);
+
     @Override
     public Object route(long invocationPasskey, RoutingAction action, Object... args)
         throws RemoteException,
             CommandFailedException,
             InvalidPasskeyException {
-        throw new DeviceReleasedException("Device has been released.");
+        String message = "Device has been released.";
+        LOGGER.fatal(message);
+        throw new DeviceReleasedException(message);
     }
 }

@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.geometry.Bounds;
 import com.musala.atmosphere.commons.util.Pair;
@@ -17,6 +18,8 @@ import com.musala.atmosphere.commons.util.Pair;
  * 
  */
 public class UiElementSelector {
+    private static final Logger LOGGER = Logger.getLogger(UiElementSelector.class);
+
     private Map<CssAttribute, Pair<Object, UiElementSelectionOption>> attributeProjectionMap;
 
     public UiElementSelector() {
@@ -50,7 +53,9 @@ public class UiElementSelector {
                 }
             }
             if (!attributeFound) {
-                throw new IllegalArgumentException("Unsupported attribute passed in to ui element selector constructor");
+                String message = "Unsupported attribute passed in to UI element selector constructor";
+                LOGGER.error(message);
+                throw new IllegalArgumentException(message);
             }
         }
     }
@@ -77,8 +82,12 @@ public class UiElementSelector {
     public void addSelectionAttribute(CssAttribute attribute, UiElementSelectionOption selectionOption, Object value)
         throws IllegalArgumentException {
         if (!attribute.isObjectOfAppropriateType(value)) {
-            throw new IllegalArgumentException("Invalid attribute value for attribute: " + attribute + " expected "
-                    + attribute.getAttributeType() + " but was " + value.getClass());
+            String message = String.format("Invalid attributes value for attributes: %s. Expected %s but was %s .",
+                                           attribute,
+                                           attribute.getAttributeType(),
+                                           value.getClass());
+            LOGGER.error(message);
+            throw new IllegalArgumentException(message);
         }
         if (!shouldSkipAttribute(attribute, value)) {
             attributeProjectionMap.put(attribute, new Pair<Object, UiElementSelectionOption>(value, selectionOption));
@@ -208,8 +217,10 @@ public class UiElementSelector {
         if (cssAttribute.getAttributeType().equals(Bounds.class)) {
             return UiElementBoundsParser.parse(value);
         }
-        throw new IllegalArgumentException("Constructing ui element selector with attribute of unsupported type "
-                + cssAttribute.getAttributeType());
+        String message = String.format("Constructing UI element selector with attribute of unsupported type %s .",
+                                       cssAttribute.getAttributeType());
+        LOGGER.error(message);
+        throw new IllegalArgumentException(message);
     }
 
     @Override

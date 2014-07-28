@@ -36,7 +36,8 @@ public class ClassLocator {
         try {
             annotationClass = (Class<? extends Annotation>) desiredClass;
         } catch (ClassCastException e) {
-            LOGGER.error("Trying to get class annotated by a non-annotation class.", e);
+            String message = "Trying to get class annotated by a non-annotation class.";
+            LOGGER.error(message, e);
             return null;
         }
 
@@ -55,7 +56,8 @@ public class ClassLocator {
                     break;
                 }
             } catch (ClassNotFoundException e) {
-                LOGGER.error("Could not find class with name: " + callerMethod.getClassName(), e);
+                String message = String.format("Could not find class with name: %s", callerMethod.getClassName());
+                LOGGER.error(message, e);
             }
         }
 
@@ -82,7 +84,8 @@ public class ClassLocator {
                     break;
                 }
             } catch (ClassNotFoundException e) {
-                LOGGER.error("Could not find class with name: " + callerMethod.getClassName(), e);
+                String message = String.format("Could not find class with name: %s", callerMethod.getClassName());
+                LOGGER.error(message, e);
             }
         }
 

@@ -13,6 +13,8 @@ import com.musala.atmosphere.client.exceptions.MissingServerAnnotationException;
 public class ServerAnnotationProperties extends ServerConnectionProperties {
     private static final Logger LOGGER = Logger.getLogger(ServerAnnotationProperties.class.getCanonicalName());
 
+    private static final String LOGGER_ERROR_MESSAGE = "The invoking class is missing a @Server annotation.";
+
     private Server serverAnnotation;
 
     private Class<?> annotatedClass;
@@ -28,19 +30,17 @@ public class ServerAnnotationProperties extends ServerConnectionProperties {
         annotatedClass = annotationLocator.getFirstAnnotatedClass();
 
         if (annotatedClass == null) {
-            String errorMessgae = "The invoking class is missing a Server annotation.";
 
-            LOGGER.fatal(errorMessgae);
-            throw new MissingServerAnnotationException(errorMessgae);
+            LOGGER.fatal(LOGGER_ERROR_MESSAGE);
+            throw new MissingServerAnnotationException(LOGGER_ERROR_MESSAGE);
         }
 
         serverAnnotation = annotatedClass.getAnnotation(Server.class);
 
         if (serverAnnotation == null) {
-            String errorMessgae = "The invoking class is missing a @Server annotation.";
 
-            LOGGER.fatal(errorMessgae);
-            throw new MissingServerAnnotationException(errorMessgae);
+            LOGGER.fatal(LOGGER_ERROR_MESSAGE);
+            throw new MissingServerAnnotationException(LOGGER_ERROR_MESSAGE);
         }
 
         this.serverIp = serverAnnotation.ip();

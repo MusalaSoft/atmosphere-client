@@ -5,6 +5,8 @@ import static com.musala.atmosphere.client.uiutils.XPathAttribute.isAttributeStr
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 
 /**
@@ -35,6 +37,8 @@ public class CssToXPathConverter {
     private final static String SPLIT_NODE_REGEX = " > ";
 
     private final static String INITIAL_NODE_FORMATTER = "%s/%s";
+
+    private static final Logger LOGGER = Logger.getLogger(CssToXPathConverter.class);
 
     /**
      * Divides the CSS Query to property selectors
@@ -169,7 +173,9 @@ public class CssToXPathConverter {
                     xpathQuery = String.format(EQUAL_FORMATTER, xpathQuery, attributeName, selectionExpression);
                 }
             } else {
-                throw new InvalidCssQueryException();
+                String message = "Converting Css to xPath query failed.";
+                LOGGER.error(message);
+                throw new InvalidCssQueryException(message);
             }
         }
 

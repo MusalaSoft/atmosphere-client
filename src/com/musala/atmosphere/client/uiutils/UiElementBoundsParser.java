@@ -3,6 +3,8 @@ package com.musala.atmosphere.client.uiutils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 import com.musala.atmosphere.client.geometry.Bounds;
 import com.musala.atmosphere.client.geometry.Point;
 
@@ -13,6 +15,8 @@ import com.musala.atmosphere.client.geometry.Point;
  * 
  */
 public class UiElementBoundsParser {
+    private static final Logger LOGGER = Logger.getLogger(UiElementBoundsParser.class);
+
     /**
      * Converts a UI element bounds in the format <b>[startX,startY][endX,endY]</b> (fetched from the UI XML file) to a
      * Pair&lt;Point, Point;&gt; format.
@@ -38,7 +42,9 @@ public class UiElementBoundsParser {
             Bounds result = new Bounds(first, second);
             return result;
         } else {
-            throw new IllegalArgumentException("'" + bounds + "' is not in the required format.");
+            String message = String.format("' %s ' is not in the required bounds format.", bounds);
+            LOGGER.error(message);
+            throw new IllegalArgumentException(message);
         }
     }
 }

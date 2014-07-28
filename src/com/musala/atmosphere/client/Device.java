@@ -144,12 +144,14 @@ public class Device {
         FileInputStream fileReaderFromApk = null;
         try {
             currentInstallationStepDescription = "Create file for storing the apk";
+            LOGGER.info(currentInstallationStepDescription);
             Object response = communicator.sendAction(RoutingAction.APK_INIT_INSTALL);
             if (response != DeviceCommunicator.VOID_SUCCESS) {
                 throw communicator.getLastException();
             }
 
             currentInstallationStepDescription = "Locating the file to store the apk in";
+            LOGGER.info(currentInstallationStepDescription);
             // Transfer the installation file from the current machine to the
             // device
             byte[] buffer = new byte[MAX_BUFFER_SIZE];
@@ -171,8 +173,8 @@ public class Device {
             if (response != DeviceCommunicator.VOID_SUCCESS) {
                 throw communicator.getLastException();
             }
-
-            LOGGER.info("File installation successfull.");
+            String message = "File installation successfull.";
+            LOGGER.info(message);
         } catch (IOException | CommandFailedException e) {
             String message = String.format("Exception occurred while '%s'.", currentInstallationStepDescription);
             LOGGER.fatal(message, e);
@@ -251,6 +253,8 @@ public class Device {
             int airplaneMode = deviceSettings.getInt(airplaneSetting);
             return airplaneMode == 1;
         } catch (SettingsParsingException e) {
+            String message = "Getting the Airplane mode of the device failed.";
+            LOGGER.error(message, e);
             return null;
         }
     }
@@ -356,7 +360,8 @@ public class Device {
             byte[] screenshot = getScreenshot();
             Files.write(pathToPngFile, screenshot);
         } catch (IOException e) {
-            LOGGER.error("Saving screenshot file failed.", e);
+            String message = "Saving the screenshot file failed.";
+            LOGGER.error(message, e);
             return false;
         }
 
@@ -375,7 +380,7 @@ public class Device {
             int obtainedScreenOrientationValue = deviceSettings.getInt(AndroidSystemSettings.USER_ROTATION);
             screenOrientation = ScreenOrientation.getValueOfInt(obtainedScreenOrientationValue);
         } catch (SettingsParsingException e) {
-            String message = "Failed to get screen orientation.";
+            String message = "Failed to get screen orientation of the device.";
             LOGGER.error(message, e);
         }
         return screenOrientation;
@@ -408,7 +413,7 @@ public class Device {
             isAutoRotationOn = autoRotationVelue == 1 ? true : false;
 
         } catch (SettingsParsingException e) {
-            String message = "Failed to get device auto rotation.";
+            String message = "Getting autorotation status failed.";
             LOGGER.error(message, e);
         }
         return isAutoRotationOn;
@@ -453,7 +458,8 @@ public class Device {
      */
     public boolean inputText(String text, int interval) {
         if (text.isEmpty()) {
-            LOGGER.info("Text input requested, but an empty String is given.");
+            String message = "Text input requested, but an empty String is given.";
+            LOGGER.warn(message);
             return true;
         }
 
@@ -675,7 +681,8 @@ public class Device {
         int apiLevel = deviceInformation.getApiLevel();
         boolean isEmulator = deviceInformation.isEmulator();
         if (isEmulator) {
-            LOGGER.error("Enabling airplane mode on emulator disconnects it from ATMOSPHERE Agent and this emulator can be connected back only after Agent restart. Setting airplane mode for emulators is prohibited.");
+            String message = "Enabling airplane mode on emulator disconnects it from ATMOSPHERE Agent and this emulator can be connected back only after Agent restart. Setting airplane mode for emulators is prohibited.";
+            LOGGER.warn(message);
             return false;
         }
 
@@ -692,6 +699,8 @@ public class Device {
 
         boolean success = deviceSettings.putInt(airplaneSetting, airplaneModeIntValue);
         if (!success) {
+            String message = "Updating airplane mode status failed.";
+            LOGGER.error(message);
             return false;
         }
 
@@ -700,7 +709,8 @@ public class Device {
         Pattern intentCommandResponsePattern = Pattern.compile(INTENT_COMMAND_RESPONSE);
         Matcher intentCommandResponseMatcher = intentCommandResponsePattern.matcher(intentCommandResponse);
         if (!intentCommandResponseMatcher.find()) {
-            LOGGER.error("Broadcasting notification intent failed.");
+            String message = "Broadcasting notification intent failed.";
+            LOGGER.error(message);
             return false;
         }
 
@@ -768,6 +778,8 @@ public class Device {
             boolean isAwake = isAwake() || pressButton(HardwareButton.POWER);
             return isAwake && pressButton(HardwareButton.MENU);
         }
+        String message = "Lock state setting execution failed.";
+        LOGGER.error(message);
         return false;
     }
 
@@ -823,7 +835,8 @@ public class Device {
     public boolean setScreenOrientation(ScreenOrientation screenOrientation) {
 
         if (!setAutoRotation(false)) {
-            LOGGER.error("Screen orientation was not set due to setting auto rotation failure.");
+            String message = "Screen orientation was not set due to setting auto rotation failure.";
+            LOGGER.error(message);
             return false;
         }
         boolean success = deviceSettings.putInt(AndroidSystemSettings.USER_ROTATION,
@@ -889,7 +902,9 @@ public class Device {
         if (response == null || response.contains("Error: Activity class")) {
             // FIXME TBD should this method return false or should it throw an
             // exception?
-            throw new ActivityStartingException("The passed package or Activity was not found.");
+            String message = "The passed package or Activity was not found.";
+            LOGGER.error(message);
+            throw new ActivityStartingException(message);
         }
         return true;
     }
@@ -1020,12 +1035,15 @@ public class Device {
         boolean isOnScreen = point.getX() <= resolution.getKey() && point.getY() <= resolution.getValue();
 
         if (!hasPositiveCoordinates || !isOnScreen) {
-            String exeptionMessageFormat = "The passed potin with coordinates (%d, %d) is outside the bouds of the screen. Screen dimetions (%d, %d)";
-            throw new IllegalArgumentException(String.format(exeptionMessageFormat,
-                                                             point.getX(),
-                                                             point.getY(),
-                                                             resolution.getKey(),
-                                                             resolution.getValue()));
+            String exeptionMessageFormat = "The passed point with coordinates (%d, %d) is outside the bounds of the screen. Screen dimentions (%d, %d)";
+            String message = String.format(exeptionMessageFormat,
+                                           point.getX(),
+                                           point.getY(),
+                                           resolution.getKey(),
+                                           resolution.getValue());
+            LOGGER.error(message);
+            throw new IllegalArgumentException(message);
+
         }
     }
 

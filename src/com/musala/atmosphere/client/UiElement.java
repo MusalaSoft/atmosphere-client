@@ -160,6 +160,7 @@ public class UiElement {
             return isElementTapped;
         } else {
             String message = String.format("Point %s not in element bounds.", point.toString());
+            LOGGER.error(message);
             throw new IllegalArgumentException(message);
         }
     }
@@ -201,11 +202,15 @@ public class UiElement {
         List<UiElement> childrenElements = getChildrenByCssQuery(cssQuery);
 
         if (childrenElements.isEmpty()) {
-            throw new UiElementFetchingException("No child element corresponding to the given selector was found.");
+            String message = "No child element corresponding to the given selector was found.";
+            LOGGER.error(message);
+            throw new UiElementFetchingException(message);
         }
 
         if (childrenElements.size() > 1) {
-            throw new UiElementFetchingException("More than one child element corresponding to the given selector was found.");
+            String message = "More than one child element corresponding to the given selector was found.";
+            LOGGER.error(message);
+            throw new UiElementFetchingException(message);
         }
 
         UiElement elementToTapOn = childrenElements.get(0);
@@ -267,6 +272,7 @@ public class UiElement {
             return isElementTapped;
         } else {
             String message = String.format("Point %s not in element bounds.", point.toString());
+            LOGGER.error(message);
             throw new IllegalArgumentException(message);
         }
     }
@@ -464,7 +470,9 @@ public class UiElement {
         innerRevalidation();
 
         if (!elementSelector.getBooleanValue(CssAttribute.FOCUSABLE)) {
-            throw new InvalidElementActionException("Attempting to focus a non-focusable element.");
+            String message = "Attempting to focus a non-focusable element.";
+            LOGGER.error(message);
+            throw new InvalidElementActionException(message);
         }
         if (elementSelector.getBooleanValue(CssAttribute.FOCUSED)) {
             return true;
@@ -534,6 +542,7 @@ public class UiElement {
             return isElementTapped;
         } else {
             String message = String.format("Point %s not in element bounds.", innerPoint.toString());
+            LOGGER.error(message);
             throw new IllegalArgumentException(message);
         }
     }
@@ -558,7 +567,9 @@ public class UiElement {
     private void innerRevalidation() {
         if (validationType == ElementValidationType.ALWAYS) {
             if (isStale) {
-                throw new StaleElementReferenceException("Element revalidation failed. This element is most likely not present on the screen anymore.");
+                String message = "Element revalidation failed. This element is most likely not present on the screen anymore.";
+                LOGGER.error(message);
+                throw new StaleElementReferenceException(message);
             }
             revalidateThrowing();
         }
@@ -566,7 +577,9 @@ public class UiElement {
 
     private void revalidateThrowing() {
         if (revalidate()) {
-            throw new StaleElementReferenceException("Element revalidation failed. This element is most likely not present on the screen anymore.");
+            String message = "Element revalidation failed. This element is most likely not present on the screen anymore.";
+            LOGGER.error(message);
+            throw new StaleElementReferenceException(message);
         }
     }
 
@@ -628,7 +641,9 @@ public class UiElement {
         }
 
         if (matchedChildrenNodes == null || matchedChildrenNodes.size() == 0) {
-            throw new UiElementFetchingException("No elements found for the XPath expression .");
+            String message = "No elements found for the XPath expression .";
+            LOGGER.error(message);
+            throw new UiElementFetchingException(message);
         }
 
         return matchedChildrenNodes;

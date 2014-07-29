@@ -48,6 +48,8 @@ public class Screen {
 
     private static final String DATE_PICKER_WIDGET = "android.widget.DatePicker";
 
+    private static final String PICKERS_MESSAGE = "No %s picker is currently available on the screen.";
+
     private String screenXml;
 
     private final Device onDevice;
@@ -75,7 +77,8 @@ public class Screen {
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             xPathDomDocument = documentBuilder.parse(new InputSource(new StringReader(screenXml)));
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            LOGGER.warn("XPath XML to DOM Document parsing failed.", e);
+            String message = "XPath XML to DOM Document parsing failed.";
+            LOGGER.warn(message, e);
         }
 
         // JSoup Document building
@@ -261,7 +264,9 @@ public class Screen {
             UiElement selectedElement = getElement(selector);
             return selectedElement;
         } else {
-            throw new UiElementFetchingException("Waiting for an element matching the selector timed out, but still no such element was present.");
+            String message = "Waiting for an element matching the selector timed out, but still no such element was present.";
+            LOGGER.error(message);
+            throw new UiElementFetchingException(message);
         }
     }
 
@@ -403,8 +408,11 @@ public class Screen {
         List<UiElement> elementList = getElements(selector);
         int listSize = elementList.size();
         if (listSize <= match) {
-            throw new UiElementFetchingException("Tapping match with index " + match + " requested, but only "
-                    + listSize + "elements matching the criteria found.");
+            String message = String.format("Tapping match with index %s requested, but only %s elements matching the criteria found.",
+                                           match,
+                                           listSize);
+            LOGGER.error(message);
+            throw new UiElementFetchingException(message);
         }
         UiElement element = elementList.get(match);
         return element.tap();
@@ -447,7 +455,9 @@ public class Screen {
         try {
             getElement(timePickerSelector);
         } catch (UiElementFetchingException | XPathExpressionException | InvalidCssQueryException e) {
-            throw new UiElementFetchingException("No time picker is currently available on the screen.");
+            String message = String.format(PICKERS_MESSAGE, "time");
+            LOGGER.error(message);
+            throw new UiElementFetchingException(message);
         }
 
         return new TimePicker(this);
@@ -467,7 +477,9 @@ public class Screen {
         try {
             getElement(timePickerSelector);
         } catch (UiElementFetchingException | XPathExpressionException | InvalidCssQueryException e) {
-            throw new UiElementFetchingException("No date picker is currently available on the screen.");
+            String message = String.format(PICKERS_MESSAGE, "date");
+            LOGGER.error(message);
+            throw new UiElementFetchingException(message);
         }
 
         return new DatePicker(this);

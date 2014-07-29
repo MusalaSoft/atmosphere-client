@@ -958,6 +958,24 @@ public class Device {
     }
 
     /**
+     * Reinstalls a given application by package name and path.
+     * 
+     * @param packageName
+     *        - the package name of the application
+     * @param pathToApk
+     *        - location of the file to be installed
+     * @return true if the reinstall was successful, false otherwise
+     */
+    public boolean reinstallApplication(String packageName, String pathToApk) {
+        boolean uninstallResponse = uninstallApplication(packageName);
+        if (!uninstallResponse) {
+            return false;
+        }
+
+        return installAPK(pathToApk);
+    }
+
+    /**
      * Simulates a swipe from a point to another unknown point.
      * 
      * @param point

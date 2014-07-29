@@ -5,6 +5,8 @@ import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.log4j.Logger;
+
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
@@ -24,6 +26,10 @@ public class NotificationBar {
     private static final String CLEAR_ALL_NOTIFICATIONS_BUTTON_XPATH_QUERY = "//*[@content-desc='Clear all notifications.']";
 
     private static final String NOTIFICATIONS_RESOURCE_ID_XPATH_QUERY = "//*[@resource-id='android:id/status_bar_latest_event_content']";
+
+    private static final String NO_NOTIFICATION_MESSAGE = "No notification matched the passes XPath query: %s";
+
+    private static final Logger LOGGER = Logger.getLogger(NotificationBar.class);
 
     private Device onDevice = null;
 
@@ -94,7 +100,9 @@ public class NotificationBar {
             List<UiElement> childrenNotifications = notificationBarElement.getChildren(xPathQuery);
 
             if (childrenNotifications.size() > 1) {
-                throw new UiElementFetchingException("More than one notification matched the passed XPath query.");
+                String message = "More than one notification matched the passed XPath query.";
+                LOGGER.error(message);
+                throw new UiElementFetchingException(message);
             }
 
             List<UiElement> allNotifications = deviceActiveScreen.getAllElementsByXPath(NOTIFICATIONS_RESOURCE_ID_XPATH_QUERY);
@@ -106,10 +114,11 @@ public class NotificationBar {
                 } catch (UiElementFetchingException e) {
                 }
             }
-
-            throw new UiElementFetchingException("No notification matched the passes XPath query.");
+            LOGGER.error(NO_NOTIFICATION_MESSAGE);
+            throw new UiElementFetchingException(NO_NOTIFICATION_MESSAGE);
         } catch (UiElementFetchingException e) {
-            throw new UiElementFetchingException("No notification matched the passed XPath query.");
+            LOGGER.error(NO_NOTIFICATION_MESSAGE, e);
+            throw new UiElementFetchingException(NO_NOTIFICATION_MESSAGE, e);
         }
     }
 

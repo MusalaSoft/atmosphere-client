@@ -10,6 +10,8 @@ import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.log4j.Logger;
+
 import com.musala.atmosphere.client.exceptions.ActionFailedException;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
@@ -21,6 +23,7 @@ import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
  * 
  */
 public class DatePicker extends PickerView {
+    private static final Logger LOGGER = Logger.getLogger(DatePicker.class);
 
     public static enum Month {
         JAN(1),
@@ -36,7 +39,7 @@ public class DatePicker extends PickerView {
         NOV(11),
         DEC(12);
 
-        int integerRepresentation;
+        private int integerRepresentation;
 
         private static Map<String, Integer> monthsStringToIntegerMap;
 
@@ -124,10 +127,10 @@ public class DatePicker extends PickerView {
         String year = String.valueOf(calendar.get(Calendar.YEAR));
         String day = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
         String month = Month.getStringRepresentation(calendar.get(Calendar.MONTH) + 1);
-
-        if (setText(year, YEAR_PICKER_INDEX) && setText(day, DAY_PICKER_INDEX) && setText(month, MONTH_PICKER_INDEX))
-            return true;
-        return false;
+        boolean setTextResult = setText(year, YEAR_PICKER_INDEX);
+        setTextResult &= setText(day, DAY_PICKER_INDEX);
+        setTextResult &= setText(month, MONTH_PICKER_INDEX);
+        return setTextResult;
     }
 
     /**
@@ -217,10 +220,15 @@ public class DatePicker extends PickerView {
         String monthNumberValue = Month.getIntValue(month).toString();
         date = String.format(DATE_FORMATTER, day, monthNumberValue, year);
 
-        Date parsedDate = parseDate(date, DATE_FORMAT);
-
-        if (parsedDate == null) {
-            throw new ActionFailedException("Getting current date from date picker widget failed.");
+        Date parsedDate;
+        try {
+            parsedDate = parseDate(date, DATE_FORMAT);
+        } catch (ParseException e) {
+            String message = String.format("Parsing the fetched from the datepicker date string %s failed. Expected format: %s.",
+                                           date,
+                                           DATE_FORMAT);
+            LOGGER.error(message, e);
+            throw new ActionFailedException(message, e);
         }
 
         Calendar calendar = Calendar.getInstance();
@@ -254,18 +262,12 @@ public class DatePicker extends PickerView {
      * @param format
      *        - the format in which the date will be parsed.
      * @return - Date with the parsed string in the given date format.
+     * @throws ParseException
      */
-    private Date parseDate(String date, String format) {
+    private Date parseDate(String date, String format) throws ParseException {
 
         SimpleDateFormat dateFormat = new SimpleDateFormat(format);
-        Date parsedDate = null;
-
-        try {
-            parsedDate = dateFormat.parse(date);
-        } catch (ParseException e) {
-            throw new ActionFailedException("Parsing the string to the given date format failed.");
-        }
-
+        Date parsedDate = dateFormat.parse(date);
         return parsedDate;
     }
 

@@ -1163,4 +1163,14 @@ public class Device {
     public boolean setAtmosphereIME() {
         return (boolean) communicator.sendAction(RoutingAction.SET_ATMOSPHERE_IME_AS_DEFAULT);
     }
+
+    /**
+     * Gets the {@link DeviceSettingsManager settings manager} of the current device, that allows getting and inserting
+     * device settings.
+     * 
+     * @return DeviceSettingsManager instance for this device
+     */
+    public DeviceSettingsManager getDeviceSettingsManager() {
+        return deviceSettings;
+    }
 }

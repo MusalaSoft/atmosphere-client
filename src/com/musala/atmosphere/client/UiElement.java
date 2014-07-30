@@ -675,6 +675,31 @@ public class UiElement {
     }
 
     /**
+     * Gets all child UiElements that match the given {@link UiElementSelector}.
+     * 
+     * @param childrenSelector
+     *        - an object of type {@link UiElementSelector} that needs to match child UI elements
+     * @return a list of {@link UiElement} children that match the given selector
+     * @throws InvalidCssQueryException
+     *         if element is searched by invalid CSS query
+     * @throws UiElementFetchingException
+     *         if element could not be found
+     * @throws XPathExpressionException
+     *         if element is searched by invalid XPath query
+     * @throws ParserConfigurationException
+     *         if an error with internal XPath configuration occurs
+     */
+    public List<UiElement> getChildrenBySelector(UiElementSelector childrenSelector)
+        throws XPathExpressionException,
+            InvalidCssQueryException,
+            UiElementFetchingException,
+            ParserConfigurationException {
+        String cssQuery = childrenSelector.buildCssQuery();
+
+        return getChildrenByCssQuery(cssQuery);
+    }
+
+    /**
      * Checks if this {@link UiElement} has the same properties as the passed one.
      * 
      * @param object

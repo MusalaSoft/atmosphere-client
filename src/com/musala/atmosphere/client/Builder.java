@@ -158,7 +158,7 @@ public class Builder {
             // We did not have the correct passkey. The device most likely timed out and got freed to be used by someone
             // else. So nothing to do here.
         }
-        String messageReleasedDevice = String.format("Fetched device with proxy RMI ID: %s .", deviceRmiId);
+        String messageReleasedDevice = String.format("Released device with proxy RMI ID: %s .", deviceRmiId);
         LOGGER.info(messageReleasedDevice);
     }
 

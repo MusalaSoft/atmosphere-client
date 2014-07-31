@@ -38,7 +38,8 @@ public class NotificationBar {
     }
 
     /**
-     * Opens the notification bar represented by the {@link NotificationBar} class.
+     * Opens the notification bar represented by the {@link NotificationBar} class. This function can only be used on a
+     * device with API 18 or higher.
      * 
      * @return true if the opening of the notification bar was successful, false otherwise
      */
@@ -47,7 +48,8 @@ public class NotificationBar {
     }
 
     /**
-     * Clears all notifications in the notification bar represented by the {@link NotificationBar} class.
+     * Clears all notifications in the notification bar represented by the {@link NotificationBar} class. This function
+     * can only be used on a device with API 18 or higher.
      * 
      * @return true if the clearing of the notifications was successful, false otherwise
      * @throws UiElementFetchingException
@@ -71,7 +73,8 @@ public class NotificationBar {
     }
 
     /**
-     * Finds a notification in the notification bar that matches the given XPath query.
+     * Finds a notification in the notification bar that matches the given XPath query. This function can only be used
+     * on a device with API 18 or higher.
      * 
      * @param xPathQuery
      *        - the given XPath query that needs to match a notification
@@ -123,7 +126,8 @@ public class NotificationBar {
     }
 
     /**
-     * Finds a notification in the notification bar that matches the given CSS query.
+     * Finds a notification in the notification bar that matches the given CSS query. This function can only be used on
+     * a device with API 18 or higher.
      * 
      * @param cssQuery
      *        - the given CSS query that needs to match a notification
@@ -148,7 +152,8 @@ public class NotificationBar {
     }
 
     /**
-     * Finds a notification in the notification bar that matches the given selector.
+     * Finds a notification in the notification bar that matches the given selector. This function can only be used on a
+     * device with API 18 or higher.
      * 
      * @param selector
      *        - an object of type {@link UiElementSelector} that corresponds to the given CSS selector
@@ -173,7 +178,8 @@ public class NotificationBar {
     }
 
     /**
-     * Finds a notification in the notification bar that matches the given text.
+     * Finds a notification in the notification bar that matches the given text. This function can only be used on a
+     * device with API 18 or higher.
      * 
      * @param text
      *        - the given text that needs to match a notification

@@ -698,6 +698,28 @@ public class UiElement {
 
         return getChildrenByCssQuery(cssQuery);
     }
+    
+    /**
+     * Gets all direct children of a {@link UiElement}, represented by XPath node.
+     * 
+     * @return list, containing all {@link UiElements} that directly ascend the current {@link UiElement}.
+     */
+    public List<UiElement> getDirectChildren() {
+        NodeList nodeChildren = representedNodeXPath.getChildNodes();
+        List<UiElement> result = new LinkedList<UiElement>();
+
+        for (int i = 0; i < nodeChildren.getLength(); i++) {
+            Node childNode = nodeChildren.item(i);
+            if (childNode.getNodeType() != Node.ELEMENT_NODE) {
+                // our node is 'fake' and it's not used in the screen's xml
+                continue;
+            }
+            UiElement childElement = new UiElement(childNode, onDevice);
+            result.add(childElement);
+        }
+
+        return result;
+    }
 
     /**
      * Checks if this {@link UiElement} has the same properties as the passed one.

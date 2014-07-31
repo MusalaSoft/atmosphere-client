@@ -21,7 +21,7 @@ import com.musala.atmosphere.commons.ui.UiElementDescriptor;
  * 
  * @author filareta.yordanova
  */
-public class ScrollableView extends UiCollection {
+public class ScrollableView extends UiElement {
 
     /**
      * Used to determine scroll direction
@@ -233,15 +233,15 @@ public class ScrollableView extends UiCollection {
         throws XPathExpressionException,
             ParserConfigurationException,
             InvalidCssQueryException {
-    	 String cssQuery = innerViewSelector.buildCssQuery();
-         Screen deviceActiveScreen = onDevice.getActiveScreen();
-         UiElementSelector scrollableViewSelector = this.getElementSelector();
-         ScrollableView updatedScrollableView = null;
+        String cssQuery = innerViewSelector.buildCssQuery();
+        Screen deviceActiveScreen = onDevice.getActiveScreen();
+        UiElementSelector scrollableViewSelector = this.getElementSelector();
+        ScrollableView updatedScrollableView = null;
 
         try {
-        	deviceActiveScreen.updateScreen();
+            deviceActiveScreen.updateScreen();
             updatedScrollableView = deviceActiveScreen.getScrollableView(scrollableViewSelector);
-                
+
             List<UiElement> innerViewChildren = updatedScrollableView.getChildrenByCssQuery(cssQuery);
 
             return innerViewChildren.get(0).tap();

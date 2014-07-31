@@ -232,4 +232,23 @@ public class UiElementFetchingTest {
             InvalidCssQueryException {
         assertFalse("Expected not to find element, but found one", screen.hasElementWithText("CoolStory1"));
     }
+
+    @Test
+    public void testGetDirectChildren() throws Exception {
+
+        UiElementSelector selector = new UiElementSelector();
+        selector.addSelectionAttribute(CssAttribute.CLASS_NAME, "android.widget.LinearLayout");
+        Bounds boundsOfFatherElement = new Bounds(new Point(7, 19), new Point(105, 55));
+        selector.addSelectionAttribute(CssAttribute.BOUNDS, boundsOfFatherElement);
+
+        UiElement linearLayout = screen.getElement(selector);
+
+        List<UiElement> children = linearLayout.getDirectChildren();
+        assertEquals("Incorrect number of found children for empty selector.", 2, children.size());
+
+        List<UiElement> secondLayerChildren = (new UiElement(children.get(0))).getDirectChildren();
+        assertEquals("Incorrect number of found children for first direct ascendant of root node.",
+                     1,
+                     secondLayerChildren.size());
+    }
 }

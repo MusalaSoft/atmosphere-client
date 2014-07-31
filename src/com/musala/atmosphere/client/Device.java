@@ -1147,7 +1147,7 @@ public class Device {
     }
 
     /**
-     * Sets a default keyboard by given ID
+     * Sets a default keyboard by given ID.
      * 
      * @return true if setting the IME is successful and false otherwise.
      */
@@ -1156,7 +1156,9 @@ public class Device {
     }
 
     /**
-     * Sets the Atmosphere IME keyboard as default
+     * Sets the Atmosphere IME keyboard as default. The Atmosphere IME is a small android application that is a simple
+     * implementation of input keyboard for Android. It is needed in order to make sure we can execute the tests
+     * requiring text input.
      * 
      * @return true if setting the IME is successful and false otherwise.
      */

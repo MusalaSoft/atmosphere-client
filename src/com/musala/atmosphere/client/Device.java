@@ -37,6 +37,7 @@ import com.musala.atmosphere.commons.beans.SwipeDirection;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.gesture.Gesture;
+import com.musala.atmosphere.commons.util.GeoLocation;
 import com.musala.atmosphere.commons.util.IntentBuilder;
 import com.musala.atmosphere.commons.util.IntentBuilder.IntentAction;
 import com.musala.atmosphere.commons.util.Pair;
@@ -1170,9 +1171,20 @@ public class Device {
      * Gets the {@link DeviceSettingsManager settings manager} of the current device, that allows getting and inserting
      * device settings.
      * 
-     * @return DeviceSettingsManager instance for this device
+     * @return {@link DeviceSettingsManager} instance for this device
      */
     public DeviceSettingsManager getDeviceSettingsManager() {
         return deviceSettings;
+    }
+
+    /**
+     * Mocks the location of the device with the one specified in the passed location object.
+     * 
+     * @param mockLocation
+     *        - the location to be mocked
+     * @return <code>true</code> if the location of the device was successfully mocked, <code>false</code> otherwise
+     */
+    public boolean mockLocation(GeoLocation mockLocation) {
+        return (Boolean) communicator.sendAction(RoutingAction.MOCK_LOCATION, mockLocation);
     }
 }

@@ -31,6 +31,7 @@ import com.musala.atmosphere.commons.TelephonyInformation;
 import com.musala.atmosphere.commons.beans.DeviceAcceleration;
 import com.musala.atmosphere.commons.beans.DeviceMagneticField;
 import com.musala.atmosphere.commons.beans.DeviceOrientation;
+import com.musala.atmosphere.commons.beans.DeviceProximity;
 import com.musala.atmosphere.commons.beans.MobileDataState;
 import com.musala.atmosphere.commons.beans.PhoneNumber;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
@@ -806,6 +807,19 @@ public class Device {
      */
     public boolean setMagneticField(DeviceMagneticField deviceMagneticField) {
         Object result = communicator.sendAction(RoutingAction.SET_MAGNETIC_FIELD, deviceMagneticField);
+        return result == DeviceCommunicator.VOID_SUCCESS;
+    }
+
+    /**
+     * Sets new proximity for this device. Can only be applied on <b>emulators</b>. You can use proximity constants from
+     * the {@link DeviceProximity} class.
+     * 
+     * @param proximity
+     *        - the new proximity to be set
+     * @return <code>true</code> if the proximity setting was successful, <code>false</code> otherwise
+     */
+    public boolean setProximity(float proximity) {
+        Object result = communicator.sendAction(RoutingAction.SET_PROXIMITY, proximity);
         return result == DeviceCommunicator.VOID_SUCCESS;
     }
 

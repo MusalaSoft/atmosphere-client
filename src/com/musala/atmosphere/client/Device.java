@@ -132,6 +132,18 @@ public class Device {
     }
 
     /**
+     * Executes a command in the shell of this device.
+     * 
+     * @param shellCommand
+     *        - String, representing the command for execution.
+     * @return the output of this device console, after the command is executed.
+     */
+    public String executeShellCommand(String shellCommand) {
+        String result = (String) communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, shellCommand);
+        return result;
+    }
+
+    /**
      * Installs a specified Android application file on this device.<br>
      * 
      * @param path

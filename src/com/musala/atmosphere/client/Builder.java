@@ -4,7 +4,9 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -166,7 +168,8 @@ public class Builder {
      * Releases all allocated devices.
      */
     public void releaseAllDevices() {
-        for (Device device : deviceToDescriptor.keySet()) {
+        Set<Device> devicesToRelease = new HashSet<Device>(deviceToDescriptor.keySet());
+        for (Device device : devicesToRelease) {
             releaseDevice(device);
         }
     }

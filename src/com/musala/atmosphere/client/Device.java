@@ -303,6 +303,17 @@ public class Device {
     }
 
     /**
+     * Gets the current proximity of the device.
+     * 
+     * @return a float representing the proximity of the device or null if the getting of the proximity failed
+     */
+    public float getDeviceProximity() {
+        float proximity = (float) communicator.sendAction(RoutingAction.GET_DEVICE_PROXIMITY);
+
+        return proximity;
+    }
+
+    /**
      * Gets current orientation in space of this device.
      * 
      * @return {@link DeviceOrientation DeviceOrientation} of the testing device,<br>

@@ -11,8 +11,6 @@ import com.musala.atmosphere.client.geometry.Bounds;
  * @author boris.strandjev
  */
 public enum CssAttribute {
-    /** FIXME what does NAF mean? */
-    NAF(Boolean.class, "naf"),
     /** Value denoting the CSS 'bounds' attribute. Type of needed value {@link Bounds}. */
     BOUNDS(Bounds.class, "bounds"),
     /** Value denoting the CSS 'checkable' attribute. Type of needed value Boolean. */

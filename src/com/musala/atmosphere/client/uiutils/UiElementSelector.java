@@ -43,6 +43,10 @@ public class UiElementSelector {
         for (Entry<String, String> nodeAttributeEntry : nodeAttributeMap.entrySet()) {
             boolean attributeFound = false;
             for (CssAttribute cssAttribute : CssAttribute.values()) {
+            	if(nodeAttributeEntry.getKey()=="NAF")
+            	{	
+            		attributeFound = true;
+            	}
                 if (cssAttribute.getHtmlAttributeName().equals(nodeAttributeEntry.getKey())) {
                     Object attributeValue = determineAttributeValue(cssAttribute, nodeAttributeEntry.getValue());
                     if (!shouldSkipAttribute(cssAttribute, attributeValue)) {
@@ -51,6 +55,7 @@ public class UiElementSelector {
                     attributeFound = true;
                     break;
                 }
+              
             }
             if (!attributeFound) {
                 String message = "Unsupported attribute passed in to UI element selector constructor";

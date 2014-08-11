@@ -48,6 +48,16 @@ public class NotificationBar {
     }
 
     /**
+     * Closes the notification bar represented by the {@link NotificationBar} class. This is the only function that can
+     * be used on a device with API lower than 18.
+     * 
+     * @return true if the notification bar was closed successfully, false otherwise
+     */
+    public boolean close() {
+        return onDevice.pressButton(HardwareButton.BACK);
+    }
+
+    /**
      * Clears all notifications in the notification bar represented by the {@link NotificationBar} class. This function
      * can only be used on a device with API 18 or higher.
      * 

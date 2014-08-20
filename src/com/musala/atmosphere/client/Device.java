@@ -74,6 +74,14 @@ public class Device {
 
     private final UiElementValidator validator;
 
+    private static final int WAIT_FOR_TASK_UPDATE_TIMEOUT = 2000;
+
+    private static final int BRING_TASK_TO_FRONT_TIMEOUT = 5000;
+
+    private static final int RUNNING_TASKS_DEFAULT_NUMBER = 1;
+
+    private static final int WAIT_FOR_TASK_UPDATE_POSITION = 1;
+
     /**
      * Constructor that creates a usable Device object by a given IClientDevice, it's invocation passkey.
      * 
@@ -784,28 +792,27 @@ public class Device {
      * @return <code>true</code> if the lock state setting is successful, <code>false</code> if it fails.
      */
     public boolean setLocked(boolean state) {
-        DeviceInformation deviceInformation = getInformation();
-        String deviceManufacturer = deviceInformation.getManufacturer();
-        // There is a different logic for Samsung devices because of they
-        // specific locking and unlocking.
-        if (deviceManufacturer.toLowerCase().equals(SAMSUNG_MANUFACTURER_LOWERCASE)) {
-            boolean lockTerms = state && isAwake();
-            boolean unlockTerms = !state && !isAwake();
-            if (lockTerms || unlockTerms) {
-                return pressButton(HardwareButton.POWER);
-            }
-        } else if (state) {
+
+        if (state) {
             return isLocked() || pressButton(HardwareButton.POWER);
         } else {
             if (!isLocked()) {
                 return true;
             }
-            boolean isAwake = isAwake() || pressButton(HardwareButton.POWER);
-            return isAwake && pressButton(HardwareButton.MENU);
+            // Gets the last running task in order to remember the phone state before locking.
+            int[] runningTasksIds = getRunningTaskIds(RUNNING_TASKS_DEFAULT_NUMBER);
+            int topTaskId = runningTasksIds[0];
+
+            // Removing keyguard changing phone state and returning the keyguard back.
+            setKeyguard(false);
+            pressButton(HardwareButton.HOME);
+            pressButton(HardwareButton.HOME);
+            setKeyguard(true);
+
+            // Bring the last running task before locking the phone.
+            waitForTasksUpdate(topTaskId, WAIT_FOR_TASK_UPDATE_POSITION, WAIT_FOR_TASK_UPDATE_TIMEOUT);
+            return bringTaskToFront(topTaskId, BRING_TASK_TO_FRONT_TIMEOUT) && isLocked();
         }
-        String message = "Lock state setting execution failed.";
-        LOGGER.error(message);
-        return false;
     }
 
     /**
@@ -1223,5 +1230,59 @@ public class Device {
      */
     public boolean mockLocation(GeoLocation mockLocation) {
         return (Boolean) communicator.sendAction(RoutingAction.MOCK_LOCATION, mockLocation);
+    }
+
+    /**
+     * Dismisses and re-enables the keyguard of the device in order to Lock and Unlock it.
+     * 
+     * @param keyguardStatus
+     *        - <code>true</code> if the keyguard should be re-enabled and <code>false</code> to dismiss it.
+     * 
+     * @Note The keyguard should be re-enabled for the device's lock to work properly again.
+     */
+    public void setKeyguard(boolean keyguardStatus) {
+        communicator.sendAction(RoutingAction.SET_KEYGUARD, keyguardStatus);
+    }
+
+    /**
+     * Gets all task that are currently running on the device, with the most recent being first and older ones after in
+     * order.
+     * 
+     * @param maxNum
+     *        - maximum number of task that are going to be get from the device.
+     * @return array of the running tasks id.
+     * @Note Useful with <b>bringTaskToFront(int taskId,int timeout)</b> and <b>waitForTaskUpdate(int taskId, int
+     *       timeout)</b>.
+     */
+    public int[] getRunningTaskIds(int maxNum) {
+        return (int[]) communicator.sendAction(RoutingAction.GET_RUNNING_TASK_IDS, maxNum);
+    }
+
+    /**
+     * Bring the given task to the foreground of the screen.
+     * 
+     * @param taskId
+     *        - the id of the task that is going to be brought to the foreground.
+     * @param timeout
+     *        - to wait before bringing the task to the foreground.
+     * @return <code>true</code> if the task is successfully brought on the foreground and <code>false</code> otherwise.
+     */
+    public boolean bringTaskToFront(int taskId, int timeout) {
+        return (boolean) communicator.sendAction(RoutingAction.BRING_TASK_TO_FRONT, taskId, timeout);
+    }
+
+    /**
+     * Waits for the given task to be moved to given position in running tasks.
+     * 
+     * @param taskId
+     *        - the id of the task.
+     * @param position
+     *        - the position of the task in which it should be after the update.
+     * @param timeout
+     *        - to wait for updating the task.
+     * @return <code>true</code> if the task is updated and <code>false</code> otherwise.
+     */
+    public boolean waitForTasksUpdate(int taskId, int position, int timeout) {
+        return (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_TASKS_UPDATE, taskId, position, timeout);
     }
 }

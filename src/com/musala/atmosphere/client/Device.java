@@ -58,7 +58,13 @@ public class Device {
 
     private static final String LOCKED_CHECK_STRING = "mLockScreenShown true";
 
-    private static final String SAMSUNG_MANUFACTURER_LOWERCASE = "samsung";
+    private static final int WAIT_FOR_TASK_UPDATE_TIMEOUT = 2000;
+
+    private static final int BRING_TASK_TO_FRONT_TIMEOUT = 5000;
+
+    private static final int RUNNING_TASKS_DEFAULT_NUMBER = 1;
+
+    private static final int WAIT_FOR_TASK_UPDATE_POSITION = 1;
 
     /**
      * Default timeout for the hold phase from long click gesture. It needs to be more than the system long click
@@ -73,14 +79,6 @@ public class Device {
     private final DeviceCommunicator communicator;
 
     private final UiElementValidator validator;
-
-    private static final int WAIT_FOR_TASK_UPDATE_TIMEOUT = 2000;
-
-    private static final int BRING_TASK_TO_FRONT_TIMEOUT = 5000;
-
-    private static final int RUNNING_TASKS_DEFAULT_NUMBER = 1;
-
-    private static final int WAIT_FOR_TASK_UPDATE_POSITION = 1;
 
     /**
      * Constructor that creates a usable Device object by a given IClientDevice, it's invocation passkey.
@@ -1232,6 +1230,16 @@ public class Device {
         return (Boolean) communicator.sendAction(RoutingAction.MOCK_LOCATION, mockLocation);
     }
 
+    /**
+     * Disables passing mock location data for the provider with the given name.
+     * 
+     * @param providerName
+     *        - the provider whose mocking should be disabled
+     */
+    public void disableMockLocation(String providerName) {
+        communicator.sendAction(RoutingAction.DISABLE_MOCK_LOCATION, providerName);
+    }
+    
     /**
      * Dismisses and re-enables the keyguard of the device in order to Lock and Unlock it.
      * 

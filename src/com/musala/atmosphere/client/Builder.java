@@ -3,6 +3,7 @@ package com.musala.atmosphere.client;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class Builder {
 
     private Registry serverRmiRegistry;
 
-    private Map<Device, DeviceAllocationInformation> deviceToDescriptor = new HashMap<Device, DeviceAllocationInformation>();
+    private Map<Device, DeviceAllocationInformation> deviceToDescriptor = Collections.synchronizedMap(new HashMap<Device, DeviceAllocationInformation>());
 
     private ServerConnectionHandler serverConnectionHandler;
 
@@ -148,8 +149,8 @@ public class Builder {
         DeviceAllocationInformation deviceDescriptor = deviceToDescriptor.get(device);
         String deviceRmiId = deviceDescriptor.getProxyRmiId();
 
+        deviceToDescriptor.remove(device);
         try {
-            deviceToDescriptor.remove(device);
             device.release();
             clientBuilder.releaseDevice(deviceDescriptor);
         } catch (RemoteException e) {

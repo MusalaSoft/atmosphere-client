@@ -403,7 +403,7 @@ public class UiElement {
             return false;
         }
 
-        if (!doubleTap()) {
+        if (!doubleTap(upperLeftCorner)) {
             return false;
         }
 
@@ -698,7 +698,7 @@ public class UiElement {
 
         return getChildrenByCssQuery(cssQuery);
     }
-    
+
     /**
      * Gets all direct children of a {@link UiElement}, represented by XPath node.
      * 

@@ -1239,7 +1239,7 @@ public class Device {
     public void disableMockLocation(String providerName) {
         communicator.sendAction(RoutingAction.DISABLE_MOCK_LOCATION, providerName);
     }
-    
+
     /**
      * Dismisses and re-enables the keyguard of the device in order to Lock and Unlock it.
      * 
@@ -1292,5 +1292,17 @@ public class Device {
      */
     public boolean waitForTasksUpdate(int taskId, int position, int timeout) {
         return (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_TASKS_UPDATE, taskId, position, timeout);
+    }
+
+    /**
+     * Simulates the given gesture.
+     * 
+     * @param gesture
+     *        - the gesture to be executed.
+     * @return <code>true</code> if the gesture is executed successfully, <code>false</code> otherwise.
+     */
+    public boolean playGesture(Gesture gesture) {
+        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, gesture);
+        return response == DeviceCommunicator.VOID_SUCCESS;
     }
 }

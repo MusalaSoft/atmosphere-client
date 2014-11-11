@@ -13,7 +13,7 @@
         </copy>
 
         <mkdir dir="${testresources.dir}"/>
-        <copy includeemptydirs="false" todir="${testresources.dir}">
+        <copy includeemptydirs="false" todir="${build.dir}/${test.resources.dir}">
             <fileset dir="${test.resources.dir}">
                 <exclude name="**/*.java"/>
             </fileset>

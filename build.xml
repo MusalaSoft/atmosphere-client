@@ -11,5 +11,12 @@
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
+
+        <mkdir dir="${testresources.dir}"/>
+        <copy includeemptydirs="false" todir="${testresources.dir}">
+            <fileset dir="${test.resources.dir}">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
     </target>
 </project>

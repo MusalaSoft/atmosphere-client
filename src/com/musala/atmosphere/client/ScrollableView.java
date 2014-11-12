@@ -274,6 +274,7 @@ public class ScrollableView extends UiElement {
             ParserConfigurationException,
             UiElementFetchingException {
         if (!scrollToElementBySelector(maxSwipes, innerViewSelector)) {
+            System.out.println("Could not find element after " + maxSwipes + " swipes.");
             return false;
         }
 

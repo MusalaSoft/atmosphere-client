@@ -50,7 +50,7 @@ public class UiXmlParser {
         NodeList nodeList = (NodeList) expression.evaluate(domDocument, XPathConstants.NODESET);
         int foundElements = 0;
         if (nodeList == null || nodeList.getLength() == 0) {
-            throw new UiElementFetchingException("No element found for the XPath expression .");
+            throw new UiElementFetchingException("No element found for the XPath expression.");
         }
         foundElements = nodeList.getLength();
         if (foundElements > 1) {

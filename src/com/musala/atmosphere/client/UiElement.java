@@ -1,9 +1,14 @@
 package com.musala.atmosphere.client;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -719,6 +724,34 @@ public class UiElement {
         }
 
         return result;
+    }
+
+    /**
+     * Used to get this {@link UiElement} as an image, using the bounds of the element.
+     * 
+     * @return {@link Image} contained in the element's bounds
+     * @throws IOException
+     *         - if getting screenshot from the device fails
+     */
+    public Image getElementImage() throws IOException {
+        byte[] imageInByte = onDevice.getScreenshot();
+        InputStream inputStream = new ByteArrayInputStream(imageInByte);
+        BufferedImage bufferedImage = ImageIO.read(inputStream);
+
+        UiElementSelector elementSelector = getElementSelector();
+        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+
+        Point upperLeftCorner = elementBounds.getUpperLeftCorner();
+
+        int upperLeftCornerPointX = upperLeftCorner.getX();
+        int upperLeftCornerPointY = upperLeftCorner.getY();
+        int elementWidth = elementBounds.getWidth();
+        int elementHeight = elementBounds.getHeight();
+        BufferedImage croppedImage = bufferedImage.getSubimage(upperLeftCornerPointX,
+                                                               upperLeftCornerPointY,
+                                                               elementWidth,
+                                                               elementHeight);
+        return new Image(croppedImage);
     }
 
     /**

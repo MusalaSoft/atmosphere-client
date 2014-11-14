@@ -1,7 +1,10 @@
 package com.musala.atmosphere.client;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,10 +13,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.imageio.ImageIO;
+
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
+import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
 import com.musala.atmosphere.client.geometry.Point;
 import com.musala.atmosphere.client.uiutils.GestureCreator;
 import com.musala.atmosphere.client.util.settings.AndroidGlobalSettings;
@@ -1304,5 +1310,38 @@ public class Device {
     public boolean playGesture(Gesture gesture) {
         Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, gesture);
         return response == DeviceCommunicator.VOID_SUCCESS;
+    }
+
+    /**
+     * Checks if the given image is present on the screen of the device.
+     * 
+     * @param image
+     *        - image that will be sought for on the active screen
+     * @return <code>true</code> if the image is present on the screen of the device and <code>false</code> otherwise
+     * @throws GettingScreenshotFailedException
+     *         if getting screenshot from the device failed
+     */
+    public boolean isImagePresentOnScreen(Image image) throws GettingScreenshotFailedException {
+        Image currentScreenImage = getDeviceScreenshotImage();
+        return currentScreenImage.containsImage(image);
+    }
+
+    /**
+     * Gets a screenshot from the device as buffered image.
+     * 
+     * @return BufferedImage that contains the screenshot from the device
+     * @throws GettingScreenshotFailedException
+     *         if getting screenshot from the device fails
+     */
+    public Image getDeviceScreenshotImage() throws GettingScreenshotFailedException {
+        byte[] imageInByte = getScreenshot();
+        InputStream inputStream = new ByteArrayInputStream(imageInByte);
+
+        try {
+            BufferedImage bufferedImage = ImageIO.read(inputStream);
+            return new Image(bufferedImage);
+        } catch (IOException e) {
+            throw new GettingScreenshotFailedException("Getting screenshot from the device failed.", e);
+        }
     }
 }

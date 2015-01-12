@@ -66,11 +66,15 @@ public class Device {
 
     private static final int WAIT_FOR_TASK_UPDATE_TIMEOUT = 2000;
 
+    private static final int PRESS_POWER_BUTTON_TIMEOUT = 2000;
+
     private static final int BRING_TASK_TO_FRONT_TIMEOUT = 5000;
 
     private static final int RUNNING_TASKS_DEFAULT_NUMBER = 1;
 
     private static final int WAIT_FOR_TASK_UPDATE_POSITION = 1;
+
+    private static final int WAIT_FOR_AWAKE_STATE_INTERVAL = 100;
 
     /**
      * Default timeout for the hold phase from long click gesture. It needs to be more than the system long click
@@ -788,8 +792,6 @@ public class Device {
     /**
      * Changes the lock state of this device.
      * 
-     * 
-     * 
      * @param state
      *        - desired lock state of the device; <code>true</code> - lock the device, <code>false</code> - unlock the
      *        device.
@@ -803,6 +805,13 @@ public class Device {
             if (!isLocked()) {
                 return true;
             }
+
+            // Wakes up the device if it's asleep
+            if (!isAwake()) {
+                pressButton(HardwareButton.POWER);
+                waitForAwakeState(PRESS_POWER_BUTTON_TIMEOUT, true);
+            }
+
             // Gets the last running task in order to remember the phone state before locking.
             int[] runningTasksIds = getRunningTaskIds(RUNNING_TASKS_DEFAULT_NUMBER);
             int topTaskId = runningTasksIds[0];
@@ -811,12 +820,37 @@ public class Device {
             setKeyguard(false);
             pressButton(HardwareButton.HOME);
             pressButton(HardwareButton.HOME);
-            setKeyguard(true);
 
             // Bring the last running task before locking the phone.
             waitForTasksUpdate(topTaskId, WAIT_FOR_TASK_UPDATE_POSITION, WAIT_FOR_TASK_UPDATE_TIMEOUT);
-            return bringTaskToFront(topTaskId, BRING_TASK_TO_FRONT_TIMEOUT) && isLocked();
+
+            setKeyguard(true);
+
+            return bringTaskToFront(topTaskId, BRING_TASK_TO_FRONT_TIMEOUT) && !isLocked();
         }
+    }
+
+    /**
+     * Wait for changing the awake state of the device.
+     * 
+     * @param timeout
+     *        - time for waiting to be changed the awake state
+     * @param isAwake
+     *        - expected awake status <code>true</code> for awake and <code>false</code> for asleep
+     * @return <code>true</code> if the state is changed as expected and <code>false</code> otherwise.
+     */
+    private boolean waitForAwakeState(int timeout, boolean isAwake) {
+        for (int i = 0; i < timeout; i += WAIT_FOR_AWAKE_STATE_INTERVAL) {
+            try {
+                Thread.sleep(WAIT_FOR_AWAKE_STATE_INTERVAL);
+                if (isAwake == isAwake()) {
+                    return true;
+                }
+            } catch (InterruptedException e) {
+                return false;
+            }
+        }
+        return false;
     }
 
     /**

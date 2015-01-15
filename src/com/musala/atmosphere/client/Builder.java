@@ -14,11 +14,12 @@ import org.apache.log4j.Logger;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
 import com.musala.atmosphere.client.util.ServerAnnotationProperties;
 import com.musala.atmosphere.client.util.ServerConnectionProperties;
-import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformation;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceParameters;
 import com.musala.atmosphere.commons.cs.clientbuilder.IClientBuilder;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
+import com.musala.atmosphere.commons.cs.exception.DeviceNotFoundException;
+import com.musala.atmosphere.commons.cs.exception.InvalidPasskeyException;
 import com.musala.atmosphere.commons.util.Pair;
 
 /**
@@ -144,8 +145,9 @@ public class Builder {
      * 
      * @param device
      *        - device to be released.
+     * @throws DeviceNotFoundException
      */
-    public void releaseDevice(Device device) {
+    public void releaseDevice(Device device) throws DeviceNotFoundException {
         DeviceAllocationInformation deviceDescriptor = deviceToDescriptor.get(device);
         String deviceRmiId = deviceDescriptor.getProxyRmiId();
 
@@ -167,8 +169,10 @@ public class Builder {
 
     /**
      * Releases all allocated devices.
+     * 
+     * @throws DeviceNotFoundException
      */
-    public void releaseAllDevices() {
+    public void releaseAllDevices() throws DeviceNotFoundException {
         Set<Device> devicesToRelease = new HashSet<Device>(deviceToDescriptor.keySet());
         for (Device device : devicesToRelease) {
             releaseDevice(device);
@@ -185,7 +189,7 @@ public class Builder {
     }
 
     @Override
-    protected void finalize() {
+    protected void finalize() throws DeviceNotFoundException {
         synchronized (Builder.class) {
             releaseAllDevices();
             builders.remove(getServerConnectionProperties());

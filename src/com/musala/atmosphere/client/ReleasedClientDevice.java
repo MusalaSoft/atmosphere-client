@@ -6,8 +6,8 @@ import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.commons.RoutingAction;
-import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
+import com.musala.atmosphere.commons.cs.exception.InvalidPasskeyException;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 
 /**

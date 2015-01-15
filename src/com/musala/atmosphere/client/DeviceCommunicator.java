@@ -8,8 +8,9 @@ import com.musala.atmosphere.client.exceptions.DeviceInvocationRejectedException
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
 import com.musala.atmosphere.commons.RoutingAction;
-import com.musala.atmosphere.commons.cs.InvalidPasskeyException;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
+import com.musala.atmosphere.commons.cs.exception.DeviceNotFoundException;
+import com.musala.atmosphere.commons.cs.exception.InvalidPasskeyException;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 
 /**
@@ -63,12 +64,12 @@ public class DeviceCommunicator {
      * Requests an action invocation on the device wrapper.
      * 
      * @param invocationPasskey
-     *        - the passkey that authorizes this invocation.
+     *        - the passkey that authorizes this invocation
      * @param action
-     *        - a {@link RoutingAction} instance that specifies the action to be invoked.
+     *        - a {@link RoutingAction} instance that specifies the action to be invoked
      * @param args
-     *        - the action parameters (if required).
-     * @return the result from the action invocation.
+     *        - the action parameters (if required)
+     * @return the result from the action invocation
      */
     public Object sendAction(RoutingAction action, Object... args) {
         lastSentActionException = null;
@@ -85,7 +86,7 @@ public class DeviceCommunicator {
         } catch (CommandFailedException e) {
             LOGGER.error("Executing action failed.", e);
             lastSentActionException = e;
-        } catch (InvalidPasskeyException e) {
+        } catch (InvalidPasskeyException | DeviceNotFoundException e) {
             LOGGER.error("Executing action was rejected by the server.", e);
             throw new DeviceInvocationRejectedException(e);
         }

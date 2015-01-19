@@ -448,7 +448,6 @@ public class Screen {
      * @throws UiElementFetchingException
      *         if no active time pickers are found in the screen or there are more than 1 time pickers
      */
-
     public TimePicker getTimePicker() throws UiElementFetchingException {
         UiElementSelector timePickerSelector = new UiElementSelector();
         timePickerSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, TIME_PICKER_WIDGET);
@@ -468,10 +467,22 @@ public class Screen {
      * 
      * @return a {@link DatePicker} object representing the time picker widget on screen.
      * @throws UiElementFetchingException
-     *         if there is no date picker available on the screen.
+     *         if there is no date picker available on the screen
+     * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws UiElementFetchingException
+     *         if there are any elements that are not present
+     * @throws InvalidCssQueryException
+     *         when the CssToXPathConverter is given an invalid CssQuery
+     * @throws ParserConfigurationException
+     *         if an error with internal XPath configuration occurs
      */
-
-    public DatePicker getDatePicker() throws UiElementFetchingException {
+    public DatePicker getDatePicker()
+        throws UiElementFetchingException,
+            NumberFormatException,
+            XPathExpressionException,
+            InvalidCssQueryException,
+            ParserConfigurationException {
         UiElementSelector timePickerSelector = new UiElementSelector();
         timePickerSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, DATE_PICKER_WIDGET);
         try {

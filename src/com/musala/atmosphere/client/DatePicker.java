@@ -100,21 +100,34 @@ public class DatePicker extends PickerView {
         }
     }
 
+    private static final int FIRST_POSIBLE_INDEX = 0;
+
+    private static final int LAST_POSIBLE_INDEX = 2;
+
     public static final String DATE_FORMAT = "dd-M-yyyy";
-
-    private static final int MONTH_PICKER_INDEX = 0;
-
-    private static final int DAY_PICKER_INDEX = 1;
-
-    private static final int YEAR_PICKER_INDEX = 2;
 
     private static final String DATE_FORMATTER = "%s-%s-%s";
 
+    private static final int HIGHEST_POSSIBLE_DAY = 31;
+
+    private int monthPickerIndex;
+
+    private int dayPickerIndex;
+
+    private int yearPickerIndex;
+
     private PickerHelper pickerHelper;
 
-    public DatePicker(Screen screen) {
+    public DatePicker(Screen screen)
+        throws NumberFormatException,
+            XPathExpressionException,
+            InvalidCssQueryException,
+            UiElementFetchingException,
+            ParserConfigurationException {
         super(screen);
         pickerHelper = new PickerHelper(screen);
+
+        evaluatePickerIndexes();
     }
 
     @Override
@@ -123,13 +136,12 @@ public class DatePicker extends PickerView {
             UiElementFetchingException,
             InvalidCssQueryException,
             ParserConfigurationException {
-
         String year = String.valueOf(calendar.get(Calendar.YEAR));
         String day = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
         String month = Month.getStringRepresentation(calendar.get(Calendar.MONTH) + 1);
-        boolean setTextResult = setText(year, YEAR_PICKER_INDEX);
-        setTextResult &= setText(day, DAY_PICKER_INDEX);
-        setTextResult &= setText(month, MONTH_PICKER_INDEX);
+        boolean setTextResult = setText(year, yearPickerIndex);
+        setTextResult &= setText(day, dayPickerIndex);
+        setTextResult &= setText(month, monthPickerIndex);
         return setTextResult;
     }
 
@@ -151,8 +163,7 @@ public class DatePicker extends PickerView {
             UiElementFetchingException,
             InvalidCssQueryException,
             ParserConfigurationException {
-
-        String year = pickerHelper.getNumberPickerFieldValue(YEAR_PICKER_INDEX);
+        String year = pickerHelper.getNumberPickerFieldValue(yearPickerIndex);
         int yearNumber = Integer.parseInt(year);
         return yearNumber;
     }
@@ -175,8 +186,7 @@ public class DatePicker extends PickerView {
             UiElementFetchingException,
             InvalidCssQueryException,
             ParserConfigurationException {
-
-        String day = pickerHelper.getNumberPickerFieldValue(DAY_PICKER_INDEX);
+        String day = pickerHelper.getNumberPickerFieldValue(dayPickerIndex);
         int dayNumber = Integer.parseInt(day);
         return dayNumber;
     }
@@ -199,8 +209,9 @@ public class DatePicker extends PickerView {
             UiElementFetchingException,
             InvalidCssQueryException,
             ParserConfigurationException {
+        evaluatePickerIndexes();
 
-        String month = pickerHelper.getNumberPickerFieldValue(MONTH_PICKER_INDEX);
+        String month = pickerHelper.getNumberPickerFieldValue(monthPickerIndex);
         int monthNumber = Month.getIntValue(month);
         return monthNumber;
     }
@@ -213,9 +224,9 @@ public class DatePicker extends PickerView {
             ParserConfigurationException {
 
         String date;
-        String month = pickerHelper.getNumberPickerFieldValue(MONTH_PICKER_INDEX);
-        String day = pickerHelper.getNumberPickerFieldValue(DAY_PICKER_INDEX);
-        String year = pickerHelper.getNumberPickerFieldValue(YEAR_PICKER_INDEX);
+        String month = pickerHelper.getNumberPickerFieldValue(monthPickerIndex);
+        String day = pickerHelper.getNumberPickerFieldValue(dayPickerIndex);
+        String year = pickerHelper.getNumberPickerFieldValue(yearPickerIndex);
 
         String monthNumberValue = Month.getIntValue(month).toString();
         date = String.format(DATE_FORMATTER, day, monthNumberValue, year);
@@ -245,13 +256,50 @@ public class DatePicker extends PickerView {
             ParserConfigurationException {
 
         String date;
-        String month = pickerHelper.getNumberPickerFieldValue(MONTH_PICKER_INDEX);
-        String day = pickerHelper.getNumberPickerFieldValue(DAY_PICKER_INDEX);
-        String year = pickerHelper.getNumberPickerFieldValue(YEAR_PICKER_INDEX);
+        String month = pickerHelper.getNumberPickerFieldValue(monthPickerIndex);
+        String day = pickerHelper.getNumberPickerFieldValue(dayPickerIndex);
+        String year = pickerHelper.getNumberPickerFieldValue(yearPickerIndex);
 
         date = String.format(DATE_FORMATTER, month, day, year);
         return date;
 
+    }
+
+    /**
+     * Finds the index of all DatePicker fields.
+     * 
+     * @throws XPathExpressionException
+     *         if the conversion from CSS to XPath is unsuccessful for some reason.
+     * @throws UiElementFetchingException
+     *         if the NumberPicker or EditText elements are not present.
+     * @throws InvalidCssQueryException
+     *         if the NumberPicker or EditText widgets are invalid.
+     * @throws ParserConfigurationException
+     *         if an error with internal XPath configuration occurs.
+     */
+    private void evaluatePickerIndexes()
+        throws NumberFormatException,
+            XPathExpressionException,
+            InvalidCssQueryException,
+            UiElementFetchingException,
+            ParserConfigurationException {
+        String pickerValue;
+
+        for (int index = FIRST_POSIBLE_INDEX; index <= LAST_POSIBLE_INDEX; index++) {
+            pickerValue = pickerHelper.getNumberPickerFieldValue(index);
+
+            try {
+                int pickerNumericValue = Integer.parseInt(pickerValue);
+
+                if (pickerNumericValue > HIGHEST_POSSIBLE_DAY) {
+                    yearPickerIndex = index;
+                } else {
+                    dayPickerIndex = index;
+                }
+            } catch (NumberFormatException e) {
+                monthPickerIndex = index;
+            }
+        }
     }
 
     /**

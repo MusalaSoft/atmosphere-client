@@ -388,51 +388,9 @@ public class UiElement {
     public boolean clearText() throws XPathExpressionException, UiElementFetchingException, InvalidCssQueryException {
         // TODO validate when an element can get it's text cleared
         innerRevalidation();
-        ElementValidationType originalValidationType = getValidationType();
-        setValidationType(validationType.MANUAL);
+        focus();
 
-        Screen screen = onDevice.getActiveScreen();
-        // A point which shows where to tap on the element to focused it. We choose the upper left corner of the element
-        // as a default
-        // point.
-        Point upperLeftCorner = new Point(0, 0);
-
-        if (!tap(upperLeftCorner)) {
-            return false;
-        }
-
-        // We need to input a text at first, because when you double tap on an empty space you can't select the whole
-        // text.
-        final String textToInputOnFirstLine = "cut";
-        if (!inputText(textToInputOnFirstLine)) {
-            return false;
-        }
-
-        if (!doubleTap(upperLeftCorner)) {
-            return false;
-        }
-
-        screen.updateScreen();
-
-        UiElementSelector selectAllSelector = new UiElementSelector();
-        selectAllSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, TEXT_VIEW_CLASS_NAME);
-        selectAllSelector.addSelectionAttribute(CssAttribute.CONTENT_DESCRIPTION, SELECT_ALL_CONTENT_DESCRIPTION);
-
-        UiElement selectAllButton = screen.getElement(selectAllSelector);
-
-        if (!selectAllButton.tap()) {
-            return false;
-        }
-
-        UiElementSelector cutButtonSelector = new UiElementSelector();
-        cutButtonSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, TEXT_VIEW_CLASS_NAME);
-        cutButtonSelector.addSelectionAttribute(CssAttribute.CONTENT_DESCRIPTION, CUT_BUTTON_CONTENT_DESCRIPTION);
-
-        UiElement cutButton = screen.getElement(cutButtonSelector);
-
-        setValidationType(originalValidationType);
-
-        return cutButton.tap();
+        return onDevice.clearText();
     }
 
     /**

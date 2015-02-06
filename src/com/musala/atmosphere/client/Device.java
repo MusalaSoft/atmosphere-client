@@ -525,6 +525,20 @@ public class Device {
     }
 
     /**
+     * Clears the content of the focused text field.
+     * 
+     * @return boolean indicating if this action was successful
+     */
+    public boolean clearText() {
+        IntentBuilder intentBuilder = new IntentBuilder(IntentAction.ATMOSPHERE_CLEAR_TEXT);
+
+        String builtCommand = intentBuilder.buildIntentCommand();
+        communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, builtCommand);
+
+        return communicator.getLastException() == null;
+    }
+
+    /**
      * Installs a specified Android application file on this device.<br>
      * 
      * @param path

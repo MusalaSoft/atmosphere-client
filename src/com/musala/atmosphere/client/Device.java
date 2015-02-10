@@ -8,8 +8,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,6 +42,8 @@ import com.musala.atmosphere.commons.beans.SwipeDirection;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.gesture.Gesture;
+import com.musala.atmosphere.commons.ime.KeyboardAction;
+import com.musala.atmosphere.commons.util.AtmosphereIntent;
 import com.musala.atmosphere.commons.util.GeoLocation;
 import com.musala.atmosphere.commons.util.IntentBuilder;
 import com.musala.atmosphere.commons.util.IntentBuilder.IntentAction;
@@ -497,29 +497,18 @@ public class Device {
      *        - time interval in milliseconds between typing each symbol.
      * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
      */
-    public boolean inputText(String text, int interval) {
+    public boolean inputText(String text, long interval) {
         if (text.isEmpty()) {
             String message = "Text input requested, but an empty String is given.";
             LOGGER.warn(message);
             return true;
         }
 
-        IntentBuilder intentBuilder = new IntentBuilder(IntentAction.ATMOSPHERE_TEXT_INPUT);
+        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.INPUT_TEXT.intentAction);
+        intent.putExtra(KeyboardAction.INTENT_EXTRA_TEXT, text);
+        intent.putExtra(KeyboardAction.INTENT_EXTRA_INPUT_SPEED, interval);
 
-        char[] textCharArray = text.toCharArray();
-        List<Integer> charsList = new LinkedList<Integer>();
-        for (int i = 0; i < textCharArray.length; i++) {
-            int numericalCharValue = textCharArray[i];
-            charsList.add(numericalCharValue);
-        }
-        intentBuilder.putExtraIntegerList("text", charsList);
-
-        if (interval > 0) {
-            intentBuilder.putExtraInteger("interval", interval);
-        }
-
-        String builtCommand = intentBuilder.buildIntentCommand();
-        communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, builtCommand);
+        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
 
         return communicator.getLastException() == null;
     }

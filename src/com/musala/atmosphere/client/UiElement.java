@@ -405,7 +405,7 @@ public class UiElement {
      *        - boolean indicating if the element should be revalidated prior to text inputting.
      * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
      */
-    public boolean inputText(String text, int intervalInMs) {
+    public boolean inputText(String text, long intervalInMs) {
         innerRevalidation();
         focus();
         boolean success = onDevice.inputText(text, intervalInMs);

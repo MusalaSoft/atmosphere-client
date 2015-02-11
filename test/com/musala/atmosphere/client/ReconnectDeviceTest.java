@@ -22,6 +22,7 @@ import com.musala.atmosphere.commons.beans.DeviceAcceleration;
 import com.musala.atmosphere.commons.beans.DeviceOrientation;
 import com.musala.atmosphere.commons.beans.PhoneNumber;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
+import com.musala.atmosphere.commons.util.AtmosphereIntent;
 
 /**
  * 
@@ -82,6 +83,9 @@ public class ReconnectDeviceTest {
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
                                                                       eq(RoutingAction.CALL_CANCEL),
                                                                       any(PhoneNumber.class));
+        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
+                                                                      eq(RoutingAction.SEND_BROADCAST),
+                                                                      any(AtmosphereIntent.class));
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.GET_AWAKE_STATUS));
 
         mockedServerConnectionHandler = mock(ServerConnectionHandler.class);

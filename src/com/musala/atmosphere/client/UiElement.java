@@ -375,17 +375,24 @@ public class UiElement {
     }
 
     /**
+     * Selects the content of this element.
+     * 
+     * @return <code>true</code> if the text selecting is successful, <code>false</code> if it fails
+     */
+    public boolean selectAllText() {
+        innerRevalidation();
+
+        focus();
+
+        return onDevice.selectAllText();
+    }
+
+    /**
      * Clears the contents of this element.
      * 
-     * @return boolean indicating if this action was successful.
-     * @throws InvalidCssQueryException
-     *         if element is searched by invalid CSS query
-     * @throws UiElementFetchingException
-     *         if element could not be found
-     * @throws XPathExpressionException
-     *         if element is searched by invalid XPath query
+     * @return <code>true</code> if clear text is successful, <code>false</code> if it fails
      */
-    public boolean clearText() throws XPathExpressionException, UiElementFetchingException, InvalidCssQueryException {
+    public boolean clearText() {
         // TODO validate when an element can get it's text cleared
         innerRevalidation();
         focus();

@@ -516,13 +516,27 @@ public class Device {
     /**
      * Clears the content of the focused text field.
      * 
-     * @return boolean indicating if this action was successful
+     * @return <code>true</code> if clear text is successful, <code>false</code> if it fails
      */
     public boolean clearText() {
         IntentBuilder intentBuilder = new IntentBuilder(IntentAction.ATMOSPHERE_CLEAR_TEXT);
 
         String builtCommand = intentBuilder.buildIntentCommand();
         communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, builtCommand);
+
+        return communicator.getLastException() == null;
+    }
+
+    /**
+     * Selects the content of the focused text field.
+     * 
+     * @return <code>true</code> if the text selecting is successful, <code>false</code> if it fails
+     */
+    public boolean selectAllText() {
+        IntentBuilder intentBuilder = new IntentBuilder(IntentAction.ATMOSPHERE_SELECT_ALL_TEXT);
+
+        String buildCommand = intentBuilder.buildIntentCommand();
+        communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, buildCommand);
 
         return communicator.getLastException() == null;
     }

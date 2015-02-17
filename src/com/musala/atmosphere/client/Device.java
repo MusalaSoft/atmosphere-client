@@ -542,6 +542,20 @@ public class Device {
     }
 
     /**
+     * Paste a copied text in the current focused text field.
+     * 
+     * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
+     */
+    public boolean pasteText() {
+        IntentBuilder intentBuilder = new IntentBuilder(IntentAction.ATMOSPHERE_PASTE_TEXT);
+
+        String buildCommand = intentBuilder.buildIntentCommand();
+        communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, buildCommand);
+
+        return communicator.getLastException() == null;
+    }
+
+    /**
      * Installs a specified Android application file on this device.<br>
      * 
      * @param path

@@ -375,6 +375,19 @@ public class UiElement {
     }
 
     /**
+     * Paste a copied text in this element.
+     * 
+     * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
+     */
+    public boolean pasteText() {
+        innerRevalidation();
+
+        focus();
+
+        return onDevice.pasteText();
+    }
+
+    /**
      * Selects the content of this element.
      * 
      * @return <code>true</code> if the text selecting is successful, <code>false</code> if it fails

@@ -559,6 +559,7 @@ public class Screen {
      *        - the timeout of the operation
      * @return <code>true</code> if a window update occurred, <code>false</code> if timeout has elapsed or if the
      *         current window does not have the specified package name
+     * @Note The behavior of this method depends on the application that it is used on.
      */
     public boolean waitForWindowUpdate(String packageName, int timeout) {
         boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_WINDOW_UPDATE, packageName, timeout);

@@ -106,7 +106,7 @@ public class Image {
      * 
      * @param soughtImage
      *        - to check if it is present in the image
-     * @return <code>true</code> if the given image is found in the image variable and <code>false</code> otherwise
+     * @return <code>true</code> if the given image is found in this image and <code>false</code> otherwise
      */
     public boolean containsImage(Image soughtImage) {
         int[][] bufferedImageMatrix = this.getRGBMatrix();

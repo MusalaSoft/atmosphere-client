@@ -519,10 +519,8 @@ public class Device {
      * @return <code>true</code> if clear text is successful, <code>false</code> if it fails
      */
     public boolean clearText() {
-        IntentBuilder intentBuilder = new IntentBuilder(IntentAction.ATMOSPHERE_CLEAR_TEXT);
-
-        String builtCommand = intentBuilder.buildIntentCommand();
-        communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, builtCommand);
+        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.DELETE_ALL.intentAction);
+        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
 
         return communicator.getLastException() == null;
     }
@@ -533,10 +531,20 @@ public class Device {
      * @return <code>true</code> if the text selecting is successful, <code>false</code> if it fails
      */
     public boolean selectAllText() {
-        IntentBuilder intentBuilder = new IntentBuilder(IntentAction.ATMOSPHERE_SELECT_ALL_TEXT);
+        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.SELECT_ALL.intentAction);
+        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
 
-        String buildCommand = intentBuilder.buildIntentCommand();
-        communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, buildCommand);
+        return communicator.getLastException() == null;
+    }
+
+    /**
+     * Copies the selected content of the focused text field.
+     * 
+     * @return <code>true</code> if copy operation is successful, <code>false</code> if it fails
+     */
+    public boolean copyText() {
+        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.COPY_TEXT.intentAction);
+        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
 
         return communicator.getLastException() == null;
     }
@@ -547,10 +555,8 @@ public class Device {
      * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
      */
     public boolean pasteText() {
-        IntentBuilder intentBuilder = new IntentBuilder(IntentAction.ATMOSPHERE_PASTE_TEXT);
-
-        String buildCommand = intentBuilder.buildIntentCommand();
-        communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, buildCommand);
+        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.PASTE_TEXT.intentAction);
+        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
 
         return communicator.getLastException() == null;
     }

@@ -47,12 +47,6 @@ public class UiElement {
         JSOUP_NODE;
     }
 
-    private static final String CUT_BUTTON_CONTENT_DESCRIPTION = "Cut";
-
-    private static final String TEXT_VIEW_CLASS_NAME = "android.widget.TextView";
-
-    private static final String SELECT_ALL_CONTENT_DESCRIPTION = "Select all";
-
     protected ElementNodeType underlyingNodeType;
 
     private static final long UI_ELEMENT_OPERATION_WAIT_TIME = 500;
@@ -375,6 +369,17 @@ public class UiElement {
     }
 
     /**
+     * Copies the current selection of the content in this element.
+     * 
+     * @return <code>true</code> if copy operation is successful, <code>false</code> if it fails
+     */
+    public boolean copyText() {
+        innerRevalidation();
+
+        return onDevice.copyText();
+    }
+
+    /**
      * Paste a copied text in this element.
      * 
      * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
@@ -429,7 +434,7 @@ public class UiElement {
         innerRevalidation();
         focus();
         boolean success = onDevice.inputText(text, intervalInMs);
-        finalizeUiElementOperation();
+
         return success;
     }
 

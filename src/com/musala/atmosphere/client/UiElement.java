@@ -369,6 +369,17 @@ public class UiElement {
     }
 
     /**
+     * Cuts the selected text from this element.
+     * 
+     * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
+     */
+    public boolean cutText() {
+        innerRevalidation();
+
+        return onDevice.cutText();
+    }
+
+    /**
      * Copies the current selection of the content in this element.
      * 
      * @return <code>true</code> if copy operation is successful, <code>false</code> if it fails
@@ -433,6 +444,7 @@ public class UiElement {
     public boolean inputText(String text, long intervalInMs) {
         innerRevalidation();
         focus();
+
         boolean success = onDevice.inputText(text, intervalInMs);
 
         return success;

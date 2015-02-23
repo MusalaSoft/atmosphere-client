@@ -538,6 +538,18 @@ public class Device {
     }
 
     /**
+     * Paste a copied text in the current focused text field.
+     * 
+     * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
+     */
+    public boolean pasteText() {
+        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.PASTE_TEXT.intentAction);
+        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
+
+        return communicator.getLastException() == null;
+    }
+
+    /**
      * Copies the selected content of the focused text field.
      * 
      * @return <code>true</code> if copy operation is successful, <code>false</code> if it fails
@@ -550,12 +562,12 @@ public class Device {
     }
 
     /**
-     * Paste a copied text in the current focused text field.
+     * Cuts the selected text from the current focused text field.
      * 
      * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
      */
-    public boolean pasteText() {
-        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.PASTE_TEXT.intentAction);
+    public boolean cutText() {
+        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.CUT_TEXT.intentAction);
         communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
 
         return communicator.getLastException() == null;

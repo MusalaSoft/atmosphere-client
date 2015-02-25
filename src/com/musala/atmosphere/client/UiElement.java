@@ -51,6 +51,8 @@ public class UiElement {
 
     private static final long UI_ELEMENT_OPERATION_WAIT_TIME = 500;
 
+    private static final long TIMEOUT_BEFORE_SELECT_ALL = 3000;
+
     protected Node representedNodeXPath;
 
     private static final Logger LOGGER = Logger.getLogger(UiElement.class);
@@ -412,6 +414,13 @@ public class UiElement {
         innerRevalidation();
 
         focus();
+
+        try {
+            Thread.sleep(TIMEOUT_BEFORE_SELECT_ALL);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         return onDevice.selectAllText();
     }

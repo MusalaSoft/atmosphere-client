@@ -1346,11 +1346,19 @@ public class Device {
      * order.
      * 
      * @param maxNum
-     *        - maximum number of task that are going to be get from the device.
+     *        - maximum number of task that are going to be get from the device
+     * 
      * @return array of the running tasks id.
-     * @Note Useful with <b>bringTaskToFront(int taskId,int timeout)</b> and <b>waitForTaskUpdate(int taskId, int
-     *       timeout)</b>.
+     *         <p>
+     *         Note: Useful with {@link #bringTaskToFront(int, int) bringTaskToFront} and
+     *         {@link #waitForTasksUpdate(int, int, int) waitForTaskUpdate}.
+     *         </p>
+     * 
+     * @deprecated Since LOLLIPOP, this method is no longer available. It will still return a small subset of its data:
+     *             at least the caller's own tasks, and possibly some other tasks such as home that are known to not be
+     *             sensitive.
      */
+    @Deprecated
     public int[] getRunningTaskIds(int maxNum) {
         return (int[]) communicator.sendAction(RoutingAction.GET_RUNNING_TASK_IDS, maxNum);
     }
@@ -1378,7 +1386,10 @@ public class Device {
      * @param timeout
      *        - to wait for updating the task.
      * @return <code>true</code> if the task is updated and <code>false</code> otherwise.
+     * 
+     * @deprecated Since LOLLIPOP, this method is no longer avaible.
      */
+    @Deprecated
     public boolean waitForTasksUpdate(int taskId, int position, int timeout) {
         return (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_TASKS_UPDATE, taskId, position, timeout);
     }

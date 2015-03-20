@@ -62,19 +62,29 @@ public class Device {
 
     private static final String LOCKED_STATUS_DUMP_COMMAND = "dumpsys activity";
 
+    private static final String SCREEN_RECORD_COMMAND = "screenrecord";
+
+    private static final String SCREEN_RECORD_FILE_PATH = "/sdcard/screenrecord.mp4";
+
+    private static final String SCREEN_RECORD_SHELL_COMMAND = String.format("%s %s",
+                                                                            SCREEN_RECORD_COMMAND,
+                                                                            SCREEN_RECORD_FILE_PATH);
+
     private static final String LOCKED_CHECK_STRING = "mLockScreenShown true";
 
-    private static final int WAIT_FOR_TASK_UPDATE_TIMEOUT = 2000;
-
     private static final int PRESS_POWER_BUTTON_TIMEOUT = 2000;
+
+    private static final int WAIT_FOR_AWAKE_STATE_INTERVAL = 100;
+
+    private static final int PULL_FILE_TIMEOUT = 2000;
+
+    private static final int WAIT_FOR_TASK_UPDATE_TIMEOUT = 2000;
 
     private static final int BRING_TASK_TO_FRONT_TIMEOUT = 5000;
 
     private static final int RUNNING_TASKS_DEFAULT_NUMBER = 1;
 
     private static final int WAIT_FOR_TASK_UPDATE_POSITION = 1;
-
-    private static final int WAIT_FOR_AWAKE_STATE_INTERVAL = 100;
 
     /**
      * Default timeout for the hold phase from long click gesture. It needs to be more than the system long click
@@ -158,6 +168,26 @@ public class Device {
     public String executeShellCommand(String shellCommand) {
         String result = (String) communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, shellCommand);
         return result;
+    }
+
+    /**
+     * Executes a command in the shell of this device in a new thread.
+     * 
+     * @param shellCommand
+     *        - command to be executed in background
+     */
+    private void executeShellCommandInBackground(String shellCommand) {
+        communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND_IN_BACKGROUND, shellCommand);
+    }
+
+    /**
+     * Terminates a background executing shell command.
+     * 
+     * @param shellCommand
+     *        - command to be terminated
+     */
+    private void terminateBackgroundShellCommand(String shellCommand) {
+        communicator.sendAction(RoutingAction.TERMINATE_BACKGROUND_SHELL_COMMAND, shellCommand);
     }
 
     /**
@@ -847,7 +877,6 @@ public class Device {
      * @return <code>true</code> if the lock state setting is successful, <code>false</code> if it fails.
      */
     public boolean setLocked(boolean state) {
-
         if (state) {
             return isLocked() || pressButton(HardwareButton.POWER);
         } else {
@@ -1437,5 +1466,41 @@ public class Device {
         } catch (IOException e) {
             throw new GettingScreenshotFailedException("Getting screenshot from the device failed.", e);
         }
+    }
+
+    /**
+     * Starts screen recording. The max screen record duration is 180 seconds and it only works for Android 4.4 and
+     * above.
+     */
+    public void startScreenRecording() {
+        executeShellCommandInBackground(SCREEN_RECORD_SHELL_COMMAND);
+    }
+
+    /**
+     * Stops screen recording and pulls the recorded video file in a local directory.
+     * 
+     * @param fullLocalScreenRecordPath
+     *        - the full local path to the screen record file
+     * @throws InterruptedException
+     *         - the thread is interrupted before or during the activity
+     */
+    public void stopScreenRecording(String fullLocalScreenRecordPath) throws InterruptedException {
+        terminateBackgroundShellCommand(SCREEN_RECORD_SHELL_COMMAND);
+
+        Thread.sleep(PULL_FILE_TIMEOUT);
+
+        pullFile(SCREEN_RECORD_FILE_PATH, fullLocalScreenRecordPath);
+    }
+
+    /**
+     * Pulls a single file from the device and save it in a selected local directory.
+     * 
+     * @param fullRemoteFilePath
+     *        - full path to the file which should be pulled
+     * @param fullLocalFilePath
+     *        - full local path to the destination file
+     */
+    public void pullFile(String fullRemoteFilePath, String fullLocalFilePath) {
+        communicator.sendAction(RoutingAction.PULL_FILE, fullRemoteFilePath, fullLocalFilePath);
     }
 }

@@ -60,8 +60,6 @@ public class Device {
 
     private static final Logger LOGGER = Logger.getLogger(Device.class.getCanonicalName());
 
-    private static final String LOCKED_STATUS_DUMP_COMMAND = "dumpsys activity";
-
     private static final String SCREEN_RECORD_COMMAND = "screenrecord";
 
     private static final String SCREEN_RECORD_FILE_PATH = "/sdcard/screenrecord.mp4";
@@ -70,21 +68,13 @@ public class Device {
                                                                             SCREEN_RECORD_COMMAND,
                                                                             SCREEN_RECORD_FILE_PATH);
 
-    private static final String LOCKED_CHECK_STRING = "mLockScreenShown true";
-
-    private static final int PRESS_POWER_BUTTON_TIMEOUT = 2000;
-
     private static final int WAIT_FOR_AWAKE_STATE_INTERVAL = 100;
 
     private static final int PULL_FILE_TIMEOUT = 2000;
 
-    private static final int WAIT_FOR_TASK_UPDATE_TIMEOUT = 2000;
+    private static final String ATMOSPHERE_SERVICE_PACKAGE = "com.musala.atmosphere.service";
 
-    private static final int BRING_TASK_TO_FRONT_TIMEOUT = 5000;
-
-    private static final int RUNNING_TASKS_DEFAULT_NUMBER = 1;
-
-    private static final int WAIT_FOR_TASK_UPDATE_POSITION = 1;
+    private static final String ATMOSPHERE_UNLOCK_DEVICE_ACTIVITY = ".UnlockDeviceActivity";
 
     /**
      * Default timeout for the hold phase from long click gesture. It needs to be more than the system long click
@@ -642,16 +632,10 @@ public class Device {
      * Checks if this device is locked.
      * 
      * @return <code>true</code> if the device is locked.<br>
-     *         <code>false</code> if the device is unlocked. <br>
-     *         <code>null</code> if the check fails.
+     *         <code>false</code> if the device is unlocked.
      */
     public Boolean isLocked() {
-        String dump = (String) communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, LOCKED_STATUS_DUMP_COMMAND);
-        if (communicator.getLastException() != null) {
-            return null;
-        }
-        boolean locked = dump.contains(LOCKED_CHECK_STRING);
-        return locked;
+        return (boolean) communicator.sendAction(RoutingAction.IS_LOCKED);
     }
 
     /**
@@ -884,27 +868,16 @@ public class Device {
                 return true;
             }
 
-            // Wakes up the device if it's asleep
-            if (!isAwake()) {
-                pressButton(HardwareButton.POWER);
-                waitForAwakeState(PRESS_POWER_BUTTON_TIMEOUT, true);
+            try {
+                startActivity(ATMOSPHERE_SERVICE_PACKAGE, ATMOSPHERE_UNLOCK_DEVICE_ACTIVITY, false);
+            } catch (ActivityStartingException e) {
+                return false;
             }
 
-            // Gets the last running task in order to remember the phone state before locking.
-            int[] runningTasksIds = getRunningTaskIds(RUNNING_TASKS_DEFAULT_NUMBER);
-            int topTaskId = runningTasksIds[0];
+            waitForAwakeState(WAIT_FOR_AWAKE_STATE_INTERVAL, true);
+            pressButton(HardwareButton.BACK);
 
-            // Removing keyguard changing phone state and returning the keyguard back.
-            setKeyguard(false);
-            pressButton(HardwareButton.HOME);
-            pressButton(HardwareButton.HOME);
-
-            // Bring the last running task before locking the phone.
-            waitForTasksUpdate(topTaskId, WAIT_FOR_TASK_UPDATE_POSITION, WAIT_FOR_TASK_UPDATE_TIMEOUT);
-
-            setKeyguard(true);
-
-            return bringTaskToFront(topTaskId, BRING_TASK_TO_FRONT_TIMEOUT) && !isLocked();
+            return !isLocked();
         }
     }
 

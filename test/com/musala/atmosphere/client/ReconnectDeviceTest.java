@@ -87,6 +87,7 @@ public class ReconnectDeviceTest {
                                                                       eq(RoutingAction.SEND_BROADCAST),
                                                                       any(AtmosphereIntent.class));
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.GET_AWAKE_STATUS));
+        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.IS_LOCKED));
 
         mockedServerConnectionHandler = mock(ServerConnectionHandler.class);
 

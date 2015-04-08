@@ -8,7 +8,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
 
-import com.musala.atmosphere.client.geometry.Bounds;
+import com.musala.atmosphere.commons.geometry.Bounds;
 import com.musala.atmosphere.commons.util.Pair;
 
 /**

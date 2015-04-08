@@ -12,8 +12,8 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.musala.atmosphere.client.geometry.Bounds;
-import com.musala.atmosphere.client.geometry.Point;
+import com.musala.atmosphere.commons.geometry.Bounds;
+import com.musala.atmosphere.commons.geometry.Point;
 
 /**
  * Tests {@link UiElementSelector}

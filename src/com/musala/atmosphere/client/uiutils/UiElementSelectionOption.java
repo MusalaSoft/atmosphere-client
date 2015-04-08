@@ -1,7 +1,7 @@
 package com.musala.atmosphere.client.uiutils;
 
-import com.musala.atmosphere.client.geometry.Bounds;
-import com.musala.atmosphere.client.geometry.Point;
+import com.musala.atmosphere.commons.geometry.Bounds;
+import com.musala.atmosphere.commons.geometry.Point;
 
 /**
  * A class defining the different options for selection of attributes in {@link UiElementSelector}

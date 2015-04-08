@@ -21,8 +21,8 @@ import org.mockito.Mockito;
 
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
-import com.musala.atmosphere.client.geometry.Bounds;
-import com.musala.atmosphere.client.geometry.Point;
+import com.musala.atmosphere.commons.geometry.Bounds;
+import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.client.uiutils.CssAttribute;
 import com.musala.atmosphere.client.uiutils.UiElementSelectionOption;
 import com.musala.atmosphere.client.uiutils.UiElementSelector;

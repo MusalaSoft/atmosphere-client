@@ -1,6 +1,6 @@
 package com.musala.atmosphere.client.uiutils;
 
-import com.musala.atmosphere.client.geometry.Bounds;
+import com.musala.atmosphere.commons.geometry.Bounds;
 
 /**
  * Lists all the CSS attributes the system currently supports.

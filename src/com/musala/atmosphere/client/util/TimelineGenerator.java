@@ -1,6 +1,6 @@
 package com.musala.atmosphere.client.util;
 
-import com.musala.atmosphere.client.geometry.Point;
+import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.gesture.Anchor;
 import com.musala.atmosphere.commons.gesture.Timeline;
 

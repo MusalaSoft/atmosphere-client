@@ -5,8 +5,8 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import com.musala.atmosphere.client.geometry.Bounds;
-import com.musala.atmosphere.client.geometry.Point;
+import com.musala.atmosphere.commons.geometry.Bounds;
+import com.musala.atmosphere.commons.geometry.Point;
 
 /**
  * Manages some of the UiElement Bounds functionality like parsing String of Bounds into Bounds pair.

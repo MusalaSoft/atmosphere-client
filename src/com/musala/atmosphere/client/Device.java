@@ -18,7 +18,6 @@ import org.apache.log4j.Logger;
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
-import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.client.uiutils.GestureCreator;
 import com.musala.atmosphere.client.util.settings.AndroidGlobalSettings;
 import com.musala.atmosphere.client.util.settings.AndroidSystemSettings;
@@ -41,6 +40,7 @@ import com.musala.atmosphere.commons.beans.PhoneNumber;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
+import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.gesture.Gesture;
 import com.musala.atmosphere.commons.ime.KeyboardAction;
 import com.musala.atmosphere.commons.util.AtmosphereIntent;
@@ -62,19 +62,19 @@ public class Device {
 
     private static final String SCREEN_RECORD_COMMAND = "screenrecord";
 
+    private static final String SCREEN_RECORD_PROCESS_NAME = "screenrecord";
+
     private static final String SCREEN_RECORD_FILE_PATH = "/sdcard/screenrecord.mp4";
 
     private static final String SCREEN_RECORD_SHELL_COMMAND = String.format("%s %s",
                                                                             SCREEN_RECORD_COMMAND,
                                                                             SCREEN_RECORD_FILE_PATH);
 
-    private static final int WAIT_FOR_AWAKE_STATE_INTERVAL = 100;
-
-    private static final int PULL_FILE_TIMEOUT = 2000;
-
     private static final String ATMOSPHERE_SERVICE_PACKAGE = "com.musala.atmosphere.service";
 
     private static final String ATMOSPHERE_UNLOCK_DEVICE_ACTIVITY = ".UnlockDeviceActivity";
+
+    private static final int WAIT_FOR_AWAKE_STATE_INTERVAL = 100;
 
     /**
      * Default timeout for the hold phase from long click gesture. It needs to be more than the system long click
@@ -171,13 +171,13 @@ public class Device {
     }
 
     /**
-     * Terminates a background executing shell command.
+     * Interrupts a background executing shell process.
      * 
-     * @param shellCommand
-     *        - command to be terminated
+     * @param processName
+     *        - name of the process to be interrupted
      */
-    private void terminateBackgroundShellCommand(String shellCommand) {
-        communicator.sendAction(RoutingAction.TERMINATE_BACKGROUND_SHELL_COMMAND, shellCommand);
+    private void interruptBackgroundShellProcess(String processName) {
+        communicator.sendAction(RoutingAction.INTERRUPT_BACKGROUND_SHELL_PROCESS, processName);
     }
 
     /**
@@ -1452,17 +1452,13 @@ public class Device {
     /**
      * Stops screen recording and pulls the recorded video file in a local directory.
      * 
-     * @param fullLocalScreenRecordPath
-     *        - the full local path to the screen record file
-     * @throws InterruptedException
-     *         - the thread is interrupted before or during the activity
+     * @param path
+     *        - the full path where the file will be saved
      */
-    public void stopScreenRecording(String fullLocalScreenRecordPath) throws InterruptedException {
-        terminateBackgroundShellCommand(SCREEN_RECORD_SHELL_COMMAND);
+    public void stopScreenRecording(String path) {
+        interruptBackgroundShellProcess(SCREEN_RECORD_PROCESS_NAME);
 
-        Thread.sleep(PULL_FILE_TIMEOUT);
-
-        pullFile(SCREEN_RECORD_FILE_PATH, fullLocalScreenRecordPath);
+        pullFile(SCREEN_RECORD_FILE_PATH, path);
     }
 
     /**
@@ -1474,6 +1470,7 @@ public class Device {
      *        - full local path to the destination file
      */
     public void pullFile(String fullRemoteFilePath, String fullLocalFilePath) {
+        // FIXME: Implement sending the file to the client after pulling it locally.
         communicator.sendAction(RoutingAction.PULL_FILE, fullRemoteFilePath, fullLocalFilePath);
     }
 }

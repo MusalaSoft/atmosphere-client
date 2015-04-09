@@ -18,6 +18,7 @@ import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformatio
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceParameters;
 import com.musala.atmosphere.commons.cs.clientbuilder.IClientBuilder;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
+import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
 import com.musala.atmosphere.commons.cs.exception.DeviceNotFoundException;
 import com.musala.atmosphere.commons.cs.exception.InvalidPasskeyException;
 import com.musala.atmosphere.commons.util.Pair;
@@ -119,6 +120,7 @@ public class Builder {
      *        - required {@link DeviceParameters} needed to construct new {@link Device Device} instance.
      * @return a {@link Device Device} instance with a given device parameters.
      */
+    @Deprecated
     public Device getDevice(DeviceParameters deviceParameters) {
         try {
             DeviceAllocationInformation deviceDescriptor = clientBuilder.allocateDevice(deviceParameters);
@@ -135,6 +137,35 @@ public class Builder {
             return device;
         } catch (RemoteException | NotBoundException e) {
             String message = "Fetching Device failed (server connection failure).";
+            LOGGER.error(message, e);
+            throw new ServerConnectionFailedException(message, e);
+        }
+    }
+
+    /**
+     * Gets a {@link Device Device} instance with the given {@link DeviceSelector device characteristics}.
+     * 
+     * @param deviceSelector
+     *        - required {@link DeviceSelector parameters} needed to construct new {@link Device Device} instance.
+     * @return a {@link Device Device} instance with the given device parameters.
+     */
+    public Device getDevice(DeviceSelector deviceSelector) {
+        try {
+            DeviceAllocationInformation deviceDescriptor = clientBuilder.allocateDevice(deviceSelector);
+
+            String deviceProxyRmiId = deviceDescriptor.getProxyRmiId();
+            String messageReleasedDevice = String.format("Fetched device with proxy RMI ID: %s .", deviceProxyRmiId);
+            LOGGER.info(messageReleasedDevice);
+
+            IClientDevice iClientDevice = (IClientDevice) serverRmiRegistry.lookup(deviceProxyRmiId);
+            long passkey = deviceDescriptor.getProxyPasskey();
+
+            Device device = new Device(iClientDevice, passkey, serverConnectionHandler);
+            deviceToDescriptor.put(device, deviceDescriptor);
+
+            return device;
+        } catch (RemoteException | NotBoundException e) {
+            String message = "Fetching device failed (server connection failure).";
             LOGGER.error(message, e);
             throw new ServerConnectionFailedException(message, e);
         }

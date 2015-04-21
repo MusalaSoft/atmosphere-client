@@ -15,7 +15,6 @@ import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
 import com.musala.atmosphere.client.util.ServerAnnotationProperties;
 import com.musala.atmosphere.client.util.ServerConnectionProperties;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformation;
-import com.musala.atmosphere.commons.cs.clientbuilder.DeviceParameters;
 import com.musala.atmosphere.commons.cs.clientbuilder.IClientBuilder;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
@@ -111,35 +110,6 @@ public class Builder {
         }
 
         return builder;
-    }
-
-    /**
-     * Gets a {@link Device Device} instance with given {@link DeviceParameters DeviceParameters}.
-     * 
-     * @param deviceParameters
-     *        - required {@link DeviceParameters} needed to construct new {@link Device Device} instance.
-     * @return a {@link Device Device} instance with a given device parameters.
-     */
-    @Deprecated
-    public Device getDevice(DeviceParameters deviceParameters) {
-        try {
-            DeviceAllocationInformation deviceDescriptor = clientBuilder.allocateDevice(deviceParameters);
-
-            String deviceProxyRmiId = deviceDescriptor.getProxyRmiId();
-            String messageReleasedDevice = String.format("Fetched device with proxy RMI ID: %s .", deviceProxyRmiId);
-            LOGGER.info(messageReleasedDevice);
-
-            IClientDevice iClientDevice = (IClientDevice) serverRmiRegistry.lookup(deviceProxyRmiId);
-            long passkey = deviceDescriptor.getProxyPasskey();
-
-            Device device = new Device(iClientDevice, passkey, serverConnectionHandler);
-            deviceToDescriptor.put(device, deviceDescriptor);
-            return device;
-        } catch (RemoteException | NotBoundException e) {
-            String message = "Fetching Device failed (server connection failure).";
-            LOGGER.error(message, e);
-            throw new ServerConnectionFailedException(message, e);
-        }
     }
 
     /**

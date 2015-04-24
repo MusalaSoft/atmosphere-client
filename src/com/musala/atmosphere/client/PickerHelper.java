@@ -7,6 +7,7 @@ import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.uiutils.CssAttribute;
 import com.musala.atmosphere.client.uiutils.UiElementSelector;
+import com.musala.atmosphere.commons.ui.UiElementPropertiesContainer;
 
 /**
  * Class for getting number pickers and setting text in their editText field.
@@ -47,9 +48,9 @@ public class PickerHelper {
             UiElementFetchingException,
             ParserConfigurationException {
         UiElement numberPickerField = getNumberPickerField(index);
-        UiElementSelector numberPickerFieldElementSelector = numberPickerField.getElementSelector();
+        UiElementPropertiesContainer numberPickerFieldElementProperties = numberPickerField.getProperties();
         screen.updateScreen();
-        return numberPickerFieldElementSelector.getStringValue(CssAttribute.TEXT);
+        return numberPickerFieldElementProperties.getText();
     }
 
     /**

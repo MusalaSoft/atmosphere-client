@@ -161,7 +161,9 @@ public class ScrollableView extends UiElement {
      * @return true if the scroll was successful, false if it was not
      */
     private boolean scroll(Integer maxSwipes, Integer maxSteps, ScrollDirection scrollDirection) {
-        UiElementDescriptor viewDescriptor = UiElementAttributeExtractor.extract(elementSelector);
+        // TODO The UiElementDescriptor should be replaced with AccessibilityElement when the
+        // appropriate routing action is implemented
+        UiElementDescriptor viewDescriptor = UiElementAttributeExtractor.extract(getElementSelector());
         boolean response = (boolean) communicator.sendAction(RoutingAction.SCROLL_TO_DIRECTION,
                                                              scrollDirection,
                                                              viewDescriptor,

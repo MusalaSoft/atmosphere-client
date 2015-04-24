@@ -9,6 +9,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.commons.geometry.Bounds;
+import com.musala.atmosphere.commons.ui.UiElementPropertiesContainer;
 import com.musala.atmosphere.commons.util.Pair;
 
 /**
@@ -17,7 +18,7 @@ import com.musala.atmosphere.commons.util.Pair;
  * @author georgi.gaydarov
  * 
  */
-public class UiElementSelector {
+public class UiElementSelector implements UiElementPropertiesContainer {
     private static final Logger LOGGER = Logger.getLogger(UiElementSelector.class);
 
     private Map<CssAttribute, Pair<Object, UiElementSelectionOption>> attributeProjectionMap;
@@ -43,10 +44,9 @@ public class UiElementSelector {
         for (Entry<String, String> nodeAttributeEntry : nodeAttributeMap.entrySet()) {
             boolean attributeFound = false;
             for (CssAttribute cssAttribute : CssAttribute.values()) {
-            	if(nodeAttributeEntry.getKey()=="NAF")
-            	{	
-            		attributeFound = true;
-            	}
+                if (nodeAttributeEntry.getKey().equalsIgnoreCase("NAF")) {
+                    attributeFound = true;
+                }
                 if (cssAttribute.getHtmlAttributeName().equals(nodeAttributeEntry.getKey())) {
                     Object attributeValue = determineAttributeValue(cssAttribute, nodeAttributeEntry.getValue());
                     if (!shouldSkipAttribute(cssAttribute, attributeValue)) {
@@ -55,7 +55,7 @@ public class UiElementSelector {
                     attributeFound = true;
                     break;
                 }
-              
+
             }
             if (!attributeFound) {
                 String message = "Unsupported attribute passed in to UI element selector constructor";
@@ -245,5 +245,85 @@ public class UiElementSelector {
     @Override
     public int hashCode() {
         return new HashCodeBuilder().append(attributeProjectionMap).toHashCode();
+    }
+
+    @Override
+    public int getIndex() {
+        return getIntegerValue(CssAttribute.INDEX);
+    }
+
+    @Override
+    public String getText() {
+        return getStringValue(CssAttribute.TEXT);
+    }
+
+    @Override
+    public boolean isClickable() {
+        return getBooleanValue(CssAttribute.CLICKABLE);
+    }
+
+    @Override
+    public boolean isScrollable() {
+        return getBooleanValue(CssAttribute.SCROLLABLE);
+    }
+
+    @Override
+    public boolean isLongClickable() {
+        return getBooleanValue(CssAttribute.LONG_CLICKABLE);
+    }
+
+    @Override
+    public boolean isSelected() {
+        return getBooleanValue(CssAttribute.SELECTED);
+    }
+
+    @Override
+    public boolean isPassword() {
+        return getBooleanValue(CssAttribute.PASSWORD);
+    }
+
+    @Override
+    public Bounds getBounds() {
+        return getBoundsValue(CssAttribute.BOUNDS);
+    }
+
+    @Override
+    public String getClassName() {
+        return getStringValue(CssAttribute.CLASS_NAME);
+    }
+
+    @Override
+    public String getPackageName() {
+        return getStringValue(CssAttribute.PACKAGE_NAME);
+    }
+
+    @Override
+    public String getContentDescriptor() {
+        return getStringValue(CssAttribute.CONTENT_DESCRIPTION);
+    }
+
+    @Override
+    public boolean isCheckable() {
+        return getBooleanValue(CssAttribute.CHECKABLE);
+    }
+
+    @Override
+    public boolean isChecked() {
+        return getBooleanValue(CssAttribute.CHECKED);
+    }
+
+    @Override
+    public boolean isFocusable() {
+        return getBooleanValue(CssAttribute.FOCUSED);
+    }
+
+    @Override
+    public boolean isFocused() {
+        return getBooleanValue(CssAttribute.FOCUSED);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return getBooleanValue(CssAttribute.ENABLED);
     }
 }

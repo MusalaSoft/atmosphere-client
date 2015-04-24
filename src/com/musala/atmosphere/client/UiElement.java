@@ -25,14 +25,14 @@ import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.InvalidElementActionException;
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
-import com.musala.atmosphere.commons.geometry.Bounds;
-import com.musala.atmosphere.commons.geometry.Point;
-import com.musala.atmosphere.client.uiutils.CssAttribute;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
 import com.musala.atmosphere.client.uiutils.UiElementSelector;
 import com.musala.atmosphere.client.uiutils.UiXmlParser;
 import com.musala.atmosphere.client.util.settings.ElementValidationType;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
+import com.musala.atmosphere.commons.geometry.Bounds;
+import com.musala.atmosphere.commons.geometry.Point;
+import com.musala.atmosphere.commons.ui.UiElementPropertiesContainer;
 
 /**
  * Used to access and manipulate certain views on the testing device, for example tapping, double-taping or holding
@@ -57,7 +57,7 @@ public class UiElement {
 
     private static final Logger LOGGER = Logger.getLogger(UiElement.class);
 
-    protected UiElementSelector elementSelector;
+    protected UiElementPropertiesContainer propertiesContainer;
 
     protected org.jsoup.nodes.Node representedNodeJSoup;
 
@@ -72,7 +72,7 @@ public class UiElement {
     private boolean isStale = false;
 
     protected UiElement(Map<String, String> nodeAttributesMap, Device onDevice) {
-        elementSelector = new UiElementSelector(nodeAttributesMap);
+        propertiesContainer = new UiElementSelector(nodeAttributesMap);
         this.onDevice = onDevice;
         communicator = onDevice.getCommunicator();
         validationType = ElementValidationType.MANUAL;
@@ -102,7 +102,7 @@ public class UiElement {
             representedNodeXPath = uiElement.representedNodeXPath;
         }
         underlyingNodeType = uiElement.underlyingNodeType;
-        elementSelector = new UiElementSelector(nodeAttributesMap);
+        propertiesContainer = new UiElementSelector(nodeAttributesMap);
         this.onDevice = uiElement.onDevice;
         communicator = onDevice.getCommunicator();
         validationType = ElementValidationType.MANUAL;
@@ -134,12 +134,22 @@ public class UiElement {
 
     /**
      * Returns the current UI element's attributes data container.
-     * 
+     *
      * @return a {@link UiElementSelector} instance, containing all attributes of this UiElement.
      */
+    @Deprecated
     public UiElementSelector getElementSelector() {
         innerRevalidation();
-        return elementSelector;
+        return (UiElementSelector) propertiesContainer;
+    }
+
+    /**
+     * Returns the current UI element's attributes properties container.
+     * 
+     * @return a {@link UiElementPropertiesContainer} instance, containing all properties of this UiElement.
+     */
+    public UiElementPropertiesContainer getProperties() {
+        return propertiesContainer;
     }
 
     /**
@@ -151,7 +161,7 @@ public class UiElement {
      */
     public boolean tap(Point point) {
         innerRevalidation();
-        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Bounds elementBounds = propertiesContainer.getBounds();
         Point tapPoint = elementBounds.getUpperLeftCorner();
         tapPoint.addVector(point);
 
@@ -172,7 +182,7 @@ public class UiElement {
      * @return <code>true</code> if the tapping is successful, <code>false</code> if it fails.
      */
     public boolean tap() {
-        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Bounds elementBounds = propertiesContainer.getBounds();
         Point centerPoint = elementBounds.getCenter();
         Point tapPoint = elementBounds.getRelativePoint(centerPoint);
 
@@ -225,8 +235,7 @@ public class UiElement {
      * @return <code>String</code> with the content of the text property of this UiElement.
      */
     public String getText() {
-        String text = elementSelector.getStringValue(CssAttribute.TEXT);
-        return text;
+        return propertiesContainer.getText();
     }
 
     /**
@@ -245,7 +254,7 @@ public class UiElement {
      * @return <code>true</code> if the double tapping is successful, <code>false</code> if it fails.
      */
     public boolean doubleTap() {
-        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Bounds elementBounds = propertiesContainer.getBounds();
         Point centerPoint = elementBounds.getCenter();
         Point tapPoint = elementBounds.getRelativePoint(centerPoint);
 
@@ -263,7 +272,7 @@ public class UiElement {
      */
     public boolean doubleTap(Point point) {
         innerRevalidation();
-        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Bounds elementBounds = propertiesContainer.getBounds();
         Point tapPoint = elementBounds.getUpperLeftCorner();
         tapPoint.addVector(point);
 
@@ -287,7 +296,7 @@ public class UiElement {
     public boolean pinchIn() {
         innerRevalidation();
 
-        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Bounds elementBounds = propertiesContainer.getBounds();
         final int BOUNDS_OFFSET_DENOMINATOR = 10;
         final int WIDTH_OFFSET = elementBounds.getWidth() / BOUNDS_OFFSET_DENOMINATOR;
         final int HEIGHT_OFFSET = elementBounds.getHeight() / BOUNDS_OFFSET_DENOMINATOR;
@@ -318,7 +327,7 @@ public class UiElement {
     public boolean pinchOut() {
         innerRevalidation();
 
-        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Bounds elementBounds = propertiesContainer.getBounds();
         Point firstFingerEnd = elementBounds.getUpperLeftCorner();
         Point secondFingerEnd = elementBounds.getLowerRightCorner();
 
@@ -349,7 +358,7 @@ public class UiElement {
      * @return <code>true</code> if the swiping is successful, <code>false</code> if it fails.
      */
     public boolean swipe(SwipeDirection swipeDirection) {
-        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Bounds elementBounds = propertiesContainer.getBounds();
         Point centerPoint = elementBounds.getCenter();
 
         return swipe(centerPoint, swipeDirection);
@@ -478,12 +487,12 @@ public class UiElement {
     public boolean focus() {
         innerRevalidation();
 
-        if (!elementSelector.getBooleanValue(CssAttribute.FOCUSABLE)) {
+        if (propertiesContainer.isFocusable()) {
             String message = "Attempting to focus a non-focusable element.";
             LOGGER.error(message);
             throw new InvalidElementActionException(message);
         }
-        if (elementSelector.getBooleanValue(CssAttribute.FOCUSED)) {
+        if (propertiesContainer.isFocused()) {
             return true;
         }
 
@@ -494,7 +503,7 @@ public class UiElement {
         finalizeUiElementOperation();
 
         if (revalidate()) {
-            if (!elementSelector.getBooleanValue(CssAttribute.FOCUSED)) {
+            if (propertiesContainer.isFocused()) {
                 return false;
             }
         }
@@ -508,7 +517,7 @@ public class UiElement {
      * @see Device#LONG_PRESS_DEFAULT_TIMEOUT
      */
     public boolean longPress() {
-        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Bounds elementBounds = propertiesContainer.getBounds();
         Point centerPoint = elementBounds.getCenter();
         Point tapPoint = elementBounds.getRelativePoint(centerPoint);
 
@@ -523,7 +532,7 @@ public class UiElement {
      * @return true, if operation is successful, and false otherwise.
      */
     public boolean longPress(int timeout) {
-        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Bounds elementBounds = propertiesContainer.getBounds();
         Point centerPoint = elementBounds.getCenter();
         Point tapPoint = elementBounds.getRelativePoint(centerPoint);
 
@@ -541,7 +550,7 @@ public class UiElement {
      */
     public boolean longPress(Point innerPoint, int timeout) {
         innerRevalidation();
-        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Bounds elementBounds = propertiesContainer.getBounds();
         Point longPressPoint = elementBounds.getUpperLeftCorner();
         longPressPoint.addVector(innerPoint);
 
@@ -742,8 +751,7 @@ public class UiElement {
         InputStream inputStream = new ByteArrayInputStream(imageInByte);
         BufferedImage bufferedImage = ImageIO.read(inputStream);
 
-        UiElementSelector elementSelector = getElementSelector();
-        Bounds elementBounds = elementSelector.getBoundsValue(CssAttribute.BOUNDS);
+        Bounds elementBounds = propertiesContainer.getBounds();
 
         Point upperLeftCorner = elementBounds.getUpperLeftCorner();
 
@@ -779,8 +787,7 @@ public class UiElement {
         }
 
         UiElement uiElement = (UiElement) object;
-
-        return new EqualsBuilder().append(elementSelector, uiElement.elementSelector).isEquals();
+        return new EqualsBuilder().append(propertiesContainer, uiElement.propertiesContainer).isEquals();
     }
 
     /**
@@ -791,6 +798,6 @@ public class UiElement {
      */
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().append(elementSelector).toHashCode();
+        return new HashCodeBuilder().append(propertiesContainer).toHashCode();
     }
 }

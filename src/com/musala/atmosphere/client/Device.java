@@ -2,6 +2,7 @@ package com.musala.atmosphere.client;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,15 +61,27 @@ public class Device {
 
     private static final Logger LOGGER = Logger.getLogger(Device.class.getCanonicalName());
 
-    private static final String SCREEN_RECORD_COMMAND = "screenrecord";
+    private static final String SCREEN_RECORD_COMPONENT_PATH = "/data/local/tmp";
 
-    private static final String SCREEN_RECORD_PROCESS_NAME = "screenrecord";
+    private static final String RECORDS_DIRECTORY_NAME = "AtmosphereScreenRecords";
 
-    private static final String SCREEN_RECORD_FILE_PATH = "/sdcard/screenrecord.mp4";
+    private static final String START_SCREENRECORD_SCRIPT_NAME = "start_screenrecord.sh";
 
-    private static final String SCREEN_RECORD_SHELL_COMMAND = String.format("%s %s",
-                                                                            SCREEN_RECORD_COMMAND,
-                                                                            SCREEN_RECORD_FILE_PATH);
+    private static final String STOP_SCREENRECORD_SCRIPT_NAME = "stop_screenrecord.sh";
+
+    private static final String START_SCREEN_RECORD_COMMAND = String.format("sh %s/%s",
+                                                                            SCREEN_RECORD_COMPONENT_PATH,
+                                                                            START_SCREENRECORD_SCRIPT_NAME);
+
+    private static final String STOP_SCREEN_RECORD_COMMAND = String.format("sh %s/%s",
+                                                                           SCREEN_RECORD_COMPONENT_PATH,
+                                                                           STOP_SCREENRECORD_SCRIPT_NAME);
+
+    private static final String RECORDS_FULL_PATH = String.format("%s/%s",
+                                                                  SCREEN_RECORD_COMPONENT_PATH,
+                                                                  RECORDS_DIRECTORY_NAME);
+
+    private static final String RECORDS_FILENAMES_DELIMITER = "\r\n";
 
     private static final String ATMOSPHERE_SERVICE_PACKAGE = "com.musala.atmosphere.service";
 
@@ -81,6 +94,8 @@ public class Device {
      * timeout which varies from device to device, but is usually around 1 second.
      */
     public static final int LONG_PRESS_DEFAULT_TIMEOUT = 1500; // ms
+
+    private String screenRecordsLocalPath;
 
     private final DeviceSettingsManager deviceSettings;
 
@@ -754,6 +769,7 @@ public class Device {
     }
 
     void release() {
+        stopScreenRecording();
         communicator.release();
     }
 
@@ -1442,23 +1458,41 @@ public class Device {
     }
 
     /**
-     * Starts screen recording. The max screen record duration is 180 seconds and it only works for Android 4.4 and
-     * above.
+     * Starts screen recording.
+     * 
+     * @param path
+     *        - the path to the directory where the file will be saved
+     * @note This method works only for Android 4.4 and above.
      */
-    public void startScreenRecording() {
-        executeShellCommandInBackground(SCREEN_RECORD_SHELL_COMMAND);
+    public void startScreenRecording(String path) {
+        screenRecordsLocalPath = path;
+
+        executeShellCommandInBackground(START_SCREEN_RECORD_COMMAND);
     }
 
     /**
-     * Stops screen recording and pulls the recorded video file in a local directory.
-     * 
-     * @param path
-     *        - the full path where the file will be saved
+     * Stops screen recording and pulls the recorded video file in a local directory, selected when the start method was
+     * invoked. If the selected directory does not exists, it will be created.
      */
-    public void stopScreenRecording(String path) {
-        interruptBackgroundShellProcess(SCREEN_RECORD_PROCESS_NAME);
+    public void stopScreenRecording() {
+        String output = executeShellCommand(STOP_SCREEN_RECORD_COMMAND);
 
-        pullFile(SCREEN_RECORD_FILE_PATH, path);
+        if (output.trim().length() > 0) {
+            File recordsDirectory = new File(screenRecordsLocalPath);
+
+            if (!recordsDirectory.exists()) {
+                recordsDirectory.mkdir();
+            }
+
+            String[] screenRecordFilenames = output.split(RECORDS_FILENAMES_DELIMITER);
+
+            for (String filename : screenRecordFilenames) {
+                String currentRecordRemotePath = String.format("%s/%s", RECORDS_FULL_PATH, filename);
+                String currentRecordLocalPath = String.format("%s/%s", screenRecordsLocalPath, filename);
+
+                pullFile(currentRecordRemotePath, currentRecordLocalPath);
+            }
+        }
     }
 
     /**

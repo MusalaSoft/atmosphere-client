@@ -10,9 +10,9 @@ import org.apache.log4j.Logger;
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
-import com.musala.atmosphere.client.uiutils.CssAttribute;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
-import com.musala.atmosphere.client.uiutils.UiElementSelector;
+import com.musala.atmosphere.commons.ui.selector.CssAttribute;
+import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 
 /**
  * A class representing a notification bar used to find and interact with notifications.

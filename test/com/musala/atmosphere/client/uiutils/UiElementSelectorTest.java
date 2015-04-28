@@ -14,6 +14,9 @@ import org.junit.Test;
 
 import com.musala.atmosphere.commons.geometry.Bounds;
 import com.musala.atmosphere.commons.geometry.Point;
+import com.musala.atmosphere.commons.ui.selector.CssAttribute;
+import com.musala.atmosphere.commons.ui.selector.UiElementSelectionOption;
+import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 
 /**
  * Tests {@link UiElementSelector}

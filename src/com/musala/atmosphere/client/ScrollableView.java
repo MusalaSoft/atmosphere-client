@@ -10,10 +10,10 @@ import org.w3c.dom.Node;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
-import com.musala.atmosphere.client.uiutils.UiElementSelector;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.ScrollDirection;
 import com.musala.atmosphere.commons.ui.UiElementDescriptor;
+import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 
 /**
  * UI element representing ScrollableView used to perform scroll actions to end, beginning, forward, backward, to a

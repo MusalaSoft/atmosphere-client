@@ -23,9 +23,9 @@ import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Bounds;
 import com.musala.atmosphere.commons.geometry.Point;
-import com.musala.atmosphere.client.uiutils.CssAttribute;
-import com.musala.atmosphere.client.uiutils.UiElementSelectionOption;
-import com.musala.atmosphere.client.uiutils.UiElementSelector;
+import com.musala.atmosphere.commons.ui.selector.CssAttribute;
+import com.musala.atmosphere.commons.ui.selector.UiElementSelectionOption;
+import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 
 public class UiElementFetchingTest {
     private static final String TEST_XML = "testXml.xml";

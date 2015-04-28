@@ -1,6 +1,8 @@
 package com.musala.atmosphere.client.uiutils;
 
 import com.musala.atmosphere.commons.ui.UiElementDescriptor;
+import com.musala.atmosphere.commons.ui.selector.CssAttribute;
+import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 
 /**
  * Manages the extracting of the attributes from a UiElementSelector instance to a simpler data container.

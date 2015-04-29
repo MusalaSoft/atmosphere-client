@@ -45,7 +45,9 @@ public class ReconnectDeviceTest {
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
                                                                       eq(RoutingAction.EXECUTE_SHELL_COMMAND),
                                                                       anyString());
-        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.GET_UI_XML_DUMP));
+        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
+                                                                      eq(RoutingAction.GET_UI_TREE),
+                                                                      anyBoolean());
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.GET_CONNECTION_TYPE));
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
                                                                       eq(RoutingAction.GET_DEVICE_ACCELERATION));

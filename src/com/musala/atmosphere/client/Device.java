@@ -44,11 +44,14 @@ import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.gesture.Gesture;
 import com.musala.atmosphere.commons.ime.KeyboardAction;
+import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
+import com.musala.atmosphere.commons.util.AccessibilityXmlSerializer;
 import com.musala.atmosphere.commons.util.AtmosphereIntent;
 import com.musala.atmosphere.commons.util.GeoLocation;
 import com.musala.atmosphere.commons.util.IntentBuilder;
 import com.musala.atmosphere.commons.util.IntentBuilder.IntentAction;
 import com.musala.atmosphere.commons.util.Pair;
+import com.musala.atmosphere.commons.util.structure.tree.Tree;
 
 /**
  * Android device representing class.
@@ -290,8 +293,11 @@ public class Device {
      * @return {@link Screen} instance, representing the active screen of this device or <code>null</code> if getting
      *         active screen fails.
      */
+    @SuppressWarnings("unchecked")
     public Screen getActiveScreen() {
-        String uiHierarchy = (String) communicator.sendAction(RoutingAction.GET_UI_XML_DUMP);
+        Tree<AccessibilityElement> uiTree = (Tree<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_UI_TREE,
+                                                                                                 true);
+        String uiHierarchy = AccessibilityXmlSerializer.serialize(uiTree);
 
         if (uiHierarchy == null) {
             return null;

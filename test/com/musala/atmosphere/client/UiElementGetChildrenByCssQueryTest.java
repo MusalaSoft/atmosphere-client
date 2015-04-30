@@ -61,14 +61,10 @@ public class UiElementGetChildrenByCssQueryTest {
     }
 
     @Test
-    public void testGetExistingChildrenByCssQuery()
-        throws UiElementFetchingException,
-            XPathExpressionException,
-            InvalidCssQueryException,
-            ParserConfigurationException {
-        UiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
+    public void testGetExistingChildrenByCssQuery() throws Exception {
+        XmlNodeUiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
 
-        List<UiElement> childrenUiElements = parentUiElement.getChildrenByCssQuery(CSS_QUERY_FOR_CHILDREN_ELEMENTS);
+        List<XmlNodeUiElement> childrenUiElements = parentUiElement.getChildrenByCssQuery(CSS_QUERY_FOR_CHILDREN_ELEMENTS);
 
         UiElement firstExpectedChild = screen.getElementByCSS(CSS_QUERY_FOR_FIRST_CHILD);
         UiElement secondExpectedChild = screen.getElementByCSS(CSS_QUERY_FOR_SECOND_CHILD);
@@ -92,7 +88,7 @@ public class UiElementGetChildrenByCssQueryTest {
             UiElementFetchingException,
             InvalidCssQueryException,
             ParserConfigurationException {
-        UiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
+        XmlNodeUiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
 
         parentUiElement.getChildrenByCssQuery(CSS_QUERY_FOR_UNEXISTING_CHILDREN_ELEMENTS);
     }
@@ -103,7 +99,7 @@ public class UiElementGetChildrenByCssQueryTest {
             UiElementFetchingException,
             InvalidCssQueryException,
             ParserConfigurationException {
-        UiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
+        XmlNodeUiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
 
         parentUiElement.getChildrenByCssQuery(INVALID_CSS_QUERY);
     }
@@ -114,7 +110,7 @@ public class UiElementGetChildrenByCssQueryTest {
             UiElementFetchingException,
             InvalidCssQueryException,
             ParserConfigurationException {
-        UiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
+        XmlNodeUiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
 
         parentUiElement.getChildrenByCssQuery(CSS_QUERY_FOR_NON_CHILDREN_ELEMENT);
     }

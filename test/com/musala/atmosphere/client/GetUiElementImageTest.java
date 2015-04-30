@@ -1,6 +1,5 @@
 package com.musala.atmosphere.client;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -60,7 +59,7 @@ public class GetUiElementImageTest {
         validator = mock(UiElementValidator.class);
         when(mockedDevice.getUiValidator()).thenReturn(validator);
 
-        element = new UiElement(nodeAttributeMap, mockedDevice);
+        element = new XmlNodeUiElement(nodeAttributeMap, mockedDevice);
         when(mockedDevice.getScreenshot()).thenReturn(screenshotData);
     }
 

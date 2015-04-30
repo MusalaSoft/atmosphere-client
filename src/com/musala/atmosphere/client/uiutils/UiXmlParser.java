@@ -65,8 +65,8 @@ public class UiXmlParser {
      * Returns all attributes of an XPath {@link Node Node} object.
      * 
      * @param node
-     *        a node which contains all attributes.
-     * @return the object attribute map.
+     *        a node which contains all attributes
+     * @return the object attribute map
      */
     public static Map<String, String> getAttributeMapOfNode(Node node) {
         Map<String, String> nodeAttributeMap = new HashMap<String, String>();
@@ -86,12 +86,12 @@ public class UiXmlParser {
      * Gets a {@link org.jsoup.nodes.Node Node} from a {@link org.jsoup.nodes.Document Document} by a JSoup query.
      * 
      * @param document
-     *        document containing a nodes which represent screen elements.
+     *        document containing a nodes which represent screen elements
      * @param query
      *        JSoup type element selecting query.
-     * @return the found {@link org.jsoup.nodes.Node Node} object.
+     * @return the found {@link org.jsoup.nodes.Node Node} object
      * @throws UiElementFetchingException
-     *         - if there are no elements that match the JSoup query.
+     *         - if there are no elements that match the JSoup query
      */
     public static org.jsoup.nodes.Node getJSoupNode(org.jsoup.nodes.Document document, String query)
         throws UiElementFetchingException {
@@ -112,12 +112,12 @@ public class UiXmlParser {
      * Gets a List<{@link org.jsoup.nodes.Node Node}> from a {@link org.jsoup.nodes.Document Document} by a JSoup query.
      * 
      * @param document
-     *        document containing a nodes which represent screen elements.
+     *        document containing a nodes which represent screen elements
      * @param query
-     *        JSoup type element selecting query.
-     * @return - list with all found {@link org.jsoup.nodes.Node Node} objects.
+     *        JSoup type element selecting query
+     * @return - list with all found {@link org.jsoup.nodes.Node Node} objects
      * @throws UiElementFetchingException
-     *         - when no elements are found for the passed JSoup expression.
+     *         - when no elements are found for the passed JSoup expression
      */
     public static List<org.jsoup.nodes.Node> getAllJSoupNodes(org.jsoup.nodes.Document document, String query)
         throws UiElementFetchingException {
@@ -138,20 +138,23 @@ public class UiXmlParser {
      * JSoup query. Elements contains all elements of type {@link org.jsoup.nodes.Node Node} found by the query.
      * 
      * @param document
-     *        document containing a nodes which represent screen elements.
+     *        document containing a nodes which represent screen elements
      * @param query
-     *        JSoup type element selecting query.
-     * @return the found {@link org.jsoup.select.Elements Elements}.
+     *        JSoup type element selecting query
+     * @return the found {@link org.jsoup.select.Elements Elements}
      * @throws UiElementFetchingException
-     *         - when no elements are found for the passed JSoup expression.
+     *         - when no elements are found for the passed JSoup expression
      */
     public static Elements getJSoupElements(org.jsoup.nodes.Document document, String query)
         throws UiElementFetchingException {
+        // FIXME document.select() does not handle new lines in beginning of text in attributes values
         Elements elements = document.select(query);
         int foundElements = elements.size();
+
         if (foundElements == 0) {
             throw new UiElementFetchingException("No element found for the passed JSoup expression.");
         }
+
         return elements;
     }
 
@@ -159,8 +162,8 @@ public class UiXmlParser {
      * Returns all attributes of an JSoup {@link org.jsoup.nodes.Node Node} object.
      * 
      * @param node
-     *        - contains the attributes of an Jsoup OObject.
-     * @return the object attribute map.
+     *        - contains the attributes of an Jsoup OObject
+     * @return the object attribute map
      */
     public static Map<String, String> getAttributeMapOfNode(org.jsoup.nodes.Node node) {
         Map<String, String> nodeAttributeMap = new HashMap<String, String>();
@@ -175,14 +178,14 @@ public class UiXmlParser {
      * Gets a NodeList of all the Nodes that matched the query
      * 
      * @param domDocument
-     *        document containing a nodes which represent screen elements.
+     *        document containing a nodes which represent screen elements
      * @param xPathQuery
      *        XPath type node selecting query.
      * @return NodeList containing all Nodes that matched the query
      * @throws UiElementFetchingException
-     *         - when no elements are found for the passed XPath query.
+     *         - when no elements are found for the passed XPath query
      * @throws XPathExpressionException
-     *         - if the given XPath is invalid.
+     *         - if the given XPath is invalid
      */
     public static NodeList getXPathNodeChildren(Document domDocument, String xPathQuery)
         throws UiElementFetchingException,

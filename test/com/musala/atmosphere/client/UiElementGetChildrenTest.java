@@ -54,40 +54,40 @@ public class UiElementGetChildrenTest {
 
     @Test
     public void testGetChildrenByxPathSelector() throws Exception {
-        UiElement linearLayoutParent = screen.getElementByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_PARENT);
+        XmlNodeUiElement linearLayoutParent = screen.getElementByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_PARENT);
 
-        UiElement firstAndOnlyExpectedChild = screen.getElementByXPath(XPATH_SELECTOR_IMAGE_VIEW);
-        List<UiElement> expectedChildrenList = new LinkedList<UiElement>();
+        XmlNodeUiElement firstAndOnlyExpectedChild = screen.getElementByXPath(XPATH_SELECTOR_IMAGE_VIEW);
+        List<XmlNodeUiElement> expectedChildrenList = new LinkedList<XmlNodeUiElement>();
         expectedChildrenList.add(firstAndOnlyExpectedChild);
 
-        List<UiElement> returnedChildrenList = linearLayoutParent.getChildren(XPATH_SELECTOR_IMAGE_VIEW);
+        List<XmlNodeUiElement> returnedChildrenList = linearLayoutParent.getChildrenByXPath(XPATH_SELECTOR_IMAGE_VIEW);
         assertEquals("The returned UiElements are not as expected", expectedChildrenList, returnedChildrenList);
     }
 
     @Test(expected = UiElementFetchingException.class)
     public void testGetChildrenGetParentNote() throws Exception {
-        UiElement linearLayoutParentNode = screen.getElementByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_PARENT);
-        linearLayoutParentNode.getChildren(XPATH_SELECTOR_LINEAR_LAYOUT_PARENT);
+        XmlNodeUiElement linearLayoutParentNode = screen.getElementByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_PARENT);
+        linearLayoutParentNode.getChildrenByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_PARENT);
     }
 
     @Test(expected = UiElementFetchingException.class)
     public void testGetChildrenNone() throws Exception {
-        UiElement linearLayoutParent = screen.getElementByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_PARENT);
-        linearLayoutParent.getChildren(XPATH_SELECTOR_NONEXISTEND_NODE);
+        XmlNodeUiElement linearLayoutParent = screen.getElementByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_PARENT);
+        linearLayoutParent.getChildrenByXPath(XPATH_SELECTOR_NONEXISTEND_NODE);
     }
 
     @Test
     public void testGetChildrenDifferentLevels() throws Exception {
-        UiElement linearLayoutParent = screen.getElementByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_PARENT);
+        XmlNodeUiElement linearLayoutParent = screen.getElementByXPath(XPATH_SELECTOR_LINEAR_LAYOUT_PARENT);
 
-        UiElement firstExpectedChild = screen.getElementByXPath(XPATH_SELECTOR_FRAME_LAYOUT_FIRST_CHILD);
-        UiElement secondExpectedChild = screen.getElementByXPath(XPATH_SELECTOR_FRAME_LAYOUT_SECOND_CHILD);
+        XmlNodeUiElement firstExpectedChild = screen.getElementByXPath(XPATH_SELECTOR_FRAME_LAYOUT_FIRST_CHILD);
+        XmlNodeUiElement secondExpectedChild = screen.getElementByXPath(XPATH_SELECTOR_FRAME_LAYOUT_SECOND_CHILD);
 
-        List<UiElement> ExpectedChildrenList = new LinkedList<UiElement>();
+        List<XmlNodeUiElement> ExpectedChildrenList = new LinkedList<XmlNodeUiElement>();
         ExpectedChildrenList.add(firstExpectedChild);
         ExpectedChildrenList.add(secondExpectedChild);
 
-        List<UiElement> returnedChildrenList = linearLayoutParent.getChildren(XPATH_SELECTOR_FRAME_LAYOUT);
+        List<XmlNodeUiElement> returnedChildrenList = linearLayoutParent.getChildrenByXPath(XPATH_SELECTOR_FRAME_LAYOUT);
         assertEquals("The returned UiElements are not as expected", ExpectedChildrenList, returnedChildrenList);
     }
 }

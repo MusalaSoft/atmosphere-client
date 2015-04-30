@@ -23,6 +23,7 @@ import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Bounds;
 import com.musala.atmosphere.commons.geometry.Point;
+import com.musala.atmosphere.commons.ui.UiElementPropertiesContainer;
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelectionOption;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
@@ -46,10 +47,7 @@ public class UiElementFetchingTest {
         String xmlFileContents = scanXml.next();
         scanXml.close();
         screen = new Screen(device, xmlFileContents);
-    }
-
-    @After
-    public void tearDown() throws Exception {
+        Mockito.doReturn(screen).when(device).getActiveScreen();
     }
 
     @Test
@@ -57,7 +55,7 @@ public class UiElementFetchingTest {
         final String desiredElementClass = "android.widget.FrameLayout";
         final String desiredElementContentDescription = "derp";
 
-        UiElement element = screen.getElementByCSS("hierarchy > *[class=" + desiredElementClass + "]");
+        XmlNodeUiElement element = screen.getElementByCSS("hierarchy > *[class=" + desiredElementClass + "]");
         UiElementSelector selector = element.getElementSelector();
 
         assertEquals("Desired element was not fetched correctly.",
@@ -70,8 +68,8 @@ public class UiElementFetchingTest {
         final String desiredElementContentDescription = "derp";
         final String desiredElementClass = "android.widget.FrameLayout";
 
-        UiElement element = screen.getElementByXPath("//hierarchy/*[@content-desc='" + desiredElementContentDescription
-                + "']");
+        XmlNodeUiElement element = screen.getElementByXPath("//hierarchy/*[@content-desc='"
+                + desiredElementContentDescription + "']");
         UiElementSelector selector = element.getElementSelector();
 
         assertEquals("Desired element was not fetched correctly.",
@@ -93,11 +91,9 @@ public class UiElementFetchingTest {
                                        desiredElementContentDescription);
         UiElement element = screen.getElement(selector);
 
-        selector = element.getElementSelector();
+        UiElementPropertiesContainer properties = element.getProperties();
 
-        assertEquals("Desired element was not fetched correctly.",
-                     selector.getStringValue(CssAttribute.CLASS_NAME),
-                     desiredElementClass);
+        assertEquals("Desired element was not fetched correctly.", properties.getClassName(), desiredElementClass);
     }
 
     @Test(expected = UiElementFetchingException.class)
@@ -134,7 +130,7 @@ public class UiElementFetchingTest {
             InvalidCssQueryException {
         final String desiredElementClass = "android.widget.FrameLayout";
 
-        List<UiElement> elements = screen.getAllElementsByCSS("[class=" + desiredElementClass + "]");
+        List<XmlNodeUiElement> elements = screen.getAllElementsByCSS("[class=" + desiredElementClass + "]");
 
         assertEquals("Desired elements were not fetched correctly.", elements.size(), 4);
     }
@@ -246,7 +242,7 @@ public class UiElementFetchingTest {
         List<UiElement> children = linearLayout.getDirectChildren();
         assertEquals("Incorrect number of found children for empty selector.", 2, children.size());
 
-        List<UiElement> secondLayerChildren = (new UiElement(children.get(0))).getDirectChildren();
+        List<UiElement> secondLayerChildren = children.get(0).getDirectChildren();
         assertEquals("Incorrect number of found children for first direct ascendant of root node.",
                      1,
                      secondLayerChildren.size());

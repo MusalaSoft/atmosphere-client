@@ -3,6 +3,10 @@ package com.musala.atmosphere.client;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.musala.atmosphere.commons.ui.selector.CssAttribute;
+import com.musala.atmosphere.commons.ui.selector.UiElementSelectionOption;
+import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
+
 /**
  * Class responsible for all {@link UiElement} instances revalidation.
  * 
@@ -10,7 +14,7 @@ import java.util.List;
  * 
  */
 class UiElementValidator {
-    private final List<UiElement> elements = new LinkedList<UiElement>();
+    private final List<XmlNodeUiElement> elements = new LinkedList<XmlNodeUiElement>();
 
     private Screen currentScreen;
 
@@ -20,7 +24,7 @@ class UiElementValidator {
      * @param element
      *        - the element to be added.
      */
-    public void addElementForValidation(UiElement element) {
+    public void addElementForValidation(XmlNodeUiElement element) {
         elements.add(element);
     }
 
@@ -42,8 +46,8 @@ class UiElementValidator {
     }
 
     private void validateElements() {
-        List<UiElement> invalidElements = new LinkedList<UiElement>();
-        for (UiElement element : elements) {
+        List<XmlNodeUiElement> invalidElements = new LinkedList<XmlNodeUiElement>();
+        for (XmlNodeUiElement element : elements) {
             boolean valid = validateElement(element);
             if (!valid) {
                 invalidElements.add(element);
@@ -55,18 +59,26 @@ class UiElementValidator {
     }
 
     /**
-     * Validates an {@link UiElement} instance (checks if it is currently on the newest fetched screen).
+     * Validates an {@link XmlNodeUiElement} instance (checks if it is currently on the newest fetched screen).
      * 
      * @param element
-     *        - the element to be validated.
-     * @return boolean indicating if the element is valid.
+     *        - the element to be validated
+     * @return boolean indicating if the element is valid
      */
-    public boolean validateElement(UiElement element) {
+    public boolean validateElement(XmlNodeUiElement element) {
         if (!elements.contains(element)) {
             return false;
         }
 
-        String elementQuery = element.getElementSelector().buildCssQuery();
+        UiElementSelector elementSelector = element.getElementSelector();
+        // FIXME workaround of the inability to match new lines before text in a jsoup query
+        String elementText = elementSelector.getText();
+
+        if (elementText != null && elementText.length() > 0 && Character.isWhitespace(elementText.charAt(0))) {
+            elementSelector.addSelectionAttribute(CssAttribute.TEXT, UiElementSelectionOption.CONTAINS, elementText);
+        }
+
+        String elementQuery = elementSelector.buildCssQuery();
         boolean present = currentScreen.containsElementByCSS(elementQuery);
         if (present) {
             return true;
@@ -75,5 +87,4 @@ class UiElementValidator {
             return false;
         }
     }
-
 }

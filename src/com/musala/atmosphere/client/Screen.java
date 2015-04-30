@@ -118,7 +118,7 @@ public class Screen {
      * 
      * @param query
      *        - CSS selector query.
-     * @return the requested {@link UiElement UiElement}.
+     * @return the requested {@link XmlNodeUiElement XmlNodeUiElement}.
      * @throws InvalidCssQueryException
      *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
@@ -126,7 +126,7 @@ public class Screen {
      * @throws UiElementFetchingException
      *         if no elements or more than 1 are found for the passed query
      */
-    public UiElement getElementByCSS(String query)
+    public XmlNodeUiElement getElementByCSS(String query)
         throws InvalidCssQueryException,
             XPathExpressionException,
             UiElementFetchingException {
@@ -179,15 +179,15 @@ public class Screen {
      * 
      * @param query
      *        XPath query.
-     * @return the requested {@link UiElement UiElement}.
+     * @return the requested {@link XmlNodeUiElement XmlNodeUiElement}.
      * @throws XPathExpressionException
      *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements or more than 1 are found for the passed query
      */
-    public UiElement getElementByXPath(String query) throws XPathExpressionException, UiElementFetchingException {
+    public XmlNodeUiElement getElementByXPath(String query) throws XPathExpressionException, UiElementFetchingException {
         Node node = UiXmlParser.getXPathNode(xPathDomDocument, query);
-        UiElement returnElement = new UiElement(node, onDevice);
+        XmlNodeUiElement returnElement = new XmlNodeUiElement(node, onDevice);
         return returnElement;
     }
 
@@ -297,15 +297,15 @@ public class Screen {
      * 
      * @param cssQuery
      *        - CSS selector query.
-     * @return List containing all found elements of type {@link UiElement UiElement}.
+     * @return List containing all found elements of type {@link XmlNodeUiElement XmlNodeUiElement}.
      * @throws InvalidCssQueryException
      *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
      *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
-     *         if no elements or more than 1 are found for the passed query
+     *         if no elements are found for the passed query
      */
-    public List<UiElement> getAllElementsByCSS(String cssQuery)
+    public List<XmlNodeUiElement> getAllElementsByCSS(String cssQuery)
         throws UiElementFetchingException,
             InvalidCssQueryException,
             XPathExpressionException {
@@ -320,21 +320,21 @@ public class Screen {
      * 
      * @param xPathQuery
      *        - an XPath query that should match the elements
-     * @return List containing all found elements of type {@link UiElement UiElement}.
+     * @return List containing all found elements of type {@link XmlNodeUiElement XmlNodeUiElement}.
      * @throws XPathExpressionException
      *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
-     *         if no elements or more than 1 are found for the passed query
+     *         if no elements are found for the passed query
      */
-    public List<UiElement> getAllElementsByXPath(String xPathQuery)
+    public List<XmlNodeUiElement> getAllElementsByXPath(String xPathQuery)
         throws XPathExpressionException,
             UiElementFetchingException {
-        List<UiElement> uiElementList = new ArrayList<UiElement>();
+        List<XmlNodeUiElement> uiElementList = new ArrayList<XmlNodeUiElement>();
         NodeList xPathNodeList = UiXmlParser.getXPathNodeChildren(xPathDomDocument, xPathQuery);
 
         for (int index = 0; index < xPathNodeList.getLength(); index++) {
             Node xPathNode = xPathNodeList.item(index);
-            UiElement returnElement = new UiElement(xPathNode, onDevice);
+            XmlNodeUiElement returnElement = new XmlNodeUiElement(xPathNode, onDevice);
             uiElementList.add(returnElement);
         }
 
@@ -360,7 +360,7 @@ public class Screen {
             XPathExpressionException,
             InvalidCssQueryException {
         String cssQuery = selector.buildCssQuery();
-        List<UiElement> result = getAllElementsByCSS(cssQuery);
+        List<UiElement> result = new ArrayList<UiElement>(getAllElementsByCSS(cssQuery));
         return result;
     }
 

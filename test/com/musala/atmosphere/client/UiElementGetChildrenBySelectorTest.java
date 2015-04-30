@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 
@@ -63,7 +62,7 @@ public class UiElementGetChildrenBySelectorTest {
         UiElementSelector childrenUiElementsSelector = new UiElementSelector();
         childrenUiElementsSelector.addSelectionAttribute(CssAttribute.PACKAGE_NAME, PACKAGE_NAME_FOR_CHILDREN_ELEMENTS);
 
-        List<UiElement> childrenUiElements = parentUiElement.getChildrenBySelector(childrenUiElementsSelector);
+        List<UiElement> childrenUiElements = parentUiElement.getChildren(childrenUiElementsSelector);
 
         UiElement firstExpectedChild = screen.getElementByCSS(CSS_QUERY_FOR_FIRST_CHILD);
         UiElement secondExpectedChild = screen.getElementByCSS(CSS_QUERY_FOR_SECOND_CHILD);
@@ -80,7 +79,7 @@ public class UiElementGetChildrenBySelectorTest {
         assertEquals("The returned children are not the right one", childrenUiElements, expectedChildren);
     }
 
-    @Test(expected = UiElementFetchingException.class)
+    @Test
     public void testGetUnexistingChildrenBySelector() throws Exception {
         UiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
 
@@ -88,10 +87,12 @@ public class UiElementGetChildrenBySelectorTest {
         childrenUiElementsSelector.addSelectionAttribute(CssAttribute.PACKAGE_NAME,
                                                          PACKAGE_NAME_FOR_UNEXISTING_CHILDREN_ELEMENTS);
 
-        parentUiElement.getChildrenBySelector(childrenUiElementsSelector);
+        int childrenCount = parentUiElement.getChildren(childrenUiElementsSelector).size();
+
+        assertEquals("Expected empty children list but it had elements.", 0, childrenCount);
     }
 
-    @Test(expected = UiElementFetchingException.class)
+    @Test
     public void testGetChildrenBySelectorForNonChildrenElement() throws Exception {
         UiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
 
@@ -99,6 +100,8 @@ public class UiElementGetChildrenBySelectorTest {
         childrenUiElementsSelector.addSelectionAttribute(CssAttribute.CONTENT_DESCRIPTION,
                                                          CONTENT_DESCRIPTION_FOR_NON_CHILDREN_ELEMENT);
 
-        parentUiElement.getChildrenBySelector(childrenUiElementsSelector);
+        int childrenCount = parentUiElement.getChildren(childrenUiElementsSelector).size();
+
+        assertEquals("Expected empty children list but it had elements.", 0, childrenCount);
     }
 }

@@ -1,5 +1,7 @@
 package com.musala.atmosphere.client;
 
+import java.util.List;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
@@ -111,7 +113,13 @@ public class PickerHelper {
         UiElementSelector textFieldSelector = new UiElementSelector();
         textFieldSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, TEXT_WIDGET);
 
-        UiElement numberPickerField = numberPicker.getChildrenByCssQuery(textFieldSelector.buildCssQuery()).get(0);
+        List<UiElement> children = numberPicker.getChildren(textFieldSelector);
+        
+        if (children.isEmpty()) {
+            throw new UiElementFetchingException("Cannot retrieve number picker field.");
+        }
+        
+        UiElement numberPickerField = children.get(0);
 
         return numberPickerField;
     }

@@ -109,8 +109,8 @@ public class NotificationBar {
         try {
 
             Screen deviceActiveScreen = onDevice.getActiveScreen();
-            UiElement notificationBarElement = deviceActiveScreen.getElementByXPath(NOTIFICATION_BAR_XPATH_QUERY);
-            List<UiElement> childrenNotifications = notificationBarElement.getChildren(xPathQuery);
+            XmlNodeUiElement notificationBarElement = deviceActiveScreen.getElementByXPath(NOTIFICATION_BAR_XPATH_QUERY);
+            List<XmlNodeUiElement> childrenNotifications = notificationBarElement.getChildrenByXPath(xPathQuery);
 
             if (childrenNotifications.size() > 1) {
                 String message = "More than one notification matched the passed XPath query.";
@@ -118,10 +118,10 @@ public class NotificationBar {
                 throw new UiElementFetchingException(message);
             }
 
-            List<UiElement> allNotifications = deviceActiveScreen.getAllElementsByXPath(NOTIFICATIONS_RESOURCE_ID_XPATH_QUERY);
-            for (UiElement currentNotification : allNotifications) {
+            List<XmlNodeUiElement> allNotifications = deviceActiveScreen.getAllElementsByXPath(NOTIFICATIONS_RESOURCE_ID_XPATH_QUERY);
+            for (XmlNodeUiElement currentNotification : allNotifications) {
                 try {
-                    currentNotification.getChildren(xPathQuery);
+                    currentNotification.getChildrenByXPath(xPathQuery);
 
                     return currentNotification;
                 } catch (UiElementFetchingException e) {

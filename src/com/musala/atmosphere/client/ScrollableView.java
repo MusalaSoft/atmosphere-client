@@ -21,7 +21,7 @@ import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
  * 
  * @author filareta.yordanova
  */
-public class ScrollableView extends UiElement {
+public class ScrollableView extends XmlNodeUiElement {
 
     /**
      * Used to determine scroll direction
@@ -32,7 +32,7 @@ public class ScrollableView extends UiElement {
         super(representingNode, onDevice);
     }
 
-    ScrollableView(UiElement uiElement) {
+    ScrollableView(XmlNodeUiElement uiElement) {
         super(uiElement);
     }
 
@@ -244,7 +244,7 @@ public class ScrollableView extends UiElement {
             deviceActiveScreen.updateScreen();
             updatedScrollableView = deviceActiveScreen.getScrollableView(scrollableViewSelector);
 
-            List<UiElement> innerViewChildren = updatedScrollableView.getChildrenByCssQuery(cssQuery);
+            List<XmlNodeUiElement> innerViewChildren = updatedScrollableView.getChildrenByCssQuery(cssQuery);
 
             return innerViewChildren.get(0).tap();
         } catch (UiElementFetchingException e) {
@@ -284,7 +284,7 @@ public class ScrollableView extends UiElement {
         String cssQuery = innerViewSelector.buildCssQuery();
         UiElementSelector scrollableViewSelector = this.getElementSelector();
         ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollableViewSelector);
-        List<UiElement> innerViewChildren = updatedScrollableView.getChildrenByCssQuery(cssQuery);
+        List<XmlNodeUiElement> innerViewChildren = updatedScrollableView.getChildrenByCssQuery(cssQuery);
 
         return innerViewChildren.get(0).tap();
     }

@@ -2,7 +2,6 @@ package com.musala.atmosphere.client;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,28 +63,6 @@ public class Device {
 
     private static final Logger LOGGER = Logger.getLogger(Device.class.getCanonicalName());
 
-    private static final String SCREEN_RECORD_COMPONENT_PATH = "/data/local/tmp";
-
-    private static final String RECORDS_DIRECTORY_NAME = "AtmosphereScreenRecords";
-
-    private static final String START_SCREENRECORD_SCRIPT_NAME = "start_screenrecord.sh";
-
-    private static final String STOP_SCREENRECORD_SCRIPT_NAME = "stop_screenrecord.sh";
-
-    private static final String START_SCREEN_RECORD_COMMAND = String.format("sh %s/%s",
-                                                                            SCREEN_RECORD_COMPONENT_PATH,
-                                                                            START_SCREENRECORD_SCRIPT_NAME);
-
-    private static final String STOP_SCREEN_RECORD_COMMAND = String.format("sh %s/%s",
-                                                                           SCREEN_RECORD_COMPONENT_PATH,
-                                                                           STOP_SCREENRECORD_SCRIPT_NAME);
-
-    private static final String RECORDS_FULL_PATH = String.format("%s/%s",
-                                                                  SCREEN_RECORD_COMPONENT_PATH,
-                                                                  RECORDS_DIRECTORY_NAME);
-
-    private static final String RECORDS_FILENAMES_DELIMITER = "\r\n";
-
     private static final String ATMOSPHERE_SERVICE_PACKAGE = "com.musala.atmosphere.service";
 
     private static final String ATMOSPHERE_UNLOCK_DEVICE_ACTIVITY = ".UnlockDeviceActivity";
@@ -97,8 +74,6 @@ public class Device {
      * timeout which varies from device to device, but is usually around 1 second.
      */
     public static final int LONG_PRESS_DEFAULT_TIMEOUT = 1500; // ms
-
-    private String screenRecordsLocalPath;
 
     private final DeviceSettingsManager deviceSettings;
 
@@ -1465,52 +1440,18 @@ public class Device {
 
     /**
      * Starts screen recording.
-     * 
-     * @param path
-     *        - the path to the directory where the file will be saved
-     * @note This method works only for Android 4.4 and above.
+     * <p>
+     * Note: This method works only for Android 4.4 and above.
+     * </p>
      */
-    public void startScreenRecording(String path) {
-        screenRecordsLocalPath = path;
-
-        executeShellCommandInBackground(START_SCREEN_RECORD_COMMAND);
+    public void startScreenRecording() {
+        communicator.sendAction(RoutingAction.START_RECORDING);
     }
 
     /**
-     * Stops screen recording and pulls the recorded video file in a local directory, selected when the start method was
-     * invoked. If the selected directory does not exists, it will be created.
+     * Stops screen recording.
      */
     public void stopScreenRecording() {
-        String output = executeShellCommand(STOP_SCREEN_RECORD_COMMAND);
-
-        if (output.trim().length() > 0) {
-            File recordsDirectory = new File(screenRecordsLocalPath);
-
-            if (!recordsDirectory.exists()) {
-                recordsDirectory.mkdir();
-            }
-
-            String[] screenRecordFilenames = output.split(RECORDS_FILENAMES_DELIMITER);
-
-            for (String filename : screenRecordFilenames) {
-                String currentRecordRemotePath = String.format("%s/%s", RECORDS_FULL_PATH, filename);
-                String currentRecordLocalPath = String.format("%s/%s", screenRecordsLocalPath, filename);
-
-                pullFile(currentRecordRemotePath, currentRecordLocalPath);
-            }
-        }
-    }
-
-    /**
-     * Pulls a single file from the device and save it in a selected local directory.
-     * 
-     * @param fullRemoteFilePath
-     *        - full path to the file which should be pulled
-     * @param fullLocalFilePath
-     *        - full local path to the destination file
-     */
-    public void pullFile(String fullRemoteFilePath, String fullLocalFilePath) {
-        // FIXME: Implement sending the file to the client after pulling it locally.
-        communicator.sendAction(RoutingAction.PULL_FILE, fullRemoteFilePath, fullLocalFilePath);
+        communicator.sendAction(RoutingAction.STOP_RECORDING);
     }
 }

@@ -268,11 +268,8 @@ public class Device {
      * @return {@link Screen} instance, representing the active screen of this device or <code>null</code> if getting
      *         active screen fails.
      */
-    @SuppressWarnings("unchecked")
     public Screen getActiveScreen() {
-        Tree<AccessibilityElement> uiTree = (Tree<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_UI_TREE,
-                                                                                                 true);
-        String uiHierarchy = AccessibilityXmlSerializer.serialize(uiTree);
+        String uiHierarchy = (String) communicator.sendAction(RoutingAction.GET_UI_XML_DUMP);
 
         if (uiHierarchy == null) {
             return null;

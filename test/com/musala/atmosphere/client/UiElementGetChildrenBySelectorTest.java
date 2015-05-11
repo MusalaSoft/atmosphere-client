@@ -53,6 +53,7 @@ public class UiElementGetChildrenBySelectorTest {
         String xmlFileContents = scanXml.next();
         scanXml.close();
         screen = new Screen(device, xmlFileContents);
+        Mockito.when(device.getActiveScreen()).thenReturn(screen);
     }
 
     @Test

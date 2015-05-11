@@ -29,7 +29,10 @@ public class UiElementRevalidationTest {
         usedDevice = mock(Device.class);
         validator = new UiElementValidator();
 
-        Mockito.when(usedDevice.getUiValidator()).thenReturn(validator);
+        Mockito.when(usedDevice.getUiValidator()).thenReturn(validator); 
+        
+        Screen screen = createScreen(POPULATED_TEST_XML);
+        Mockito.when(usedDevice.getActiveScreen()).thenReturn(screen);
     }
 
     @Test
@@ -52,17 +55,17 @@ public class UiElementRevalidationTest {
 
     @Test
     public void testRevalidationWithInvalidElement() throws Throwable {
+        Screen populated = createPopulatedScreen();
+
+        UiElement element = populated.getElementByCSS("[text=CoolStory]");
+        UiElement element2 = populated.getElementByCSS("[bounds=[0,55][240,320]][class=android.view.View]");
+        
         Mockito.when(usedDevice.getActiveScreen()).then(new Answer<Screen>() {
             @Override
             public Screen answer(InvocationOnMock invocation) throws Throwable {
                 return createUnpopulatedScreen();
             }
         });
-
-        Screen populated = createPopulatedScreen();
-
-        UiElement element = populated.getElementByCSS("[text=CoolStory]");
-        UiElement element2 = populated.getElementByCSS("[bounds=[0,55][240,320]][class=android.view.View]");
 
         assertTrue("Element revalidation should have resulted in element still present.", element.revalidate());
         assertFalse("Element revalidation should have resulted in element not present anymore.", element2.revalidate());
@@ -70,17 +73,17 @@ public class UiElementRevalidationTest {
 
     @Test(expected = StaleElementReferenceException.class)
     public void testCrossRevalidation() throws Throwable {
+        Screen populated = createPopulatedScreen();
+        UiElement element = populated.getElementByCSS("[text=CoolStory]");
+        UiElement element2 = populated.getElementByCSS("[bounds=[0,55][240,320]][class=android.view.View]");
+
         Mockito.when(usedDevice.getActiveScreen()).then(new Answer<Screen>() {
             @Override
             public Screen answer(InvocationOnMock invocation) throws Throwable {
                 return createUnpopulatedScreen();
             }
         });
-
-        Screen populated = createPopulatedScreen();
-        UiElement element = populated.getElementByCSS("[text=CoolStory]");
-        UiElement element2 = populated.getElementByCSS("[bounds=[0,55][240,320]][class=android.view.View]");
-
+        
         assertTrue("Element revalidation should have resulted in element still present.", element.revalidate());
         element2.tap(); // should be cross-revalidated and result in an exception.
     }

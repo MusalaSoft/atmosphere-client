@@ -169,6 +169,7 @@ public class Screen {
     public ScrollableView getScrollableViewByXPath(String query)
         throws XPathExpressionException,
             UiElementFetchingException {
+        updateScreen();
         Node node = UiXmlParser.getXPathNode(xPathDomDocument, query);
         ScrollableView scrollableView = new ScrollableView(node, onDevice);
         return scrollableView;
@@ -186,6 +187,7 @@ public class Screen {
      *         if no elements or more than 1 are found for the passed query
      */
     public XmlNodeUiElement getElementByXPath(String query) throws XPathExpressionException, UiElementFetchingException {
+        updateScreen();
         Node node = UiXmlParser.getXPathNode(xPathDomDocument, query);
         XmlNodeUiElement returnElement = new XmlNodeUiElement(node, onDevice);
         return returnElement;
@@ -329,6 +331,7 @@ public class Screen {
     public List<XmlNodeUiElement> getAllElementsByXPath(String xPathQuery)
         throws XPathExpressionException,
             UiElementFetchingException {
+        updateScreen();
         List<XmlNodeUiElement> uiElementList = new ArrayList<XmlNodeUiElement>();
         NodeList xPathNodeList = UiXmlParser.getXPathNodeChildren(xPathDomDocument, xPathQuery);
 
@@ -528,6 +531,7 @@ public class Screen {
     public boolean waitForElementExists(UiElementSelector selector, Integer timeout) {
         UiElementDescriptor descriptor = UiElementAttributeExtractor.extract(selector);
         boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_EXISTS, descriptor, timeout);
+        updateScreen();
         return response;
     }
 
@@ -545,6 +549,7 @@ public class Screen {
     public boolean waitUntilElementGone(UiElementSelector selector, Integer timeout) {
         UiElementDescriptor descriptor = UiElementAttributeExtractor.extract(selector);
         boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_UNTIL_GONE, descriptor, timeout);
+        updateScreen();
         return response;
     }
 
@@ -563,6 +568,7 @@ public class Screen {
      */
     public boolean waitForWindowUpdate(String packageName, int timeout) {
         boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_WINDOW_UPDATE, packageName, timeout);
+        updateScreen();
         return response;
     }
 }

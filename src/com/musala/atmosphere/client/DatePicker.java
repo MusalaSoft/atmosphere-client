@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.exceptions.ActionFailedException;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
+import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 
 /**
@@ -123,7 +124,8 @@ public class DatePicker extends PickerView {
             XPathExpressionException,
             InvalidCssQueryException,
             UiElementFetchingException,
-            ParserConfigurationException {
+            ParserConfigurationException,
+            MultipleElementsFoundException {
         super(screen);
         pickerHelper = new PickerHelper(screen);
 
@@ -135,7 +137,8 @@ public class DatePicker extends PickerView {
         throws XPathExpressionException,
             UiElementFetchingException,
             InvalidCssQueryException,
-            ParserConfigurationException {
+            ParserConfigurationException,
+            MultipleElementsFoundException {
         String year = String.valueOf(calendar.get(Calendar.YEAR));
         String day = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
         String month = Month.getStringRepresentation(calendar.get(Calendar.MONTH) + 1);
@@ -148,21 +151,24 @@ public class DatePicker extends PickerView {
     /**
      * Gets the year in DatePicker.
      * 
-     * @return - int instance of DatePicker's year field.
+     * @return - int instance of DatePicker's year field
      * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason.
+     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
-     *         if the NumberPicker or EditText elements are not present.
+     *         if the NumberPicker or EditText elements are not present
      * @throws InvalidCssQueryException
      *         if the NumberPicker or EditText widgets are invalid.
      * @throws ParserConfigurationException
      *         if an error with internal XPath configuration occurs.
+     * @throws MultipleElementsFoundException
+     *         if multiple NumberPicker or matching EditText elements are present
      */
     public int getYear()
         throws XPathExpressionException,
             UiElementFetchingException,
             InvalidCssQueryException,
-            ParserConfigurationException {
+            ParserConfigurationException,
+            MultipleElementsFoundException {
         String year = pickerHelper.getNumberPickerFieldValue(yearPickerIndex);
         int yearNumber = Integer.parseInt(year);
         return yearNumber;
@@ -180,12 +186,15 @@ public class DatePicker extends PickerView {
      *         if the NumberPicker or EditText widgets are invalid.
      * @throws ParserConfigurationException
      *         if an error with internal XPath configuration occurs.
+     * @throws MultipleElementsFoundException
+     *         if more than one NumberPicker or EditText element is present
      */
     public int getDay()
         throws XPathExpressionException,
             UiElementFetchingException,
             InvalidCssQueryException,
-            ParserConfigurationException {
+            ParserConfigurationException,
+            MultipleElementsFoundException {
         String day = pickerHelper.getNumberPickerFieldValue(dayPickerIndex);
         int dayNumber = Integer.parseInt(day);
         return dayNumber;
@@ -203,12 +212,15 @@ public class DatePicker extends PickerView {
      *         if the NumberPicker or EditText widgets are invalid.
      * @throws ParserConfigurationException
      *         if an error with internal XPath configuration occurs.
+     * @throws MultipleElementsFoundException
+     *         if more than one NumberPicker or EditText is found
      */
     public int getMonth()
         throws XPathExpressionException,
             UiElementFetchingException,
             InvalidCssQueryException,
-            ParserConfigurationException {
+            ParserConfigurationException,
+            MultipleElementsFoundException {
         evaluatePickerIndexes();
 
         String month = pickerHelper.getNumberPickerFieldValue(monthPickerIndex);
@@ -221,7 +233,8 @@ public class DatePicker extends PickerView {
         throws XPathExpressionException,
             UiElementFetchingException,
             InvalidCssQueryException,
-            ParserConfigurationException {
+            ParserConfigurationException,
+            MultipleElementsFoundException {
 
         String date;
         String month = pickerHelper.getNumberPickerFieldValue(monthPickerIndex);
@@ -253,7 +266,8 @@ public class DatePicker extends PickerView {
         throws XPathExpressionException,
             UiElementFetchingException,
             InvalidCssQueryException,
-            ParserConfigurationException {
+            ParserConfigurationException,
+            MultipleElementsFoundException {
 
         String date;
         String month = pickerHelper.getNumberPickerFieldValue(monthPickerIndex);
@@ -276,13 +290,16 @@ public class DatePicker extends PickerView {
      *         if the NumberPicker or EditText widgets are invalid.
      * @throws ParserConfigurationException
      *         if an error with internal XPath configuration occurs.
+     * @throws MultipleElementsFoundException
+     *         if more than one NumberPicker or EditText element is present
      */
     private void evaluatePickerIndexes()
         throws NumberFormatException,
             XPathExpressionException,
             InvalidCssQueryException,
             UiElementFetchingException,
-            ParserConfigurationException {
+            ParserConfigurationException,
+            MultipleElementsFoundException {
         String pickerValue;
 
         for (int index = FIRST_POSIBLE_INDEX; index <= LAST_POSIBLE_INDEX; index++) {
@@ -335,12 +352,15 @@ public class DatePicker extends PickerView {
      *         if the NumberPicker or EditText widgets are invalid.
      * @throws ParserConfigurationException
      *         if an error with internal XPath configuration occurs.
+     * @throws MultipleElementsFoundException
+     *         if more than one NumberPicker or EditText fields are found
      */
     private boolean setText(String value, int pickerIndex)
         throws XPathExpressionException,
             UiElementFetchingException,
             InvalidCssQueryException,
-            ParserConfigurationException {
+            ParserConfigurationException,
+            MultipleElementsFoundException {
 
         String currentValue = pickerHelper.getNumberPickerFieldValue(pickerIndex);
         if (!value.equals(currentValue)) {

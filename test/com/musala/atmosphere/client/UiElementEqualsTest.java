@@ -7,14 +7,9 @@ import static org.mockito.Mockito.mock;
 import java.io.InputStream;
 import java.util.Scanner;
 
-import javax.xml.xpath.XPathExpressionException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
-import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 
 public class UiElementEqualsTest {
 
@@ -46,10 +41,7 @@ public class UiElementEqualsTest {
     }
 
     @Test
-    public void testTwoEqualUiElements()
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            InvalidCssQueryException {
+    public void testTwoEqualUiElements() throws Exception {
         UiElement firstUiElement = screen.getElementByCSS(FIRST_CSS_QUERY);
         UiElement secondUiElement = screen.getElementByXPath(FIRST_XPATH_QUERY);
 
@@ -57,10 +49,7 @@ public class UiElementEqualsTest {
     }
 
     @Test
-    public void testTwoDifferentUiElements()
-        throws UiElementFetchingException,
-            XPathExpressionException,
-            InvalidCssQueryException {
+    public void testTwoDifferentUiElements() throws Exception {
         UiElement firstUiElement = screen.getElementByCSS(FIRST_CSS_QUERY);
         UiElement secondUiElement = screen.getElementByCSS(SECOND_CSS_QUERY);
 

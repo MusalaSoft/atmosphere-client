@@ -6,6 +6,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
+import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 
 /**
@@ -35,17 +36,20 @@ public abstract class PickerView {
      * @throws ParserConfigurationException
      *         if an error with internal XPath configuration occurs
      * @throws UiElementFetchingException
-     *         if no elements or more than one are found for the passed query
+     *         if no elements are found for the passed query
      * @throws InvalidCssQueryException
      *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
      *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws MultipleElementsFoundException
+     *         if multiple elements are found for the passed query
      */
     public abstract boolean setValue(Calendar value)
         throws XPathExpressionException,
             InvalidCssQueryException,
             UiElementFetchingException,
-            ParserConfigurationException;
+            ParserConfigurationException,
+            MultipleElementsFoundException;
 
     /**
      * Gets the value from the picker into a calendar object.
@@ -56,17 +60,20 @@ public abstract class PickerView {
      * @throws ParserConfigurationException
      *         if an error with internal XPath configuration occurs
      * @throws UiElementFetchingException
-     *         if no elements or more than one are found for the passed query
+     *         if no elements are found for the passed query
      * @throws InvalidCssQueryException
      *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
      *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws MultipleElementsFoundException
+     *         if multiple elements are found for the passed query
      */
     public abstract Calendar getValue()
         throws XPathExpressionException,
             InvalidCssQueryException,
             UiElementFetchingException,
-            ParserConfigurationException;
+            ParserConfigurationException,
+            MultipleElementsFoundException;
 
     /**
      * Gets the value from the picker into a String object.
@@ -75,15 +82,18 @@ public abstract class PickerView {
      * @throws ParserConfigurationException
      *         if an error with internal XPath configuration occurs
      * @throws UiElementFetchingException
-     *         if no elements or more than one are found for the passed query
+     *         if no elements are found for the passed query
      * @throws InvalidCssQueryException
      *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
      *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws MultipleElementsFoundException
+     *         if more than one element is found for the passed query
      */
     public abstract String getStringValue()
         throws XPathExpressionException,
             InvalidCssQueryException,
             UiElementFetchingException,
-            ParserConfigurationException;
+            ParserConfigurationException,
+            MultipleElementsFoundException;
 }

@@ -9,6 +9,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
+import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 
 /**
@@ -50,7 +51,8 @@ public class TimePicker extends PickerView {
         throws XPathExpressionException,
             InvalidCssQueryException,
             UiElementFetchingException,
-            ParserConfigurationException {
+            ParserConfigurationException,
+            MultipleElementsFoundException {
         boolean is24HourFormat = false;
 
         try {
@@ -81,7 +83,8 @@ public class TimePicker extends PickerView {
         throws XPathExpressionException,
             InvalidCssQueryException,
             UiElementFetchingException,
-            ParserConfigurationException {
+            ParserConfigurationException,
+            MultipleElementsFoundException {
         String response = getStringValue();
         Date parsedTime = null;
         parsedTime = parseTime(response, TIME_FORMAT);
@@ -107,17 +110,20 @@ public class TimePicker extends PickerView {
      * @throws ParserConfigurationException
      *         if an error with internal XPath configuration occurs
      * @throws UiElementFetchingException
-     *         if no elements or more than one are found for the passed query
+     *         if no elements are found for the passed query
      * @throws InvalidCssQueryException
      *         if the passed argument is invalid CSS query
      * @throws XPathExpressionException
      *         if the conversion from CSS to XPath is unsuccessful for some reason
+     * @throws MultipleElementsFoundException
+     *         if more than one element is found for the given pickerIndex
      */
     public boolean setText(String value, int pickerIndex)
         throws XPathExpressionException,
             InvalidCssQueryException,
             UiElementFetchingException,
-            ParserConfigurationException {
+            ParserConfigurationException,
+            MultipleElementsFoundException {
         String currentValue = pickerHelper.getNumberPickerFieldValue(pickerIndex);
 
         if (!value.equals(currentValue)) {
@@ -155,7 +161,8 @@ public class TimePicker extends PickerView {
         throws XPathExpressionException,
             InvalidCssQueryException,
             UiElementFetchingException,
-            ParserConfigurationException {
+            ParserConfigurationException,
+            MultipleElementsFoundException {
         String meridiem = null;
         String hour = pickerHelper.getNumberPickerFieldValue(HOUR_INDEX);
         String minute = pickerHelper.getNumberPickerFieldValue(MINUTE_INDEX);

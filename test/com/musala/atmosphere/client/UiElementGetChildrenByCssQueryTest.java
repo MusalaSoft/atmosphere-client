@@ -8,9 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -58,8 +55,8 @@ public class UiElementGetChildrenByCssQueryTest {
         String xmlFileContents = scanXml.next();
         scanXml.close();
         screen = new Screen(device, xmlFileContents);
-        Mockito.when(device.getActiveScreen()).thenReturn(screen);    
-        }
+        Mockito.when(device.getActiveScreen()).thenReturn(screen);
+    }
 
     @Test
     public void testGetExistingChildrenByCssQuery() throws Exception {
@@ -84,33 +81,21 @@ public class UiElementGetChildrenByCssQueryTest {
     }
 
     @Test(expected = UiElementFetchingException.class)
-    public void testGetUnexistingChildrenByCssQuery()
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            InvalidCssQueryException,
-            ParserConfigurationException {
+    public void testGetUnexistingChildrenByCssQuery() throws Exception {
         XmlNodeUiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
 
         parentUiElement.getChildrenByCssQuery(CSS_QUERY_FOR_UNEXISTING_CHILDREN_ELEMENTS);
     }
 
     @Test(expected = InvalidCssQueryException.class)
-    public void testGetChildrenByInvalidCssQuery()
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            InvalidCssQueryException,
-            ParserConfigurationException {
+    public void testGetChildrenByInvalidCssQuery() throws Exception {
         XmlNodeUiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
 
         parentUiElement.getChildrenByCssQuery(INVALID_CSS_QUERY);
     }
 
     @Test(expected = UiElementFetchingException.class)
-    public void testGetChildrenByCssQueryForNonChildrenElement()
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            InvalidCssQueryException,
-            ParserConfigurationException {
+    public void testGetChildrenByCssQueryForNonChildrenElement() throws Exception {
         XmlNodeUiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
 
         parentUiElement.getChildrenByCssQuery(CSS_QUERY_FOR_NON_CHILDREN_ELEMENT);

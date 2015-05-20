@@ -14,12 +14,12 @@ import java.util.Scanner;
 
 import javax.xml.xpath.XPathExpressionException;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
+import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Bounds;
 import com.musala.atmosphere.commons.geometry.Point;
@@ -51,7 +51,7 @@ public class UiElementFetchingTest {
     }
 
     @Test
-    public void getByCSSTest() throws UiElementFetchingException, XPathExpressionException, InvalidCssQueryException {
+    public void getByCSSTest() throws Exception {
         final String desiredElementClass = "android.widget.FrameLayout";
         final String desiredElementContentDescription = "derp";
 
@@ -64,7 +64,7 @@ public class UiElementFetchingTest {
     }
 
     @Test
-    public void getByXPathTest() throws UiElementFetchingException, XPathExpressionException {
+    public void getByXPathTest() throws Exception {
         final String desiredElementContentDescription = "derp";
         final String desiredElementClass = "android.widget.FrameLayout";
 
@@ -78,10 +78,7 @@ public class UiElementFetchingTest {
     }
 
     @Test
-    public void getBySelectorTest()
-        throws UiElementFetchingException,
-            XPathExpressionException,
-            InvalidCssQueryException {
+    public void getBySelectorTest() throws Exception {
         final String desiredElementContentDescription = "derp";
         final String desiredElementClass = "android.widget.FrameLayout";
 
@@ -96,11 +93,8 @@ public class UiElementFetchingTest {
         assertEquals("Desired element was not fetched correctly.", properties.getClassName(), desiredElementClass);
     }
 
-    @Test(expected = UiElementFetchingException.class)
-    public void multipleFoundBySelectorTest()
-        throws UiElementFetchingException,
-            XPathExpressionException,
-            InvalidCssQueryException {
+    @Test(expected = MultipleElementsFoundException.class)
+    public void multipleFoundBySelectorTest() throws Exception {
         final String desiredElementClass = "android.widget.FrameLayout";
 
         UiElementSelector selector = new UiElementSelector();
@@ -109,17 +103,14 @@ public class UiElementFetchingTest {
     }
 
     @Test(expected = UiElementFetchingException.class)
-    public void notFoundByXPathTest() throws UiElementFetchingException, XPathExpressionException {
+    public void notFoundByXPathTest() throws Exception {
         final String desiredElementContentDescription = "derp";
 
         screen.getElementByXPath("//hierarchy/nonexistent[@content-desc='" + desiredElementContentDescription + "']");
     }
 
-    @Test(expected = UiElementFetchingException.class)
-    public void multipleFoundByCSSTest()
-        throws UiElementFetchingException,
-            XPathExpressionException,
-            InvalidCssQueryException {
+    @Test(expected = MultipleElementsFoundException.class)
+    public void multipleFoundByCSSTest() throws Exception {
         screen.getElementByCSS("node");
     }
 
@@ -147,15 +138,12 @@ public class UiElementFetchingTest {
     }
 
     @Test(expected = UiElementFetchingException.class)
-    public void getElementsByCSSExceptionTest()
-        throws UiElementFetchingException,
-            XPathExpressionException,
-            InvalidCssQueryException {
+    public void getElementsByCSSExceptionTest() throws Exception {
         screen.getElementByCSS("nonexistent");
     }
 
     @Test
-    public void tapElementTest() throws UiElementFetchingException, XPathExpressionException, InvalidCssQueryException {
+    public void tapElementTest() throws Exception {
         final String desiredElementContentDescription = "derp";
 
         UiElementSelector selector = new UiElementSelector();

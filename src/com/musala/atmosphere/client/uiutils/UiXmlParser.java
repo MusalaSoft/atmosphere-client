@@ -19,6 +19,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 
 /**
@@ -32,30 +33,36 @@ public class UiXmlParser {
      * Gets a {@link Node Node} from a {@link Document Document} by a XPath query.
      * 
      * @param domDocument
-     *        document containing a nodes which represent screen elements.
+     *        document containing a nodes which represent screen elements
      * @param xPathQuery
-     *        XPath type node selecting query.
-     * @return the found {@link Node Node} object.
+     *        XPath type node selecting query
+     * @return the found {@link Node Node} object
      * @throws UiElementFetchingException
-     *         if there are no nodes in the document to be found by the given xPathQuery or the xPathQuery is invalid.
+     *         if there are no nodes in the document to be found by the given xPathQuery or the xPathQuery is invalid
      * @throws XPathExpressionException
-     *         if the given xPathQuery is invalid.
+     *         if the given xPathQuery is invalid
+     * @throws MultipleElementsFoundException
+     *         if more than one node in the document matches the given xPathQuery
      */
     public static Node getXPathNode(Document domDocument, String xPathQuery)
         throws UiElementFetchingException,
-            XPathExpressionException {
+            XPathExpressionException,
+            MultipleElementsFoundException {
         XPath x = XPathFactory.newInstance().newXPath();
         XPathExpression expression = x.compile(xPathQuery);
 
         NodeList nodeList = (NodeList) expression.evaluate(domDocument, XPathConstants.NODESET);
         int foundElements = 0;
         if (nodeList == null || nodeList.getLength() == 0) {
-            throw new UiElementFetchingException("No element found for the XPath expression.");
+            throw new UiElementFetchingException(String.format("No element found for the XPath expression %s.",
+                                                               xPathQuery));
         }
+
         foundElements = nodeList.getLength();
         if (foundElements > 1) {
-            throw new UiElementFetchingException("Found " + foundElements
-                    + " elements that match the element selecting query. Please be more specific.");
+            throw new MultipleElementsFoundException(String.format("Found %d elements that match the selecting query %s. Please be more specific.",
+                                                                   foundElements,
+                                                                   xPathQuery));
         }
 
         return nodeList.item(0);

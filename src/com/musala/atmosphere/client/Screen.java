@@ -22,6 +22,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
+import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
 import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
@@ -49,6 +50,8 @@ public class Screen {
     private static final String DATE_PICKER_WIDGET = "android.widget.DatePicker";
 
     private static final String PICKERS_MESSAGE = "No %s picker is currently available on the screen.";
+
+    private static final String MULTIPLE_PICKERS_AVAILABLE_MESSAGE = "More than one %s picker is currently available on the screen.";
 
     private String screenXml;
 
@@ -124,12 +127,15 @@ public class Screen {
      * @throws XPathExpressionException
      *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
-     *         if no elements or more than 1 are found for the passed query
+     *         if no elements are found for the passed query
+     * @throws MultipleElementsFoundException
+     *         if more than one element is found for the passed query
      */
     public XmlNodeUiElement getElementByCSS(String query)
         throws InvalidCssQueryException,
             XPathExpressionException,
-            UiElementFetchingException {
+            UiElementFetchingException,
+            MultipleElementsFoundException {
         String xpathQuery = CssToXPathConverter.convertCssToXPath(query);
         return getElementByXPath(xpathQuery);
     }
@@ -145,12 +151,15 @@ public class Screen {
      * @throws XPathExpressionException
      *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
-     *         if no elements or more than 1 are found for the passed query
+     *         if no elements are found for the passed query
+     * @throws MultipleElementsFoundException
+     *         if more than one element is found for the passed query
      */
     public ScrollableView getScrollableViewtByCSS(String query)
         throws UiElementFetchingException,
             InvalidCssQueryException,
-            XPathExpressionException {
+            XPathExpressionException,
+            MultipleElementsFoundException {
         String xpathQuery = CssToXPathConverter.convertCssToXPath(query);
         return getScrollableViewByXPath(xpathQuery);
     }
@@ -164,11 +173,14 @@ public class Screen {
      * @throws XPathExpressionException
      *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
-     *         if no elements or more than 1 are found for the passed query
+     *         if no elements are found for the passed query
+     * @throws MultipleElementsFoundException
+     *         if more than one element is found for the passed query
      */
     public ScrollableView getScrollableViewByXPath(String query)
         throws XPathExpressionException,
-            UiElementFetchingException {
+            UiElementFetchingException,
+            MultipleElementsFoundException {
         updateScreen();
         Node node = UiXmlParser.getXPathNode(xPathDomDocument, query);
         ScrollableView scrollableView = new ScrollableView(node, onDevice);
@@ -184,9 +196,14 @@ public class Screen {
      * @throws XPathExpressionException
      *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
-     *         if no elements or more than 1 are found for the passed query
+     *         if no elements are found for the passed query
+     * @throws MultipleElementsFoundException
+     *         if more than one element is found for the passed query
      */
-    public XmlNodeUiElement getElementByXPath(String query) throws XPathExpressionException, UiElementFetchingException {
+    public XmlNodeUiElement getElementByXPath(String query)
+        throws XPathExpressionException,
+            UiElementFetchingException,
+            MultipleElementsFoundException {
         updateScreen();
         Node node = UiXmlParser.getXPathNode(xPathDomDocument, query);
         XmlNodeUiElement returnElement = new XmlNodeUiElement(node, onDevice);
@@ -205,12 +222,15 @@ public class Screen {
      * @throws XPathExpressionException
      *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
-     *         if no elements or more than 1 are found for the passed query
+     *         if no elements are found for the passed query
+     * @throws MultipleElementsFoundException
+     *         if more than one element is found for the passed query
      */
     public UiElement getElement(UiElementSelector selector)
         throws UiElementFetchingException,
             XPathExpressionException,
-            InvalidCssQueryException {
+            InvalidCssQueryException,
+            MultipleElementsFoundException {
         String cssQuery = selector.buildCssQuery();
         UiElement result = getElementByCSS(cssQuery);
         return result;
@@ -228,12 +248,15 @@ public class Screen {
      * @throws XPathExpressionException
      *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
-     *         if no elements or more than 1 are found for the passed query
+     *         if no elements are found for the passed query
+     * @throws MultipleElementsFoundException
+     *         if more than one element is found for the passed query
      */
     public ScrollableView getScrollableView(UiElementSelector selector)
         throws UiElementFetchingException,
             XPathExpressionException,
-            InvalidCssQueryException {
+            InvalidCssQueryException,
+            MultipleElementsFoundException {
         String cssQuery = selector.buildCssQuery();
         ScrollableView result = getScrollableViewtByCSS(cssQuery);
         return result;
@@ -253,12 +276,15 @@ public class Screen {
      * @throws XPathExpressionException
      *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
-     *         if no elements or more than 1 are found for the passed query
+     *         if no elements are found for the passed query
+     * @throws MultipleElementsFoundException
+     *         if more than one element is found for the passed query
      */
     public UiElement getElementWhenPresent(UiElementSelector selector, int waitTimeout)
         throws UiElementFetchingException,
             XPathExpressionException,
-            InvalidCssQueryException {
+            InvalidCssQueryException,
+            MultipleElementsFoundException {
         boolean isElementPresent = waitForElementExists(selector, waitTimeout);
 
         if (isElementPresent) {
@@ -284,12 +310,15 @@ public class Screen {
      * @throws XPathExpressionException
      *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
-     *         if no elements or more than 1 are found for the passed query
+     *         if no elements are found for the passed query
+     * @throws MultipleElementsFoundException
+     *         if more than one element is found for the passed query
      */
     public UiElement getElementWhenPresent(UiElementSelector selector)
         throws UiElementFetchingException,
             XPathExpressionException,
-            InvalidCssQueryException {
+            InvalidCssQueryException,
+            MultipleElementsFoundException {
         return getElementWhenPresent(selector, WAIT_AND_GET_DEFAULT_TIMEOUT);
     }
 
@@ -449,17 +478,24 @@ public class Screen {
      * 
      * @return a {@link TimePicker} object representing the only time picker widget on screen.
      * @throws UiElementFetchingException
-     *         if no active time pickers are found in the screen or there are more than 1 time pickers
+     *         if no active time pickers are found in the screen
+     * @throws MultipleElementsFoundException
+     *         if there are more than one time pickers
      */
-    public TimePicker getTimePicker() throws UiElementFetchingException {
+    public TimePicker getTimePicker() throws UiElementFetchingException, MultipleElementsFoundException {
+        String message = String.format(PICKERS_MESSAGE, "time");
         UiElementSelector timePickerSelector = new UiElementSelector();
         timePickerSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, TIME_PICKER_WIDGET);
+
         try {
             getElement(timePickerSelector);
         } catch (UiElementFetchingException | XPathExpressionException | InvalidCssQueryException e) {
-            String message = String.format(PICKERS_MESSAGE, "time");
-            LOGGER.error(message);
+            LOGGER.error(message, e);
             throw new UiElementFetchingException(message);
+        } catch (MultipleElementsFoundException e) {
+            message = String.format(MULTIPLE_PICKERS_AVAILABLE_MESSAGE, "time");
+            LOGGER.error(message, e);
+            throw new MultipleElementsFoundException(message, e);
         }
 
         return new TimePicker(this);
@@ -479,21 +515,29 @@ public class Screen {
      *         when the CssToXPathConverter is given an invalid CssQuery
      * @throws ParserConfigurationException
      *         if an error with internal XPath configuration occurs
+     * @throws MultipleElementsFoundException
+     *         if multiple date pickers are present on the screen
      */
     public DatePicker getDatePicker()
         throws UiElementFetchingException,
             NumberFormatException,
             XPathExpressionException,
             InvalidCssQueryException,
-            ParserConfigurationException {
+            ParserConfigurationException,
+            MultipleElementsFoundException {
+        String message = String.format(PICKERS_MESSAGE, "date");
         UiElementSelector timePickerSelector = new UiElementSelector();
         timePickerSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, DATE_PICKER_WIDGET);
+
         try {
             getElement(timePickerSelector);
         } catch (UiElementFetchingException | XPathExpressionException | InvalidCssQueryException e) {
-            String message = String.format(PICKERS_MESSAGE, "date");
-            LOGGER.error(message);
+            LOGGER.error(message, e);
             throw new UiElementFetchingException(message);
+        } catch (MultipleElementsFoundException e) {
+            message = String.format(MULTIPLE_PICKERS_AVAILABLE_MESSAGE, "date");
+            LOGGER.error(message, e);
+            throw new MultipleElementsFoundException();
         }
 
         return new DatePicker(this);

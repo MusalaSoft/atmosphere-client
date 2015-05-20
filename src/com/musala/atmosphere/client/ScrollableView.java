@@ -5,9 +5,11 @@ import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
+import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
 import com.musala.atmosphere.commons.RoutingAction;
@@ -22,6 +24,7 @@ import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
  * @author filareta.yordanova
  */
 public class ScrollableView extends XmlNodeUiElement {
+    private static final Logger LOGGER = Logger.getLogger(ScrollableView.class);
 
     /**
      * Used to determine scroll direction
@@ -188,11 +191,14 @@ public class ScrollableView extends XmlNodeUiElement {
      *         - if the CSS query corresponding to the {@link UiElementSelector} is invalid
      * @throws ParserConfigurationException
      *         - if an error with internal XPath configuration occurs
+     * @throws MultipleElementsFoundException
+     *         if multiple scrollable views are present on the screen
      */
     public boolean scrollToElementBySelector(Integer maxSwipes, UiElementSelector innerViewSelector)
         throws XPathExpressionException,
             InvalidCssQueryException,
-            ParserConfigurationException {
+            ParserConfigurationException,
+            MultipleElementsFoundException {
         String cssQuery = innerViewSelector.buildCssQuery();
         Screen deviceActiveScreen = onDevice.getActiveScreen();
         UiElementSelector scrollableViewSelector = this.getElementSelector();
@@ -230,11 +236,14 @@ public class ScrollableView extends XmlNodeUiElement {
      *         - if the CSS query corresponding to the {@link UiElementSelector} is invalid
      * @throws ParserConfigurationException
      *         - if an error with internal XPath configuration occurs
+     * @throws MultipleElementsFoundException
+     *         if multiple scrollable views are present on the screen
      */
     public boolean tapElementBySelectorWithoutScrolling(UiElementSelector innerViewSelector)
         throws XPathExpressionException,
             ParserConfigurationException,
-            InvalidCssQueryException {
+            InvalidCssQueryException,
+            MultipleElementsFoundException {
         String cssQuery = innerViewSelector.buildCssQuery();
         Screen deviceActiveScreen = onDevice.getActiveScreen();
         UiElementSelector scrollableViewSelector = this.getElementSelector();
@@ -269,14 +278,17 @@ public class ScrollableView extends XmlNodeUiElement {
      *         - if an error with internal XPath configuration occurs
      * @throws UiElementFetchingException
      *         - if the UI element could not be found
+     * @throws MultipleElementsFoundException
+     *         if multiple scrollable views are present on the screen
      */
     public boolean tapElementBySelectorWithScrolling(Integer maxSwipes, UiElementSelector innerViewSelector)
         throws XPathExpressionException,
             InvalidCssQueryException,
             ParserConfigurationException,
-            UiElementFetchingException {
+            UiElementFetchingException,
+            MultipleElementsFoundException {
         if (!scrollToElementBySelector(maxSwipes, innerViewSelector)) {
-            System.out.println("Could not find element after " + maxSwipes + " swipes.");
+            LOGGER.debug(String.format("Could not find element after %d swipes.", maxSwipes));
             return false;
         }
 

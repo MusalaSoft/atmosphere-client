@@ -269,14 +269,14 @@ public class Device {
      *         active screen fails.
      */
     public Screen getActiveScreen() {
-        String uiHierarchy = (String) communicator.sendAction(RoutingAction.GET_UI_XML_DUMP);
+        Tree<AccessibilityElement> accessibilityElementTree = (Tree<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_UI_TREE);
+        String uiHierarchy = AccessibilityXmlSerializer.serialize(accessibilityElementTree);
 
         if (uiHierarchy == null) {
             return null;
         }
 
-        Screen activeScreen = new Screen(this, uiHierarchy);
-        return activeScreen;
+        return new Screen(this, uiHierarchy);
     }
 
     /**

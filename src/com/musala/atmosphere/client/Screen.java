@@ -211,6 +211,86 @@ public class Screen {
     }
 
     /**
+     * Searches for {@link AccessibilityUiElement UI element} on the active screen that matches the given selector.
+     * 
+     * @param selector
+     *        - by which the {@link AccessibilityUiElement UI element} will be searched
+     * @param visibleOnly
+     *        - <code>true</code> to search for visible elements only and <code>false</code> to search all elements
+     * @return the found {@link AccessibilityUiElement UI element}
+     * @throws MultipleElementsFoundException
+     *         if more than one elements are found matching the given selector
+     * @throws UiElementFetchingException
+     *         if no element was found matching the given selector
+     */
+    public AccessibilityUiElement getAccessibilityUiElement(UiElementSelector selector, Boolean visibleOnly)
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
+        List<AccessibilityUiElement> foundElements = getAccessibilityUiElements(selector, visibleOnly);
+        int fountElementsCount = foundElements.size();
+        if (fountElementsCount > 1) {
+            throw new MultipleElementsFoundException(String.format("Searching for a single UiElement but %d were found.",
+                                                                   fountElementsCount));
+        } else {
+            return onDevice.getAccessibilityUiElements(selector, true).get(0);
+        }
+    }
+
+    /**
+     * Searches for {@link AccessibilityUiElement UI element} on the active screen that matches the given selector.
+     * Searches only visible elements.
+     * 
+     * @param selector
+     *        - by which the {@link AccessibilityUiElement UI element} will be searched
+     * @return the found {@link AccessibilityUiElement UI element}
+     * @throws MultipleElementsFoundException
+     *         if more than one elements are found matching the given selector
+     * @throws UiElementFetchingException
+     *         if no element was found matching the given selector
+     */
+    public AccessibilityUiElement getAccessibilityUiElement(UiElementSelector selector)
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
+        return getAccessibilityUiElement(selector, true);
+    }
+
+    /**
+     * Searches for list of {@link AccessibilityUiElement UI elements} on the active screen that are matching the given
+     * selector.
+     * 
+     * @param selector
+     *        - by which the {@link AccessibilityUiElement UI elements} will be searched
+     * @param visibleOnly
+     *        - <code>true</code> to search for visible elements only and <code>false</code> to search all elements
+     * @return list containing the found {@link AccessibilityUiElement UI elements}
+     * @throws UiElementFetchingException
+     *         if no element was found matching the given selector
+     */
+    public List<AccessibilityUiElement> getAccessibilityUiElements(UiElementSelector selector, Boolean visibleOnly)
+        throws UiElementFetchingException {
+        List<AccessibilityUiElement> foundElements = onDevice.getAccessibilityUiElements(selector, visibleOnly);
+        if (foundElements.isEmpty()) {
+            throw new UiElementFetchingException("No elements found matching the given selector.");
+        }
+        return foundElements;
+    }
+
+    /**
+     * Searches for list of {@link AccessibilityUiElement UI elements} on the active screen that are matching the given
+     * selector. Searches only visible elements.
+     * 
+     * @param selector
+     *        - by which the {@link AccessibilityUiElement UI elements} will be searched
+     * @return list containing the found {@link AccessibilityUiElement UI elements}
+     * @throws UiElementFetchingException
+     *         if no element was found matching the given selector
+     */
+    public List<AccessibilityUiElement> getAccessibilityUiElements(UiElementSelector selector)
+        throws UiElementFetchingException {
+        return getAccessibilityUiElements(selector, true);
+    }
+
+    /**
      * Searches for given UI element in the current screen XML structure using a {@link UiElementSelector
      * UiElementSelector} instance.
      * 

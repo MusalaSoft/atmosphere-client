@@ -43,11 +43,14 @@ import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.gesture.Gesture;
 import com.musala.atmosphere.commons.ime.KeyboardAction;
+import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
+import com.musala.atmosphere.commons.util.AccessibilityXmlSerializer;
 import com.musala.atmosphere.commons.util.AtmosphereIntent;
 import com.musala.atmosphere.commons.util.GeoLocation;
 import com.musala.atmosphere.commons.util.IntentBuilder;
 import com.musala.atmosphere.commons.util.IntentBuilder.IntentAction;
 import com.musala.atmosphere.commons.util.Pair;
+import com.musala.atmosphere.commons.util.structure.tree.Tree;
 
 /**
  * Android device representing class.
@@ -981,14 +984,24 @@ public class Device {
     }
 
     /**
-     * Sets the WiFi state of this device.
+     * Enables the WiFi of this device.
      * 
-     * @param state
-     *        - <code>true</code> enables WiFi; <code>false</code> disables WiFi.
-     * @return <code>true</code> if the WiFi state setting is successful, <code>false</code> if it fails.
+     * @return <code>true</code> if the WiFi enabling is successful, <code>false</code> if it fails
      */
-    public boolean setWiFi(boolean state) {
-        Object result = communicator.sendAction(RoutingAction.SET_WIFI_STATE, state);
+    public boolean enableWiFi() {
+        Object result = communicator.sendAction(RoutingAction.SET_WIFI_STATE, true);
+
+        return result == DeviceCommunicator.VOID_SUCCESS;
+    }
+
+    /**
+     * Disables the WiFi of this device.
+     * 
+     * @return <code>true</code> if the WiFi disabling is successful, <code>false</code> if it fails
+     */
+    public boolean disableWiFi() {
+        Object result = communicator.sendAction(RoutingAction.SET_WIFI_STATE, false);
+
         return result == DeviceCommunicator.VOID_SUCCESS;
     }
 

@@ -204,7 +204,7 @@ public class ReconnectDeviceTest {
 
     @Test(expected = DeviceReleasedException.class)
     public void testThrowsExceptionOnSetWiFi() {
-        testDevice.setWiFi(true);
+        testDevice.enableWiFi();
     }
 
     @Test(expected = DeviceReleasedException.class)

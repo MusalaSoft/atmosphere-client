@@ -10,7 +10,7 @@ import javax.xml.xpath.XPathExpressionException;
 
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
-import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
+import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 
 /**
  * Class for interactions with time picker widget.

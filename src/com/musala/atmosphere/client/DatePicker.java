@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
 import com.musala.atmosphere.client.exceptions.ActionFailedException;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
-import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
+import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 
 /**
  * Manages DatePicker functionality for getting and setting values and getting individual elements of the picker.

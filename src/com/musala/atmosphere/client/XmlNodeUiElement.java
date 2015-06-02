@@ -16,9 +16,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
-import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
 import com.musala.atmosphere.client.uiutils.UiXmlParser;
+import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 
 /**

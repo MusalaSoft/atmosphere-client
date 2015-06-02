@@ -20,7 +20,7 @@ import org.mockito.Mockito;
 
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
-import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
+import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Bounds;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.ui.UiElementPropertiesContainer;

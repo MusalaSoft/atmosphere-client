@@ -1,7 +1,9 @@
 package com.musala.atmosphere.client;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 
@@ -18,16 +20,30 @@ public class AccessibilityUiElement extends UiElement {
         super(properties, device);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<UiElement> getChildren(UiElementSelector childrenSelector) {
-        // TODO Auto-generated method stub
-        return null;
+        AccessibilityElement accessibilityElement = (AccessibilityElement) propertiesContainer;
+        List<AccessibilityElement> children = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_CHILDREN,
+                                                                                                   accessibilityElement,
+                                                                                                   childrenSelector,
+                                                                                                   false,
+                                                                                                   true);
+
+        return wrapAccessibilityElements(children);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<UiElement> getDirectChildren() {
-        // TODO Auto-generated method stub
-        return null;
+        AccessibilityElement accessibilityElement = (AccessibilityElement) propertiesContainer;
+        List<AccessibilityElement> children = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_CHILDREN,
+                                                                                                   accessibilityElement,
+                                                                                                   new UiElementSelector(),
+                                                                                                   true,
+                                                                                                   true);
+
+        return wrapAccessibilityElements(children);
     }
 
     @Override
@@ -36,4 +52,13 @@ public class AccessibilityUiElement extends UiElement {
         return false;
     }
 
+    private List<UiElement> wrapAccessibilityElements(List<AccessibilityElement> accessibilityElements) {
+        List<UiElement> wrappedElements = new ArrayList<UiElement>();
+
+        for (AccessibilityElement element : accessibilityElements) {
+            wrappedElements.add(new AccessibilityUiElement(element, onDevice));
+        }
+
+        return wrappedElements;
+    }
 }

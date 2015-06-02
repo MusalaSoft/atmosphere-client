@@ -23,11 +23,11 @@ import org.xml.sax.SAXException;
 
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
-import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
 import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
 import com.musala.atmosphere.client.uiutils.UiXmlParser;
 import com.musala.atmosphere.commons.RoutingAction;
+import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.ui.UiElementDescriptor;
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelectionOption;

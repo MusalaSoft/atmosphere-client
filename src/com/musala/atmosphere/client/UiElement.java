@@ -13,8 +13,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
-import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
+import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Bounds;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.ui.UiElementPropertiesContainer;

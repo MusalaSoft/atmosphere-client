@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
-import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
+import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 
 public class UiElementGetChildrenByCssQueryTest {
 

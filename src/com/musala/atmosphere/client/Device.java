@@ -43,14 +43,11 @@ import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.gesture.Gesture;
 import com.musala.atmosphere.commons.ime.KeyboardAction;
-import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
-import com.musala.atmosphere.commons.util.AccessibilityXmlSerializer;
 import com.musala.atmosphere.commons.util.AtmosphereIntent;
 import com.musala.atmosphere.commons.util.GeoLocation;
 import com.musala.atmosphere.commons.util.IntentBuilder;
 import com.musala.atmosphere.commons.util.IntentBuilder.IntentAction;
 import com.musala.atmosphere.commons.util.Pair;
-import com.musala.atmosphere.commons.util.structure.tree.Tree;
 
 /**
  * Android device representing class.
@@ -847,14 +844,24 @@ public class Device {
     }
 
     /**
-     * Changes the lock state of this device.
+     * Locks the device.
      * 
-     * @param state
-     *        - desired lock state of the device; <code>true</code> - lock the device, <code>false</code> - unlock the
-     *        device.
-     * @return <code>true</code> if the lock state setting is successful, <code>false</code> if it fails.
+     * @return <code>true</code> if the lock state setting is successful, <code>false</code> if it fails
      */
-    public boolean setLocked(boolean state) {
+    public boolean lock() {
+        return setLockState(true);
+    }
+
+    /**
+     * Unlocks the device.
+     * 
+     * @return <code>true</code> if the lock state setting is successful, <code>false</code> if it fails
+     */
+    public boolean unlock() {
+        return setLockState(false);
+    }
+
+    private boolean setLockState(boolean state) {
         if (state) {
             return isLocked() || pressButton(HardwareButton.POWER);
         } else {
@@ -1019,7 +1026,7 @@ public class Device {
     public boolean startActivity(String packageName, String activityName, boolean unlockDevice)
         throws ActivityStartingException {
         if (unlockDevice) {
-            setLocked(false);
+            setLockState(false);
         }
 
         IntentBuilder intentBuilder = new IntentBuilder(IntentAction.START_COMPONENT);
@@ -1063,7 +1070,7 @@ public class Device {
      */
     public boolean startApplication(String packageName, boolean shouldUnlockDevice) {
         if (shouldUnlockDevice) {
-            setLocked(false);
+            setLockState(false);
         }
 
         Boolean response = (Boolean) communicator.sendAction(RoutingAction.START_APP, packageName);

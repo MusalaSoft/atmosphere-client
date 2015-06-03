@@ -48,8 +48,7 @@ public class ReconnectDeviceTest {
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
                                                                       eq(RoutingAction.GET_UI_TREE),
                                                                       anyBoolean());
-        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
-                                                                      eq(RoutingAction.GET_UI_XML_DUMP));
+        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.GET_UI_XML_DUMP));
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.GET_CONNECTION_TYPE));
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
                                                                       eq(RoutingAction.GET_DEVICE_ACCELERATION));
@@ -165,7 +164,7 @@ public class ReconnectDeviceTest {
 
     @Test(expected = DeviceReleasedException.class)
     public void testThrowsExceptionOnLock() {
-        testDevice.setLocked(true);
+        testDevice.lock();
     }
 
     @Test(expected = DeviceReleasedException.class)
@@ -210,7 +209,7 @@ public class ReconnectDeviceTest {
 
     @Test(expected = DeviceReleasedException.class)
     public void testThrowsExceptionOnUnlock() {
-        testDevice.setLocked(false);
+        testDevice.unlock();
     }
 
     @Test(expected = DeviceReleasedException.class)

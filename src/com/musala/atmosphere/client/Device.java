@@ -12,12 +12,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
+import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
+import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.uiutils.GestureCreator;
 import com.musala.atmosphere.client.util.settings.AndroidGlobalSettings;
 import com.musala.atmosphere.client.util.settings.AndroidSystemSettings;
@@ -43,14 +46,13 @@ import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.gesture.Gesture;
 import com.musala.atmosphere.commons.ime.KeyboardAction;
-import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
-import com.musala.atmosphere.commons.util.AccessibilityXmlSerializer;
+import com.musala.atmosphere.commons.ui.selector.CssAttribute;
+import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 import com.musala.atmosphere.commons.util.AtmosphereIntent;
 import com.musala.atmosphere.commons.util.GeoLocation;
 import com.musala.atmosphere.commons.util.IntentBuilder;
 import com.musala.atmosphere.commons.util.IntentBuilder.IntentAction;
 import com.musala.atmosphere.commons.util.Pair;
-import com.musala.atmosphere.commons.util.structure.tree.Tree;
 
 /**
  * Android device representing class.
@@ -64,6 +66,12 @@ public class Device {
     private static final Logger LOGGER = Logger.getLogger(Device.class.getCanonicalName());
 
     private static final String ATMOSPHERE_SERVICE_PACKAGE = "com.musala.atmosphere.service";
+
+    private static final String ANDROID_WIDGET_SWITCH_CLASS_NAME = "android.widget.Switch";
+
+    private static final String ANDROID_WIDGET_CHECKBOX_CLASS_NAME = "android.widget.CheckBox";
+
+    private static final String AGREE_BUTTON_RESOURCE_ID = "android:id/button1";
 
     private static final String ATMOSPHERE_UNLOCK_DEVICE_ACTIVITY = ".UnlockDeviceActivity";
 
@@ -1450,5 +1458,110 @@ public class Device {
      */
     public void stopScreenRecording() {
         communicator.sendAction(RoutingAction.STOP_RECORDING);
+    }
+
+    /**
+     * Check if the GPS location is enabled on this device.
+     * 
+     * @return <code>true</code> if the GPS location is enabled, <code>false</code> if it's disabled
+     */
+    public boolean isGpsLocationEnabled() {
+        return (boolean) communicator.sendAction(RoutingAction.IS_GPS_LOCATION_ENABLED);
+    }
+
+    /**
+     * Enables the GPS location on this device.
+     * 
+     * @return <code>true</code> if the GPS location enabling is successful, <code>false</code> if it fails
+     */
+    public boolean enableGpsLocation() {
+        return setGpsLocationState(true);
+    }
+
+    /**
+     * Disables the GPS location on this device.
+     * 
+     * @return <code>true</code> if the GPS location disabling is successful, <code>false</code> if it fails
+     */
+    public boolean disableGpsLocation() {
+        return setGpsLocationState(false);
+    }
+
+    /**
+     * Changes the GPS location state of this device.
+     * 
+     * @param state
+     *        - desired GPS location state: <code>true</code> - enable GPS location, <code>false</code> - disable GPS
+     *        location
+     * @return <code>true</code> if the GPS location state setting is successful, <code>false</code> if it fails
+     */
+    private boolean setGpsLocationState(boolean state) {
+        if (isGpsLocationEnabled() == state) {
+            return true;
+        }
+
+        boolean isActionSuccessful = false;
+
+        openLocationSettings();
+
+        UiElementSelector switchButtonSelector = new UiElementSelector();
+        switchButtonSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, ANDROID_WIDGET_SWITCH_CLASS_NAME);
+
+        UiElementSelector checkBoxSelector = new UiElementSelector();
+        checkBoxSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, ANDROID_WIDGET_CHECKBOX_CLASS_NAME);
+
+        if (tapLocationSettingsActivityElement(switchButtonSelector)
+                || tapLocationSettingsActivityElement(checkBoxSelector)) {
+            isActionSuccessful = true;
+        }
+
+        UiElementSelector agreeButtonSelector = new UiElementSelector();
+        agreeButtonSelector.addSelectionAttribute(CssAttribute.RESOURCE_ID, AGREE_BUTTON_RESOURCE_ID);
+        /*
+         * TODO: Remove the Thread.sleep after wait for element start working with selectors created by resource ID.
+         */
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+        }
+
+        tapLocationSettingsActivityElement(agreeButtonSelector);
+
+        pressButton(HardwareButton.BACK);
+
+        return isActionSuccessful;
+    }
+
+    /**
+     * Taps element from location settings activity.
+     * 
+     * @param selector
+     *        - the {@link UiElementSelector} instance of the desired element
+     * @return <code>true</code> if tapping the element is successful, <code>false</code> if it fails
+     */
+    private boolean tapLocationSettingsActivityElement(UiElementSelector selector) {
+        Screen screen = getActiveScreen();
+        int waitForElementTimeout = 5000;
+
+        boolean isElementPresent = screen.waitForElementExists(selector, waitForElementTimeout);
+
+        if (isElementPresent) {
+            try {
+                // We use getElements to use this logic for both switch view elements and check box elements. The reason
+                // is that there is only one switch view element and many check boxes, but we need only the first one.
+                UiElement element = screen.getElements(selector).get(0);
+                return element.tap();
+            } catch (XPathExpressionException | UiElementFetchingException | InvalidCssQueryException e) {
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Opens the location settings activity.
+     */
+    private void openLocationSettings() {
+        communicator.sendAction(RoutingAction.OPEN_LOCATION_SETTINGS);
     }
 }

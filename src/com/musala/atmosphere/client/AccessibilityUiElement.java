@@ -20,28 +20,33 @@ public class AccessibilityUiElement extends UiElement {
         super(properties, device);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<UiElement> getChildren(UiElementSelector childrenSelector) {
         AccessibilityElement accessibilityElement = (AccessibilityElement) propertiesContainer;
-        List<AccessibilityElement> children = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_CHILDREN,
-                                                                                                   accessibilityElement,
-                                                                                                   childrenSelector,
-                                                                                                   false,
-                                                                                                   true);
+        boolean directChildrenOnly = false;
+        boolean visibleNodesOnly = true;
+        List<AccessibilityElement> children = getChildren(accessibilityElement,
+                                                          childrenSelector,
+                                                          directChildrenOnly,
+                                                          visibleNodesOnly);
 
         return wrapAccessibilityElements(children);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<UiElement> getDirectChildren() {
+        return getDirectChildren(new UiElementSelector());
+    }
+
+    @Override
+    public List<UiElement> getDirectChildren(UiElementSelector childrenSelector) {
         AccessibilityElement accessibilityElement = (AccessibilityElement) propertiesContainer;
-        List<AccessibilityElement> children = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_CHILDREN,
-                                                                                                   accessibilityElement,
-                                                                                                   new UiElementSelector(),
-                                                                                                   true,
-                                                                                                   true);
+        boolean directChildrenOnly = true;
+        boolean visibleNodesOnly = true;
+        List<AccessibilityElement> children = getChildren(accessibilityElement,
+                                                          childrenSelector,
+                                                          directChildrenOnly,
+                                                          visibleNodesOnly);
 
         return wrapAccessibilityElements(children);
     }
@@ -50,6 +55,19 @@ public class AccessibilityUiElement extends UiElement {
     public boolean revalidate() {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<AccessibilityElement> getChildren(AccessibilityElement accessibilityElement,
+                                                   UiElementSelector selector,
+                                                   boolean directChildrenOnly,
+                                                   boolean visibleNodesOnly) {
+        List<AccessibilityElement> children = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_CHILDREN,
+                                                                                                   accessibilityElement,
+                                                                                                   selector,
+                                                                                                   directChildrenOnly,
+                                                                                                   visibleNodesOnly);
+        return children;
     }
 
     private List<UiElement> wrapAccessibilityElements(List<AccessibilityElement> accessibilityElements) {
@@ -61,4 +79,5 @@ public class AccessibilityUiElement extends UiElement {
 
         return wrappedElements;
     }
+
 }

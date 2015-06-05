@@ -238,4 +238,23 @@ public class XmlNodeUiElement extends UiElement {
         }
         return children;
     }
+
+    @Override
+    public List<UiElement> getDirectChildren(UiElementSelector childrenSelector) {
+        String cssQuery = childrenSelector.buildCssQuery();
+
+        try {
+            String convertedXPathQuery = CssToXPathConverter.convertCssToXPath(cssQuery);
+            String queryPrefix = String.format("/%s/child::", representedNodeXPath.getNodeName());
+            convertedXPathQuery = convertedXPathQuery.replaceFirst("//", queryPrefix);
+            return new ArrayList<UiElement>(getChildrenByXPath(convertedXPathQuery));
+        } catch (InvalidCssQueryException | XPathExpressionException | UiElementFetchingException
+                | ParserConfigurationException e) {
+            LOGGER.error(String.format("Failed attempt to retrieve children from %s.",
+                                       propertiesContainer.getPackageName()),
+                         e);
+        }
+
+        return new ArrayList<UiElement>();
+    }
 }

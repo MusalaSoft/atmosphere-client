@@ -79,5 +79,4 @@ public class AccessibilityUiElement extends UiElement {
 
         return wrappedElements;
     }
-
 }

@@ -229,8 +229,9 @@ public class Screen {
         List<AccessibilityUiElement> foundElements = getAccessibilityUiElements(selector, visibleOnly);
         int fountElementsCount = foundElements.size();
         if (fountElementsCount > 1) {
-            throw new MultipleElementsFoundException(String.format("Searching for a single UiElement but %d were found.",
-                                                                   fountElementsCount));
+            throw new MultipleElementsFoundException(String.format("Searching for a single UiElement but %d that match the given properties %s were found.",
+                                                                   fountElementsCount,
+                                                                   selector));
         } else {
             return onDevice.getAccessibilityUiElements(selector, true).get(0);
         }

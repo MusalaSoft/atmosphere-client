@@ -10,7 +10,7 @@ import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 /**
  * {@link UiElement} represented as {@link AccessibilityElement} structure. Containing methods operating with
  * {@link AccessibilityNodeInfo}.
- * 
+ *
  * @author denis.bialev
  *
  */
@@ -53,8 +53,8 @@ public class AccessibilityUiElement extends UiElement {
 
     @Override
     public boolean revalidate() {
-        // TODO Auto-generated method stub
-        return false;
+
+        return (boolean) communicator.sendAction(RoutingAction.CHECK_ELEMENT_PRESENCE, propertiesContainer, true);
     }
 
     @SuppressWarnings("unchecked")

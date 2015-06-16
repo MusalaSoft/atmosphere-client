@@ -53,13 +53,12 @@ import com.musala.atmosphere.commons.util.GeoLocation;
 import com.musala.atmosphere.commons.util.IntentBuilder;
 import com.musala.atmosphere.commons.util.IntentBuilder.IntentAction;
 import com.musala.atmosphere.commons.util.Pair;
-import com.musala.atmosphere.commons.util.structure.tree.Tree;
 
 /**
  * Android device representing class.
- * 
+ *
  * @author vladimir.vladimirov
- * 
+ *
  */
 public class Device {
     private static final int MAX_BUFFER_SIZE = 8092; // 8K
@@ -94,7 +93,7 @@ public class Device {
 
     /**
      * Constructor that creates a usable Device object by a given IClientDevice, it's invocation passkey.
-     * 
+     *
      * @param iClientDevice
      * @param devicePasskey
      * @param serverConnectionHandler
@@ -108,7 +107,7 @@ public class Device {
 
     /**
      * Accepts call to this device.
-     * 
+     *
      * @return <code>true</code> if the accepting call is successful, <code>false</code> if it fails.
      */
     public boolean acceptCall() {
@@ -118,7 +117,7 @@ public class Device {
     /**
      * Accepts a call to this device.<br>
      * Can only be applied on <b>emulators</b>.
-     * 
+     *
      * @param phoneNumber
      *        - {@link PhoneNumber}, that calls the device.
      * @return <code>true</code> if the accepting call is successful, <code>false</code> if it fails.
@@ -131,7 +130,7 @@ public class Device {
     /**
      * Cancels a call to this device.<br>
      * Can only be applied on <b>emulators</b>.
-     * 
+     *
      * @param phoneNumber
      *        - {@link PhoneNumber}, that calls the device.
      * @return <code>true</code> if the canceling call is successful, <code>false</code> if it fails.
@@ -143,7 +142,7 @@ public class Device {
 
     /**
      * Declines a call to this device.<br>
-     * 
+     *
      * @return <code>true</code> if the denying call is successful, <code>false</code> if it fails.
      */
     public boolean declineCall() {
@@ -152,7 +151,7 @@ public class Device {
 
     /**
      * Executes a command in the shell of this device.
-     * 
+     *
      * @param shellCommand
      *        - String, representing the command for execution.
      * @return the output of this device console, after the command is executed.
@@ -164,7 +163,7 @@ public class Device {
 
     /**
      * Executes a command in the shell of this device in a new thread.
-     * 
+     *
      * @param shellCommand
      *        - command to be executed in background
      */
@@ -174,7 +173,7 @@ public class Device {
 
     /**
      * Interrupts a background executing shell process.
-     * 
+     *
      * @param processName
      *        - name of the process to be interrupted
      */
@@ -184,7 +183,7 @@ public class Device {
 
     /**
      * Installs a specified Android application file on this device.<br>
-     * 
+     *
      * @param path
      *        - location of the file to be installed.
      * @return <code>true</code> if the APK installation is successful, <code>false</code> if it fails.
@@ -249,7 +248,7 @@ public class Device {
 
     /**
      * Simulates a double tap on the specified point.
-     * 
+     *
      * @param point
      *        - the point to be tapped
      * @return <code>true</code> if the double tap is successful, <code>false</code> if it fails.
@@ -263,7 +262,7 @@ public class Device {
 
     /**
      * Executes user-described gesture on this device.
-     * 
+     *
      * @param gesture
      *        - the gesture to be executed.
      */
@@ -273,7 +272,7 @@ public class Device {
 
     /**
      * Gets the currently active {@link Screen Screen} of this device.
-     * 
+     *
      * @return {@link Screen} instance, representing the active screen of this device or <code>null</code> if getting
      *         active screen fails.
      */
@@ -290,7 +289,7 @@ public class Device {
 
     /**
      * Gets the airplane mode state of this device.<br>
-     * 
+     *
      * @return <code>true</code> if the airplane mode is on, <code>false</code> if it's off and <code>null</code> if
      *         getting airplane mode fails.
      */
@@ -317,11 +316,11 @@ public class Device {
 
     /**
      * Gets the current network connection type of this device.
-     * 
+     *
      * @return the {@link ConnectionType type} of the network on this device, or <code>null</code> if getting connection
      *         type fails.
      * @see ConnectionType
-     * 
+     *
      */
     public ConnectionType getConnectionType() {
         ConnectionType type = (ConnectionType) communicator.sendAction(RoutingAction.GET_CONNECTION_TYPE);
@@ -330,7 +329,7 @@ public class Device {
 
     /**
      * Gets current acceleration of this device.
-     * 
+     *
      * @return the movement {@link DeviceAcceleration vector} of this device in the space or <code>null</code> if
      *         getting acceleration fails.
      * @see DeviceAcceleration
@@ -342,7 +341,7 @@ public class Device {
 
     /**
      * Gets the current proximity of the device.
-     * 
+     *
      * @return a float representing the proximity of the device or null if the getting of the proximity failed
      */
     public float getDeviceProximity() {
@@ -353,7 +352,7 @@ public class Device {
 
     /**
      * Gets current orientation in space of this device.
-     * 
+     *
      * @return {@link DeviceOrientation DeviceOrientation} of the testing device,<br>
      *         <code>null</code> if getting device orientation fails.
      */
@@ -365,7 +364,7 @@ public class Device {
     /**
      * Provides information about device physical properties, such as type (tablet or emulator), dpi, resolution,
      * android API level, manufacturer, camera presence and others.
-     * 
+     *
      * @return {@link DeviceInformation DeviceInformation} structure with information for the testing device,<br>
      *         <code>null</code> if getting device information fails.
      */
@@ -377,7 +376,7 @@ public class Device {
     /**
      * Gets the current mobile data state of this device.<br>
      * Can only be applied on <b>emulators</b>.
-     * 
+     *
      * @return the {@link MobileDataState state} of mobile data on this device or <code>null</code> if getting mobile
      *         data state fails.
      * @see MobileDataState
@@ -390,7 +389,7 @@ public class Device {
     /**
      * Gets a {@link PowerProperties} instance that contains information about the current device power-related
      * environment.
-     * 
+     *
      * @return a filled {@link PowerProperties} instance (or <code>null</code> if fetching the environment fails).
      */
     public PowerProperties getPowerProperties() {
@@ -400,7 +399,7 @@ public class Device {
 
     /**
      * Gets screenshot of this device's active screen.
-     * 
+     *
      * @return byte buffer, containing captured device screen,<br>
      *         <code>null</code> if getting screenshot fails.<br>
      *         It can be subsequently dumped to a file and directly opened as a PNG image.
@@ -412,7 +411,7 @@ public class Device {
 
     /**
      * Gets screenshot of this device's active screen and saves it as an image file at a specified location.
-     * 
+     *
      * @param pathToImageFile
      *        - location at which the screenshot image file should be saved.
      * @return <code>true</code> if the getting screenshot is successful, <code>false</code> if it fails.
@@ -433,7 +432,7 @@ public class Device {
 
     /**
      * Gets a {@link ScreenOrientation} instance that contains information about the orientation of the screen.
-     * 
+     *
      * @return {@link ScreenOrientation object} that shows how android elements are rotated on the screen.
      * @see ScreenOrientation
      */
@@ -451,7 +450,7 @@ public class Device {
 
     /**
      * Obtains information about the telephony services on the device.
-     * 
+     *
      * @return {@link TelephonyInformation} instance.
      */
     public TelephonyInformation getTelephonyInformation() {
@@ -465,7 +464,7 @@ public class Device {
 
     /**
      * Returns device auto rotation state.
-     * 
+     *
      * @return <code>true</code> if the auto rotation is on , <code>false</code> if it's not,<code>null</code> if the
      *         method failed to get device auto rotation state.
      */
@@ -485,7 +484,7 @@ public class Device {
     /**
      * Holds a call to this device.<br>
      * Can only be applied on <b>emulators</b>.
-     * 
+     *
      * @param phoneNumber
      *        - {@link PhoneNumber}, that calls the device.
      * @return <code>true</code> if the holding call is successful, <code>false</code> if it fails.
@@ -499,7 +498,7 @@ public class Device {
      * Inputs text directly on the device, in the element on focus, if possible. It is user's responsibility to focus an
      * editable android widget using {@link Device#tapScreenLocation(Point) Device.tapScreenLocation()},
      * {@link UiElement#tap() UiElement.tap()} or {@link UiElement#focus() UiElement.focus()} methods.
-     * 
+     *
      * @param text
      *        - text to be input.
      * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
@@ -512,7 +511,7 @@ public class Device {
      * Simulates text typing in the element on focus for this device. It is user's responsibility to focus an editable
      * android widget using {@link Device#tapScreenLocation(Point) Device.tapScreenLocation()}, {@link UiElement#tap()
      * UiElement.tap()} or {@link UiElement#focus() UiElement.focus()} methods.
-     * 
+     *
      * @param text
      *        - text to be input.
      * @param interval
@@ -537,7 +536,7 @@ public class Device {
 
     /**
      * Clears the content of the focused text field.
-     * 
+     *
      * @return <code>true</code> if clear text is successful, <code>false</code> if it fails
      */
     public boolean clearText() {
@@ -549,7 +548,7 @@ public class Device {
 
     /**
      * Selects the content of the focused text field.
-     * 
+     *
      * @return <code>true</code> if the text selecting is successful, <code>false</code> if it fails
      */
     public boolean selectAllText() {
@@ -561,7 +560,7 @@ public class Device {
 
     /**
      * Paste a copied text in the current focused text field.
-     * 
+     *
      * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
      */
     public boolean pasteText() {
@@ -573,7 +572,7 @@ public class Device {
 
     /**
      * Copies the selected content of the focused text field.
-     * 
+     *
      * @return <code>true</code> if copy operation is successful, <code>false</code> if it fails
      */
     public boolean copyText() {
@@ -585,7 +584,7 @@ public class Device {
 
     /**
      * Cuts the selected text from the current focused text field.
-     * 
+     *
      * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
      */
     public boolean cutText() {
@@ -597,7 +596,7 @@ public class Device {
 
     /**
      * Installs a specified Android application file on this device.<br>
-     * 
+     *
      * @param path
      *        - location of the file to be installed.
      * @return <code>true</code> if the APK installation is successful, <code>false</code> if it fails.
@@ -608,7 +607,7 @@ public class Device {
 
     /**
      * Installs a specified Android application file on this device.<br>
-     * 
+     *
      * @param path
      *        - location of the file to be installed.
      * @param shouldForceInstall
@@ -621,7 +620,7 @@ public class Device {
 
     /**
      * Checks if this device is in a WAKE state.<br>
-     * 
+     *
      * @return <code>true</code> if the device is awake.<br>
      *         <code>false</code> if the device is asleep.<br>
      */
@@ -632,7 +631,7 @@ public class Device {
 
     /**
      * Checks if this device is locked.
-     * 
+     *
      * @return <code>true</code> if the device is locked.<br>
      *         <code>false</code> if the device is unlocked.
      */
@@ -642,7 +641,7 @@ public class Device {
 
     /**
      * Simulates a pinch in having the initial coordinates of the fingers performing it.
-     * 
+     *
      * @param firstFingerInitial
      *        - the initial position of the first finger
      * @param secondFingerInitial
@@ -661,7 +660,7 @@ public class Device {
 
     /**
      * Simulates a pinch out having the positions of the fingers performing it in the end of the gesture.
-     * 
+     *
      * @param firstFingerEnd
      *        - the position of the first finger in the end of the gesture
      * @param secondFingerEnd
@@ -680,7 +679,7 @@ public class Device {
 
     /**
      * Presses hardware button on this device.
-     * 
+     *
      * @param button
      *        - {@link HardwareButton HardwareButton} to be pressed.
      * @return <code>true</code> if the button press is successful, <code>false</code> if it fails.
@@ -692,7 +691,7 @@ public class Device {
 
     /**
      * Presses hardware button on this device.
-     * 
+     *
      * @param keyCode
      *        - button key code as specified by the Android KeyEvent KEYCODE_ constants.
      * @return <code>true</code> if the hardware button press is successful, <code>false</code> if it fails.
@@ -706,7 +705,7 @@ public class Device {
 
     /**
      * Simulates random finger actions on the screen of this device.
-     * 
+     *
      * @return <code>true</code> if the random multi-touch event execution is successful, <code>false</code> if it
      *         fails.
      */
@@ -718,7 +717,7 @@ public class Device {
     /**
      * This device receives a call.<br>
      * Can only be applied on <b>emulators</b>.
-     * 
+     *
      * @param phoneNumber
      *        - {@link PhoneNumber}, that will be sent to the device.
      * @return <code>true</code> if the call receiving is successful, <code>false</code> if it fails.
@@ -731,7 +730,7 @@ public class Device {
     /**
      * Sends SMS to this device.<br>
      * Can only be applied on <b>emulators</b>.
-     * 
+     *
      * @param smsMessage
      *        - {@link SmsMessage}, that will be sent to the device.
      * @return <code>true</code> if the SMS receiving is successful, <code>false</code> if it fails.
@@ -743,7 +742,7 @@ public class Device {
 
     /**
      * Redirects specific IP address to another IP address.
-     * 
+     *
      * @param toIp
      *        - IP which will receive requests.
      * @param toNewIp
@@ -763,7 +762,7 @@ public class Device {
     /**
      * Sets new acceleration for this device.<br>
      * Can only be applied on <b>emulators</b>.
-     * 
+     *
      * @param deviceAcceleration
      *        - new {@link DeviceAcceleration DeviceAcceleration} to be set.
      * @return <code>true</code> if the acceleration setting is successful, <code>false</code> if it fails.
@@ -777,7 +776,7 @@ public class Device {
      * Sets the airplane mode state for this device.<br>
      * <i><b>Warning:</b> enabling airplane mode on emulator disconnects it from ATMOSPHERE Agent and this emulator can
      * be connected back only after Agent restart. Setting airplane mode for emulators is prohibited</i>
-     * 
+     *
      * @param airplaneMode
      *        - <code>true</code> to enter device in airplane mode, <code>false</code> to exit device from airplane
      *        mode.
@@ -825,24 +824,27 @@ public class Device {
     }
 
     /**
-     * Changes the screen auto rotation of this device.<br>
-     * Controls whether the accelerometer will be used to change screen orientation.
-     * 
-     * @param autoRotation
-     *        - <code>false</code> - disables screen auto rotation; <code>true</code> - enables screen auto rotation.
-     * @return <code>true</code> if the auto rotation setting is successful, <code>false</code> if it fails.
+     * Enables the screen auto rotation on this device.
+     *
+     * @return <code>true</code> if the auto rotation setting is successful, and <code>false</code> if it fails
      */
-    public boolean setAutoRotation(boolean autoRotation) {
-        int autoRotationInt = autoRotation ? 1 : 0;
-        boolean success = deviceSettings.putInt(AndroidSystemSettings.ACCELEROMETER_ROTATION, autoRotationInt);
+    public boolean enableScreenAutoRotation() {
+        return deviceSettings.putInt(AndroidSystemSettings.ACCELEROMETER_ROTATION, 1);
+    }
 
-        return success;
+    /**
+     * Disables the screen auto rotation on this device.
+     *
+     * @return <code>true</code> if the auto rotation setting is successful, and <code>false</code> if it fails
+     */
+    public boolean disableScreenAutoRotation() {
+        return deviceSettings.putInt(AndroidSystemSettings.ACCELEROMETER_ROTATION, 0);
     }
 
     /**
      * Sets new orientation in space of this device.<br>
      * Can only be applied on <b>emulators</b>.
-     * 
+     *
      * @param deviceOrientation
      *        - new {@link DeviceOrientation DeviceOrientation} to be set.
      * @return <code>true</code> if the orientation setting is successful, <code>false</code> if it fails.
@@ -857,7 +859,7 @@ public class Device {
 
     /**
      * Locks the device.
-     * 
+     *
      * @return <code>true</code> if the lock state setting is successful, <code>false</code> if it fails
      */
     public boolean lock() {
@@ -866,7 +868,7 @@ public class Device {
 
     /**
      * Unlocks the device.
-     * 
+     *
      * @return <code>true</code> if the lock state setting is successful, <code>false</code> if it fails
      */
     public boolean unlock() {
@@ -896,7 +898,7 @@ public class Device {
 
     /**
      * Wait for changing the awake state of the device.
-     * 
+     *
      * @param timeout
      *        - time for waiting to be changed the awake state
      * @param isAwake
@@ -920,7 +922,7 @@ public class Device {
     /**
      * Sets new magnetic field for this device.<br>
      * Can only be applied on <b>emulators</b>.
-     * 
+     *
      * @param deviceMagneticField
      *        - new {@link DeviceMagneticField DeviceMagneticField} to be set.
      * @return <code>true</code> if the magnetic field setting is successful, <code>false</code> if it fails.
@@ -933,7 +935,7 @@ public class Device {
     /**
      * Sets new proximity for this device. Can only be applied on <b>emulators</b>. You can use proximity constants from
      * the {@link DeviceProximity} class.
-     * 
+     *
      * @param proximity
      *        - the new proximity to be set
      * @return <code>true</code> if the proximity setting was successful, <code>false</code> otherwise
@@ -946,7 +948,7 @@ public class Device {
     /**
      * Sets the mobile data state of this device.<br>
      * Can only be applied on <b>emulators</b>.
-     * 
+     *
      * @param state
      *        - {@link MobileDataState} to set.
      * @return <code>true</code> if the mobile data state setting is successful, <code>false</code> if it fails.
@@ -961,7 +963,7 @@ public class Device {
      * Sets the environment power-related properties of this device.<br>
      * <i>On real devices, this manipulation only lasts for limited period of time (until the Android BatteryManager
      * updates the battery information).</i>
-     * 
+     *
      * @param properties
      *        - the new power related environment properties to be set.
      * @return <code>true</code> if the environment manipulation is successful, <code>false</code> otherwise.
@@ -974,14 +976,14 @@ public class Device {
     /**
      * Sets new screen orientation for this device.<br>
      * Implicitly turns off screen auto rotation.
-     * 
+     *
      * @param screenOrientation
      *        - new {@link ScreenOrientation ScreenOrientation} to be set.
      * @return <code>true</code> if the screen orientation setting is successful, <code>false</code> if it fails.
      */
     public boolean setScreenOrientation(ScreenOrientation screenOrientation) {
 
-        if (!setAutoRotation(false)) {
+        if (!disableScreenAutoRotation()) {
             String message = "Screen orientation was not set due to setting auto rotation failure.";
             LOGGER.error(message);
             return false;
@@ -994,7 +996,7 @@ public class Device {
 
     /**
      * Enables the WiFi of this device.
-     * 
+     *
      * @return <code>true</code> if the WiFi enabling is successful, <code>false</code> if it fails
      */
     public boolean enableWiFi() {
@@ -1005,7 +1007,7 @@ public class Device {
 
     /**
      * Disables the WiFi of this device.
-     * 
+     *
      * @return <code>true</code> if the WiFi disabling is successful, <code>false</code> if it fails
      */
     public boolean disableWiFi() {
@@ -1016,14 +1018,14 @@ public class Device {
 
     /**
      * Starts an Activity from a package on this device.
-     * 
+     *
      * @param packageName
      *        - package name from which an activity should be started.
      * @param activityName
      *        - activity name to be started. Expects either absolute name or a name starting with dot (.), relative to
      *        the packageName.
      * @return <code>true</code> if the activity start is successful, <code>false</code> if it fails.
-     * 
+     *
      * @throws ActivityStartingException
      *         when the activity can't be started.
      */
@@ -1033,7 +1035,7 @@ public class Device {
 
     /**
      * Starts an Activity from a package on this device.
-     * 
+     *
      * @param packageName
      *        - package name from which an activity should be started.
      * @param activityName
@@ -1046,7 +1048,7 @@ public class Device {
      *         when the package or activity is invalid.
      */
     public boolean startActivity(String packageName, String activityName, boolean unlockDevice)
-        throws ActivityStartingException {
+            throws ActivityStartingException {
         if (unlockDevice) {
             setLockState(false);
         }
@@ -1068,10 +1070,10 @@ public class Device {
 
     /**
      * Unlocks the device and starts an application on it.
-     * 
+     *
      * @param packageName
      *        - name of the application's package
-     * 
+     *
      * @return <code>true</code> if the application launch is successful and <code>false</code> otherwise
      */
     public boolean startApplication(String packageName) {
@@ -1081,13 +1083,13 @@ public class Device {
 
     /**
      * Starts an application on the device.
-     * 
+     *
      * @param packageName
      *        - name of the application's package
-     * 
+     *
      * @param shouldUnlockDevice
      *        - if <code>true</code>, unlocks the device before starting the application
-     * 
+     *
      * @return <code>true</code> if the application launch is successful and <code>false</code> otherwise
      */
     public boolean startApplication(String packageName, boolean shouldUnlockDevice) {
@@ -1102,10 +1104,10 @@ public class Device {
 
     /**
      * Uninstalls an application from the device.
-     * 
+     *
      * @param packageName
      *        - name of the application's package
-     * 
+     *
      * @return <code>true</code> if the application was successfully uninstalled, <code>false</code> otherwise
      */
     public boolean uninstallApplication(String packageName) {
@@ -1116,7 +1118,7 @@ public class Device {
 
     /**
      * Reinstalls a given application by package name and path.
-     * 
+     *
      * @param packageName
      *        - the package name of the application
      * @param pathToApk
@@ -1134,7 +1136,7 @@ public class Device {
 
     /**
      * Simulates a swipe from a point to another unknown point.
-     * 
+     *
      * @param point
      *        - the starting point.
      * @return <code>true</code> if the swipe is successful, <code>false</code> if it fails.
@@ -1152,10 +1154,10 @@ public class Device {
 
     /**
      * Executes a simple tap on the screen of this device at a specified location point.
-     * 
+     *
      * @param tapPoint
      *        - {@link Point Point} on the screen to tap on.
-     * 
+     *
      * @return <code>true</code> if tapping screen is successful, <code>false</code> if it fails.
      */
     public boolean tapScreenLocation(Point tapPoint) {
@@ -1170,7 +1172,7 @@ public class Device {
     /**
      * Executes long press on point on the screen with given coordinates and (default) timeout for the gesture
      * {@value #LONG_PRESS_DEFAULT_TIMEOUT} ms.
-     * 
+     *
      * @param pressPoint
      *        - {@link Point point} on the screen where the long press should be executed.
      * @return - true, if operation is successful, and false otherwise.
@@ -1181,7 +1183,7 @@ public class Device {
 
     /**
      * Executes long press on point on the screen with given coordinates and timeout for the gesture in ms.
-     * 
+     *
      * @param pressPoint
      *        - {@link Point point} on the screen where the long press should be executed.
      * @param timeout
@@ -1198,7 +1200,7 @@ public class Device {
     /**
      * Checks whether the given point is inside the bounds of the screen, and throws an {@link IllegalArgumentException}
      * otherwise.
-     * 
+     *
      * @param point
      *        - the point to be checked
      */
@@ -1224,7 +1226,7 @@ public class Device {
 
     /**
      * Check if there are running processes on the device with the given package
-     * 
+     *
      * @param packageName
      *        - package of the process that we want to check
      * @return - true, if there are running process and false otherwise
@@ -1236,11 +1238,11 @@ public class Device {
 
     /**
      * ForceStops all the processes containing the given package.
-     * 
+     *
      * @param packageName
      *        - package of the processes that we want to stop.
      * @return - true, if execution of the command is successful, and false otherwise.
-     * 
+     *
      * @note - doesn't work for system processes in the Android OS such as phone, sms, etc.
      */
     public boolean forceStopProcess(String packageName) {
@@ -1250,11 +1252,11 @@ public class Device {
 
     /**
      * Stop a background process by given package.
-     * 
+     *
      * @param packageName
      *        - contains the package of the process.
      * @return - true, if execution of the command is successful, and false otherwise.
-     * 
+     *
      * @Note Can not be used on system processes.
      * @Note This method kills only processes that are safe to kill and that will not impact the user experience.
      * @Note Usage of this method on a process that contains service will result in process restart.
@@ -1266,7 +1268,7 @@ public class Device {
 
     /**
      * Opens the notification bar on the device.
-     * 
+     *
      * @return true if the opening of the notification bar was successful, false otherwise
      */
     public boolean openNotificationBar() {
@@ -1275,7 +1277,7 @@ public class Device {
 
     /**
      * Opens the quick settings on the device.
-     * 
+     *
      * @return true if the opening of the quick settings was successful, false otherwise
      */
     public boolean openQuickSettings() {
@@ -1284,7 +1286,7 @@ public class Device {
 
     /**
      * Sets the timeout in the system settings, after which the screen is turned off.
-     * 
+     *
      * @param screenOffTimeout
      *        - timeout in milliseconds, after which the screen is turned off.
      * @return true if the given screen off timeout is successfully set.
@@ -1296,7 +1298,7 @@ public class Device {
 
     /**
      * Gets the timeout from the system settings, after which the screen is turned off.
-     * 
+     *
      * @return timeout in milliseconds, after which the screen is turned off.
      */
     public long getScreenOffTimeout() {
@@ -1305,7 +1307,7 @@ public class Device {
 
     /**
      * Sets a default keyboard by given ID.
-     * 
+     *
      * @return true if setting the IME is successful and false otherwise.
      */
     public boolean setDefaultIME(String keyboardID) {
@@ -1316,7 +1318,7 @@ public class Device {
      * Sets the Atmosphere IME keyboard as default. The Atmosphere IME is a small android application that is a simple
      * implementation of input keyboard for Android. It is needed in order to make sure we can execute the tests
      * requiring text input.
-     * 
+     *
      * @return true if setting the IME is successful and false otherwise.
      */
     public boolean setAtmosphereIME() {
@@ -1326,7 +1328,7 @@ public class Device {
     /**
      * Gets the {@link DeviceSettingsManager settings manager} of the current device, that allows getting and inserting
      * device settings.
-     * 
+     *
      * @return {@link DeviceSettingsManager} instance for this device
      */
     public DeviceSettingsManager getDeviceSettingsManager() {
@@ -1335,7 +1337,7 @@ public class Device {
 
     /**
      * Mocks the location of the device with the one specified in the passed location object.
-     * 
+     *
      * @param mockLocation
      *        - the location to be mocked
      * @return <code>true</code> if the location of the device was successfully mocked, <code>false</code> otherwise
@@ -1346,7 +1348,7 @@ public class Device {
 
     /**
      * Disables passing mock location data for the provider with the given name.
-     * 
+     *
      * @param providerName
      *        - the provider whose mocking should be disabled
      */
@@ -1356,10 +1358,10 @@ public class Device {
 
     /**
      * Dismisses and re-enables the keyguard of the device in order to Lock and Unlock it.
-     * 
+     *
      * @param keyguardStatus
      *        - <code>true</code> if the keyguard should be re-enabled and <code>false</code> to dismiss it.
-     * 
+     *
      * @Note The keyguard should be re-enabled for the device's lock to work properly again.
      */
     public void setKeyguard(boolean keyguardStatus) {
@@ -1369,16 +1371,16 @@ public class Device {
     /**
      * Gets all task that are currently running on the device, with the most recent being first and older ones after in
      * order.
-     * 
+     *
      * @param maxNum
      *        - maximum number of task that are going to be get from the device
-     * 
+     *
      * @return array of the running tasks id.
      *         <p>
      *         Note: Useful with {@link #bringTaskToFront(int, int) bringTaskToFront} and
      *         {@link #waitForTasksUpdate(int, int, int) waitForTaskUpdate}.
      *         </p>
-     * 
+     *
      * @deprecated Since LOLLIPOP, this method is no longer available. It will still return a small subset of its data:
      *             at least the caller's own tasks, and possibly some other tasks such as home that are known to not be
      *             sensitive.
@@ -1390,7 +1392,7 @@ public class Device {
 
     /**
      * Bring the given task to the foreground of the screen.
-     * 
+     *
      * @param taskId
      *        - the id of the task that is going to be brought to the foreground.
      * @param timeout
@@ -1403,7 +1405,7 @@ public class Device {
 
     /**
      * Waits for the given task to be moved to given position in running tasks.
-     * 
+     *
      * @param taskId
      *        - the id of the task.
      * @param position
@@ -1411,7 +1413,7 @@ public class Device {
      * @param timeout
      *        - to wait for updating the task.
      * @return <code>true</code> if the task is updated and <code>false</code> otherwise.
-     * 
+     *
      * @deprecated Since LOLLIPOP, this method is no longer avaible.
      */
     @Deprecated
@@ -1421,7 +1423,7 @@ public class Device {
 
     /**
      * Simulates the given gesture.
-     * 
+     *
      * @param gesture
      *        - the gesture to be executed.
      * @return <code>true</code> if the gesture is executed successfully, <code>false</code> otherwise.
@@ -1433,7 +1435,7 @@ public class Device {
 
     /**
      * Checks if the given image is present on the screen of the device.
-     * 
+     *
      * @param image
      *        - image that will be sought for on the active screen
      * @return <code>true</code> if the image is present on the screen of the device and <code>false</code> otherwise
@@ -1447,7 +1449,7 @@ public class Device {
 
     /**
      * Gets a screenshot from the device as buffered image.
-     * 
+     *
      * @return BufferedImage that contains the screenshot from the device
      * @throws GettingScreenshotFailedException
      *         if getting screenshot from the device fails
@@ -1483,7 +1485,7 @@ public class Device {
 
     /**
      * Check if the GPS location is enabled on this device.
-     * 
+     *
      * @return <code>true</code> if the GPS location is enabled, <code>false</code> if it's disabled
      */
     public boolean isGpsLocationEnabled() {
@@ -1492,7 +1494,7 @@ public class Device {
 
     /**
      * Enables the GPS location on this device.
-     * 
+     *
      * @return <code>true</code> if the GPS location enabling is successful, <code>false</code> if it fails
      */
     public boolean enableGpsLocation() {
@@ -1501,7 +1503,7 @@ public class Device {
 
     /**
      * Disables the GPS location on this device.
-     * 
+     *
      * @return <code>true</code> if the GPS location disabling is successful, <code>false</code> if it fails
      */
     public boolean disableGpsLocation() {
@@ -1510,7 +1512,7 @@ public class Device {
 
     /**
      * Changes the GPS location state of this device.
-     * 
+     *
      * @param state
      *        - desired GPS location state: <code>true</code> - enable GPS location, <code>false</code> - disable GPS
      *        location
@@ -1555,7 +1557,7 @@ public class Device {
 
     /**
      * Taps element from location settings activity.
-     * 
+     *
      * @param selector
      *        - the {@link UiElementSelector} instance of the desired element
      * @return <code>true</code> if tapping the element is successful, <code>false</code> if it fails

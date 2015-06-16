@@ -25,9 +25,9 @@ import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.util.AtmosphereIntent;
 
 /**
- * 
+ *
  * @author yordan.petrov
- * 
+ *
  */
 public class ReconnectDeviceTest {
     private static IClientDevice mockedClientDevice;
@@ -188,8 +188,13 @@ public class ReconnectDeviceTest {
     }
 
     @Test(expected = DeviceReleasedException.class)
-    public void testThrowsExceptionOnSetAutoRotation() {
-        testDevice.setAutoRotation(true);
+    public void testThrowsExceptionOnEnableScreenAutoRotation() {
+        testDevice.enableScreenAutoRotation();
+    }
+
+    @Test(expected = DeviceReleasedException.class)
+    public void testThrowsExceptionOnDisableSetAutoRotation() {
+        testDevice.disableScreenAutoRotation();
     }
 
     @Test(expected = DeviceReleasedException.class)

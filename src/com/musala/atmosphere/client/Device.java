@@ -1048,7 +1048,7 @@ public class Device {
      *         when the package or activity is invalid.
      */
     public boolean startActivity(String packageName, String activityName, boolean unlockDevice)
-            throws ActivityStartingException {
+        throws ActivityStartingException {
         if (unlockDevice) {
             setLockState(false);
         }
@@ -1164,6 +1164,8 @@ public class Device {
         int tapPointX = tapPoint.getX();
         int tapPointY = tapPoint.getY();
         String query = "input tap " + tapPointX + " " + tapPointY;
+
+        showTapLocation(tapPoint);
 
         communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, query);
         return communicator.getLastException() == null;
@@ -1586,5 +1588,15 @@ public class Device {
      */
     private void openLocationSettings() {
         communicator.sendAction(RoutingAction.OPEN_LOCATION_SETTINGS);
+    }
+
+    /**
+     * Shows the tap location on the current device screen.
+     * 
+     * @param point
+     *        - the point where the tap will be placed
+     */
+    private void showTapLocation(Point point) {
+        communicator.sendAction(RoutingAction.SHOW_TAP_LOCATION, point);
     }
 }

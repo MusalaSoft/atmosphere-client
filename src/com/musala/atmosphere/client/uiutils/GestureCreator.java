@@ -1,7 +1,7 @@
 package com.musala.atmosphere.client.uiutils;
 
-import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
+import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.gesture.Anchor;
 import com.musala.atmosphere.commons.gesture.Gesture;
 import com.musala.atmosphere.commons.gesture.Timeline;
@@ -20,7 +20,7 @@ public class GestureCreator {
 
     private static int SWIPE_INTERVAL = 250;
 
-    private static int SWIPE_DISTANCE = 75;
+    private static int SWIPE_DISTANCE = 300;
 
     /**
      * Creates a double tap {@link Gesture} on the passed point.

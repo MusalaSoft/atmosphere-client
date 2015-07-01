@@ -1048,7 +1048,7 @@ public class Device {
      *         when the package or activity is invalid.
      */
     public boolean startActivity(String packageName, String activityName, boolean unlockDevice)
-            throws ActivityStartingException {
+        throws ActivityStartingException {
         if (unlockDevice) {
             setLockState(false);
         }
@@ -1508,6 +1508,15 @@ public class Device {
      */
     public boolean disableGpsLocation() {
         return setGpsLocationState(false);
+    }
+
+    /**
+     * Checks if any audio is currently playing on the device.
+     * 
+     * @return <code>true</code> if an audio is playing, <code>false</code> otherwise
+     */
+    public Boolean isAudioPlaying() {
+        return (boolean) communicator.sendAction(RoutingAction.IS_AUDIO_PLAYING);
     }
 
     /**

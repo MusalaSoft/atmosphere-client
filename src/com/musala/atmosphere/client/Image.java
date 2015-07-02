@@ -6,6 +6,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import com.musala.atmosphere.bitmap.comparison.kmp.KMPMatrixComparator;
 
 /**
@@ -114,6 +116,40 @@ public class Image {
 
         boolean containsMatrix = matrixComparator.containsMatrix(bufferedImageMatrix, soughtImageMatrix);
         return containsMatrix;
+    }
+
+    /**
+     * Checks if this {@link Image} has the same RGB matrix and resolution as the passed one.
+     * 
+     * @param object
+     *        - the {@link Image} for comparison
+     * 
+     * @return <code>true</code>, if this Image has the same properties as the passed <code>object</
+    code> and <code>false</code> if
+     *         the passed object is not an {@link Image} or differs from this {@link Image}
+     */
+    @Override
+    public boolean equals(Object object) {
+        if (object == null) {
+            return false;
+        }
+        if (getClass() != object.getClass()) {
+            return false;
+        }
+
+        Image image = (Image) object;
+        return (image.getHeight() == this.getHeight() && image.getWidth() == this.getWidth() && this.containsImage(image));
+    }
+
+    /**
+     * Returns a hash code for this value.
+     * 
+     * @return the hashcode of this object
+     * @see HashCodeBuilder
+     */
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(image).append(format).toHashCode();
     }
 
     /**

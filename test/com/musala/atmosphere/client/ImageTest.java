@@ -1,6 +1,7 @@
 package com.musala.atmosphere.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.image.BufferedImage;
@@ -20,23 +21,28 @@ import org.junit.Test;
  */
 public class ImageTest {
 
-    private static String IMAGE_PATH_FORMAT = ".%stest-resources%stestImage.png";
+    private static final String IMAGE_PATH_FORMAT = ".%stest-resources%stestImage.png";
 
-    private static String IMAGE_PATH;
+    private static final String IMAGE_PATH = String.format(IMAGE_PATH_FORMAT, File.separator, File.separator);
 
-    private static String WRONG_PATH_FORMAT = ".%sUnexistentImage.png";
+    private static final String SCREENSHOT_IMAGE_PATH_FORMAT = ".%stest-resources%sscreenshot.png";
 
-    private static String WRONG_PATH;
+    private static final String SCREENSHOT_IMAGE_PATH = String.format(SCREENSHOT_IMAGE_PATH_FORMAT,
+                                                                    File.separator,
+                                                                    File.separator);
+
+    private static final String WRONG_PATH_FORMAT = ".%sUnexistentImage.png";
+
+    private static final String WRONG_PATH = String.format(WRONG_PATH_FORMAT, File.separator);
 
     private static final String SAVED_IMAGE_NAME = "saveTestImage.png";
+
+    private static final String STRING_TO_COMPARE = "Test_text";
 
     private static Image image;
 
     @Before
     public void setUp() throws IOException {
-        IMAGE_PATH = String.format(IMAGE_PATH_FORMAT, File.separator, File.separator);
-        WRONG_PATH = String.format(WRONG_PATH_FORMAT, File.separator);
-
         File imageFile = new File(IMAGE_PATH);
         BufferedImage bufferedImage = ImageIO.read(imageFile);
 
@@ -81,6 +87,37 @@ public class ImageTest {
                      loadedImageWidth);
         assertTrue("The image comparator returned false when the loaded and buffered image should be equals.",
                    image.containsImage(loadedImage));
+    }
+
+    @Test
+    public void testEqualsSameImage() throws Exception {
+        File imageFile = new File(IMAGE_PATH);
+        BufferedImage bufferedImage = ImageIO.read(imageFile);
+
+        Image loadedImage = new Image(bufferedImage);
+        Image imageToEquals = new Image(bufferedImage);
+        assertTrue("Equals returned false while comparing identical images.", loadedImage.equals(imageToEquals));
+    }
+
+    @Test
+    public void testEqualsDifferentImage() throws Exception {
+        File imageFile = new File(SCREENSHOT_IMAGE_PATH);
+        BufferedImage bufferedImage = ImageIO.read(imageFile);
+
+        Image imageToEquals = new Image(bufferedImage);
+        assertFalse("Equals returned true while comparing different images.", image.equals(imageToEquals));
+    }
+
+    @Test
+    public void testEqualsWrongObject() throws Exception {
+        assertFalse("Equals returned true while comparing image with string.", image.equals(STRING_TO_COMPARE));
+    }
+
+    @Test
+    public void testEqualsNullImage() throws Exception {
+        image = image.load(IMAGE_PATH);
+        Image imageToEquals = null;
+        assertFalse("Equals returned true while comparing with null image.", image.equals(imageToEquals));
     }
 
     @After

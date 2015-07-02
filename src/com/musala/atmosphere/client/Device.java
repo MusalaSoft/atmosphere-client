@@ -1048,7 +1048,7 @@ public class Device {
      *         when the package or activity is invalid.
      */
     public boolean startActivity(String packageName, String activityName, boolean unlockDevice)
-            throws ActivityStartingException {
+        throws ActivityStartingException {
         if (unlockDevice) {
             setLockState(false);
         }
@@ -1194,6 +1194,22 @@ public class Device {
         Gesture longPress = GestureCreator.createLongPress(pressPoint.getX(), pressPoint.getY(), timeout);
         Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, longPress);
 
+        return response == DeviceCommunicator.VOID_SUCCESS;
+    }
+
+    /**
+     * Drags and drops from point (Point startPoint) to point (Point endPoint).
+     *
+     * @param startPoint
+     *        - start point of the drag and drop gesture
+     * @param endPoint
+     *        - end point of the drag and drop gesture
+     * @return <code>true</code>, if operation is successful, <code>false</code>otherwise
+     */
+    public boolean drag(Point startPoint, Point endPoint) {
+        validatePointOnScreen(endPoint);
+        Gesture drag = GestureCreator.createDrag(startPoint, endPoint);
+        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, drag);
         return response == DeviceCommunicator.VOID_SUCCESS;
     }
 

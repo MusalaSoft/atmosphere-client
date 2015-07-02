@@ -20,7 +20,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
-import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
+import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 
 /**
  * Contains static helper methods that parse XML documents.

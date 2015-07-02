@@ -16,9 +16,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
-import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
 import com.musala.atmosphere.client.uiutils.UiXmlParser;
+import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 
 /**
@@ -237,5 +237,24 @@ public class XmlNodeUiElement extends UiElement {
             LOGGER.error(childRetrievalErrorMessage, e);
         }
         return children;
+    }
+
+    @Override
+    public List<UiElement> getDirectChildren(UiElementSelector childrenSelector) {
+        String cssQuery = childrenSelector.buildCssQuery();
+
+        try {
+            String convertedXPathQuery = CssToXPathConverter.convertCssToXPath(cssQuery);
+            String queryPrefix = String.format("/%s/child::", representedNodeXPath.getNodeName());
+            convertedXPathQuery = convertedXPathQuery.replaceFirst("//", queryPrefix);
+            return new ArrayList<UiElement>(getChildrenByXPath(convertedXPathQuery));
+        } catch (InvalidCssQueryException | XPathExpressionException | UiElementFetchingException
+                | ParserConfigurationException e) {
+            LOGGER.error(String.format("Failed attempt to retrieve children from %s.",
+                                       propertiesContainer.getPackageName()),
+                         e);
+        }
+
+        return new ArrayList<UiElement>();
     }
 }

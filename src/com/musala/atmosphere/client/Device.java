@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,7 +22,6 @@ import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
-import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.client.uiutils.GestureCreator;
 import com.musala.atmosphere.client.util.settings.AndroidGlobalSettings;
 import com.musala.atmosphere.client.util.settings.AndroidSystemSettings;
@@ -43,16 +44,20 @@ import com.musala.atmosphere.commons.beans.PhoneNumber;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
+import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.gesture.Gesture;
 import com.musala.atmosphere.commons.ime.KeyboardAction;
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
+import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
+import com.musala.atmosphere.commons.util.AccessibilityXmlSerializer;
 import com.musala.atmosphere.commons.util.AtmosphereIntent;
 import com.musala.atmosphere.commons.util.GeoLocation;
 import com.musala.atmosphere.commons.util.IntentBuilder;
 import com.musala.atmosphere.commons.util.IntentBuilder.IntentAction;
 import com.musala.atmosphere.commons.util.Pair;
+import com.musala.atmosphere.commons.util.structure.tree.Tree;
 
 /**
  * Android device representing class.
@@ -277,14 +282,36 @@ public class Device {
      *         active screen fails.
      */
     public Screen getActiveScreen() {
-        String uiHierarchy = (String) communicator.sendAction(RoutingAction.GET_UI_XML_DUMP);
+        Tree<AccessibilityElement> accessibilityElementTree = (Tree<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_UI_TREE,
+                                                                                                                   true);
+        String uiHierarchy = AccessibilityXmlSerializer.serialize(accessibilityElementTree);
 
         if (uiHierarchy == null) {
             return null;
         }
 
-        Screen activeScreen = new Screen(this, uiHierarchy);
-        return activeScreen;
+        return new Screen(this, uiHierarchy);
+    }
+
+    /**
+     * Gets a list with all UI elements present on the {@link Screen active screen} and matching the given selector.
+     * 
+     * @param selector
+     *        - contains the matching criteria
+     * @param visibleOnly
+     *        - <code>true</code> to search for visible elements only and <code>false</code> to search all elements
+     * @return list with all UI elements present on the screen and matching the given selector
+     */
+    public List<AccessibilityUiElement> getAccessibilityUiElements(UiElementSelector selector, Boolean visibleOnly) {
+        List<AccessibilityElement> foundElements = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_UI_ELEMENTS,
+                                                                                                        selector,
+                                                                                                        visibleOnly);
+        List<AccessibilityUiElement> uiElements = new ArrayList<AccessibilityUiElement>();
+        for (AccessibilityElement element : foundElements) {
+            uiElements.add(new AccessibilityUiElement(element, this));
+        }
+
+        return uiElements;
     }
 
     /**

@@ -13,8 +13,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
-import com.musala.atmosphere.client.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
+import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Bounds;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.ui.UiElementPropertiesContainer;
@@ -65,6 +65,14 @@ public abstract class UiElement {
      * @return list, containing all {@link UiElements} that directly ascend the current {@link UiElement}
      */
     public abstract List<UiElement> getDirectChildren();
+
+    /**
+     * Gets all direct children of a {@link UiElement} that match the given {@link UiElementSelector}.
+     * 
+     * @return list, containing all {@link UiElement UI elements} matching the {@link UiElementSelector selector} and
+     *         directly ascend the current {@link UiElement}
+     */
+    public abstract List<UiElement> getDirectChildren(UiElementSelector selector);
 
     /**
      * Checks if the current element is still valid (on the screen) and updates it's attributes container. This is

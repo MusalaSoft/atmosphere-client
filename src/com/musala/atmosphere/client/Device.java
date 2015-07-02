@@ -1599,4 +1599,14 @@ public class Device {
     private void showTapLocation(Point point) {
         communicator.sendAction(RoutingAction.SHOW_TAP_LOCATION, point);
     }
+
+    /**
+     * Clears the data of a given application.
+     * 
+     * @param packageName
+     *        - the package name of the application
+     */
+    public void clearApplicationData(String packageName) {
+        communicator.sendAction(RoutingAction.CLEAR_APP_DATA, packageName);
+    }
 }

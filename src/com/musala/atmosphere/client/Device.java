@@ -1540,6 +1540,15 @@ public class Device {
     }
 
     /**
+     * Checks if any audio is currently playing on the device.
+     * 
+     * @return <code>true</code> if an audio is playing, <code>false</code> otherwise
+     */
+    public Boolean isAudioPlaying() {
+        return (boolean) communicator.sendAction(RoutingAction.IS_AUDIO_PLAYING);
+    }
+
+    /**
      * Changes the GPS location state of this device.
      *
      * @param state

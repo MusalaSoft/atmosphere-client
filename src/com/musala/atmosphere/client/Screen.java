@@ -298,22 +298,15 @@ public class Screen {
      * @param selector
      *        - {@link UiElementSelector} object that contains all the selection criteria for the required elements.
      * @return the requested {@link UiElement UiElement}.
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
      * @throws MultipleElementsFoundException
      *         if more than one element is found for the passed query
      */
     public UiElement getElement(UiElementSelector selector)
-        throws UiElementFetchingException,
-            XPathExpressionException,
-            InvalidCssQueryException,
-            MultipleElementsFoundException {
-        String cssQuery = selector.buildCssQuery();
-        UiElement result = getElementByCSS(cssQuery);
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
+        UiElement result = getAccessibilityUiElement(selector);
         return result;
     }
 
@@ -461,19 +454,11 @@ public class Screen {
      * @param selector
      *        - {@link UiElementSelector} object that contains all the selection criteria for the required elements.
      * @return List containing all found elements of type {@link UiElement UiElement}.
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements or more than 1 are found for the passed query
      */
-    public List<UiElement> getElements(UiElementSelector selector)
-        throws UiElementFetchingException,
-            XPathExpressionException,
-            InvalidCssQueryException {
-        String cssQuery = selector.buildCssQuery();
-        List<UiElement> result = new ArrayList<UiElement>(getAllElementsByCSS(cssQuery));
+    public List<UiElement> getElements(UiElementSelector selector) throws UiElementFetchingException {
+        List<UiElement> result = new ArrayList<UiElement>(getAccessibilityUiElements(selector));
         return result;
     }
 
@@ -570,7 +555,7 @@ public class Screen {
 
         try {
             getElement(timePickerSelector);
-        } catch (UiElementFetchingException | XPathExpressionException | InvalidCssQueryException e) {
+        } catch (UiElementFetchingException e) {
             LOGGER.error(message, e);
             throw new UiElementFetchingException(message);
         } catch (MultipleElementsFoundException e) {
@@ -601,18 +586,17 @@ public class Screen {
      */
     public DatePicker getDatePicker()
         throws UiElementFetchingException,
-            NumberFormatException,
+            MultipleElementsFoundException,
             XPathExpressionException,
             InvalidCssQueryException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+            ParserConfigurationException {
         String message = String.format(PICKERS_MESSAGE, "date");
         UiElementSelector timePickerSelector = new UiElementSelector();
         timePickerSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, DATE_PICKER_WIDGET);
 
         try {
             getElement(timePickerSelector);
-        } catch (UiElementFetchingException | XPathExpressionException | InvalidCssQueryException e) {
+        } catch (UiElementFetchingException e) {
             LOGGER.error(message, e);
             throw new UiElementFetchingException(message);
         } catch (MultipleElementsFoundException e) {

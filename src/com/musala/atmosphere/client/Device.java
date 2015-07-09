@@ -14,14 +14,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
-import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
-import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.uiutils.GestureCreator;
 import com.musala.atmosphere.client.util.settings.AndroidGlobalSettings;
 import com.musala.atmosphere.client.util.settings.AndroidSystemSettings;
@@ -1612,7 +1610,7 @@ public class Device {
                 // is that there is only one switch view element and many check boxes, but we need only the first one.
                 UiElement element = screen.getElements(selector).get(0);
                 return element.tap();
-            } catch (XPathExpressionException | UiElementFetchingException | InvalidCssQueryException e) {
+            } catch (UiElementFetchingException e) {
             }
         }
 

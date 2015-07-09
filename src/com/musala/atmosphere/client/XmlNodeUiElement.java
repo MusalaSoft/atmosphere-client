@@ -112,11 +112,12 @@ public class XmlNodeUiElement extends UiElement {
 
     @Override
     public boolean revalidate() {
-        if (!isStale) {
-            validator.forceRevalidation();
-            // if this element is no longer valid, the revalidation procedure
-            // will have set it to stale.
-        }
+        // TODO: The revalidation is not working as expected and must be fixed.
+        // if (!isStale) {
+        // validator.forceRevalidation();
+        // // if this element is no longer valid, the revalidation procedure
+        // // will have set it to stale.
+        // }
         return !isStale;
     }
 

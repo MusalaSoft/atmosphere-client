@@ -120,8 +120,7 @@ public class DatePicker extends PickerView {
     private PickerHelper pickerHelper;
 
     public DatePicker(Screen screen)
-        throws NumberFormatException,
-            XPathExpressionException,
+        throws XPathExpressionException,
             InvalidCssQueryException,
             UiElementFetchingException,
             ParserConfigurationException,

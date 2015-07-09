@@ -184,28 +184,19 @@ public class NotificationBar {
      * device with API 18 or higher.
      * 
      * @param selector
-     *        - an object of type {@link UiElementSelector} that corresponds to the given CSS selector
+     *        - an object of type {@link UiElementSelector}
      * @return UiElement that matches the found notification
-     * @throws InvalidCssQueryException
-     *         - if element is searched by invalid CSS query
      * @throws UiElementFetchingException
      *         - if element could not be found
-     * @throws XPathExpressionException
-     *         - if element is searched by invalid XPath query
-     * @throws ParserConfigurationException
-     *         - if an error with internal XPath configuration occurs
      * @throws MultipleElementsFoundException
      *         if multiple elements are matching the given selector
      */
     public UiElement getNotificationBySelector(UiElementSelector selector)
-        throws XPathExpressionException,
-            InvalidCssQueryException,
-            UiElementFetchingException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
-        String cssQuery = selector.buildCssQuery();
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
+        Screen activeScreen = onDevice.getActiveScreen();
 
-        return getNotificationByCssQuery(cssQuery);
+        return activeScreen.getElement(selector);
     }
 
     /**
@@ -215,23 +206,14 @@ public class NotificationBar {
      * @param text
      *        - the given text that needs to match a notification
      * @return UiElement that matches the found notification
-     * @throws InvalidCssQueryException
-     *         - if element is searched by invalid CSS query
      * @throws UiElementFetchingException
      *         - if element could not be found
-     * @throws XPathExpressionException
-     *         - if element is searched by invalid XPath query
-     * @throws ParserConfigurationException
-     *         - if an error with internal XPath configuration occurs
      * @throws MultipleElementsFoundException
      *         if multiple elements are found by the given text
      */
     public UiElement getNotificationByText(String text)
-        throws XPathExpressionException,
-            InvalidCssQueryException,
-            UiElementFetchingException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
         UiElementSelector textSelector = new UiElementSelector();
         textSelector.addSelectionAttribute(CssAttribute.TEXT, text);
 

@@ -31,7 +31,7 @@ public abstract class UiElement {
 
     private static final long UI_ELEMENT_OPERATION_WAIT_TIME = 500;
 
-    private static final long TIMEOUT_BEFORE_SELECT_ALL = 3000;
+    private static final long TIMEOUT_BEFORE_SELECT_ALL = 4000;
 
     private static final Logger LOGGER = Logger.getLogger(UiElement.class);
 
@@ -372,13 +372,16 @@ public abstract class UiElement {
      *         if the element has become stale before executing this method
      */
     public boolean selectAllText() {
+        boolean isFocused = propertiesContainer.isFocused();
         focus();
 
-        try {
-            Thread.sleep(TIMEOUT_BEFORE_SELECT_ALL);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        // If the text element is focused just before selecting the text in it, the selecting will fail.
+        if (!isFocused) {
+            try {
+                Thread.sleep(TIMEOUT_BEFORE_SELECT_ALL);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         return onDevice.selectAllText();

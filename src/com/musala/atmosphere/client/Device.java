@@ -1225,6 +1225,22 @@ public class Device {
     }
 
     /**
+     * Drags and drops from point (Point startPoint) to point (Point endPoint).
+     *
+     * @param startPoint
+     *        - start point of the drag and drop gesture
+     * @param endPoint
+     *        - end point of the drag and drop gesture
+     * @return <code>true</code>, if operation is successful, <code>false</code>otherwise
+     */
+    public boolean drag(Point startPoint, Point endPoint) {
+        validatePointOnScreen(endPoint);
+        Gesture drag = GestureCreator.createDrag(startPoint, endPoint);
+        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, drag);
+        return response == DeviceCommunicator.VOID_SUCCESS;
+    }
+
+    /**
      * Checks whether the given point is inside the bounds of the screen, and throws an {@link IllegalArgumentException}
      * otherwise.
      *

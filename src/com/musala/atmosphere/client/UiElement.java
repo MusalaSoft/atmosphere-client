@@ -7,25 +7,29 @@ import java.io.InputStream;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
 
+import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
+import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Bounds;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.ui.UiElementPropertiesContainer;
+import com.musala.atmosphere.commons.ui.selector.CssAttribute;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 
 /**
  * Used to access and manipulate certain views on the testing device, for example tapping, double-taping or holding
  * finger on given widget.
- * 
+ *
  * @author georgi.gaydarov
- * 
+ *
  */
 public abstract class UiElement {
 
@@ -52,7 +56,7 @@ public abstract class UiElement {
 
     /**
      * Gets all child UiElements that match the given {@link UiElementSelector}.
-     * 
+     *
      * @param childrenSelector
      *        - an object of type {@link UiElementSelector} that needs to match child UI elements
      * @return a list of {@link UiElement} children that match the given selector
@@ -61,7 +65,7 @@ public abstract class UiElement {
 
     /**
      * Gets all direct children of a {@link UiElement}, represented by XPath node.
-     * 
+     *
      * @return list, containing all {@link UiElements} that directly ascend the current {@link UiElement}
      */
     public abstract List<UiElement> getDirectChildren();
@@ -77,14 +81,14 @@ public abstract class UiElement {
     /**
      * Checks if the current element is still valid (on the screen) and updates it's attributes container. This is
      * executed before each operation that requires the element to be still present on the screen.
-     * 
+     *
      * @return true if the current element is still valid, false otherwise
      */
     public abstract boolean revalidate();
 
     /**
      * Returns the current UI element's attributes properties container.
-     * 
+     *
      * @return a {@link UiElementPropertiesContainer} instance, containing all properties of this UiElement
      */
     public UiElementPropertiesContainer getProperties() {
@@ -93,7 +97,7 @@ public abstract class UiElement {
 
     /**
      * Simulates tapping on a relative point in the current UI element.
-     * 
+     *
      * @param point
      *        - the relative point that will be added to the upper left corner's coordinates
      * @return <code>true</code> if the tapping is successful, <code>false</code> if it fails
@@ -119,7 +123,7 @@ public abstract class UiElement {
 
     /**
      * Simulates tapping in the center of this UI Element.
-     * 
+     *
      * @return <code>true</code> if the tapping is successful, <code>false</code> if it fails
      * @throws StaleElementReferenceException
      *         if the element has become stale before executing this method
@@ -134,7 +138,7 @@ public abstract class UiElement {
 
     /**
      * Searches for a child UI element that corresponds to the given {@link UiElementSelector} and taps on it.
-     * 
+     *
      * @param selector
      *        - a {@link UiElementSelector} that needs to match a certain child UI element
      * @return <code>true</code> if the tap on the child UI element was successful,<code>false</code> otherwise
@@ -165,7 +169,7 @@ public abstract class UiElement {
 
     /**
      * Used to get the text of this UiElement.
-     * 
+     *
      * @return <code>String</code> with the content of the text property of this UiElement
      */
     public String getText() {
@@ -174,7 +178,7 @@ public abstract class UiElement {
 
     /**
      * Simulates holding finger in the center of this UiElement. <i><b>Warning: method not yet implemented!</b></i>
-     * 
+     *
      * @return <code>true</code> if the holding is successful, <code>false</code> if it fails
      */
     public boolean hold() {
@@ -184,11 +188,11 @@ public abstract class UiElement {
 
     /**
      * Simulates double-tapping in the center of this UiElement.
-     * 
+     *
      * @return <code>true</code> if the double tapping is successful, <code>false</code> if it fails
      * @throws StaleElementReferenceException
      *         if the element has become stale before executing this method
-     * 
+     *
      */
     public boolean doubleTap() {
         Bounds elementBounds = propertiesContainer.getBounds();
@@ -200,7 +204,7 @@ public abstract class UiElement {
 
     /**
      * Simulates double-tapping on a point in this UiElement.
-     * 
+     *
      * @param point
      *        - a {@link Point} object, representing the relative coordinates of the point to tap inside this UiElement.
      *        <i><b><u>Note</u></b>: the point with relative coordinates (0,0) denotes the upper-left corner of the
@@ -229,7 +233,7 @@ public abstract class UiElement {
     /**
      * Simulates a pinch in on the element. NOTE emulator devices may not detect pinch gestures on UI elements with size
      * smaller than 100x100dp.
-     * 
+     *
      * @return <code>true</code> if the pinch in is successful, <code>false</code> if it fails
      * @throws StaleElementReferenceException
      *         if the element has become stale before executing this method
@@ -262,7 +266,7 @@ public abstract class UiElement {
     /**
      * Simulates a pinch out on the element. NOTE emulator devices may not detect pinch gestures on UI elements with
      * size smaller than 100x100dp.
-     * 
+     *
      * @return <code>true</code> if the pinch out is successful, <code>false</code> if it fails
      * @throws StaleElementReferenceException
      *         if the element has become stale before executing this method
@@ -279,23 +283,103 @@ public abstract class UiElement {
     }
 
     /**
-     * Simulates dragging the UI widget until his upper-left corner stands at position (toX,toY) on the screen.
-     * <i><b>Warning: method not yet implemented!</b></i>
-     * 
-     * @param toX
-     *        - X-coordinate of the upper-left corner of the UI widget after the dragging is done
-     * @param toY
-     *        - Y-coordinate of the upper-left corner of the UI widget after the dragging is done
+     * Drags the element to the center of an element with given text
+     *
+     * @param destinationElementText
+     *        - the text of the destination element
+     * @return <code>true</code> if the dragging is successful, <code>false</code> if it fails
+     * @throws InvalidCssQueryException
+     *         when an invalid CSS query is used
+     */
+    public boolean drag(String destinationElementText)
+        throws XPathExpressionException,
+            UiElementFetchingException,
+            MultipleElementsFoundException,
+            InvalidCssQueryException {
+        Screen deviceScreen = onDevice.getActiveScreen();
+
+        UiElementSelector selector = new UiElementSelector();
+        selector.addSelectionAttribute(CssAttribute.TEXT, destinationElementText);
+
+        UiElement destinationElement = deviceScreen.getElement(selector);
+
+        Point startPoint = propertiesContainer.getBounds().getCenter();
+        Point endPoint = destinationElement.propertiesContainer.getBounds().getCenter();
+
+        return onDevice.drag(startPoint, endPoint);
+    }
+
+    /**
+     * Drags the element to the center of an element with given selector.
+     *
+     * @param destinationSelector
+     *        - selector of the destination element
+     * @return <code>true</code> if the dragging is successful, <code>false</code> if it fails
+     * @throws MultipleElementsFoundException
+     *         when selector's query finds multiple elements
+     * @throws InvalidCssQueryException
+     *         when an invalid CSS query is used
+     * @throws UiElementFetchingException
+     *         when trying to fetch UiElement but it does not exist on the screen
+     * @throws XPathExpressionException
+     *         when there is error in the Xpath expression
+     */
+    public boolean drag(UiElementSelector destinationSelector)
+        throws XPathExpressionException,
+            UiElementFetchingException,
+            InvalidCssQueryException,
+            MultipleElementsFoundException {
+        Screen deviceScreen = onDevice.getActiveScreen();
+
+        UiElement destinationElement = deviceScreen.getElement(destinationSelector);
+
+        Point startPoint = propertiesContainer.getBounds().getCenter();
+        Point endPoint = destinationElement.getProperties().getBounds().getCenter();
+
+        return onDevice.drag(startPoint, endPoint);
+    }
+
+    /**
+     * Drags the element to the center of another element.
+     *
+     * @param destinationElement
+     *        - destination element
+     * @return <code>true</code> if the dragging is successful, <code>false</code> if it fails
+     * @throws MultipleElementsFoundException
+     *         when selector's query finds multiple elements
+     * @throws InvalidCssQueryException
+     *         when an invalid CSS query is used
+     * @throws UiElementFetchingException
+     *         when trying to fetch UiElement but it does not exist on the screen
+     * @throws XPathExpressionException
+     *         when there is error in the Xpath expression
+     */
+    public boolean drag(UiElement destinationElement)
+        throws XPathExpressionException,
+            UiElementFetchingException,
+            InvalidCssQueryException,
+            MultipleElementsFoundException {
+        Point startPoint = propertiesContainer.getBounds().getCenter();
+        Point endPoint = destinationElement.getProperties().getBounds().getCenter();
+
+        return onDevice.drag(startPoint, endPoint);
+    }
+
+    /**
+     * Drags the element until his center point stands at (Point endPoint) on the screen.
+     *
+     * @param endPoint
+     *        - the point where we want to move the element
      * @return <code>true</code> if the dragging is successful, <code>false</code> if it fails
      */
-    public boolean drag(int toX, int toY) {
-        // TODO implement uiElement.drag()
-        return false;
+    public boolean drag(Point endPoint) {
+        Point startPoint = propertiesContainer.getBounds().getCenter();
+        return onDevice.drag(startPoint, endPoint);
     }
 
     /**
      * Simulates swiping this UiElement.
-     * 
+     *
      * @param swipeDirection
      *        - a {@link SwipeDirection}, describing the direction of the swipe.
      * @return <code>true</code> if the swiping is successful, <code>false</code> if it fails
@@ -311,7 +395,7 @@ public abstract class UiElement {
 
     /**
      * Swipes this element in particular direction.
-     * 
+     *
      * @param point
      *        -a {@link Point} the point from which the swipe start
      * @param direction
@@ -328,7 +412,7 @@ public abstract class UiElement {
 
     /**
      * Cuts the selected text from this element.
-     * 
+     *
      * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
      * @throws StaleElementReferenceException
      *         if the element has become stale before executing this method
@@ -341,7 +425,7 @@ public abstract class UiElement {
 
     /**
      * Copies the current selection of the content in this element.
-     * 
+     *
      * @return <code>true</code> if copy operation is successful, <code>false</code> if it fails
      * @throws StaleElementReferenceException
      *         if the element has become stale before executing this method
@@ -354,7 +438,7 @@ public abstract class UiElement {
 
     /**
      * Paste a copied text in this element.
-     * 
+     *
      * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
      * @throws StaleElementReferenceException
      *         if the element has become stale before executing this method
@@ -366,7 +450,7 @@ public abstract class UiElement {
 
     /**
      * Selects the content of this element.
-     * 
+     *
      * @return <code>true</code> if the text selecting is successful, <code>false</code> if it fails
      * @throws StaleElementReferenceException
      *         if the element has become stale before executing this method
@@ -389,7 +473,7 @@ public abstract class UiElement {
 
     /**
      * Clears the contents of this element.
-     * 
+     *
      * @return <code>true</code> if clear text is successful, <code>false</code> if it fails
      * @throws StaleElementReferenceException
      *         if the element has become stale before executing this method
@@ -404,7 +488,7 @@ public abstract class UiElement {
     /**
      * Inputs text into the UI Element, <b> if it supports text input </b> with interval in milliseconds between the
      * input of each letter.
-     * 
+     *
      * @param text
      *        - text to be input
      * @param intervalInMs
@@ -424,7 +508,7 @@ public abstract class UiElement {
 
     /**
      * Inputs text into the UI Element <b>if it supports text input</b>.
-     * 
+     *
      * @param text
      *        - text to be input
      * @return <code>true</code> if the text input is successful, <code>false</code> if it fails
@@ -437,7 +521,7 @@ public abstract class UiElement {
 
     /**
      * Focuses the current element.
-     * 
+     *
      * @return <code>true</code> if the focusing is successful, <code>false</code> if it fails
      * @throws StaleElementReferenceException
      *         if the element has become stale before executing this method
@@ -455,7 +539,7 @@ public abstract class UiElement {
 
     /**
      * Simulates long press on the current element with default timeout value.
-     * 
+     *
      * @return true, if operation is successful, and false otherwise
      * @throws StaleElementReferenceException
      *         if the element has become stale before executing this method
@@ -471,7 +555,7 @@ public abstract class UiElement {
 
     /**
      * Simulates long press on the current element with passed timeout value.
-     * 
+     *
      * @param timeout
      *        - time in ms for which the element should be held
      * @return true, if operation is successful, and false otherwise
@@ -488,7 +572,7 @@ public abstract class UiElement {
 
     /**
      * Simulates long press on given point inside the current {@link UiElement uielement} for given time.
-     * 
+     *
      * @param innerPoint
      *        - point, representing the relative coordinates of the point for long press, inside the element's bounds
      * @param timeout
@@ -516,7 +600,7 @@ public abstract class UiElement {
 
     /**
      * Attempts revalidation and if it fails throws exception.
-     * 
+     *
      * @throws StaleElementReferenceException
      *         if the revalidation fails
      */
@@ -547,7 +631,7 @@ public abstract class UiElement {
 
     /**
      * Used to get this {@link UiElement} as an image, using the bounds of the element.
-     * 
+     *
      * @return {@link Image} contained in the element's bounds
      * @throws IOException
      *         - if getting screenshot from the device fails
@@ -574,10 +658,10 @@ public abstract class UiElement {
 
     /**
      * Checks if this {@link UiElement} has the same properties as the passed one.
-     * 
+     *
      * @param object
      *        - the {@link UiElement} for comparison
-     * 
+     *
      * @return <code>true</code>, if this UiElement has the same properties as the passed <code>object</code> and
      *         <code>false</code> if the passed object is not an {@link UiElement} or differs from this
      *         {@link UiElement}
@@ -598,7 +682,7 @@ public abstract class UiElement {
 
     /**
      * Returns a hash code for this value.
-     * 
+     *
      * @return - the hashcode of this object
      * @see HashCodeBuilder
      */

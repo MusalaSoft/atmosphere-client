@@ -9,9 +9,9 @@ import com.musala.atmosphere.commons.util.Pair;
 
 /**
  * Serves to create {@link Gesture} later performed by the gesture player.
- * 
+ *
  * @author delyan.dimitrov
- * 
+ *
  */
 public class GestureCreator {
     private static int DOUBLE_TAP_INTERVAL = 150;
@@ -22,9 +22,13 @@ public class GestureCreator {
 
     private static int SWIPE_DISTANCE = 300;
 
+    private static int LONG_PRESS_INTERVAL = 2000;
+
+    private static int DRAG_DURATION = 3000;
+
     /**
      * Creates a double tap {@link Gesture} on the passed point.
-     * 
+     *
      * @param x
      *        - the x coordinate of the tap point
      * @param y
@@ -49,7 +53,7 @@ public class GestureCreator {
 
     /**
      * Creates a pinch in {@link Gesture}.
-     * 
+     *
      * @param firstFingerInitial
      *        - the initial position of the first finger performing the gesture
      * @param secondFingerInitial
@@ -74,7 +78,7 @@ public class GestureCreator {
 
     /**
      * Creates a pinch out {@link Gesture}.
-     * 
+     *
      * @param firstFingerEnd
      *        - the point where the first finger will be at the end of the pinch
      * @param secondFingerEnd
@@ -99,7 +103,7 @@ public class GestureCreator {
 
     /**
      * Creates a swipe gesture {@link Gesture} from passed point in passed direction.
-     * 
+     *
      * @param startPoint
      *        - the start point of the swipe
      * @param swipeDirection
@@ -138,7 +142,7 @@ public class GestureCreator {
 
     /**
      * Defines a {@link Timeline} for a scroll between two points with a given duration.
-     * 
+     *
      * @param from
      *        - the initial point of the motion
      * @param to
@@ -162,7 +166,7 @@ public class GestureCreator {
      * Defines a {@link Timeline} for a long press gesture. A {@link Timeline} represents a single finger gesture which
      * contains the {@link Anchor Anchor} points that the current pointer will traverse and represent a long press on a
      * Device.
-     * 
+     *
      * @param x
      *        - the x coordinate of the tap point;
      * @param y
@@ -180,5 +184,27 @@ public class GestureCreator {
         Gesture longPress = new Gesture();
         longPress.add(pressTimeline);
         return longPress;
+    }
+
+    /**
+     * Defines a {@link Timeline) for a drag and drop gesture. A {@link Timeline} represents a single finger gesture
+     * which contains the {$link Anchor Anchor} points that the current pointer will traverse and represent drag and
+     * drop on a Device.
+     *
+     * @param startPoint
+     *        - the starting point of the drag and drop gesture
+     * @param endPoint
+     *        - the destination point of the drag and drop gesture
+     * @return a {@link Gesture} representing a drag and drop on a device
+     */
+    public static Gesture createDrag(Point startPoint, Point endPoint) {
+        Timeline dragTimeline = new Timeline();
+        dragTimeline.add(new Anchor(startPoint.getX(), startPoint.getY(), 0));
+        dragTimeline.add(new Anchor(startPoint.getX(), startPoint.getY(), LONG_PRESS_INTERVAL));
+        dragTimeline.add(new Anchor(endPoint.getX(), endPoint.getY(), DRAG_DURATION));
+
+        Gesture dragAndDrop = new Gesture();
+        dragAndDrop.add(dragTimeline);
+        return dragAndDrop;
     }
 }

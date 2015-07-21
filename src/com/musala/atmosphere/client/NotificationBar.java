@@ -200,6 +200,22 @@ public class NotificationBar {
     }
 
     /**
+     * Finds the notifications in the notification bar that are matching the given selector. This function can only be
+     * used on a device with API 18 or higher.
+     * 
+     * @param selector
+     *        - an object of type {@link UiElementSelector}
+     * @return UiElements that are matching the found notifications
+     * @throws UiElementFetchingException
+     *         if element could not be found
+     */
+    public List<UiElement> getNotificationsBySelector(UiElementSelector selector) throws UiElementFetchingException {
+        Screen activeScreen = onDevice.getActiveScreen();
+
+        return activeScreen.getElements(selector);
+    }
+
+    /**
      * Finds a notification in the notification bar that matches the given text. This function can only be used on a
      * device with API 18 or higher.
      * 

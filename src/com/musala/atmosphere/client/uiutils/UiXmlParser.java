@@ -48,10 +48,11 @@ public class UiXmlParser {
         throws UiElementFetchingException,
             XPathExpressionException,
             MultipleElementsFoundException {
-        XPath x = XPathFactory.newInstance().newXPath();
-        XPathExpression expression = x.compile(xPathQuery);
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        XPathExpression expression = xPath.compile(xPathQuery);
 
         NodeList nodeList = (NodeList) expression.evaluate(domDocument, XPathConstants.NODESET);
+
         int foundElements = 0;
         if (nodeList == null || nodeList.getLength() == 0) {
             throw new UiElementFetchingException(String.format("No element found for the XPath expression %s.",

@@ -1048,7 +1048,7 @@ public class Device {
      *         when the package or activity is invalid.
      */
     public boolean startActivity(String packageName, String activityName, boolean unlockDevice)
-            throws ActivityStartingException {
+        throws ActivityStartingException {
         if (unlockDevice) {
             setLockState(false);
         }
@@ -1586,5 +1586,20 @@ public class Device {
      */
     private void openLocationSettings() {
         communicator.sendAction(RoutingAction.OPEN_LOCATION_SETTINGS);
+    }
+
+    /**
+     * Gets the text of the last detected toast message.
+     *
+     * @return the text of the last toast message or <code>null</code> if such is not detected yet
+     */
+    public String getLastToast() {
+        Object response = communicator.sendAction(RoutingAction.GET_LAST_TOAST);
+
+        if (!(response instanceof String)) {
+            return null;
+        }
+
+        return (String) response;
     }
 }

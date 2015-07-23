@@ -35,6 +35,7 @@ public class UiElementAttributeExtractor {
         descriptor.setScrollable(selector.getBooleanValue(CssAttribute.SCROLLABLE));
         descriptor.setSelected(selector.getBooleanValue(CssAttribute.SELECTED));
         descriptor.setText(selector.getStringValue(CssAttribute.TEXT));
+        descriptor.setResourceId(selector.getStringValue(CssAttribute.RESOURCE_ID));
         return descriptor;
     }
 }

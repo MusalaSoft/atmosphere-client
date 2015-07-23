@@ -1641,6 +1641,21 @@ public class Device {
     }
 
     /**
+     * Gets the text of the last detected toast message.
+     *
+     * @return the text of the last toast message or <code>null</code> if such is not detected yet
+     */
+    public String getLastToast() {
+        Object response = communicator.sendAction(RoutingAction.GET_LAST_TOAST);
+
+        if (!(response instanceof String)) {
+            return null;
+        }
+
+        return (String) response;
+    }
+
+    /**
      * Shows the tap location on the current device screen.
      * 
      * @param point

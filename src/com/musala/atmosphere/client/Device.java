@@ -1294,19 +1294,17 @@ public class Device {
     }
 
     /**
-     * Stop a background process by given package.
+     * Stops a background process by given package.
      *
      * @param packageName
      *        - contains the package of the process.
-     * @return - true, if execution of the command is successful, and false otherwise.
      *
      * @Note Can not be used on system processes.
      * @Note This method kills only processes that are safe to kill and that will not impact the user experience.
      * @Note Usage of this method on a process that contains service will result in process restart.
      */
-    public boolean stopBackgroundProcess(String packageName) {
-        Object response = communicator.sendAction(RoutingAction.STOP_BACKGROUND_PROCESS, packageName);
-        return response == DeviceCommunicator.VOID_SUCCESS;
+    public void stopBackgroundProcess(String packageName) {
+        communicator.sendAction(RoutingAction.STOP_BACKGROUND_PROCESS, packageName);
     }
 
     /**

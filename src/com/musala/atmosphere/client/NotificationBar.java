@@ -30,12 +30,20 @@ public class NotificationBar {
 
     private static final String NO_NOTIFICATION_MESSAGE = "No notification matched the passes XPath query: %s";
 
+    private UiElementSelector notificationBarSelector;
+
+    private static final String NOTIFICATION_BAR_RESOURCE_ID = "com.android.systemui:id/notification_panel";
+
     private static final Logger LOGGER = Logger.getLogger(NotificationBar.class);
+
+    private static final int OPEN_NOTIFICATION_BAR_TIMEOUT = 5_000;
 
     private Device onDevice = null;
 
     public NotificationBar(Device onDevice) throws XPathExpressionException, UiElementFetchingException {
         this.onDevice = onDevice;
+        notificationBarSelector = new UiElementSelector();
+        notificationBarSelector.addSelectionAttribute(CssAttribute.RESOURCE_ID, NOTIFICATION_BAR_RESOURCE_ID);
     }
 
     /**
@@ -45,7 +53,9 @@ public class NotificationBar {
      * @return true if the opening of the notification bar was successful, false otherwise
      */
     public boolean open() {
-        return onDevice.openNotificationBar();
+        onDevice.openNotificationBar();
+        Screen deviceActiveScreen = onDevice.getActiveScreen();
+        return deviceActiveScreen.waitForElementExists(notificationBarSelector, OPEN_NOTIFICATION_BAR_TIMEOUT);
     }
 
     /**
@@ -121,7 +131,6 @@ public class NotificationBar {
         String missingNotificationError = String.format(NO_NOTIFICATION_MESSAGE, xPathQuery);
 
         try {
-
             Screen deviceActiveScreen = onDevice.getActiveScreen();
             XmlNodeUiElement notificationBarElement = deviceActiveScreen.getElementByXPath(NOTIFICATION_BAR_XPATH_QUERY);
             List<XmlNodeUiElement> childrenNotifications = notificationBarElement.getChildrenByXPath(xPathQuery);

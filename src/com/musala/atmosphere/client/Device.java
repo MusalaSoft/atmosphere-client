@@ -40,6 +40,7 @@ import com.musala.atmosphere.commons.beans.DeviceProximity;
 import com.musala.atmosphere.commons.beans.MobileDataState;
 import com.musala.atmosphere.commons.beans.PhoneNumber;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
+import com.musala.atmosphere.commons.connectivity.WifiConnectionProperties;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
@@ -1671,5 +1672,22 @@ public class Device {
      */
     public void clearApplicationData(String packageName) {
         communicator.sendAction(RoutingAction.CLEAR_APP_DATA, packageName);
+    }
+
+    /**
+     * Sets WiFI connection properties for this device.
+     * 
+     * @param connectionProperties
+     *        - {@link properties WifiConnectionProperties} of the WiFi connection to be set
+     */
+    public void setWifiConnectionProperties(WifiConnectionProperties connectionProperties) {
+        communicator.sendAction(RoutingAction.SHAPE_DEVICE, connectionProperties);
+    }
+
+    /**
+     * Restores WifI connection properties for this device.
+     */
+    public void restoreWifiConnectionProperties() {
+        communicator.sendAction(RoutingAction.UNSHAPE_DEVICE);
     }
 }

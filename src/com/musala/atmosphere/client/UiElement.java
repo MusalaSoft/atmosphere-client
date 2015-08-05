@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
+import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Bounds;
@@ -23,6 +24,7 @@ import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.ui.UiElementPropertiesContainer;
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
+import com.musala.atmosphere.commons.util.Pair;
 
 /**
  * Used to access and manipulate certain views on the testing device, for example tapping, double-taping or holding
@@ -72,7 +74,7 @@ public abstract class UiElement {
 
     /**
      * Gets all direct children of a {@link UiElement} that match the given {@link UiElementSelector}.
-     * 
+     *
      * @return list, containing all {@link UiElement UI elements} matching the {@link UiElementSelector selector} and
      *         directly ascend the current {@link UiElement}
      */
@@ -355,8 +357,7 @@ public abstract class UiElement {
      *         when there is error in the Xpath expression
      */
     public boolean drag(UiElement destinationElement)
-        throws XPathExpressionException,
-            UiElementFetchingException,
+        throws UiElementFetchingException,
             InvalidCssQueryException,
             MultipleElementsFoundException {
         Point startPoint = propertiesContainer.getBounds().getCenter();
@@ -630,7 +631,7 @@ public abstract class UiElement {
     }
 
     /**
-     * Used to get this {@link UiElement} as an image, using the bounds of the element.
+     * Crops this {@link UiElement} as an image, using the bounds of the element.
      *
      * @return {@link Image} contained in the element's bounds
      * @throws IOException
@@ -643,17 +644,11 @@ public abstract class UiElement {
 
         Bounds elementBounds = propertiesContainer.getBounds();
 
-        Point upperLeftCorner = elementBounds.getUpperLeftCorner();
+        Pair<Integer, Integer> resolution = onDevice.getInformation().getResolution();
+        ScreenOrientation screenOrientation = onDevice.getScreenOrientation();
 
-        int upperLeftCornerPointX = upperLeftCorner.getX();
-        int upperLeftCornerPointY = upperLeftCorner.getY();
-        int elementWidth = elementBounds.getWidth();
-        int elementHeight = elementBounds.getHeight();
-        BufferedImage croppedImage = bufferedImage.getSubimage(upperLeftCornerPointX,
-                                                               upperLeftCornerPointY,
-                                                               elementWidth,
-                                                               elementHeight);
-        return new Image(croppedImage);
+        Image newImage = new Image(bufferedImage);
+        return newImage.getSubimage(elementBounds, screenOrientation, resolution);
     }
 
     /**

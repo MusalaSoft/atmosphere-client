@@ -11,6 +11,15 @@ import com.musala.atmosphere.commons.ui.selector.WebElementSelectionCriterion;
  *
  */
 public abstract class WebElement {
+    protected Device device;
+
+    protected DeviceCommunicator deviceCommunicator;
+
+    WebElement(Device device) {
+        this.device = device;
+        this.deviceCommunicator = device.getCommunicator();
+    }
+
     /**
      * Finds {@link UiWebElement} within the current {@link WebElement} by the given
      * {@link WebElementSelectionCriterion selection criterion} and the corresponding value.

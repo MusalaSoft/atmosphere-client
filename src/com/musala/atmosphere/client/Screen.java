@@ -681,4 +681,16 @@ public class Screen {
         updateScreen();
         return response;
     }
+
+    /**
+     * Gets the present {@link WebView} on the active screen.
+     * 
+     * @param packageName
+     *        - package of the application from which the {@link WebView} will be selected
+     * @return the present {@link WebView} on the active screen
+     */
+    public WebView getWebView(String packageName) {
+        communicator.sendAction(RoutingAction.GET_WEB_VIEW, packageName);
+        return new WebView(onDevice);
+    }
 }

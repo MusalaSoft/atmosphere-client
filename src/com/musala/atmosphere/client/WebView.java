@@ -11,4 +11,7 @@ public class WebView extends WebElement {
     // TODO: Some additional fields and information might be kept in the class after the prototype supports more than
     // one WebView visible on the screen.
 
+    WebView(Device device) {
+        super(device);
+    }
 }

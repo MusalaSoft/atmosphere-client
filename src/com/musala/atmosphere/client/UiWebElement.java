@@ -13,13 +13,11 @@ import com.musala.atmosphere.commons.util.Pair;
  */
 public class UiWebElement extends WebElement {
 
-    Map<String, String> elementProperties;
-
-    DeviceCommunicator deviceCommunicator;
+    private Map<String, String> elementProperties;
 
     UiWebElement(Device device, Map<String, String> elementProperties) {
+        super(device);
         this.elementProperties = elementProperties;
-        deviceCommunicator = device.getCommunicator();
     }
 
     /**

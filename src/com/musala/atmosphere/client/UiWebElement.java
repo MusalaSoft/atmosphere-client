@@ -1,12 +1,14 @@
 package com.musala.atmosphere.client;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.util.Pair;
 import com.musala.atmosphere.commons.webelement.actions.WebElementActions;
+import com.musala.atmosphere.commons.webelement.selection.WebElementSelectionCriterion;
 
 /**
  * Represents element in the {@link WebView} containing all possible interaction functionality we can execute on it.
@@ -18,9 +20,18 @@ public class UiWebElement extends WebElement {
 
     private Map<String, Object> elementProperties;
 
-    UiWebElement(Device device, Map<String, Object> elementProperties) {
+    private WebElementSelectionCriterion selectionCriterion;
+
+    private String criterionValue;
+
+    UiWebElement(Device device,
+            Map<String, Object> elementProperties,
+            WebElementSelectionCriterion selectionCriterion,
+            String criterionValue) {
         super(device);
         this.elementProperties = elementProperties;
+        this.selectionCriterion = selectionCriterion;
+        this.criterionValue = criterionValue;
     }
 
     /**
@@ -98,9 +109,8 @@ public class UiWebElement extends WebElement {
      * @return the attribute/property's current value or <code>null</code> if the value is not set or the key is not
      *         present
      */
-    public String getAttribute(String attributeKey) {
-        // TODO Implement the method
-        return null;
+    public Object getAttribute(String attributeKey) {
+        return elementProperties.get(attributeKey);
     }
 
     /**
@@ -180,6 +190,18 @@ public class UiWebElement extends WebElement {
      * @return the innerText of this element
      */
     public String getText() {
+        // TODO Implement the method
+        return null;
+    }
+
+    @Override
+    public UiWebElement findElement(WebElementSelectionCriterion selectionCriterion, String criterionValue) {
+        // TODO Implement the method
+        return null;
+    }
+
+    @Override
+    public List<UiWebElement> findElements(WebElementSelectionCriterion selectionCriterion, String criterionValue) {
         // TODO Implement the method
         return null;
     }

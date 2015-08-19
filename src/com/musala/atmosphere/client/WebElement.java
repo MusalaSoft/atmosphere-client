@@ -2,7 +2,7 @@ package com.musala.atmosphere.client;
 
 import java.util.List;
 
-import com.musala.atmosphere.commons.ui.selector.WebElementSelectionCriterion;
+import com.musala.atmosphere.commons.webelement.selection.WebElementSelectionCriterion;
 
 /**
  * Contains the common logic between {@link UiWebElement} and WebView.
@@ -26,10 +26,7 @@ public abstract class WebElement {
      * 
      * @return the wanted element
      */
-    UiWebElement findElement(WebElementSelectionCriterion selectionCriterion, String criterionValue) {
-        // TODO Implement the method
-        return null;
-    }
+    public abstract UiWebElement findElement(WebElementSelectionCriterion selectionCriterion, String criterionValue);
 
     /**
      * Finds {@link UiWebElement UiWebElements} within the current {@link WebElement} by the given
@@ -37,8 +34,6 @@ public abstract class WebElement {
      * 
      * @return the wanted element
      */
-    List<UiWebElement> findElements(WebElementSelectionCriterion selectionCriterion, String criterionValue) {
-        // TODO Implement the method
-        return null;
-    }
+    public abstract List<UiWebElement> findElements(WebElementSelectionCriterion selectionCriterion,
+                                                    String criterionValue);
 }

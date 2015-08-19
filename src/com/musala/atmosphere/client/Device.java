@@ -294,7 +294,7 @@ public class Device {
 
     /**
      * Gets a list with all UI elements present on the {@link Screen active screen} and matching the given selector.
-     * 
+     *
      * @param selector
      *        - contains the matching criteria
      * @param visibleOnly
@@ -1554,7 +1554,7 @@ public class Device {
 
     /**
      * Checks if any audio is currently playing on the device.
-     * 
+     *
      * @return <code>true</code> if an audio is playing, <code>false</code> otherwise
      */
     public Boolean isAudioPlaying() {
@@ -1656,7 +1656,7 @@ public class Device {
 
     /**
      * Shows the tap location on the current device screen.
-     * 
+     *
      * @param point
      *        - the point where the tap will be placed
      */
@@ -1666,7 +1666,7 @@ public class Device {
 
     /**
      * Clears the data of a given application.
-     * 
+     *
      * @param packageName
      *        - the package name of the application
      */
@@ -1676,18 +1676,21 @@ public class Device {
 
     /**
      * Sets WiFI connection properties for this device.
-     * 
+     *
      * @param connectionProperties
      *        - {@link properties WifiConnectionProperties} of the WiFi connection to be set
+     * @return <code>true</code> if Wifi properties are set, <code>false</code> otherwise
      */
-    public void setWifiConnectionProperties(WifiConnectionProperties connectionProperties) {
-        communicator.sendAction(RoutingAction.SHAPE_DEVICE, connectionProperties);
+    public Boolean setWifiConnectionProperties(WifiConnectionProperties connectionProperties) {
+        return (Boolean) communicator.sendAction(RoutingAction.SHAPE_DEVICE, connectionProperties);
     }
 
     /**
      * Restores WifI connection properties for this device.
+     *
+     * @return <code>true</code> if Wifi properties are restored, <code>false</code> otherwise
      */
-    public void restoreWifiConnectionProperties() {
-        communicator.sendAction(RoutingAction.UNSHAPE_DEVICE);
+    public Boolean restoreWifiConnectionProperties() {
+        return (Boolean) communicator.sendAction(RoutingAction.UNSHAPE_DEVICE);
     }
 }

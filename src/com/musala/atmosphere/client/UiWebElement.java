@@ -1,9 +1,12 @@
 package com.musala.atmosphere.client;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.util.Pair;
+import com.musala.atmosphere.commons.webelement.actions.WebElementActions;
 
 /**
  * Represents element in the {@link WebView} containing all possible interaction functionality we can execute on it.
@@ -13,9 +16,9 @@ import com.musala.atmosphere.commons.util.Pair;
  */
 public class UiWebElement extends WebElement {
 
-    private Map<String, String> elementProperties;
+    private Map<String, Object> elementProperties;
 
-    UiWebElement(Device device, Map<String, String> elementProperties) {
+    UiWebElement(Device device, Map<String, Object> elementProperties) {
         super(device);
         this.elementProperties = elementProperties;
     }
@@ -101,6 +104,16 @@ public class UiWebElement extends WebElement {
     }
 
     /**
+     * Get the values of all attributes of the element.
+     * 
+     * @return Map containing the element attributes and their values
+     */
+    public Map<String, Object> getAttributes() {
+        return (Map<String, Object>) deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
+                                                                   WebElementActions.GET_ATTRIBUTES);
+    }
+
+    /**
      * Is the element currently enabled or not? This will generally return true for everything but disabled input
      * elements.
      * 
@@ -169,5 +182,12 @@ public class UiWebElement extends WebElement {
     public String getText() {
         // TODO Implement the method
         return null;
+    }
+
+    /**
+     * Updates the attributes container of the element.
+     */
+    private void revalidate() {
+        elementProperties = new HashMap<String, Object>(getAttributes());
     }
 }

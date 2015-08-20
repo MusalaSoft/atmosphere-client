@@ -7,7 +7,7 @@ import java.util.Map;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.util.Pair;
-import com.musala.atmosphere.commons.webelement.actions.WebElementActions;
+import com.musala.atmosphere.commons.webelement.actions.WebElementAction;
 import com.musala.atmosphere.commons.webelement.selection.WebElementSelectionCriterion;
 
 /**
@@ -120,7 +120,9 @@ public class UiWebElement extends WebElement {
      */
     public Map<String, Object> getAttributes() {
         return (Map<String, Object>) deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
-                                                                   WebElementActions.GET_ATTRIBUTES);
+                                                                   WebElementAction.GET_ATTRIBUTES,
+                                                                   selectionCriterion,
+                                                                   criterionValue);
     }
 
     /**
@@ -130,8 +132,7 @@ public class UiWebElement extends WebElement {
      * @return <code>true</code> if the element is enabled, <code>false</code> otherwise
      */
     public boolean isEnabled() {
-        // TODO Implement the method
-        return true;
+        return !elementProperties.containsKey("disabled");
     }
 
     /**
@@ -141,8 +142,10 @@ public class UiWebElement extends WebElement {
      * @return <code>true</code> if the element is selected, <code>false</code> otherwise
      */
     public boolean isSelected() {
-        // TODO Implement the method
-        return true;
+        return (boolean) deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
+                                                       WebElementAction.IS_SELECTED,
+                                                       selectionCriterion,
+                                                       criterionValue);
     }
 
     /**
@@ -151,8 +154,10 @@ public class UiWebElement extends WebElement {
      * @return <code>true</code> if the element is disabled, <code>false</code> otherwise
      */
     public boolean isDisplayed() {
-        // TODO Implement the method
-        return true;
+        return (boolean) deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
+                                                       WebElementAction.IS_DISPLAYED,
+                                                       selectionCriterion,
+                                                       criterionValue);
     }
 
     /**
@@ -179,8 +184,7 @@ public class UiWebElement extends WebElement {
      * @return the tag name of the element
      */
     public String getTagName() {
-        // TODO Implement the method
-        return null;
+        return elementProperties.get("tag").toString();
     }
 
     /**

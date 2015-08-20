@@ -119,10 +119,7 @@ public class UiWebElement extends WebElement {
      * @return Map containing the element attributes and their values
      */
     public Map<String, Object> getAttributes() {
-        return (Map<String, Object>) deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
-                                                                   WebElementAction.GET_ATTRIBUTES,
-                                                                   selectionCriterion,
-                                                                   criterionValue);
+        return elementProperties;
     }
 
     /**
@@ -184,7 +181,10 @@ public class UiWebElement extends WebElement {
      * @return the tag name of the element
      */
     public String getTagName() {
-        return elementProperties.get("tag").toString();
+        return (String) deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
+                                                      WebElementAction.GET_TAG_NAME,
+                                                      selectionCriterion,
+                                                      criterionValue);
     }
 
     /**

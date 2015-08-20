@@ -781,6 +781,7 @@ public class Device {
 
     void release() {
         stopScreenRecording();
+        closeChromeDriver();
         communicator.release();
     }
 
@@ -1671,5 +1672,12 @@ public class Device {
      */
     public void clearApplicationData(String packageName) {
         communicator.sendAction(RoutingAction.CLEAR_APP_DATA, packageName);
+    }
+
+    /**
+     * Closes the instance of the Chrome driver that is currently in use.
+     */
+    private void closeChromeDriver() {
+        communicator.sendAction(RoutingAction.CLOSE_CHROME_DRIVER);
     }
 }

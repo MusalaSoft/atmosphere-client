@@ -202,8 +202,10 @@ public class UiWebElement extends WebElement {
      * @return the innerText of this element
      */
     public String getText() {
-        // TODO Implement the method
-        return null;
+        return (String) deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
+                                                      WebElementAction.GET_TEXT,
+                                                      selectionCriterion,
+                                                      criterionValue);
     }
 
     @Override

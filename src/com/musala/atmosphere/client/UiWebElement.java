@@ -68,9 +68,12 @@ public class UiWebElement extends WebElement {
      * 
      * @return {@link Pair} containing the size of the element
      */
+    @SuppressWarnings("unchecked")
     public Pair<Integer, Integer> getSize() {
-        // TODO Implement the method
-        return null;
+        return (Pair<Integer, Integer>) deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
+                                                                      WebElementAction.GET_SIZE,
+                                                                      selectionCriterion,
+                                                                      criterionValue);
     }
 
     /**
@@ -159,11 +162,10 @@ public class UiWebElement extends WebElement {
 
     /**
      * Get the value of a given CSS property. Color values should be returned as rgba strings, so, for example if the
-     * "background-color" property is set as "green" in the HTML source, the returned value will be
-     * "rgba(0, 255, 0, 1)". Note that shorthand CSS properties (e.g. background, font, border, border-top, margin,
-     * margin-top, padding, padding-top, list-style, outline, pause, cue) are not returned, in accordance with the DOM
-     * CSS2 specification - you should directly access the longhand properties (e.g. background-color) to access the
-     * desired values.
+     * "background-color" property is set as "green" in the HTML source, the returned value will be "rgba(0, 255, 0, 1)"
+     * . Note that shorthand CSS properties (e.g. background, font, border, border-top, margin, margin-top, padding,
+     * padding-top, list-style, outline, pause, cue) are not returned, in accordance with the DOM CSS2 specification -
+     * you should directly access the longhand properties (e.g. background-color) to access the desired values.
      * 
      * @param key
      *        - by which the property will be selected
@@ -175,8 +177,8 @@ public class UiWebElement extends WebElement {
     }
 
     /**
-     * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element <input
-     * name="foo" />.
+     * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element
+     * <input name="foo" />.
      * 
      * @return the tag name of the element
      */

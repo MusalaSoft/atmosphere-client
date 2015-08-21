@@ -1,6 +1,5 @@
 package com.musala.atmosphere.client;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +38,11 @@ public class UiWebElement extends WebElement {
      * loaded.
      */
     public void tap() {
-        // TODO Implement the method
+        revalidate();
+        deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
+                                      WebElementAction.TAP,
+                                      selectionCriterion,
+                                      criterionValue);
     }
 
     /**
@@ -113,6 +116,7 @@ public class UiWebElement extends WebElement {
      *         present
      */
     public Object getAttribute(String attributeKey) {
+        revalidate();
         return elementProperties.get(attributeKey);
     }
 
@@ -122,6 +126,7 @@ public class UiWebElement extends WebElement {
      * @return Map containing the element attributes and their values
      */
     public Map<String, Object> getAttributes() {
+        revalidate();
         return elementProperties;
     }
 
@@ -132,6 +137,7 @@ public class UiWebElement extends WebElement {
      * @return <code>true</code> if the element is enabled, <code>false</code> otherwise
      */
     public boolean isEnabled() {
+        revalidate();
         return !elementProperties.containsKey("disabled");
     }
 
@@ -216,6 +222,8 @@ public class UiWebElement extends WebElement {
      * Updates the attributes container of the element.
      */
     private void revalidate() {
-        elementProperties = new HashMap<String, Object>(getAttributes());
+        elementProperties = (Map<String, Object>) deviceCommunicator.sendAction(RoutingAction.FIND_WEB_ELEMENT,
+                                                                                selectionCriterion,
+                                                                                criterionValue);
     }
 }

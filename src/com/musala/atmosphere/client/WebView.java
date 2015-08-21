@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
+import com.musala.atmosphere.client.util.webview.WebElementSelectionCriterionConverter;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.webelement.selection.WebElementSelectionCriterion;
 
@@ -39,8 +41,24 @@ public class WebView extends WebElement {
                                                                                                              selectionCriterion,
                                                                                                              criterionValue);
 
+        int index = 1;
         for (Map<String, Object> elementAttributes : attributesList) {
-            webElements.add(new UiWebElement(device, elementAttributes, selectionCriterion, criterionValue));
+            UiWebElement webElement;
+
+            try {
+                String xpathCriterionValue = WebElementSelectionCriterionConverter.convertToXpathQuery(selectionCriterion,
+                                                                                                  criterionValue,
+                                                                                                  index);
+                webElement = new UiWebElement(device,
+                                              elementAttributes,
+                                              WebElementSelectionCriterion.XPATH,
+                                              xpathCriterionValue);
+            } catch (InvalidCssQueryException e) {
+                webElement = new UiWebElement(device, elementAttributes, selectionCriterion, criterionValue);
+            }
+
+            webElements.add(webElement);
+            index++;
         }
 
         return webElements;

@@ -80,13 +80,31 @@ public class UiWebElement extends WebElement {
     }
 
     /**
-     * Simulates typing on the element.
-     * 
+     * Inputs text into the Web Element <b>if it supports text input</b>.
+     *
      * @param text
-     *        - text, which will be typed on the element
+     *        - text to input
+     * @return <code>true</code> if the text input is successful, <code>false</code> if it fails
      */
-    public void inputText(String text) {
-        // TODO Implement the method
+    public boolean inputText(String text) {
+        return inputText(text, 0);
+    }
+
+    /**
+     * Inputs text into the Web Element, <b> if it supports text input </b> with interval in milliseconds between the
+     * input of each symbol.
+     *
+     * @param text
+     *        - text to input
+     * @param interval
+     *        - interval in milliseconds between the input of each symbol
+     * @return <code>true</code> if the text input is successful, <code>false</code> if it fails
+     */
+    public boolean inputText(String text, long interval) {
+        revalidate();
+        focus();
+
+        return device.inputText(text, interval);
     }
 
     /**
@@ -183,8 +201,8 @@ public class UiWebElement extends WebElement {
     }
 
     /**
-     * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element
-     * <input name="foo" />.
+     * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element <input
+     * name="foo" />.
      * 
      * @return the tag name of the element
      */
@@ -227,5 +245,15 @@ public class UiWebElement extends WebElement {
         elementProperties = (Map<String, Object>) deviceCommunicator.sendAction(RoutingAction.FIND_WEB_ELEMENT,
                                                                                 selectionCriterion,
                                                                                 criterionValue);
+    }
+
+    /**
+     * Focuses the current web element.
+     */
+    private void focus() {
+        deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
+                                      WebElementAction.FOCUS,
+                                      selectionCriterion,
+                                      criterionValue);
     }
 }

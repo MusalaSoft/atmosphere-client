@@ -59,11 +59,13 @@ public class UiWebElement extends WebElement {
     /**
      * Gets the upper left corner location of the element relative to the {@link WebView} that contains the element.
      * 
-     * @return {@link Point} containing the relative position of the element
+     * @return {@link Point} representing the relative position of the element
      */
-    public Point getPosition() {
-        // TODO Implement the method
-        return null;
+    public Point getRelativePosition() {
+        return (Point) deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
+                                                              WebElementAction.GET_POSITION,
+                                                              selectionCriterion,
+                                                     criterionValue);
     }
 
     /**

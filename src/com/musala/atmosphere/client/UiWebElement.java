@@ -52,8 +52,11 @@ public class UiWebElement extends WebElement {
      * using something like inputText(String) with the backspace key. To ensure you get a change event, consider
      * following with a call to inputText(String) with the tab key.
      */
-    public void clearText() {
-        // TODO Implement the method
+    public boolean clearText() {
+        revalidate();
+        focus();
+        device.selectAllText();
+        return device.clearText();
     }
 
     /**
@@ -63,8 +66,8 @@ public class UiWebElement extends WebElement {
      */
     public Point getRelativePosition() {
         return (Point) deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
-                                                              WebElementAction.GET_POSITION,
-                                                              selectionCriterion,
+                                                     WebElementAction.GET_POSITION,
+                                                     selectionCriterion,
                                                      criterionValue);
     }
 
@@ -203,8 +206,8 @@ public class UiWebElement extends WebElement {
     }
 
     /**
-     * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element <input
-     * name="foo" />.
+     * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element
+     * <input name="foo" />.
      * 
      * @return the tag name of the element
      */

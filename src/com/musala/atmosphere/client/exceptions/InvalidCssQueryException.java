@@ -9,7 +9,7 @@ import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
  * @author simeon.ivanov
  * 
  */
-public class InvalidCssQueryException extends Exception {
+public class InvalidCssQueryException extends RuntimeException {
     /**
      * auto generated serialization id
      */

@@ -19,10 +19,6 @@ public class UiWebElement extends WebElement {
 
     private Map<String, Object> elementProperties;
 
-    private WebElementSelectionCriterion selectionCriterion;
-
-    private String criterionValue;
-
     UiWebElement(Device device,
             Map<String, Object> elementProperties,
             WebElementSelectionCriterion selectionCriterion,
@@ -211,8 +207,8 @@ public class UiWebElement extends WebElement {
     }
 
     /**
-     * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element <input
-     * name="foo" />.
+     * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element
+     * <input name="foo" />.
      * 
      * @return the tag name of the element
      */
@@ -234,12 +230,6 @@ public class UiWebElement extends WebElement {
                                                       WebElementAction.GET_TEXT,
                                                       selectionCriterion,
                                                       criterionValue);
-    }
-
-    @Override
-    public UiWebElement findElement(WebElementSelectionCriterion selectionCriterion, String criterionValue) {
-        // TODO Implement the method
-        return null;
     }
 
     @Override

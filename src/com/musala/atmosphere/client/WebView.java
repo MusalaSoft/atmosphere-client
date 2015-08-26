@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.util.webview.WebElementSelectionCriterionConverter;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.webelement.selection.WebElementSelectionCriterion;
@@ -26,15 +25,6 @@ public class WebView extends WebElement {
 
     @SuppressWarnings("unchecked")
     @Override
-    public UiWebElement findElement(WebElementSelectionCriterion selectionCriterion, String criterionValue) {
-        Map<String, Object> attributes = (Map<String, Object>) deviceCommunicator.sendAction(RoutingAction.FIND_WEB_ELEMENT,
-                                                                                             selectionCriterion,
-                                                                                             criterionValue);
-        return new UiWebElement(device, attributes, selectionCriterion, criterionValue);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
     public List<UiWebElement> findElements(WebElementSelectionCriterion selectionCriterion, String criterionValue) {
         List<UiWebElement> webElements = new ArrayList<UiWebElement>();
         List<Map<String, Object>> attributesList = (List<Map<String, Object>>) deviceCommunicator.sendAction(RoutingAction.FIND_WEB_ELEMENTS,
@@ -43,20 +33,13 @@ public class WebView extends WebElement {
 
         int index = 1;
         for (Map<String, Object> elementAttributes : attributesList) {
-            UiWebElement webElement;
-
-            try {
-                String xpathCriterionValue = WebElementSelectionCriterionConverter.convertToXpathQuery(selectionCriterion,
-                                                                                                  criterionValue,
-                                                                                                  index);
-                webElement = new UiWebElement(device,
-                                              elementAttributes,
-                                              WebElementSelectionCriterion.XPATH,
-                                              xpathCriterionValue);
-            } catch (InvalidCssQueryException e) {
-                webElement = new UiWebElement(device, elementAttributes, selectionCriterion, criterionValue);
-            }
-
+            String xpathCriterionValue = WebElementSelectionCriterionConverter.convertToXpathQuery(selectionCriterion,
+                                                                                                   criterionValue,
+                                                                                                   index);
+            UiWebElement webElement = new UiWebElement(device,
+                                                       elementAttributes,
+                                                       WebElementSelectionCriterion.XPATH,
+                                                       xpathCriterionValue);
             webElements.add(webElement);
             index++;
         }

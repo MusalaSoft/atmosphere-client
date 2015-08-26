@@ -38,31 +38,40 @@ public class WebElementSelectionCriterionConverter {
     public static String convertToXpathQuery(WebElementSelectionCriterion selectionCriterion,
                                              String criterionValue,
                                              int index) throws InvalidCssQueryException {
-        String xpathQuery = null;
+        String xpathQuery = convertToXpathQuery(selectionCriterion, criterionValue);
 
+        return xpathQuery != null ? String.format(ELEMENT_AT_INDEX_PATTERN, xpathQuery, index) : null;
+    }
+
+    /**
+     * Converts the given {@link WebElementSelectionCriterion selection criterion} to xpath query.
+     * 
+     * @param selectionCriterion
+     *        - type of the selection criterion
+     * @param criterionValue
+     *        - value that is used for matching
+     * @return the converted xpath query
+     * @throws InvalidCssQueryException
+     *         if {@link WebElementSelectionCriterion selection criterion} is set to CSS_SELECTOR and the query is
+     *         invalid
+     */
+    public static String convertToXpathQuery(WebElementSelectionCriterion selectionCriterion, String criterionValue) {
         switch (selectionCriterion) {
             case TAG:
-                xpathQuery = String.format(TAG_PATTERN, criterionValue);
-                break;
+                return String.format(TAG_PATTERN, criterionValue);
             case ID:
             case NAME:
             case CLASS:
             case LINK:
-                xpathQuery = String.format(ATTRIBUTE_PATTERN, selectionCriterion.getName(), criterionValue);
-                break;
+                return String.format(ATTRIBUTE_PATTERN, selectionCriterion.getName(), criterionValue);
             case PARTIAL_LINK:
-                xpathQuery = String.format(PARTIAL_LINK_PATTERN, selectionCriterion.getName(), criterionValue);
-                break;
+                return String.format(PARTIAL_LINK_PATTERN, selectionCriterion.getName(), criterionValue);
             case CSS_SELECTOR:
-                xpathQuery = CssToXPathConverter.convertCssToXPath(criterionValue);
-                break;
+                return CssToXPathConverter.convertCssToXPath(criterionValue);
             case XPATH:
-                xpathQuery = criterionValue;
-                break;
+                return criterionValue;
             default:
-                break;
+                return null;
         }
-
-        return xpathQuery != null ? String.format(ELEMENT_AT_INDEX_PATTERN, xpathQuery, index) : null;
     }
 }

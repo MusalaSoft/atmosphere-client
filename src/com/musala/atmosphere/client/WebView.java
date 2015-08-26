@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.musala.atmosphere.client.util.webview.WebElementSelectionCriterionConverter;
 import com.musala.atmosphere.commons.RoutingAction;
+import com.musala.atmosphere.commons.webelement.action.WebElementWaitCondition;
 import com.musala.atmosphere.commons.webelement.selection.WebElementSelectionCriterion;
 
 /**
@@ -45,5 +46,27 @@ public class WebView extends WebElement {
         }
 
         return webElements;
+    }
+
+    /**
+     * Waits for the existence of a given {@link UiWebElement} with a given timeout.
+     * 
+     * @param selectionCriterion
+     *        - {@link WebElementSelectionCriterion} by which the element will be selected
+     * @param criterionValue
+     *        - value of the criterion
+     * @param timeout
+     *        - the given timeout in milliseconds
+     * @return <code>true</code> if the element is present on the screen, before the given timeout, <code>false</code>
+     *         otherwise
+     */
+    public boolean waitForElementExists(WebElementSelectionCriterion selectionCriterion,
+                                        String criterionValue,
+                                        int timeout) {
+        return (boolean) deviceCommunicator.sendAction(RoutingAction.WAIT_FOR_WEB_ELEMENT,
+                                                       selectionCriterion,
+                                                       criterionValue,
+                                                       WebElementWaitCondition.ELEMENT_EXISTS,
+                                                       timeout);
     }
 }

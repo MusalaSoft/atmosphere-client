@@ -6,7 +6,7 @@ import java.util.Map;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.util.Pair;
-import com.musala.atmosphere.commons.webelement.actions.WebElementAction;
+import com.musala.atmosphere.commons.webelement.action.WebElementAction;
 import com.musala.atmosphere.commons.webelement.selection.WebElementSelectionCriterion;
 
 /**

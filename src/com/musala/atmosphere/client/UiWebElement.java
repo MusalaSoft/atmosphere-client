@@ -117,7 +117,10 @@ public class UiWebElement extends WebElement {
      * server. If this causes the current page to change, then this method will block until the new page is loaded.
      */
     public void submitForm() {
-        // TODO Implement the method
+        deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
+                                      WebElementAction.SUBMIT_FORM,
+                                      selectionCriterion,
+                                      criterionValue);
     }
 
     /**

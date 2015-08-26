@@ -199,18 +199,20 @@ public class UiWebElement extends WebElement {
      * padding-top, list-style, outline, pause, cue) are not returned, in accordance with the DOM CSS2 specification -
      * you should directly access the longhand properties (e.g. background-color) to access the desired values.
      * 
-     * @param key
-     *        - by which the property will be selected
-     * @return the wanted property
+     * @param cssProperty
+     *        - the given CSS property
+     * @return String representing the value of the wanted property
      */
-    public String getCssValue(String key) {
-        // TODO Implement the method
-        return null;
+    public String getCssValue(String cssProperty) {
+        return (String) deviceCommunicator.sendAction(RoutingAction.GET_CSS_VALUE,
+                                                      selectionCriterion,
+                                                      criterionValue,
+                                                      cssProperty);
     }
 
     /**
-     * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element
-     * <input name="foo" />.
+     * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element <input
+     * name="foo" />.
      * 
      * @return the tag name of the element
      */

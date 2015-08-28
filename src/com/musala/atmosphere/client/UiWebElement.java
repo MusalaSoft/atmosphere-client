@@ -1,13 +1,11 @@
 package com.musala.atmosphere.client;
 
-import java.util.List;
 import java.util.Map;
 
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.util.Pair;
 import com.musala.atmosphere.commons.webelement.action.WebElementAction;
-import com.musala.atmosphere.commons.webelement.selection.WebElementSelectionCriterion;
 
 /**
  * Represents element in the {@link WebView} containing all possible interaction functionality we can execute on it.
@@ -21,12 +19,10 @@ public class UiWebElement extends WebElement {
 
     UiWebElement(Device device,
             Map<String, Object> elementProperties,
-            WebElementSelectionCriterion selectionCriterion,
             String criterionValue) {
         super(device);
         this.elementProperties = elementProperties;
-        this.selectionCriterion = selectionCriterion;
-        this.criterionValue = criterionValue;
+        this.xpathQuery = criterionValue;
     }
 
     /**
@@ -37,8 +33,7 @@ public class UiWebElement extends WebElement {
         revalidate();
         deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
                                       WebElementAction.TAP,
-                                      selectionCriterion,
-                                      criterionValue);
+                                      xpathQuery);
     }
 
     /**
@@ -63,8 +58,7 @@ public class UiWebElement extends WebElement {
     public Point getRelativePosition() {
         return (Point) deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
                                                      WebElementAction.GET_POSITION,
-                                                     selectionCriterion,
-                                                     criterionValue);
+                                                     xpathQuery);
     }
 
     /**
@@ -76,8 +70,7 @@ public class UiWebElement extends WebElement {
     public Pair<Integer, Integer> getSize() {
         return (Pair<Integer, Integer>) deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
                                                                       WebElementAction.GET_SIZE,
-                                                                      selectionCriterion,
-                                                                      criterionValue);
+                                                                      xpathQuery);
     }
 
     /**
@@ -115,8 +108,7 @@ public class UiWebElement extends WebElement {
     public void submitForm() {
         deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
                                       WebElementAction.SUBMIT_FORM,
-                                      selectionCriterion,
-                                      criterionValue);
+                                      xpathQuery);
     }
 
     /**
@@ -172,8 +164,7 @@ public class UiWebElement extends WebElement {
     public boolean isSelected() {
         return (boolean) deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
                                                        WebElementAction.IS_SELECTED,
-                                                       selectionCriterion,
-                                                       criterionValue);
+                                                       xpathQuery);
     }
 
     /**
@@ -184,8 +175,7 @@ public class UiWebElement extends WebElement {
     public boolean isDisplayed() {
         return (boolean) deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
                                                        WebElementAction.IS_DISPLAYED,
-                                                       selectionCriterion,
-                                                       criterionValue);
+                                                       xpathQuery);
     }
 
     /**
@@ -201,8 +191,7 @@ public class UiWebElement extends WebElement {
      */
     public String getCssValue(String cssProperty) {
         return (String) deviceCommunicator.sendAction(RoutingAction.GET_CSS_VALUE,
-                                                      selectionCriterion,
-                                                      criterionValue,
+                                                      xpathQuery,
                                                       cssProperty);
     }
 
@@ -215,8 +204,7 @@ public class UiWebElement extends WebElement {
     public String getTagName() {
         return (String) deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
                                                       WebElementAction.GET_TAG_NAME,
-                                                      selectionCriterion,
-                                                      criterionValue);
+                                                      xpathQuery);
     }
 
     /**
@@ -228,14 +216,7 @@ public class UiWebElement extends WebElement {
     public String getText() {
         return (String) deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
                                                       WebElementAction.GET_TEXT,
-                                                      selectionCriterion,
-                                                      criterionValue);
-    }
-
-    @Override
-    public List<UiWebElement> findElements(WebElementSelectionCriterion selectionCriterion, String criterionValue) {
-        // TODO Implement the method
-        return null;
+                                                      xpathQuery);
     }
 
     /**
@@ -243,8 +224,7 @@ public class UiWebElement extends WebElement {
      */
     private void revalidate() {
         elementProperties = (Map<String, Object>) deviceCommunicator.sendAction(RoutingAction.FIND_WEB_ELEMENT,
-                                                                                selectionCriterion,
-                                                                                criterionValue);
+                                                                                xpathQuery);
     }
 
     /**
@@ -253,7 +233,6 @@ public class UiWebElement extends WebElement {
     private void focus() {
         deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
                                       WebElementAction.FOCUS,
-                                      selectionCriterion,
-                                      criterionValue);
+                                      xpathQuery);
     }
 }

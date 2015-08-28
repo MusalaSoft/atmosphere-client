@@ -1,9 +1,5 @@
 package com.musala.atmosphere.client;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.musala.atmosphere.client.util.webview.WebElementSelectionCriterionConverter;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.webelement.action.WebElementWaitCondition;
@@ -24,30 +20,6 @@ public class WebView extends WebElement {
         super(device);
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<UiWebElement> findElements(WebElementSelectionCriterion selectionCriterion, String criterionValue) {
-        List<UiWebElement> webElements = new ArrayList<UiWebElement>();
-        List<Map<String, Object>> attributesList = (List<Map<String, Object>>) deviceCommunicator.sendAction(RoutingAction.FIND_WEB_ELEMENTS,
-                                                                                                             selectionCriterion,
-                                                                                                             criterionValue);
-
-        int index = 1;
-        for (Map<String, Object> elementAttributes : attributesList) {
-            String xpathCriterionValue = WebElementSelectionCriterionConverter.convertToXpathQuery(selectionCriterion,
-                                                                                                   criterionValue,
-                                                                                                   index);
-            UiWebElement webElement = new UiWebElement(device,
-                                                       elementAttributes,
-                                                       WebElementSelectionCriterion.XPATH,
-                                                       xpathCriterionValue);
-            webElements.add(webElement);
-            index++;
-        }
-
-        return webElements;
-    }
-
     /**
      * Waits for the existence of a given {@link UiWebElement} with a given timeout.
      * 
@@ -63,9 +35,10 @@ public class WebView extends WebElement {
     public boolean waitForElementExists(WebElementSelectionCriterion selectionCriterion,
                                         String criterionValue,
                                         int timeout) {
+        String xpathQuery = WebElementSelectionCriterionConverter.convertToXpathQuery(selectionCriterion,
+                                                                                      criterionValue);
         return (boolean) deviceCommunicator.sendAction(RoutingAction.WAIT_FOR_WEB_ELEMENT,
-                                                       selectionCriterion,
-                                                       criterionValue,
+                                                       xpathQuery,
                                                        WebElementWaitCondition.ELEMENT_EXISTS,
                                                        timeout);
     }

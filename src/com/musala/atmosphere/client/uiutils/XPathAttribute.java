@@ -44,7 +44,19 @@ public enum XPathAttribute {
     /** Value denoting the XPath 'selected' attribute. Type of needed value Boolean. */
     SELECTED(Boolean.class, "selected"),
     /** Value denoting the XPath 'text' attribute. Type of needed value String. */
-    TEXT(String.class, "text");
+    TEXT(String.class, "text"),
+    /** Value denoting the XPath 'id' attribute. Type of needed value String. */
+    ID(String.class, "id"),
+    /** Value denoting the XPath 'href' attribute. Type of needed value String. */
+    HREF(String.class, "href"),
+    /** Value denoting the XPath 'title' attribute. Type of needed value String. */
+    TITLE(String.class, "title"),
+    /** Value denoting the XPath 'class' attribute. Type of needed value String. */
+    CLASS(String.class, "class"),
+    /** Value denoting the XPath 'type' attribute. Type of needed value String. */
+    TYPE(String.class, "type"),
+    /** Value denoting the XPath 'src' attribute. Type of needed value String. */
+    SRC(String.class, "src");
 
     /** The attribute values will be checked against this type and in case of discrepancy an exception will be thrown */
     private Class<?> attributeType;

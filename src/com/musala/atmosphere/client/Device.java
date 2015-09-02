@@ -782,6 +782,7 @@ public class Device {
 
     void release() {
         stopScreenRecording();
+        closeChromeDriver();
         communicator.release();
     }
 
@@ -1291,6 +1292,7 @@ public class Device {
      */
     public boolean forceStopProcess(String packageName) {
         Object response = communicator.sendAction(RoutingAction.FORCE_STOP_PROCESS, packageName);
+        closeChromeDriver();
         return response == DeviceCommunicator.VOID_SUCCESS;
     }
 
@@ -1692,5 +1694,12 @@ public class Device {
      */
     public Boolean restoreWifiConnectionProperties() {
         return (Boolean) communicator.sendAction(RoutingAction.UNSHAPE_DEVICE);
+    }
+
+    /**
+     * Closes the instance of the Chrome driver that is currently in use.
+     */
+    private void closeChromeDriver() {
+        communicator.sendAction(RoutingAction.CLOSE_CHROME_DRIVER);
     }
 }

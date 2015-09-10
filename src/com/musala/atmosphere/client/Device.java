@@ -39,7 +39,6 @@ import com.musala.atmosphere.commons.beans.MobileDataState;
 import com.musala.atmosphere.commons.beans.PhoneNumber;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
 import com.musala.atmosphere.commons.connectivity.WifiConnectionProperties;
-import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Point;
@@ -84,20 +83,15 @@ public class Device {
 
     private final DeviceSettingsManager deviceSettings;
 
-    private final ServerConnectionHandler serverConnectionHandler;
-
     private final DeviceCommunicator communicator;
 
     /**
-     * Constructor that creates a usable Device object by a given IClientDevice, it's invocation passkey.
+     * Constructor that creates a usable Device object by a given {@link DeviceCommunicator device communicator}.
      *
-     * @param iClientDevice
-     * @param devicePasskey
-     * @param serverConnectionHandler
+     * @param deviceCommunicator
      */
-    Device(IClientDevice clientDevice, long devicePasskey, ServerConnectionHandler serverConnectionHandler) {
-        this.serverConnectionHandler = serverConnectionHandler;
-        communicator = new DeviceCommunicator(clientDevice, devicePasskey);
+    Device(DeviceCommunicator deviceCommunicator) {
+        communicator = deviceCommunicator;
         deviceSettings = new DeviceSettingsManager(communicator);
     }
 

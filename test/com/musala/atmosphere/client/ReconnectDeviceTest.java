@@ -30,9 +30,9 @@ import com.musala.atmosphere.commons.util.AtmosphereIntent;
  *
  */
 public class ReconnectDeviceTest {
-    private static IClientDevice mockedClientDevice;
+    private static final int TEST_PASSKEY = 0;
 
-    private static ServerConnectionHandler mockedServerConnectionHandler;
+    private static IClientDevice mockedClientDevice;
 
     private static Device testDevice;
 
@@ -91,9 +91,8 @@ public class ReconnectDeviceTest {
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.GET_AWAKE_STATUS));
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.IS_LOCKED));
 
-        mockedServerConnectionHandler = mock(ServerConnectionHandler.class);
-
-        testDevice = new Device(mockedClientDevice, 0, mockedServerConnectionHandler);
+        DeviceCommunicator deviceCommunicator = new DeviceCommunicator(mockedClientDevice, TEST_PASSKEY);
+        testDevice = new Device(deviceCommunicator);
     }
 
     @Test(expected = DeviceReleasedException.class)

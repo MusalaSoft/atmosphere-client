@@ -122,7 +122,6 @@ public class Builder {
     public Device getDevice(DeviceSelector deviceSelector) {
         try {
             DeviceAllocationInformation deviceDescriptor = clientBuilder.allocateDevice(deviceSelector);
-
             String deviceProxyRmiId = deviceDescriptor.getProxyRmiId();
             String messageReleasedDevice = String.format("Fetched device with proxy RMI ID: %s .", deviceProxyRmiId);
             LOGGER.info(messageReleasedDevice);
@@ -130,7 +129,7 @@ public class Builder {
             IClientDevice iClientDevice = (IClientDevice) serverRmiRegistry.lookup(deviceProxyRmiId);
             long passkey = deviceDescriptor.getProxyPasskey();
 
-            Device device = new Device(iClientDevice, passkey, serverConnectionHandler);
+            Device device = new DeviceBuilder(iClientDevice, passkey).build();
             deviceToDescriptor.put(device, deviceDescriptor);
 
             return device;

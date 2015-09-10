@@ -15,5 +15,9 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Restriction {
+    /**
+     * 
+     * Manufacturer of the device that must be built with the annotated entity.
+     */
     String manufacturer();
 }

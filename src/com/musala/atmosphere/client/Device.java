@@ -1677,6 +1677,15 @@ public class Device {
     }
 
     /**
+     * Shows the current available disk space on the device.
+     * 
+     * @return the available disk space in gigabytes
+     */
+    public Double showAvailableDiskSpace() {
+        return (Double) communicator.sendAction(RoutingAction.SHOW_AVAILABLE_DISK_SPACE);
+    }
+
+    /**
      * Sets WiFI connection properties for this device.
      *
      * @param connectionProperties

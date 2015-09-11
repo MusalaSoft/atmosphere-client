@@ -1677,29 +1677,29 @@ public class Device {
     }
 
     /**
-     * Shows the current available disk space on the device.
-     * 
-     * @return the available disk space in gigabytes
+     * Gets the current available disk space on the device.
+     *
+     * @return the available disk space in megabytes
      */
-    public Double showAvailableDiskSpace() {
-        return (Double) communicator.sendAction(RoutingAction.SHOW_AVAILABLE_DISK_SPACE);
+    public Long getAvailableDiskSpace() {
+        return (Long) communicator.sendAction(RoutingAction.GET_AVAILABLE_DISK_SPACE);
     }
 
     /**
-     * Sets WiFI connection properties for this device.
+     * Sets WiFi connection properties for this device.
      *
      * @param connectionProperties
      *        - {@link properties WifiConnectionProperties} of the WiFi connection to be set
-     * @return <code>true</code> if Wifi properties are set, <code>false</code> otherwise
+     * @return <code>true</code> if WiFi properties are set, <code>false</code> otherwise
      */
     public Boolean setWifiConnectionProperties(WifiConnectionProperties connectionProperties) {
         return (Boolean) communicator.sendAction(RoutingAction.SHAPE_DEVICE, connectionProperties);
     }
 
     /**
-     * Restores WifI connection properties for this device.
+     * Restores WiFi connection properties for this device.
      *
-     * @return <code>true</code> if Wifi properties are restored, <code>false</code> otherwise
+     * @return <code>true</code> if WiFi properties are restored, <code>false</code> otherwise
      */
     public Boolean restoreWifiConnectionProperties() {
         return (Boolean) communicator.sendAction(RoutingAction.UNSHAPE_DEVICE);

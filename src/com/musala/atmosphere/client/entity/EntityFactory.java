@@ -65,6 +65,21 @@ public class EntityFactory {
     }
 
     /**
+     * Returns an instance of the {@link HardwareButtonEntity}.
+     * <p>
+     * Note
+     * </p>
+     * For now only one implementation, independent of the {@link DeviceInformation}, is available.
+     *
+     * @return instance of the {@link HardwareButtonEntity}
+     */
+    // TODO: Treat base operations entities consistently with the device specific ones. Figure out more flexible way to
+    // return the required set of entities to build the device.
+    public HardwareButtonEntity getHardwareButtonEntity() {
+        return new HardwareButtonEntity(deviceCommunicator);
+    }
+
+    /**
      * Finds entity implementation for a device specific operation depending on the {@link DeviceInformation device
      * information} and the hierarchy type given.
      *

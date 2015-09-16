@@ -13,7 +13,10 @@ import java.rmi.RemoteException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.musala.atmosphere.client.entity.EntityFactory;
+import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
+import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.PowerProperties;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.ScreenOrientation;
@@ -92,7 +95,10 @@ public class ReconnectDeviceTest {
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.IS_LOCKED));
 
         DeviceCommunicator deviceCommunicator = new DeviceCommunicator(mockedClientDevice, TEST_PASSKEY);
-        testDevice = new Device(deviceCommunicator);
+        HardwareButtonEntity hardwareButtonEntity = new EntityFactory(mock(Screen.class),
+                                                                      mock(DeviceInformation.class),
+                                                                      deviceCommunicator).getHardwareButtonEntity();
+        testDevice = new Device(deviceCommunicator, hardwareButtonEntity);
     }
 
     @Test(expected = DeviceReleasedException.class)

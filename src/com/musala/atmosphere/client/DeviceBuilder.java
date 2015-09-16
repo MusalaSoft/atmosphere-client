@@ -1,5 +1,7 @@
 package com.musala.atmosphere.client;
 
+import com.musala.atmosphere.client.entity.EntityFactory;
+import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
@@ -7,7 +9,7 @@ import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 /**
  * Class responsible for creating {@link Device} instance with the suitable implementations for device specific
  * operations, based on the {@link DeviceInformation device information}.
- * 
+ *
  * @author filareta.yordanova
  *
  */
@@ -29,14 +31,18 @@ public class DeviceBuilder {
     /**
      * Creates {@link Device} instance with the proper implementations for device specific operations, based on the
      * {@link DeviceInformation device information}.
-     * 
+     *
      * @return {@link Device} instance
      */
     public Device build() {
         // TODO: Implement the logic for building device instance with the proper set of entities depending on the
         // device information received.
         populateDeviceInformation();
-        return new Device(deviceCommunicator);
+
+        EntityFactory entityFactory = new EntityFactory(screen, deviceInformation, deviceCommunicator);
+
+        HardwareButtonEntity hardwareButtonEntitiy = entityFactory.getHardwareButtonEntity();
+        return new Device(deviceCommunicator, hardwareButtonEntitiy);
     }
 
     private void populateDeviceInformation() {

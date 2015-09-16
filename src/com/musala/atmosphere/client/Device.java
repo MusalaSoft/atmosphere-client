@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.HardwareButton;
+import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
 import com.musala.atmosphere.client.uiutils.GestureCreator;
@@ -85,14 +86,18 @@ public class Device {
 
     private final DeviceCommunicator communicator;
 
+    private final HardwareButtonEntity hardwareButtonEntity;
+
     /**
      * Constructor that creates a usable Device object by a given {@link DeviceCommunicator device communicator}.
      *
      * @param deviceCommunicator
+     * @param hardwareButtonEntity
      */
-    Device(DeviceCommunicator deviceCommunicator) {
-        communicator = deviceCommunicator;
-        deviceSettings = new DeviceSettingsManager(communicator);
+    Device(DeviceCommunicator deviceCommunicator, HardwareButtonEntity hardwareButtonEntity) {
+        this.communicator = deviceCommunicator;
+        this.hardwareButtonEntity = hardwareButtonEntity;
+        this.deviceSettings = new DeviceSettingsManager(communicator);
     }
 
     /**
@@ -676,10 +681,7 @@ public class Device {
      * @return <code>true</code> if the hardware button press is successful, <code>false</code> if it fails.
      */
     public boolean pressButton(int keyCode) {
-        String query = "input keyevent " + Integer.toString(keyCode);
-        communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, query);
-
-        return communicator.getLastException() == null;
+        return hardwareButtonEntity.pressButton(keyCode);
     }
 
     /**

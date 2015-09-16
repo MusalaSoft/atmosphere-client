@@ -66,6 +66,19 @@ public abstract class UiElement {
     public abstract List<UiElement> getChildren(UiElementSelector childrenSelector);
 
     /**
+     * Gets a list with all UI element's children present on the {@link Screen active screen} and matching the given
+     * xpath query.
+     * <p>
+     * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
+     * </p>
+     * 
+     * @param xpathQuery
+     *        - a string representing an XPath query
+     * @return list with all UI element's children present on the screen and matching the given xpath query
+     */
+    public abstract List<UiElement> getChildrenByXPath(String xpathQuery);
+
+    /**
      * Gets all direct children of a {@link UiElement}, represented by XPath node.
      *
      * @return list, containing all {@link UiElements} that directly ascend the current {@link UiElement}
@@ -685,4 +698,13 @@ public abstract class UiElement {
     public int hashCode() {
         return new HashCodeBuilder().append(propertiesContainer).toHashCode();
     }
+
+    /**
+     * Gets all child UiElements that match the given CSS query.
+     * 
+     * @param cssQuery
+     *        - a string representing a CSS Query
+     * @return Returns all children of the UiElement that match the given CSS query
+     */
+    public abstract List<UiElement> getChildrenByCssQuery(String cssQuery);
 }

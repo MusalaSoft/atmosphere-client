@@ -83,21 +83,13 @@ public class NotificationBar {
         Screen deviceActiveScreen = onDevice.getActiveScreen();
 
         try {
-            UiElement clearAllNotificationsButton;
-            try {
-                clearAllNotificationsButton = deviceActiveScreen.getElementByXPath(CLEAR_ALL_NOTIFICATIONS_BUTTON_XPATH_QUERY);
-            } catch (MultipleElementsFoundException e) {
-                LOGGER.error(String.format("Clearing all notifications failed, because multiple elements were found for the XPath query %s",
-                                           CLEAR_ALL_NOTIFICATIONS_BUTTON_XPATH_QUERY),
-                             e);
-                return false;
-            }
-
+            UiElement clearAllNotificationsButton = deviceActiveScreen.getElementByXPath(CLEAR_ALL_NOTIFICATIONS_BUTTON_XPATH_QUERY);
             return clearAllNotificationsButton.tap();
-        } catch (UiElementFetchingException e) {
-            onDevice.pressButton(HardwareButton.BACK);
-
-            return true;
+        } catch (MultipleElementsFoundException e) {
+            LOGGER.error(String.format("Clearing all notifications failed, because multiple elements were found for the XPath query %s",
+                                       CLEAR_ALL_NOTIFICATIONS_BUTTON_XPATH_QUERY),
+                         e);
+            return false;
         }
     }
 
@@ -132,8 +124,8 @@ public class NotificationBar {
 
         try {
             Screen deviceActiveScreen = onDevice.getActiveScreen();
-            XmlNodeUiElement notificationBarElement = deviceActiveScreen.getElementByXPath(NOTIFICATION_BAR_XPATH_QUERY);
-            List<XmlNodeUiElement> childrenNotifications = notificationBarElement.getChildrenByXPath(xPathQuery);
+            UiElement notificationBarElement = deviceActiveScreen.getElementByXPath(NOTIFICATION_BAR_XPATH_QUERY);
+            List<UiElement> childrenNotifications = notificationBarElement.getChildrenByXPath(xPathQuery);
 
             if (childrenNotifications.size() > 1) {
                 String message = String.format("More than one notification matched the passed XPath query %s.",
@@ -142,14 +134,11 @@ public class NotificationBar {
                 throw new MultipleElementsFoundException(message);
             }
 
-            List<XmlNodeUiElement> allNotifications = deviceActiveScreen.getAllElementsByXPath(NOTIFICATIONS_RESOURCE_ID_XPATH_QUERY);
-            for (XmlNodeUiElement currentNotification : allNotifications) {
-                try {
-                    currentNotification.getChildrenByXPath(xPathQuery);
+            List<UiElement> allNotifications = deviceActiveScreen.getAllElementsByXPath(NOTIFICATIONS_RESOURCE_ID_XPATH_QUERY);
+            for (UiElement currentNotification : allNotifications) {
+                currentNotification.getChildrenByXPath(xPathQuery);
 
-                    return currentNotification;
-                } catch (UiElementFetchingException e) {
-                }
+                return currentNotification;
             }
             LOGGER.error(missingNotificationError);
             throw new UiElementFetchingException(missingNotificationError);

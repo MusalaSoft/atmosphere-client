@@ -253,7 +253,7 @@ public class ScrollableView extends XmlNodeUiElement {
             deviceActiveScreen.updateScreen();
             updatedScrollableView = deviceActiveScreen.getScrollableView(scrollableViewSelector);
 
-            List<XmlNodeUiElement> innerViewChildren = updatedScrollableView.getChildrenByCssQuery(cssQuery);
+            List<UiElement> innerViewChildren = updatedScrollableView.getChildrenByCssQuery(cssQuery);
 
             return innerViewChildren.get(0).tap();
         } catch (UiElementFetchingException e) {
@@ -296,7 +296,7 @@ public class ScrollableView extends XmlNodeUiElement {
         String cssQuery = innerViewSelector.buildCssQuery();
         UiElementSelector scrollableViewSelector = this.getElementSelector();
         ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollableViewSelector);
-        List<XmlNodeUiElement> innerViewChildren = updatedScrollableView.getChildrenByCssQuery(cssQuery);
+        List<UiElement> innerViewChildren = updatedScrollableView.getChildrenByCssQuery(cssQuery);
 
         return innerViewChildren.get(0).tap();
     }

@@ -56,11 +56,11 @@ public class UiElementFetchingTest {
         final String desiredElementClass = "android.widget.FrameLayout";
         final String desiredElementContentDescription = "derp";
 
-        XmlNodeUiElement element = screen.getElementByCSS("hierarchy > *[class=" + desiredElementClass + "]");
-        UiElementSelector selector = element.getElementSelector();
+        UiElement element = screen.getElementByCSS("hierarchy > *[class=" + desiredElementClass + "]");
+        UiElementPropertiesContainer selector = element.getProperties();
 
         assertEquals("Desired element was not fetched correctly.",
-                     selector.getStringValue(CssAttribute.CONTENT_DESCRIPTION),
+                     selector.getContentDescriptor(),
                      desiredElementContentDescription);
     }
 
@@ -69,9 +69,9 @@ public class UiElementFetchingTest {
         final String desiredElementContentDescription = "derp";
         final String desiredElementClass = "android.widget.FrameLayout";
 
-        XmlNodeUiElement element = screen.getElementByXPath("//hierarchy/*[@content-desc='"
-                + desiredElementContentDescription + "']");
-        UiElementSelector selector = element.getElementSelector();
+        UiElement element = screen.getElementByXPath("//hierarchy/*[@content-desc='" + desiredElementContentDescription
+                + "']");
+        UiElementSelector selector = (UiElementSelector) element.getProperties();
 
         assertEquals("Desired element was not fetched correctly.",
                      selector.getStringValue(CssAttribute.CLASS_NAME),
@@ -122,13 +122,16 @@ public class UiElementFetchingTest {
             InvalidCssQueryException {
         final String desiredElementClass = "android.widget.FrameLayout";
 
-        List<XmlNodeUiElement> elements = screen.getAllElementsByCSS("[class=" + desiredElementClass + "]");
+        List<UiElement> elements = screen.getAllElementsByCSS("[class=" + desiredElementClass + "]");
 
         assertEquals("Desired elements were not fetched correctly.", elements.size(), 4);
     }
 
     // @Test
-    public void getElementsTest() throws UiElementFetchingException, XPathExpressionException, InvalidCssQueryException {
+    public void getElementsTest()
+        throws UiElementFetchingException,
+            XPathExpressionException,
+            InvalidCssQueryException {
         final String desiredElementClass = "android.widget.FrameLayout";
 
         UiElementSelector selector = new UiElementSelector();

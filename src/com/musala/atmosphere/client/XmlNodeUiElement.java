@@ -145,22 +145,21 @@ public class XmlNodeUiElement extends UiElement {
      * @param xPathQuery
      *        XPath type node selecting query.
      * @return Returns all the children of the UiElement that matched the xPathQuery
-     * @throws UiElementFetchingException
-     *         if no appropriate UiElements are found
-     * @throws XPathExpressionException
-     *         if the passed XPath query is invalid
-     * @throws ParserConfigurationException
-     *         if an error with internal XPath configuration occurs
      */
-    public List<XmlNodeUiElement> getChildrenByXPath(String xPathQuery)
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            ParserConfigurationException {
+    public List<UiElement> getChildrenByXPath(String xPathQuery) {
 
         // Creating new Document
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
+        DocumentBuilder builder = null;
+        try {
+            builder = factory.newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            String message = "Creating new document builder failed.";
+            LOGGER.error(message, e);
+            // there is no point in continuing
+            return null;
+        }
         Document newDocument = builder.newDocument();
 
         // Importing the node of the UiElement in the new Document
@@ -169,8 +168,16 @@ public class XmlNodeUiElement extends UiElement {
         newDocument.appendChild(importedNode);
 
         // Constructing the UiElements by given xPathNode
-        NodeList matchedNodes = UiXmlParser.getXPathNodeChildren(newDocument, xPathQuery);
-        List<XmlNodeUiElement> matchedChildrenNodes = new LinkedList<XmlNodeUiElement>();
+        NodeList matchedNodes = null;
+        try {
+            matchedNodes = UiXmlParser.getXPathNodeChildren(newDocument, xPathQuery);
+        } catch (XPathExpressionException | UiElementFetchingException e) {
+            String message = "Getting Ui element's children failed.";
+            LOGGER.error(message, e);
+            return null;
+        }
+
+        List<UiElement> matchedChildrenNodes = new LinkedList<UiElement>();
         for (int i = 0; i < matchedNodes.getLength(); i++) {
             Node childNode = matchedNodes.item(i);
             if (!childNode.isEqualNode(representedNodeXPath)) {
@@ -179,36 +186,19 @@ public class XmlNodeUiElement extends UiElement {
             }
         }
 
-        if (matchedChildrenNodes == null || matchedChildrenNodes.size() == 0) {
-            String message = "No elements found for the XPath expression .";
-            LOGGER.error(message);
-            throw new UiElementFetchingException(message);
-        }
-
         return matchedChildrenNodes;
     }
 
-    /**
-     * Gets all child UiElements that match the given CSS query
-     * 
-     * @param cssQuery
-     *        - a string representing a CSS Query
-     * @return Returns all children of the UiElement that match the given CSS query
-     * @throws InvalidCssQueryException
-     *         if element is searched by invalid CSS query
-     * @throws UiElementFetchingException
-     *         if element could not be found
-     * @throws XPathExpressionException
-     *         if element is searched by invalid XPath query
-     * @throws ParserConfigurationException
-     *         if an error with internal XPath configuration occurs
-     */
-    public List<XmlNodeUiElement> getChildrenByCssQuery(String cssQuery)
-        throws InvalidCssQueryException,
-            XPathExpressionException,
-            UiElementFetchingException,
-            ParserConfigurationException {
-        String convertedXPathQuery = CssToXPathConverter.convertCssToXPath(cssQuery);
+    @Override
+    public List<UiElement> getChildrenByCssQuery(String cssQuery) {
+        String childRetrievalErrorMessage = String.format("Failed attempt to retrieve children from %s.",
+                                                          propertiesContainer.getPackageName());
+        String convertedXPathQuery = null;
+        try {
+            convertedXPathQuery = CssToXPathConverter.convertCssToXPath(cssQuery);
+        } catch (InvalidCssQueryException e) {
+            LOGGER.error(childRetrievalErrorMessage, e);
+        }
 
         return getChildrenByXPath(convertedXPathQuery);
     }
@@ -223,21 +213,7 @@ public class XmlNodeUiElement extends UiElement {
      */
     public List<UiElement> getChildren(UiElementSelector childrenSelector) {
         String cssQuery = childrenSelector.buildCssQuery();
-        String childRetrievalErrorMessage = String.format("Failed attempt to retrieve children from %s.",
-                                                          propertiesContainer.getPackageName());
-        List<UiElement> children = new ArrayList<UiElement>();
-        try {
-            children = new ArrayList<UiElement>(getChildrenByCssQuery(cssQuery));
-        } catch (XPathExpressionException e) {
-            LOGGER.error(childRetrievalErrorMessage, e);
-        } catch (InvalidCssQueryException e) {
-            LOGGER.error(childRetrievalErrorMessage, e);
-        } catch (UiElementFetchingException e) {
-            // No error in case no elements are found
-        } catch (ParserConfigurationException e) {
-            LOGGER.error(childRetrievalErrorMessage, e);
-        }
-        return children;
+        return getChildrenByCssQuery(cssQuery);
     }
 
     @Override
@@ -249,8 +225,7 @@ public class XmlNodeUiElement extends UiElement {
             String queryPrefix = String.format("/%s/child::", representedNodeXPath.getNodeName());
             convertedXPathQuery = convertedXPathQuery.replaceFirst("//", queryPrefix);
             return new ArrayList<UiElement>(getChildrenByXPath(convertedXPathQuery));
-        } catch (InvalidCssQueryException | XPathExpressionException | UiElementFetchingException
-                | ParserConfigurationException e) {
+        } catch (InvalidCssQueryException e) {
             LOGGER.error(String.format("Failed attempt to retrieve children from %s.",
                                        propertiesContainer.getPackageName()),
                          e);

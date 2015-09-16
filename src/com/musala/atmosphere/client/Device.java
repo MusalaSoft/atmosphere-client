@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.entity.GestureEntity;
+import com.musala.atmosphere.client.entity.GpsLocationEntity;
 import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
@@ -86,9 +87,11 @@ public class Device {
 
     private final DeviceCommunicator communicator;
 
-    private final GestureEntity gestureEntity;
+    private GestureEntity gestureEntity;
 
-    private final HardwareButtonEntity hardwareButtonEntity;
+    private HardwareButtonEntity hardwareButtonEntity;
+
+    private GpsLocationEntity gpsLocationEntity;
 
     /**
      * Constructor that creates a usable Device object by a given {@link DeviceCommunicator device communicator}.
@@ -96,12 +99,8 @@ public class Device {
      * @param deviceCommunicator
      * @param hardwareButtonEntity
      */
-    Device(DeviceCommunicator deviceCommunicator,
-            HardwareButtonEntity hardwareButtonEntity,
-            GestureEntity gestureEntity) {
+    Device(DeviceCommunicator deviceCommunicator) {
         this.communicator = deviceCommunicator;
-        this.gestureEntity = gestureEntity;
-        this.hardwareButtonEntity = hardwareButtonEntity;
         this.deviceSettings = new DeviceSettingsManager(communicator);
     }
 
@@ -1635,5 +1634,37 @@ public class Device {
      */
     private void closeChromeDriver() {
         communicator.sendAction(RoutingAction.CLOSE_CHROME_DRIVER);
+    }
+
+    /**
+     * Sets the {@link GpsLocationEntity entity} responsible for executing operations related with changing the GPS
+     * location state.
+     *
+     * @param gpsLocationEntity
+     *        - instance of the entity which executes GPS location related operations
+     */
+    void setGpsLocationEntity(GpsLocationEntity gpsLocationEntity) {
+        this.gpsLocationEntity = gpsLocationEntity;
+    }
+
+    /**
+     * Sets the {@link HardwareButtonEntity entity} responsible for executing operations with {@link HardwareButton
+     * hardware buttons}.
+     *
+     * @param hardwareButtonEntity
+     *        - instance of the entity that handles pressing hardware buttons
+     */
+    void setHardwareButtonEntity(HardwareButtonEntity hardwareButtonEntity) {
+        this.hardwareButtonEntity = hardwareButtonEntity;
+    }
+
+    /**
+     * Sets the {@link GestureEntity entity} responsible for executing gestures.
+     *
+     * @param gestureEntity
+     *        - instance of the entity that handles pressing hardware buttons
+     */
+    void setGestureEntity(GestureEntity gestureEntity) {
+        this.gestureEntity = gestureEntity;
     }
 }

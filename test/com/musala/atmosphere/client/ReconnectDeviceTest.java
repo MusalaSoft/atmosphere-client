@@ -8,16 +8,17 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
+import java.lang.reflect.Constructor;
 import java.rmi.RemoteException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
 
-import com.musala.atmosphere.client.entity.EntityFactory;
-import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
-import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.PowerProperties;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.ScreenOrientation;
@@ -36,13 +37,25 @@ import com.musala.atmosphere.commons.util.AtmosphereIntent;
 public class ReconnectDeviceTest {
     private static final int TEST_PASSKEY = 0;
 
-    private static IClientDevice mockedClientDevice;
+    @Mock
+    private static IClientDevice mockedClientDevice = mock(IClientDevice.class);
+
+    @Spy
+    private static DeviceCommunicator deviceCommunicator = new DeviceCommunicator(mockedClientDevice, TEST_PASSKEY);
+
+    @InjectMocks
+    private static HardwareButtonEntity hardwareButtonEntity;
 
     private static Device testDevice;
 
     @BeforeClass
     public static void setUp() throws Exception {
-        mockedClientDevice = mock(IClientDevice.class);
+        // Constructor visibility is package
+        Constructor<?> hardwareButtonEntityConstructor = HardwareButtonEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
+        hardwareButtonEntityConstructor.setAccessible(true);
+        hardwareButtonEntity = (HardwareButtonEntity) hardwareButtonEntityConstructor.newInstance(new Object[] {
+                deviceCommunicator});
+
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
                                                                       eq(RoutingAction.GET_POWER_PROPERTIES));
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.APK_INIT_INSTALL));
@@ -95,14 +108,8 @@ public class ReconnectDeviceTest {
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.GET_AWAKE_STATUS));
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.IS_LOCKED));
 
-        DeviceCommunicator deviceCommunicator = new DeviceCommunicator(mockedClientDevice, TEST_PASSKEY);
-        HardwareButtonEntity hardwareButtonEntity = new EntityFactory(mock(Screen.class),
-                                                                      mock(DeviceInformation.class),
-                                                                      deviceCommunicator).getHardwareButtonEntity();
-        GestureEntity gestureEntity = new EntityFactory(mock(Screen.class),
-                                                                      mock(DeviceInformation.class),
-                                                                      deviceCommunicator).getGestureEntity();
-        testDevice = new Device(deviceCommunicator, hardwareButtonEntity, gestureEntity);
+        testDevice = new Device(deviceCommunicator);
+        testDevice.setHardwareButtonEntity(hardwareButtonEntity);
     }
 
     @Test(expected = DeviceReleasedException.class)

@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 
 import java.net.URLDecoder;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,8 +21,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import com.musala.atmosphere.client.entity.HardwareButtonEntity;
-import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
@@ -51,12 +48,7 @@ public class InstallApkTest {
                                          eq(RoutingAction.GET_DEVICE_INFORMATION))).thenReturn(deviceInfoMock);
         deviceCommunicator = new DeviceCommunicator(innerClientDeviceMock, TEST_PASSKEY);
 
-        device = new Device(deviceCommunicator, mock(HardwareButtonEntity.class), mock(GestureEntity.class));
-    }
-
-    @After
-    public void tearDown() {
-
+        device = new Device(deviceCommunicator);
     }
 
     @Test

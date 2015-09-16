@@ -1,8 +1,13 @@
 package com.musala.atmosphere.client;
 
-import com.musala.atmosphere.client.entity.EntityFactory;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
+import com.musala.atmosphere.client.entity.EntityTypeResolver;
 import com.musala.atmosphere.client.entity.GestureEntity;
+import com.musala.atmosphere.client.entity.GpsLocationEntity;
 import com.musala.atmosphere.client.entity.HardwareButtonEntity;
+import com.musala.atmosphere.client.exceptions.UnresolvedEntityTypeException;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
@@ -36,16 +41,34 @@ public class DeviceBuilder {
      * @return {@link Device} instance
      */
     public Device build() {
-        // TODO: Implement the logic for building device instance with the proper set of entities depending on the
-        // device information received.
         populateDeviceInformation();
 
-        EntityFactory entityFactory = new EntityFactory(screen, deviceInformation, deviceCommunicator);
+        EntityTypeResolver typeResolver = new EntityTypeResolver(deviceInformation);
+        Device device = new Device(deviceCommunicator);
 
-        HardwareButtonEntity hardwareButtonEntitiy = entityFactory.getHardwareButtonEntity();
-        GestureEntity gestureEntity = entityFactory.getGestureEntity();
+        try {
+            Constructor<?> hardwareButtonEntityConstructor = HardwareButtonEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
+            hardwareButtonEntityConstructor.setAccessible(true);
+            device.setHardwareButtonEntity((HardwareButtonEntity) hardwareButtonEntityConstructor.newInstance(new Object[] {
+                    deviceCommunicator}));
+            Constructor<?> gestureEntitiyConstructor = GestureEntity.class.getDeclaredConstructor(DeviceCommunicator.class,
+                                                                                                  DeviceInformation.class);
+            gestureEntitiyConstructor.setAccessible(true);
+            device.setGestureEntity((GestureEntity) gestureEntitiyConstructor.newInstance(new Object[] {
+                    deviceCommunicator, deviceInformation}));
+            Class<?> locationEntityClass = typeResolver.getEntityClass(GpsLocationEntity.class);
+            Constructor<?> locationEntityConstructor = locationEntityClass.getDeclaredConstructor(Screen.class,
+                                                                                                  DeviceCommunicator.class);
+            locationEntityConstructor.setAccessible(true);
+            device.setGpsLocationEntity((GpsLocationEntity) locationEntityConstructor.newInstance(new Object[] {screen,
+                    deviceCommunicator}));
+        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+                | IllegalArgumentException | InvocationTargetException e) {
+            throw new UnresolvedEntityTypeException("Failed to find the correct set of entities implmentations matching the given device information.",
+                                                    e);
+        }
 
-        return new Device(deviceCommunicator, hardwareButtonEntitiy, gestureEntity);
+        return device;
     }
 
     private void populateDeviceInformation() {

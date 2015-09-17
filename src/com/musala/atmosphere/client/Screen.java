@@ -18,6 +18,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.musala.atmosphere.client.entity.GestureEntity;
+import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
@@ -54,6 +55,8 @@ public class Screen {
 
     private GestureEntity gestureEntity;
 
+    private ImeEntity imeEntity;
+
     private Document xPathDomDocument;
 
     private org.jsoup.nodes.Document jSoupDocument;
@@ -61,9 +64,10 @@ public class Screen {
     private final DeviceCommunicator communicator;
 
     @Deprecated
-    Screen(Device onDevice, GestureEntity gestureEntity, String uiHierarchyXml) {
+    Screen(Device onDevice, GestureEntity gestureEntity, ImeEntity imeEntity, String uiHierarchyXml) {
         this.onDevice = onDevice;
         this.gestureEntity = gestureEntity;
+        this.imeEntity = imeEntity;
         communicator = onDevice.getCommunicator();
         screenXml = uiHierarchyXml;
 
@@ -82,9 +86,10 @@ public class Screen {
         jSoupDocument = Jsoup.parse(screenXml);
     }
 
-    Screen(Device onDevice, GestureEntity gestureEntity) {
+    Screen(Device onDevice, GestureEntity gestureEntity, ImeEntity imeEntity) {
         this.onDevice = onDevice;
         this.gestureEntity = gestureEntity;
+        this.imeEntity = imeEntity;
         communicator = onDevice.getCommunicator();
     }
 
@@ -119,7 +124,7 @@ public class Screen {
 
         List<UiElement> uiElements = new ArrayList<UiElement>();
         for (AccessibilityElement element : foundElements) {
-            uiElements.add(new AccessibilityUiElement(element, onDevice, gestureEntity));
+            uiElements.add(new AccessibilityUiElement(element, onDevice, gestureEntity, imeEntity));
         }
 
         return uiElements;
@@ -298,7 +303,7 @@ public class Screen {
 
         List<UiElement> uiElements = new ArrayList<UiElement>();
         for (AccessibilityElement element : foundElements) {
-            uiElements.add(new AccessibilityUiElement(element, onDevice, gestureEntity));
+            uiElements.add(new AccessibilityUiElement(element, onDevice, gestureEntity, imeEntity));
         }
 
         return uiElements;

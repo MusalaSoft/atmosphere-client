@@ -19,6 +19,7 @@ import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.GpsLocationEntity;
 import com.musala.atmosphere.client.entity.HardwareButtonEntity;
+import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
 import com.musala.atmosphere.client.util.settings.AndroidGlobalSettings;
@@ -45,10 +46,8 @@ import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.gesture.Gesture;
-import com.musala.atmosphere.commons.ime.KeyboardAction;
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
-import com.musala.atmosphere.commons.util.AtmosphereIntent;
 import com.musala.atmosphere.commons.util.GeoLocation;
 import com.musala.atmosphere.commons.util.IntentBuilder;
 import com.musala.atmosphere.commons.util.IntentBuilder.IntentAction;
@@ -90,6 +89,8 @@ public class Device {
     private GestureEntity gestureEntity;
 
     private HardwareButtonEntity hardwareButtonEntity;
+
+    private ImeEntity imeEntity;
 
     private GpsLocationEntity gpsLocationEntity;
 
@@ -273,7 +274,7 @@ public class Device {
      *         active screen fails.
      */
     public Screen getActiveScreen() {
-        return new Screen(this, gestureEntity);
+        return new Screen(this, gestureEntity,imeEntity);
     }
 
     /**
@@ -504,19 +505,7 @@ public class Device {
      * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
      */
     public boolean inputText(String text, long interval) {
-        if (text.isEmpty()) {
-            String message = "Text input requested, but an empty String is given.";
-            LOGGER.warn(message);
-            return true;
-        }
-
-        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.INPUT_TEXT.intentAction);
-        intent.putExtra(KeyboardAction.INTENT_EXTRA_TEXT, text);
-        intent.putExtra(KeyboardAction.INTENT_EXTRA_INPUT_SPEED, interval);
-
-        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
-
-        return communicator.getLastException() == null;
+        return imeEntity.inputText(text, interval);
     }
 
     /**
@@ -525,10 +514,7 @@ public class Device {
      * @return <code>true</code> if clear text is successful, <code>false</code> if it fails
      */
     public boolean clearText() {
-        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.DELETE_ALL.intentAction);
-        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
-
-        return communicator.getLastException() == null;
+        return imeEntity.clearText();
     }
 
     /**
@@ -537,10 +523,7 @@ public class Device {
      * @return <code>true</code> if the text selecting is successful, <code>false</code> if it fails
      */
     public boolean selectAllText() {
-        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.SELECT_ALL.intentAction);
-        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
-
-        return communicator.getLastException() == null;
+        return imeEntity.selectAllText();
     }
 
     /**
@@ -549,10 +532,7 @@ public class Device {
      * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
      */
     public boolean pasteText() {
-        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.PASTE_TEXT.intentAction);
-        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
-
-        return communicator.getLastException() == null;
+        return imeEntity.pasteText();
     }
 
     /**
@@ -561,10 +541,7 @@ public class Device {
      * @return <code>true</code> if copy operation is successful, <code>false</code> if it fails
      */
     public boolean copyText() {
-        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.COPY_TEXT.intentAction);
-        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
-
-        return communicator.getLastException() == null;
+        return imeEntity.copyText();
     }
 
     /**
@@ -573,10 +550,7 @@ public class Device {
      * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
      */
     public boolean cutText() {
-        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.CUT_TEXT.intentAction);
-        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
-
-        return communicator.getLastException() == null;
+        return imeEntity.cutText();
     }
 
     /**
@@ -1666,5 +1640,15 @@ public class Device {
      */
     void setGestureEntity(GestureEntity gestureEntity) {
         this.gestureEntity = gestureEntity;
+    }
+
+    /**
+     * Sets the {@link ImeEntity entity} responsible for operations related with the input method engine.
+     *
+     * @param imeEntity
+     *        - instance of the entity that handles operations related with the input method engine
+     */
+    void setImeEntity(ImeEntity imeEntity) {
+        this.imeEntity = imeEntity;
     }
 }

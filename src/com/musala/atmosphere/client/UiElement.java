@@ -14,6 +14,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.entity.GestureEntity;
+import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
@@ -48,21 +49,27 @@ public abstract class UiElement {
 
     protected GestureEntity gestureEntity;
 
+    protected ImeEntity imeEntity;
+
     protected DeviceCommunicator communicator;
 
     protected boolean isStale;
 
-    UiElement(UiElementPropertiesContainer properties, Device device, GestureEntity gestureEntity) {
+    UiElement(UiElementPropertiesContainer properties,
+            Device device,
+            GestureEntity gestureEntity,
+            ImeEntity imeEntity) {
         this.propertiesContainer = properties;
         this.onDevice = device;
         this.gestureEntity = gestureEntity;
+        this.imeEntity = imeEntity;
         this.communicator = device.getCommunicator();
 
         isStale = false;
     }
 
     UiElement(UiElement uiElement) {
-        this(uiElement.propertiesContainer, uiElement.onDevice, uiElement.gestureEntity);
+        this(uiElement.propertiesContainer, uiElement.onDevice, uiElement.gestureEntity, uiElement.imeEntity);
     }
 
     /**
@@ -451,7 +458,7 @@ public abstract class UiElement {
     public boolean cutText() {
         revalidateThrowing();
 
-        return onDevice.cutText();
+        return imeEntity.cutText();
     }
 
     /**
@@ -464,7 +471,7 @@ public abstract class UiElement {
     public boolean copyText() {
         revalidateThrowing();
 
-        return onDevice.copyText();
+        return imeEntity.copyText();
     }
 
     /**
@@ -476,7 +483,7 @@ public abstract class UiElement {
      */
     public boolean pasteText() {
         focus();
-        return onDevice.pasteText();
+        return imeEntity.pasteText();
     }
 
     /**
@@ -499,7 +506,7 @@ public abstract class UiElement {
             }
         }
 
-        return onDevice.selectAllText();
+        return imeEntity.selectAllText();
     }
 
     /**
@@ -513,7 +520,7 @@ public abstract class UiElement {
         // TODO validate when an element can get it's text cleared
         focus();
 
-        return onDevice.clearText();
+        return imeEntity.clearText();
     }
 
     /**
@@ -533,7 +540,7 @@ public abstract class UiElement {
     public boolean inputText(String text, long intervalInMs) {
         focus();
 
-        boolean success = onDevice.inputText(text, intervalInMs);
+        boolean success = imeEntity.inputText(text, intervalInMs);
         return success;
     }
 

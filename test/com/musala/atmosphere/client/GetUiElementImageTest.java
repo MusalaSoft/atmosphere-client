@@ -21,6 +21,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import com.musala.atmosphere.client.entity.GestureEntity;
+import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.geometry.Bounds;
@@ -72,6 +73,8 @@ public class GetUiElementImageTest {
 
     private GestureEntity gestureEntity;
 
+    private ImeEntity imeEntity;
+
     private static final String RECEIVED_DIFFERENT_IMAGES_MESSAGE = "Received image is different than the expected one.";
 
     @Before
@@ -99,6 +102,7 @@ public class GetUiElementImageTest {
 
         mockedDevice = mock(Device.class);
         gestureEntity = mock(GestureEntity.class);
+        imeEntity = mock(ImeEntity.class);
 
 
         MockitoAnnotations.initMocks(this);

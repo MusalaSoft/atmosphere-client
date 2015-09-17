@@ -2,10 +2,6 @@ package com.musala.atmosphere.client;
 
 import java.util.List;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
-import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.ui.UiElementPropertiesContainer;
@@ -36,23 +32,14 @@ public class PickerHelper {
      * @param index
      *        - used for matching criterion when selecting number picker widget from the picker.
      * @return The text of the edit text field in a number picker widget.
-     * @throws ParserConfigurationException
-     *         if an error with internal XPath configuration occurs
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws MultipleElementsFoundException
      *         if multiple elements are found for the passed query
      */
     public String getNumberPickerFieldValue(int index)
-        throws XPathExpressionException,
-            InvalidCssQueryException,
-            UiElementFetchingException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
         UiElement numberPickerField = getNumberPickerField(index);
         UiElementPropertiesContainer numberPickerFieldElementProperties = numberPickerField.getProperties();
         screen.updateScreen();
@@ -67,23 +54,14 @@ public class PickerHelper {
      * @param text
      *        - text to set in the edit text field in a number picker widget.
      * @return <code>true</code> if the method is successful, <code>false</code> if it fails.
-     * @throws ParserConfigurationException
-     *         if an error with internal XPath configuration occurs
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws MultipleElementsFoundException
      *         if multiple elements are found for the passed query
      */
     public boolean setTextInNumberPickerField(int pickerIndex, String text)
-        throws XPathExpressionException,
-            InvalidCssQueryException,
-            UiElementFetchingException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
         UiElement numberPickerField = getNumberPickerField(pickerIndex);
 
         if (!numberPickerField.inputText(text)) {
@@ -101,23 +79,12 @@ public class PickerHelper {
      * @param index
      *        - the index of the picker, we are interested in.
      * @return The editText field of the given picker.
-     * @throws ParserConfigurationException
-     *         if an error with internal XPath configuration occurs
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws MultipleElementsFoundException
      *         if multiple elements are found for the passed query
      */
-    public UiElement getNumberPickerField(int index)
-        throws XPathExpressionException,
-            InvalidCssQueryException,
-            UiElementFetchingException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+    public UiElement getNumberPickerField(int index) throws MultipleElementsFoundException, UiElementFetchingException {
         UiElement numberPicker = getNumberPicker(index);
 
         UiElementSelector textFieldSelector = new UiElementSelector();
@@ -140,22 +107,12 @@ public class PickerHelper {
      * @param index
      *        - the index of the picker.
      * @return The picker with the given index.
-     * @throws ParserConfigurationException
-     *         if an error with internal XPath configuration occurs
      * @throws UiElementFetchingException
      *         if picker for the passed query is not found
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws MultipleElementsFoundException
      *         if more than one pickers are found for the passed query
      */
-    public UiElement getNumberPicker(int index)
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            InvalidCssQueryException,
-            MultipleElementsFoundException {
+    public UiElement getNumberPicker(int index) throws MultipleElementsFoundException, UiElementFetchingException {
         UiElementSelector numberPickerSelector = new UiElementSelector();
 
         numberPickerSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, NUMBER_PICKER_WIDGET);

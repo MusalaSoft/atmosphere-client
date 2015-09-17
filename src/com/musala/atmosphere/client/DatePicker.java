@@ -7,13 +7,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.exceptions.ActionFailedException;
-import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 
@@ -119,12 +115,7 @@ public class DatePicker extends PickerView {
 
     private PickerHelper pickerHelper;
 
-    public DatePicker(Screen screen)
-        throws XPathExpressionException,
-            InvalidCssQueryException,
-            UiElementFetchingException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+    public DatePicker(Screen screen) throws MultipleElementsFoundException, UiElementFetchingException {
         super(screen);
         pickerHelper = new PickerHelper(screen);
 
@@ -132,12 +123,7 @@ public class DatePicker extends PickerView {
     }
 
     @Override
-    public boolean setValue(Calendar calendar)
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            InvalidCssQueryException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+    public boolean setValue(Calendar calendar) throws MultipleElementsFoundException, UiElementFetchingException {
         String year = String.valueOf(calendar.get(Calendar.YEAR));
         String day = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
         String month = Month.getStringRepresentation(calendar.get(Calendar.MONTH) + 1);
@@ -151,23 +137,12 @@ public class DatePicker extends PickerView {
      * Gets the year in DatePicker.
      * 
      * @return - int instance of DatePicker's year field
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if the NumberPicker or EditText elements are not present
-     * @throws InvalidCssQueryException
-     *         if the NumberPicker or EditText widgets are invalid.
-     * @throws ParserConfigurationException
-     *         if an error with internal XPath configuration occurs.
      * @throws MultipleElementsFoundException
      *         if multiple NumberPicker or matching EditText elements are present
      */
-    public int getYear()
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            InvalidCssQueryException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+    public int getYear() throws MultipleElementsFoundException, UiElementFetchingException {
         String year = pickerHelper.getNumberPickerFieldValue(yearPickerIndex);
         int yearNumber = Integer.parseInt(year);
         return yearNumber;
@@ -177,23 +152,12 @@ public class DatePicker extends PickerView {
      * Gets the day in DatePicker.
      * 
      * @return - int instance of DatePicker's day field.
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason.
      * @throws UiElementFetchingException
      *         if the NumberPicker or EditText elements are not present.
-     * @throws InvalidCssQueryException
-     *         if the NumberPicker or EditText widgets are invalid.
-     * @throws ParserConfigurationException
-     *         if an error with internal XPath configuration occurs.
      * @throws MultipleElementsFoundException
      *         if more than one NumberPicker or EditText element is present
      */
-    public int getDay()
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            InvalidCssQueryException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+    public int getDay() throws MultipleElementsFoundException, UiElementFetchingException {
         String day = pickerHelper.getNumberPickerFieldValue(dayPickerIndex);
         int dayNumber = Integer.parseInt(day);
         return dayNumber;
@@ -203,23 +167,12 @@ public class DatePicker extends PickerView {
      * Gets the month in DatePicker.
      * 
      * @return - int instance of DatePicker's month field.
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason.
      * @throws UiElementFetchingException
      *         if the NumberPicker or EditText elements are not present.
-     * @throws InvalidCssQueryException
-     *         if the NumberPicker or EditText widgets are invalid.
-     * @throws ParserConfigurationException
-     *         if an error with internal XPath configuration occurs.
      * @throws MultipleElementsFoundException
      *         if more than one NumberPicker or EditText is found
      */
-    public int getMonth()
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            InvalidCssQueryException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+    public int getMonth() throws MultipleElementsFoundException, UiElementFetchingException {
         evaluatePickerIndexes();
 
         String month = pickerHelper.getNumberPickerFieldValue(monthPickerIndex);
@@ -228,12 +181,7 @@ public class DatePicker extends PickerView {
     }
 
     @Override
-    public Calendar getValue()
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            InvalidCssQueryException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+    public Calendar getValue() throws MultipleElementsFoundException, UiElementFetchingException {
 
         String date;
         String month = pickerHelper.getNumberPickerFieldValue(monthPickerIndex);
@@ -261,12 +209,7 @@ public class DatePicker extends PickerView {
     }
 
     @Override
-    public String getStringValue()
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            InvalidCssQueryException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+    public String getStringValue() throws MultipleElementsFoundException, UiElementFetchingException {
 
         String date;
         String month = pickerHelper.getNumberPickerFieldValue(monthPickerIndex);
@@ -281,24 +224,12 @@ public class DatePicker extends PickerView {
     /**
      * Finds the index of all DatePicker fields.
      * 
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason.
      * @throws UiElementFetchingException
      *         if the NumberPicker or EditText elements are not present.
-     * @throws InvalidCssQueryException
-     *         if the NumberPicker or EditText widgets are invalid.
-     * @throws ParserConfigurationException
-     *         if an error with internal XPath configuration occurs.
      * @throws MultipleElementsFoundException
      *         if more than one NumberPicker or EditText element is present
      */
-    private void evaluatePickerIndexes()
-        throws NumberFormatException,
-            XPathExpressionException,
-            InvalidCssQueryException,
-            UiElementFetchingException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+    private void evaluatePickerIndexes() throws MultipleElementsFoundException, UiElementFetchingException {
         String pickerValue;
 
         for (int index = FIRST_POSIBLE_INDEX; index <= LAST_POSIBLE_INDEX; index++) {
@@ -343,23 +274,14 @@ public class DatePicker extends PickerView {
      * @param pickerInstance
      *        - the Index of the NumberPicker that contains the EditText
      * @return - true if setting of the text is successful and false otherwise.
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason.
      * @throws UiElementFetchingException
      *         if the NumberPicker or EditText elements are not present.
-     * @throws InvalidCssQueryException
-     *         if the NumberPicker or EditText widgets are invalid.
-     * @throws ParserConfigurationException
-     *         if an error with internal XPath configuration occurs.
      * @throws MultipleElementsFoundException
      *         if more than one NumberPicker or EditText fields are found
      */
     private boolean setText(String value, int pickerIndex)
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            InvalidCssQueryException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
 
         String currentValue = pickerHelper.getNumberPickerFieldValue(pickerIndex);
         if (!value.equals(currentValue)) {

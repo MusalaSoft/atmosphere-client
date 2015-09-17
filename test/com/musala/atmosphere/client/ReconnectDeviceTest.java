@@ -14,6 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.musala.atmosphere.client.entity.EntityFactory;
+import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.commons.DeviceInformation;
@@ -98,7 +99,10 @@ public class ReconnectDeviceTest {
         HardwareButtonEntity hardwareButtonEntity = new EntityFactory(mock(Screen.class),
                                                                       mock(DeviceInformation.class),
                                                                       deviceCommunicator).getHardwareButtonEntity();
-        testDevice = new Device(deviceCommunicator, hardwareButtonEntity);
+        GestureEntity gestureEntity = new EntityFactory(mock(Screen.class),
+                                                                      mock(DeviceInformation.class),
+                                                                      deviceCommunicator).getGestureEntity();
+        testDevice = new Device(deviceCommunicator, hardwareButtonEntity, gestureEntity);
     }
 
     @Test(expected = DeviceReleasedException.class)

@@ -1,6 +1,7 @@
 package com.musala.atmosphere.client;
 
 import com.musala.atmosphere.client.entity.EntityFactory;
+import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.RoutingAction;
@@ -42,7 +43,9 @@ public class DeviceBuilder {
         EntityFactory entityFactory = new EntityFactory(screen, deviceInformation, deviceCommunicator);
 
         HardwareButtonEntity hardwareButtonEntitiy = entityFactory.getHardwareButtonEntity();
-        return new Device(deviceCommunicator, hardwareButtonEntitiy);
+        GestureEntity gestureEntity = entityFactory.getGestureEntity();
+
+        return new Device(deviceCommunicator, hardwareButtonEntitiy, gestureEntity);
     }
 
     private void populateDeviceInformation() {

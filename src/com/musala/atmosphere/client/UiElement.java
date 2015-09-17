@@ -13,6 +13,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
 
+import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
@@ -45,19 +46,23 @@ public abstract class UiElement {
 
     protected Device onDevice;
 
+    protected GestureEntity gestureEntity;
+
     protected DeviceCommunicator communicator;
 
     protected boolean isStale;
 
-    UiElement(UiElementPropertiesContainer properties, Device device) {
-        propertiesContainer = properties;
-        onDevice = device;
-        communicator = device.getCommunicator();
+    UiElement(UiElementPropertiesContainer properties, Device device, GestureEntity gestureEntity) {
+        this.propertiesContainer = properties;
+        this.onDevice = device;
+        this.gestureEntity = gestureEntity;
+        this.communicator = device.getCommunicator();
+
         isStale = false;
     }
 
     UiElement(UiElement uiElement) {
-        this(uiElement.propertiesContainer, uiElement.onDevice);
+        this(uiElement.propertiesContainer, uiElement.onDevice, uiElement.gestureEntity);
     }
 
     /**
@@ -138,7 +143,7 @@ public abstract class UiElement {
         tapPoint.addVector(point);
 
         if (elementBounds.contains(tapPoint)) {
-            boolean isElementTapped = onDevice.tapScreenLocation(tapPoint);
+            boolean isElementTapped = gestureEntity.tapScreenLocation(tapPoint);
             finalizeUiElementOperation();
             return isElementTapped;
         } else {
@@ -247,7 +252,7 @@ public abstract class UiElement {
         tapPoint.addVector(point);
 
         if (elementBounds.contains(tapPoint)) {
-            boolean isElementTapped = onDevice.doubleTap(tapPoint);
+            boolean isElementTapped = gestureEntity.doubleTap(tapPoint);
             finalizeUiElementOperation();
             return isElementTapped;
         } else {
@@ -285,7 +290,7 @@ public abstract class UiElement {
         int secondFingerInitialY = upperLeft.getY() + HEIGHT_OFFSET;
         Point secondFingerInitial = new Point(secondFingerInitialX, secondFingerInitialY);
 
-        boolean result = onDevice.pinchIn(firstFingerInitial, secondFingerInitial);
+        boolean result = gestureEntity.pinchIn(firstFingerInitial, secondFingerInitial);
 
         return result;
     }
@@ -305,7 +310,7 @@ public abstract class UiElement {
         Point firstFingerEnd = elementBounds.getUpperLeftCorner();
         Point secondFingerEnd = elementBounds.getLowerRightCorner();
 
-        boolean result = onDevice.pinchOut(firstFingerEnd, secondFingerEnd);
+        boolean result = gestureEntity.pinchOut(firstFingerEnd, secondFingerEnd);
         return result;
     }
 
@@ -333,7 +338,7 @@ public abstract class UiElement {
         Point startPoint = propertiesContainer.getBounds().getCenter();
         Point endPoint = destinationElement.propertiesContainer.getBounds().getCenter();
 
-        return onDevice.drag(startPoint, endPoint);
+        return gestureEntity.drag(startPoint, endPoint);
     }
 
     /**
@@ -363,7 +368,7 @@ public abstract class UiElement {
         Point startPoint = propertiesContainer.getBounds().getCenter();
         Point endPoint = destinationElement.getProperties().getBounds().getCenter();
 
-        return onDevice.drag(startPoint, endPoint);
+        return gestureEntity.drag(startPoint, endPoint);
     }
 
     /**
@@ -388,7 +393,7 @@ public abstract class UiElement {
         Point startPoint = propertiesContainer.getBounds().getCenter();
         Point endPoint = destinationElement.getProperties().getBounds().getCenter();
 
-        return onDevice.drag(startPoint, endPoint);
+        return gestureEntity.drag(startPoint, endPoint);
     }
 
     /**
@@ -400,7 +405,7 @@ public abstract class UiElement {
      */
     public boolean drag(Point endPoint) {
         Point startPoint = propertiesContainer.getBounds().getCenter();
-        return onDevice.drag(startPoint, endPoint);
+        return gestureEntity.drag(startPoint, endPoint);
     }
 
     /**
@@ -432,7 +437,7 @@ public abstract class UiElement {
      */
     public boolean swipe(Point point, SwipeDirection direction) {
         revalidateThrowing();
-        boolean response = onDevice.swipe(point, direction);
+        boolean response = gestureEntity.swipe(point, direction);
         return response;
     }
 
@@ -614,7 +619,7 @@ public abstract class UiElement {
         longPressPoint.addVector(innerPoint);
 
         if (elementBounds.contains(longPressPoint)) {
-            boolean isElementTapped = onDevice.longPress(longPressPoint, timeout);
+            boolean isElementTapped = gestureEntity.longPress(longPressPoint, timeout);
             finalizeUiElementOperation();
             return isElementTapped;
         } else {

@@ -16,10 +16,10 @@ import javax.imageio.ImageIO;
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.HardwareButton;
+import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
-import com.musala.atmosphere.client.uiutils.GestureCreator;
 import com.musala.atmosphere.client.util.settings.AndroidGlobalSettings;
 import com.musala.atmosphere.client.util.settings.AndroidSystemSettings;
 import com.musala.atmosphere.client.util.settings.DeviceSettingsManager;
@@ -86,6 +86,8 @@ public class Device {
 
     private final DeviceCommunicator communicator;
 
+    private final GestureEntity gestureEntity;
+
     private final HardwareButtonEntity hardwareButtonEntity;
 
     /**
@@ -94,8 +96,11 @@ public class Device {
      * @param deviceCommunicator
      * @param hardwareButtonEntity
      */
-    Device(DeviceCommunicator deviceCommunicator, HardwareButtonEntity hardwareButtonEntity) {
+    Device(DeviceCommunicator deviceCommunicator,
+            HardwareButtonEntity hardwareButtonEntity,
+            GestureEntity gestureEntity) {
         this.communicator = deviceCommunicator;
+        this.gestureEntity = gestureEntity;
         this.hardwareButtonEntity = hardwareButtonEntity;
         this.deviceSettings = new DeviceSettingsManager(communicator);
     }
@@ -249,10 +254,7 @@ public class Device {
      * @return <code>true</code> if the double tap is successful, <code>false</code> if it fails.
      */
     public boolean doubleTap(Point point) {
-        Gesture doubleTap = GestureCreator.createDoubleTap(point.getX(), point.getY());
-        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, doubleTap);
-
-        return response == DeviceCommunicator.VOID_SUCCESS;
+        return gestureEntity.doubleTap(point);
     }
 
     /**
@@ -272,7 +274,7 @@ public class Device {
      *         active screen fails.
      */
     public Screen getActiveScreen() {
-        return new Screen(this);
+        return new Screen(this, gestureEntity);
     }
 
     /**
@@ -633,13 +635,7 @@ public class Device {
      * @return <code>true</code> if the pinch in is successful, <code>false</code> if it fails.
      */
     public boolean pinchIn(Point firstFingerInitial, Point secondFingerInitial) {
-        validatePointOnScreen(firstFingerInitial);
-        validatePointOnScreen(secondFingerInitial);
-
-        Gesture pinchIn = GestureCreator.createPinchIn(firstFingerInitial, secondFingerInitial);
-        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, pinchIn);
-
-        return response == DeviceCommunicator.VOID_SUCCESS;
+        return gestureEntity.pinchIn(firstFingerInitial, secondFingerInitial);
     }
 
     /**
@@ -652,13 +648,7 @@ public class Device {
      * @return <code>true</code> if the pinch out is successful, <code>false</code> if it fails.
      */
     public boolean pinchOut(Point firstFingerEnd, Point secondFingerEnd) {
-        validatePointOnScreen(firstFingerEnd);
-        validatePointOnScreen(secondFingerEnd);
-
-        Gesture pinchOut = GestureCreator.createPinchOut(firstFingerEnd, secondFingerEnd);
-        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, pinchOut);
-
-        return response == DeviceCommunicator.VOID_SUCCESS;
+        return gestureEntity.pinchOut(firstFingerEnd, secondFingerEnd);
     }
 
     /**
@@ -1124,14 +1114,7 @@ public class Device {
      * @return <code>true</code> if the swipe is successful, <code>false</code> if it fails.
      */
     public boolean swipe(Point point, SwipeDirection swipeDirection) {
-        validatePointOnScreen(point);
-
-        DeviceInformation information = getInformation();
-        Pair<Integer, Integer> resolution = information.getResolution();
-        Gesture swipe = GestureCreator.createSwipe(point, swipeDirection, resolution);
-        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, swipe);
-
-        return response == DeviceCommunicator.VOID_SUCCESS;
+        return gestureEntity.swipe(point, swipeDirection);
     }
 
     /**
@@ -1143,14 +1126,7 @@ public class Device {
      * @return <code>true</code> if tapping screen is successful, <code>false</code> if it fails.
      */
     public boolean tapScreenLocation(Point tapPoint) {
-        int tapPointX = tapPoint.getX();
-        int tapPointY = tapPoint.getY();
-        String query = "input tap " + tapPointX + " " + tapPointY;
-
-        showTapLocation(tapPoint);
-
-        communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, query);
-        return communicator.getLastException() == null;
+        return gestureEntity.tapScreenLocation(tapPoint);
     }
 
     /**
@@ -1175,10 +1151,7 @@ public class Device {
      * @return - true, if operation is successful, and false otherwise.
      */
     public boolean longPress(Point pressPoint, int timeout) {
-        Gesture longPress = GestureCreator.createLongPress(pressPoint.getX(), pressPoint.getY(), timeout);
-        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, longPress);
-
-        return response == DeviceCommunicator.VOID_SUCCESS;
+        return gestureEntity.longPress(pressPoint, timeout);
     }
 
     /**
@@ -1191,10 +1164,7 @@ public class Device {
      * @return <code>true</code>, if operation is successful, <code>false</code>otherwise
      */
     public boolean drag(Point startPoint, Point endPoint) {
-        validatePointOnScreen(endPoint);
-        Gesture drag = GestureCreator.createDrag(startPoint, endPoint);
-        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, drag);
-        return response == DeviceCommunicator.VOID_SUCCESS;
+        return gestureEntity.drag(startPoint, endPoint);
     }
 
     /**

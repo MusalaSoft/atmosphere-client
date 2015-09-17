@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import com.musala.atmosphere.client.entity.GestureEntity;
 
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
@@ -22,8 +23,8 @@ import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 public class AccessibilityUiElement extends UiElement {
     private static final Logger LOGGER = Logger.getLogger(AccessibilityUiElement.class);
 
-    AccessibilityUiElement(AccessibilityElement properties, Device device) {
-        super(properties, device);
+    protected AccessibilityUiElement(AccessibilityElement properties, Device device, GestureEntity gestureEntity) {
+        super(properties, device, gestureEntity);
     }
 
     AccessibilityUiElement(UiElement uiElement) {
@@ -136,7 +137,7 @@ public class AccessibilityUiElement extends UiElement {
         List<UiElement> wrappedElements = new ArrayList<UiElement>();
 
         for (AccessibilityElement element : accessibilityElements) {
-            wrappedElements.add(new AccessibilityUiElement(element, onDevice));
+            wrappedElements.add(new AccessibilityUiElement(element, onDevice, gestureEntity));
         }
 
         return wrappedElements;

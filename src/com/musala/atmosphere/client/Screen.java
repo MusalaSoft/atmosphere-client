@@ -17,6 +17,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
@@ -51,6 +52,8 @@ public class Screen {
 
     private final Device onDevice;
 
+    private GestureEntity gestureEntity;
+
     private Document xPathDomDocument;
 
     private org.jsoup.nodes.Document jSoupDocument;
@@ -58,8 +61,9 @@ public class Screen {
     private final DeviceCommunicator communicator;
 
     @Deprecated
-    Screen(Device onDevice, String uiHierarchyXml) {
+    Screen(Device onDevice, GestureEntity gestureEntity, String uiHierarchyXml) {
         this.onDevice = onDevice;
+        this.gestureEntity = gestureEntity;
         communicator = onDevice.getCommunicator();
         screenXml = uiHierarchyXml;
 
@@ -78,8 +82,9 @@ public class Screen {
         jSoupDocument = Jsoup.parse(screenXml);
     }
 
-    Screen(Device onDevice) {
+    Screen(Device onDevice, GestureEntity gestureEntity) {
         this.onDevice = onDevice;
+        this.gestureEntity = gestureEntity;
         communicator = onDevice.getCommunicator();
     }
 
@@ -114,7 +119,7 @@ public class Screen {
 
         List<UiElement> uiElements = new ArrayList<UiElement>();
         for (AccessibilityElement element : foundElements) {
-            uiElements.add(new AccessibilityUiElement(element, onDevice));
+            uiElements.add(new AccessibilityUiElement(element, onDevice, gestureEntity));
         }
 
         return uiElements;
@@ -293,7 +298,7 @@ public class Screen {
 
         List<UiElement> uiElements = new ArrayList<UiElement>();
         for (AccessibilityElement element : foundElements) {
-            uiElements.add(new AccessibilityUiElement(element, onDevice));
+            uiElements.add(new AccessibilityUiElement(element, onDevice, gestureEntity));
         }
 
         return uiElements;

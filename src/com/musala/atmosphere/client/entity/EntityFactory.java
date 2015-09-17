@@ -80,6 +80,19 @@ public class EntityFactory {
     }
 
     /**
+     * Returns an instance of the {@link GestureEntity}.
+     * <p>
+     * Note
+     * </p>
+     * For now only one implementation, independent of the {@link DeviceInformation}, is available.
+     *
+     * @return instance of the {@link GestureEntity}
+     */
+    public GestureEntity getGestureEntity() {
+        return new GestureEntity(deviceCommunicator, deviceInformation);
+    }
+
+    /**
      * Finds entity implementation for a device specific operation depending on the {@link DeviceInformation device
      * information} and the hierarchy type given.
      *

@@ -23,6 +23,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.musala.atmosphere.client.entity.HardwareButtonEntity;
+import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
@@ -50,7 +51,7 @@ public class InstallApkTest {
                                          eq(RoutingAction.GET_DEVICE_INFORMATION))).thenReturn(deviceInfoMock);
         deviceCommunicator = new DeviceCommunicator(innerClientDeviceMock, TEST_PASSKEY);
 
-        device = new Device(deviceCommunicator, mock(HardwareButtonEntity.class));
+        device = new Device(deviceCommunicator, mock(HardwareButtonEntity.class), mock(GestureEntity.class));
     }
 
     @After

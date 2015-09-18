@@ -18,11 +18,11 @@ public enum XPathAttribute {
     /** Value denoting the XPath 'checked' attribute. Type of needed value Boolean. */
     CHECKED(Boolean.class, "checked"),
     /** Value denoting the XPath 'class' attribute. Type of needed value String. */
-    CLASS_NAME(String.class, "class"),
+    CLASS_NAME(String.class, "className"),
     /** Value denoting the XPath 'clickable' attribute. Type of needed value Boolean. */
     CLICKABLE(Boolean.class, "clickable"),
     /** Value denoting the XPath 'content-desc' attribute. Type of needed value String. */
-    CONTENT_DESCRIPTION(String.class, "content-desc"),
+    CONTENT_DESCRIPTION(String.class, "contentDesc"),
     /** Value denoting the XPath 'enabled' attribute. Type of needed value Boolean. */
     ENABLED(Boolean.class, "enabled"),
     /** Value denoting the XPath 'focusable' attribute. Type of needed value Boolean. */
@@ -32,13 +32,13 @@ public enum XPathAttribute {
     /** Value denoting the XPath 'index' attribute. Type of needed value Integer. */
     INDEX(Integer.class, "index"),
     /** Value denoting the XPath 'long-clickable' attribute. Type of needed value Boolean. */
-    LONG_CLICKABLE(Boolean.class, "long-clickable"),
+    LONG_CLICKABLE(Boolean.class, "longClickable"),
     /** Value denoting the XPath 'package' attribute. Type of needed value String. */
     PACKAGE_NAME(String.class, "package"),
     /** Value denoting the XPath 'password' attribute. Type of needed value Boolean. */
     PASSWORD(Boolean.class, "password"),
     /** Value denoting the CSS 'resource-id' attribute. Type of needed value String. */
-    RESOURCE_ID(String.class, "resource-id"),
+    RESOURCE_ID(String.class, "resourceId"),
     /** Value denoting the XPath 'scrollable' attribute. Type of needed value Boolean. */
     SCROLLABLE(Boolean.class, "scrollable"),
     /** Value denoting the XPath 'selected' attribute. Type of needed value Boolean. */

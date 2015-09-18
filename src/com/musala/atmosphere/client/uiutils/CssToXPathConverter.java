@@ -136,7 +136,6 @@ public class CssToXPathConverter {
         }
 
         String xpathQuery = convertInitialNode(separatedInitialNode);
-
         List<String> dividedCssQuery = divideCssQuery(cssQuery);
         String[] attributeNameAndSelectionExpression = new String[2];
         String attributeName = null;
@@ -172,6 +171,7 @@ public class CssToXPathConverter {
                 if (isAttributeStringOfTheEnumeration(attributeName)) {
                     xpathQuery = String.format(EQUAL_FORMATTER, xpathQuery, attributeName, selectionExpression);
                 }
+
             } else {
                 String message = "Converting Css to xPath query failed.";
                 LOGGER.error(message);

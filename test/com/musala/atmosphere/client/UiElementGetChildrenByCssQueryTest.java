@@ -25,19 +25,19 @@ public class UiElementGetChildrenByCssQueryTest {
 
     private static final String CSS_QUERY_FOR_UNEXISTING_CHILDREN_ELEMENTS = "[package=non-existing-package]";
 
-    private static final String CSS_QUERY_FOR_FIRST_CHILD = "[bounds=[7,19][37,55]][class=android.widget.FrameLayout]";
+    private static final String CSS_QUERY_FOR_FIRST_CHILD = "[bounds=[7,19][37,55]][className=android.widget.FrameLayout]";
 
-    private static final String CSS_QUERY_FOR_SECOND_CHILD = "[bounds=[10,25][34,49]][class=android.widget.ImageView]";
+    private static final String CSS_QUERY_FOR_SECOND_CHILD = "[bounds=[10,25][34,49]][className=android.widget.ImageView]";
 
-    private static final String CSS_QUERY_FOR_THIRD_CHILD = "[bounds=[37,19][105,55]][class=android.widget.LinearLayout]";
+    private static final String CSS_QUERY_FOR_THIRD_CHILD = "[bounds=[37,19][105,55]][className=android.widget.LinearLayout]";
 
-    private static final String CSS_QUERY_FOR_FOURTH_CHILD = "[bounds=[37,27][99,46]][class=android.widget.LinearLayout]";
+    private static final String CSS_QUERY_FOR_FOURTH_CHILD = "[bounds=[37,27][99,46]][className=android.widget.LinearLayout]";
 
-    private static final String CSS_QUERY_FOR_FIFTH_CHILD = "[bounds=[37,27][99,46]][class=android.widget.TextView]";
+    private static final String CSS_QUERY_FOR_FIFTH_CHILD = "[bounds=[37,27][99,46]][className=android.widget.TextView]";
 
-    private static final String INVALID_CSS_QUERY = "[index=0]derp[content-desc=derp]";
+    private static final String INVALID_CSS_QUERY = "[index=0]derp[contentDesc=derp]";
 
-    private static final String CSS_QUERY_FOR_NON_CHILDREN_ELEMENT = "[class=android.widget.FrameLayout][content-desc=derp]";
+    private static final String CSS_QUERY_FOR_NON_CHILDREN_ELEMENT = "[className=android.widget.FrameLayout][content-desc=derp]";
 
     private Device device;
 

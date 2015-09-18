@@ -14,11 +14,11 @@ import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
  */
 public class CssToXPathConverterTest {
 
-    private final static String VALID_CSS_QUERY = "[resour_id=12321][checkable=false][content-desc~=word][class=com.musala.bam][class*=com.musala][bounds=[0,2][4,5]][index=2]";
+    private final static String VALID_CSS_QUERY = "[resour_id=12321][checkable=false][contentDesc~=word][className=com.musala.bam][className*=com.musala][bounds=[0,2][4,5]][index=2]";
 
-    private final static String EXPECTED_XPATH_QUERY = "//*[@checkable='false'][contains(concat(' ', @content-desc, ' '), ' word ')][@class='com.musala.bam'][contains(@class,'com.musala')][@bounds='[0,2][4,5]'][@index='2']";
+    private final static String EXPECTED_XPATH_QUERY = "//*[@checkable='false'][contains(concat(' ', @contentDesc, ' '), ' word ')][@className='com.musala.bam'][contains(@className,'com.musala')][@bounds='[0,2][4,5]'][@index='2']";
 
-    private final static String INVALID_CSS_QUERY = "[resource-id=2]/s[index=1]";
+    private final static String INVALID_CSS_QUERY = "[resourceId=2]/s[index=1]";
 
     @Test
     public void testConverterWithValidCssQuery() throws InvalidCssQueryException {

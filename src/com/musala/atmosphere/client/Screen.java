@@ -158,13 +158,14 @@ public class Screen {
     }
 
     /**
-     * Searches for given UI element in the current screen XML structure using CSS.
+     * Searches for given UI element in the current screen using CSS.
+     * <p>
+     * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
+     * </p>
      * 
      * @param query
      *        - CSS selector query.
      * @return the requested {@link UiElement UiElement}.
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
      * @throws MultipleElementsFoundException
      *         if more than one element is found for the passed query
      * @throws UiElementFetchingException
@@ -174,7 +175,6 @@ public class Screen {
         throws InvalidCssQueryException,
             MultipleElementsFoundException,
             UiElementFetchingException {
-        // FIXME: The css converter is not compatible with the new implementation and should be fixed
         String xpathQuery = CssToXPathConverter.convertCssToXPath(query);
         return getElementByXPath(xpathQuery);
     }
@@ -368,20 +368,14 @@ public class Screen {
      * @param waitTimeout
      *        - a timeout for the wait operation
      * @return an {@link UiElement} matching the passed selector
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
      * @throws MultipleElementsFoundException
      *         if more than one element is found for the passed query
      */
     public UiElement getElementWhenPresent(UiElementSelector selector, int waitTimeout)
-        throws UiElementFetchingException,
-            XPathExpressionException,
-            InvalidCssQueryException,
-            MultipleElementsFoundException {
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
         boolean isElementPresent = waitForElementExists(selector, waitTimeout);
 
         if (isElementPresent) {
@@ -402,34 +396,29 @@ public class Screen {
      * @param selector
      *        - an {@link UiElementSelector} describing the desired element
      * @return an {@link UiElement} matching the passed selector
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
      * @throws MultipleElementsFoundException
      *         if more than one element is found for the passed query
      */
     public UiElement getElementWhenPresent(UiElementSelector selector)
-        throws UiElementFetchingException,
-            XPathExpressionException,
-            InvalidCssQueryException,
-            MultipleElementsFoundException {
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
         return getElementWhenPresent(selector, WAIT_AND_GET_DEFAULT_TIMEOUT);
     }
 
     /**
      * Searches for UI elements in the current screen using given CSS. Returns a list of all found elements having the
      * used CSS.
+     * <p>
+     * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
+     * </p>
      * 
      * @param cssQuery
      *        - CSS selector query.
      * @return List containing all found elements of type {@link XmlNodeUiElement XmlNodeUiElement}.
      * @throws InvalidCssQueryException
      *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
      */
@@ -451,8 +440,6 @@ public class Screen {
      * @param xPathQuery
      *        - an XPath query that should match the elements
      * @return List containing all found elements of type {@link XmlNodeUiElement XmlNodeUiElement}.
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
      */
@@ -467,17 +454,10 @@ public class Screen {
      * @param text
      *        - search text.
      * @return <code>true</code> if the tapping of element is successful, <code>false</code> if it fails.
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements or more than 1 are found for the passed query
      */
-    public boolean tapElementWithText(String text)
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            InvalidCssQueryException {
+    public boolean tapElementWithText(String text) throws UiElementFetchingException, InvalidCssQueryException {
         return tapElementWithText(text, 0);
     }
 
@@ -489,17 +469,10 @@ public class Screen {
      * @param match
      *        - determines which element to tap if multiple matches exist; zero based index.
      * @return <code>true</code> if the tapping of element is successful, <code>false</code> if it fails.
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements or more than 1 are found for the passed query
      */
-    public boolean tapElementWithText(String text, int match)
-        throws UiElementFetchingException,
-            XPathExpressionException,
-            InvalidCssQueryException {
+    public boolean tapElementWithText(String text, int match) throws UiElementFetchingException {
         UiElementSelector selector = new UiElementSelector();
         selector.addSelectionAttribute(CssAttribute.TEXT, UiElementSelectionOption.EQUALS, text);
         List<UiElement> elementList = getElements(selector);
@@ -521,10 +494,6 @@ public class Screen {
      * @param text
      *        - search text.
      * @return - true if element with supplied search text exists on screen.
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      */
     public boolean hasElementWithText(String text) {
         UiElementSelector selector = new UiElementSelector();
@@ -569,23 +538,10 @@ public class Screen {
      * @return a {@link DatePicker} object representing the time picker widget on screen.
      * @throws UiElementFetchingException
      *         if there is no date picker available on the screen
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
-     * @throws UiElementFetchingException
-     *         if there are any elements that are not present
-     * @throws InvalidCssQueryException
-     *         when the CssToXPathConverter is given an invalid CssQuery
-     * @throws ParserConfigurationException
-     *         if an error with internal XPath configuration occurs
      * @throws MultipleElementsFoundException
      *         if multiple date pickers are present on the screen
      */
-    public DatePicker getDatePicker()
-        throws UiElementFetchingException,
-            MultipleElementsFoundException,
-            XPathExpressionException,
-            InvalidCssQueryException,
-            ParserConfigurationException {
+    public DatePicker getDatePicker() throws UiElementFetchingException, MultipleElementsFoundException {
         String message = String.format(PICKERS_MESSAGE, "date");
         UiElementSelector timePickerSelector = new UiElementSelector();
         timePickerSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, DATE_PICKER_WIDGET);
@@ -603,6 +559,9 @@ public class Screen {
 
     /**
      * Checks if an element is present in the current {@link Screen} instance.
+     * <p>
+     * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
+     * </p>
      * 
      * @param query
      *        - the CSS element query with all selection criteria for the searched element.

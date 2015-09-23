@@ -1,41 +1,41 @@
 package com.musala.atmosphere.client.uiutils;
 
-import com.musala.atmosphere.commons.ui.UiElementDescriptor;
+import com.musala.atmosphere.commons.ui.UiElementPropertiesContainer;
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 
 /**
- * Manages the extracting of the attributes from a UiElementSelector instance to a simpler data container.
+ * Manages the extracting of the attributes from a UiElementPropertiesContainer instance to a UiElementSelector.
  * 
  * @author georgi.gaydarov
  * 
  */
 public class UiElementAttributeExtractor {
     /**
-     * Extracts the attributes from a {@link UiElementSelector} instance to a simpler data container - the
-     * {@link UiElementDescriptor}.
+     * Extracts the attributes from a {@link UiElementPropertiesContainer} instance to a {@link UiElementSelector}.
      * 
-     * @param selector
-     *        - selector instance from which we get the attributes.
-     * @return a {@link UiElementDescriptor} instance containing the {@link UiElementSelector} attributes.
+     * @param propertiesContainer
+     *        - {@link UiElementPropertiesContainer} instance from which we get the attributes
+     * @return a {@link UiElementSelector} instance containing the {@link UiElementPropertiesContainer} attributes
      */
-    public static UiElementDescriptor extract(UiElementSelector selector) {
-        UiElementDescriptor descriptor = new UiElementDescriptor();
-        descriptor.setCheckable(selector.getBooleanValue(CssAttribute.CHECKABLE));
-        descriptor.setChecked(selector.getBooleanValue(CssAttribute.CHECKED));
-        descriptor.setClassName(selector.getStringValue(CssAttribute.CLASS_NAME));
-        descriptor.setClickable(selector.getBooleanValue(CssAttribute.CLICKABLE));
-        descriptor.setContentDescription(selector.getStringValue(CssAttribute.CONTENT_DESCRIPTION));
-        descriptor.setEnabled(selector.getBooleanValue(CssAttribute.ENABLED));
-        descriptor.setFocusable(selector.getBooleanValue(CssAttribute.FOCUSABLE));
-        descriptor.setFocused(selector.getBooleanValue(CssAttribute.FOCUSED));
-        descriptor.setIndex(selector.getIntegerValue(CssAttribute.INDEX));
-        descriptor.setLongClickable(selector.getBooleanValue(CssAttribute.LONG_CLICKABLE));
-        descriptor.setPackageName(selector.getStringValue(CssAttribute.PACKAGE_NAME));
-        descriptor.setScrollable(selector.getBooleanValue(CssAttribute.SCROLLABLE));
-        descriptor.setSelected(selector.getBooleanValue(CssAttribute.SELECTED));
-        descriptor.setText(selector.getStringValue(CssAttribute.TEXT));
-        descriptor.setResourceId(selector.getStringValue(CssAttribute.RESOURCE_ID));
-        return descriptor;
+    public static UiElementSelector extract(UiElementPropertiesContainer propertiesContainer) {
+        UiElementSelector elementSelector = new UiElementSelector();
+        elementSelector.addSelectionAttribute(CssAttribute.CHECKED, propertiesContainer.isChecked());
+        elementSelector.addSelectionAttribute(CssAttribute.CHECKABLE, propertiesContainer.isCheckable());
+        elementSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, propertiesContainer.getClassName());
+        elementSelector.addSelectionAttribute(CssAttribute.CLICKABLE, propertiesContainer.isClickable());
+        elementSelector.addSelectionAttribute(CssAttribute.CONTENT_DESCRIPTION, propertiesContainer.getContentDescriptor());
+        elementSelector.addSelectionAttribute(CssAttribute.ENABLED, propertiesContainer.isEnabled());
+        elementSelector.addSelectionAttribute(CssAttribute.FOCUSABLE, propertiesContainer.isFocusable());
+        elementSelector.addSelectionAttribute(CssAttribute.FOCUSED, propertiesContainer.isFocused());
+        elementSelector.addSelectionAttribute(CssAttribute.INDEX, propertiesContainer.getIndex());
+        elementSelector.addSelectionAttribute(CssAttribute.CLICKABLE, propertiesContainer.isLongClickable());
+        elementSelector.addSelectionAttribute(CssAttribute.PACKAGE_NAME, propertiesContainer.getPackageName());
+        elementSelector.addSelectionAttribute(CssAttribute.SCROLLABLE, propertiesContainer.isScrollable());
+        elementSelector.addSelectionAttribute(CssAttribute.SELECTED, propertiesContainer.isSelected());
+        elementSelector.addSelectionAttribute(CssAttribute.TEXT, propertiesContainer.getText());
+        elementSelector.addSelectionAttribute(CssAttribute.RESOURCE_ID, propertiesContainer.getResourceId());
+
+        return elementSelector;
     }
 }

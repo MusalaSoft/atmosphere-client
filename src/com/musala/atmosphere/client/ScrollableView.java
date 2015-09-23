@@ -2,20 +2,15 @@ package com.musala.atmosphere.client;
 
 import java.util.List;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
 import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
 
-import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.ScrollDirection;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
-import com.musala.atmosphere.commons.ui.UiElementDescriptor;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
+import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 
 /**
  * UI element representing ScrollableView used to perform scroll actions to end, beginning, forward, backward, to a
@@ -23,7 +18,7 @@ import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
  * 
  * @author filareta.yordanova
  */
-public class ScrollableView extends XmlNodeUiElement {
+public class ScrollableView extends AccessibilityUiElement {
     private static final Logger LOGGER = Logger.getLogger(ScrollableView.class);
 
     /**
@@ -31,11 +26,11 @@ public class ScrollableView extends XmlNodeUiElement {
      */
     private boolean isVertical = true;
 
-    ScrollableView(Node representingNode, Device onDevice) {
-        super(representingNode, onDevice);
+    ScrollableView(AccessibilityElement accessibilityElement, Device onDevice) {
+        super(accessibilityElement, onDevice);
     }
 
-    ScrollableView(XmlNodeUiElement uiElement) {
+    ScrollableView(UiElement uiElement) {
         super(uiElement);
     }
 
@@ -164,12 +159,9 @@ public class ScrollableView extends XmlNodeUiElement {
      * @return true if the scroll was successful, false if it was not
      */
     private boolean scroll(Integer maxSwipes, Integer maxSteps, ScrollDirection scrollDirection) {
-        // TODO The UiElementDescriptor should be replaced with AccessibilityElement when the
-        // appropriate routing action is implemented
-        UiElementDescriptor viewDescriptor = UiElementAttributeExtractor.extract(getElementSelector());
         boolean response = (boolean) communicator.sendAction(RoutingAction.SCROLL_TO_DIRECTION,
                                                              scrollDirection,
-                                                             viewDescriptor,
+                                                             getProperties(),
                                                              maxSwipes,
                                                              maxSteps,
                                                              isVertical);
@@ -185,36 +177,29 @@ public class ScrollableView extends XmlNodeUiElement {
      * @param innerViewSelector
      *        - a {@link UiElementSelector} that needs to match a certain element in the scrollable view
      * @return true if the method finds the element corresponding to the selector, false if it does not find it
-     * @throws XPathExpressionException
-     *         - if the XPath expression resulting from the conversion of the {@link UiElementSelector} is invalid
-     * @throws InvalidCssQueryException
-     *         - if the CSS query corresponding to the {@link UiElementSelector} is invalid
-     * @throws ParserConfigurationException
-     *         - if an error with internal XPath configuration occurs
      * @throws MultipleElementsFoundException
      *         if multiple scrollable views are present on the screen
+     * @throws UiElementFetchingException
+     *         if no scrollable view is present on the screen
      */
     public boolean scrollToElementBySelector(Integer maxSwipes, UiElementSelector innerViewSelector)
-        throws XPathExpressionException,
-            InvalidCssQueryException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
-        String cssQuery = innerViewSelector.buildCssQuery();
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
         Screen deviceActiveScreen = onDevice.getActiveScreen();
-        UiElementSelector scrollableViewSelector = this.getElementSelector();
-        ScrollableView updatedScrollableView = null;
 
-        this.scrollToBeginning(maxSwipes);
+        UiElementSelector scrollViewSelector = UiElementAttributeExtractor.extract(getProperties());
+
+        if (!scrollToBeginning(maxSwipes)) {
+            return false;
+        }
 
         for (int i = 0; i < maxSwipes; i++) {
             try {
-                deviceActiveScreen.updateScreen();
-                updatedScrollableView = deviceActiveScreen.getScrollableView(scrollableViewSelector);
-                updatedScrollableView.getChildrenByCssQuery(cssQuery);
-
+                ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollViewSelector);
+                updatedScrollableView.getChildren(innerViewSelector);
                 return true;
-            } catch (UiElementFetchingException expection) {
-                if (!this.scrollForward()) {
+            } catch (UiElementFetchingException e) {
+                if (!scrollForward()) {
                     return false;
                 }
             }
@@ -230,34 +215,24 @@ public class ScrollableView extends XmlNodeUiElement {
      *        - a {@link UiElementSelector} that needs to match a certain element in the scrollable view
      * @return true if you can find and tap on an element in ScrollableView corresponding to the given selector without
      *         scrolling, false if you cannot
-     * @throws XPathExpressionException
-     *         - if the XPath expression resulting from the conversion of the {@link UiElementSelector} is invalid
-     * @throws InvalidCssQueryException
-     *         - if the CSS query corresponding to the {@link UiElementSelector} is invalid
-     * @throws ParserConfigurationException
-     *         - if an error with internal XPath configuration occurs
      * @throws MultipleElementsFoundException
      *         if multiple scrollable views are present on the screen
+     * @throws UiElementFetchingException
+     *         if no scrollable view is present on the screen
      */
     public boolean tapElementBySelectorWithoutScrolling(UiElementSelector innerViewSelector)
-        throws XPathExpressionException,
-            ParserConfigurationException,
-            InvalidCssQueryException,
-            MultipleElementsFoundException {
-        String cssQuery = innerViewSelector.buildCssQuery();
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
         Screen deviceActiveScreen = onDevice.getActiveScreen();
-        UiElementSelector scrollableViewSelector = this.getElementSelector();
-        ScrollableView updatedScrollableView = null;
 
+        UiElementSelector scrollViewSelector = UiElementAttributeExtractor.extract(getProperties());
         try {
-            deviceActiveScreen.updateScreen();
-            updatedScrollableView = deviceActiveScreen.getScrollableView(scrollableViewSelector);
+            ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollViewSelector);
 
-            List<UiElement> innerViewChildren = updatedScrollableView.getChildrenByCssQuery(cssQuery);
-
+            List<UiElement> innerViewChildren = updatedScrollableView.getChildren(innerViewSelector);
             return innerViewChildren.get(0).tap();
         } catch (UiElementFetchingException e) {
-            return false;
+            throw new UiElementFetchingException("No element matching the given selector was found.", e);
         }
     }
 
@@ -270,34 +245,28 @@ public class ScrollableView extends XmlNodeUiElement {
      *        - a {@link UiElementSelector} that needs to match a certain element in the scrollable view
      * @return true if you can find and tap on an element in ScrollableView corresponding to the given selector with
      *         scrolling, false if you cannot
-     * @throws XPathExpressionException
-     *         - if the XPath expression resulting from the conversion of the {@link UiElementSelector} is invalid
-     * @throws InvalidCssQueryException
-     *         - if the CSS query corresponding to the {@link UiElementSelector} is invalid
-     * @throws ParserConfigurationException
-     *         - if an error with internal XPath configuration occurs
      * @throws UiElementFetchingException
-     *         - if the UI element could not be found
+     *         if the UI element could not be found
      * @throws MultipleElementsFoundException
      *         if multiple scrollable views are present on the screen
      */
     public boolean tapElementBySelectorWithScrolling(Integer maxSwipes, UiElementSelector innerViewSelector)
-        throws XPathExpressionException,
-            InvalidCssQueryException,
-            ParserConfigurationException,
-            UiElementFetchingException,
-            MultipleElementsFoundException {
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
         if (!scrollToElementBySelector(maxSwipes, innerViewSelector)) {
             LOGGER.debug(String.format("Could not find element after %d swipes.", maxSwipes));
             return false;
         }
 
         Screen deviceActiveScreen = onDevice.getActiveScreen();
-        String cssQuery = innerViewSelector.buildCssQuery();
-        UiElementSelector scrollableViewSelector = this.getElementSelector();
-        ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollableViewSelector);
-        List<UiElement> innerViewChildren = updatedScrollableView.getChildrenByCssQuery(cssQuery);
+        try {
+            UiElementSelector scrollViewSelector = UiElementAttributeExtractor.extract(getProperties());
+            ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollViewSelector);
+            List<UiElement> innerViewChildren = updatedScrollableView.getChildren(innerViewSelector);
 
-        return innerViewChildren.get(0).tap();
+            return innerViewChildren.get(0).tap();
+        } catch (UiElementFetchingException e) {
+            throw new UiElementFetchingException("No element matching the given selector was found.", e);
+        }
     }
 }

@@ -10,24 +10,20 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
-import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
 import com.musala.atmosphere.client.uiutils.UiXmlParser;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
-import com.musala.atmosphere.commons.ui.UiElementDescriptor;
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelectionOption;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
@@ -180,15 +176,13 @@ public class Screen {
     }
 
     /**
-     * Searches for given ScrollableView in the current screen XML structure using CSS
+     * Searches for given ScrollableView in the current screen using CSS
      * 
      * @param query
      *        CSS selector query
      * @return the requested ScrollableView
      * @throws InvalidCssQueryException
      *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
      * @throws MultipleElementsFoundException
@@ -196,15 +190,14 @@ public class Screen {
      */
     public ScrollableView getScrollableViewtByCSS(String query)
         throws UiElementFetchingException,
-            InvalidCssQueryException,
-            XPathExpressionException,
-            MultipleElementsFoundException {
+            MultipleElementsFoundException,
+            InvalidCssQueryException {
         String xpathQuery = CssToXPathConverter.convertCssToXPath(query);
         return getScrollableViewByXPath(xpathQuery);
     }
 
     /**
-     * Searches for given ScrollableView in the current screen XML structure using XPath.
+     * Searches for given ScrollableView in the current screen using XPath.
      * <p>
      * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
      * </p>
@@ -212,21 +205,15 @@ public class Screen {
      * @param query
      *        - an XPath query
      * @return the requested ScrollableView
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
      * @throws MultipleElementsFoundException
      *         if more than one element is found for the passed query
      */
     public ScrollableView getScrollableViewByXPath(String query)
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            MultipleElementsFoundException {
-        updateScreen();
-        Node node = UiXmlParser.getXPathNode(xPathDomDocument, query);
-        ScrollableView scrollableView = new ScrollableView(node, onDevice);
-        return scrollableView;
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
+        return new ScrollableView(getElementByXPath(query));
     }
 
     /**
@@ -334,29 +321,21 @@ public class Screen {
     }
 
     /**
-     * Searches for given ScrollableView in the current screen XML structure using a {@link UiElementSelector
-     * UiElementSelector} instance.
+     * Searches for given ScrollableView in the current screen using a {@link UiElementSelector UiElementSelector}
+     * instance.
      * 
      * @param selector
      *        - {@link UiElementSelector} object that contains all the selection criteria for the required elements.
      * @return the requested {@link ScrollableView ScrollableView}
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
      * @throws MultipleElementsFoundException
      *         if more than one element is found for the passed query
      */
     public ScrollableView getScrollableView(UiElementSelector selector)
-        throws UiElementFetchingException,
-            XPathExpressionException,
-            InvalidCssQueryException,
-            MultipleElementsFoundException {
-        String cssQuery = selector.buildCssQuery();
-        ScrollableView result = getScrollableViewtByCSS(cssQuery);
-        return result;
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
+        return new ScrollableView(getElement(selector));
     }
 
     /**
@@ -590,8 +569,7 @@ public class Screen {
      * @return boolean indicating if this action was successful.
      */
     public boolean waitForElementExists(UiElementSelector selector, Integer timeout) {
-        UiElementDescriptor descriptor = UiElementAttributeExtractor.extract(selector);
-        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_EXISTS, descriptor, timeout);
+        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_EXISTS, selector, timeout);
         updateScreen();
         return response;
     }
@@ -608,8 +586,7 @@ public class Screen {
      * @return boolean indicating if this action was successful.
      */
     public boolean waitUntilElementGone(UiElementSelector selector, Integer timeout) {
-        UiElementDescriptor descriptor = UiElementAttributeExtractor.extract(selector);
-        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_UNTIL_GONE, descriptor, timeout);
+        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_UNTIL_GONE, selector, timeout);
         updateScreen();
         return response;
     }

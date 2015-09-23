@@ -28,7 +28,9 @@ import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
  * @author vassil.angelov
  *
  */
+@Deprecated
 public class XmlNodeUiElement extends UiElement {
+    // TODO This class is no longer needed and should be removed.
 
     private static final Logger LOGGER = Logger.getLogger(XmlNodeUiElement.class);
 
@@ -211,6 +213,7 @@ public class XmlNodeUiElement extends UiElement {
      * @return a list of {@link UiElement} children that match the given selector
      * 
      */
+    @Override
     public List<UiElement> getChildren(UiElementSelector childrenSelector) {
         String cssQuery = childrenSelector.buildCssQuery();
         return getChildrenByCssQuery(cssQuery);

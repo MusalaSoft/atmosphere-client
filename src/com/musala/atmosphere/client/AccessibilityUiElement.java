@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
@@ -26,8 +27,9 @@ public class AccessibilityUiElement extends UiElement {
     protected AccessibilityUiElement(AccessibilityElement properties,
             Device device,
             GestureEntity gestureEntity,
-            ImeEntity imeEntity) {
-        super(properties, device, gestureEntity, imeEntity);
+            ImeEntity imeEntity,
+            DeviceSettingsEntity settingsEntity) {
+        super(properties, device, gestureEntity, imeEntity, settingsEntity);
     }
 
     AccessibilityUiElement(UiElement uiElement) {
@@ -140,7 +142,11 @@ public class AccessibilityUiElement extends UiElement {
         List<UiElement> wrappedElements = new ArrayList<UiElement>();
 
         for (AccessibilityElement element : accessibilityElements) {
-            wrappedElements.add(new AccessibilityUiElement(element, onDevice, gestureEntity, imeEntity));
+            wrappedElements.add(new AccessibilityUiElement(element,
+                                                           onDevice,
+                                                           gestureEntity,
+                                                           imeEntity,
+                                                           settingsEntity));
         }
 
         return wrappedElements;

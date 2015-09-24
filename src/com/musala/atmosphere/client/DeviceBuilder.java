@@ -3,6 +3,7 @@ package com.musala.atmosphere.client;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.EntityTypeResolver;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.GpsLocationEntity;
@@ -25,7 +26,8 @@ public class DeviceBuilder {
 
     private DeviceCommunicator deviceCommunicator;
 
-    // TODO: Getting device screen through the communicator will be implemented in one of the next tasks;
+    // TODO: Use UiElementSelectionEntity here for getting elements from device screen. This must be fixed in
+    // the GpsLocationEntitiy before it is used in Device;
     private Screen screen;
 
     public DeviceBuilder() {
@@ -62,6 +64,12 @@ public class DeviceBuilder {
             Constructor<?> imeEntitiyConstructor = ImeEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
             imeEntitiyConstructor.setAccessible(true);
             device.setImeEntity((ImeEntity) imeEntitiyConstructor.newInstance(new Object[] {deviceCommunicator}));
+
+            Constructor<?> settingsEntitiyConstructor = DeviceSettingsEntity.class.getDeclaredConstructor(DeviceCommunicator.class,
+                                                                                                          DeviceInformation.class);
+            settingsEntitiyConstructor.setAccessible(true);
+            device.setSettingsEntity((DeviceSettingsEntity) settingsEntitiyConstructor.newInstance(new Object[] {
+                    deviceCommunicator, deviceInformation}));
 
             Class<?> locationEntityClass = typeResolver.getEntityClass(GpsLocationEntity.class);
             Constructor<?> locationEntityConstructor = locationEntityClass.getDeclaredConstructor(Screen.class,

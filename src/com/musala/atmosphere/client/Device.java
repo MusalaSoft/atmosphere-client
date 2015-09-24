@@ -8,25 +8,20 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.HardwareButton;
+import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.GpsLocationEntity;
 import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
-import com.musala.atmosphere.client.util.settings.AndroidGlobalSettings;
-import com.musala.atmosphere.client.util.settings.AndroidSystemSettings;
 import com.musala.atmosphere.client.util.settings.DeviceSettingsManager;
-import com.musala.atmosphere.client.util.settings.IAndroidSettings;
-import com.musala.atmosphere.client.util.settings.SettingsParsingException;
 import com.musala.atmosphere.commons.ConnectionType;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.PowerProperties;
@@ -82,8 +77,6 @@ public class Device {
      */
     public static final int LONG_PRESS_DEFAULT_TIMEOUT = 1500; // ms
 
-    private final DeviceSettingsManager deviceSettings;
-
     private final DeviceCommunicator communicator;
 
     private GestureEntity gestureEntity;
@@ -91,6 +84,8 @@ public class Device {
     private HardwareButtonEntity hardwareButtonEntity;
 
     private ImeEntity imeEntity;
+
+    private DeviceSettingsEntity settingsEntity;
 
     private GpsLocationEntity gpsLocationEntity;
 
@@ -102,7 +97,6 @@ public class Device {
      */
     Device(DeviceCommunicator deviceCommunicator) {
         this.communicator = deviceCommunicator;
-        this.deviceSettings = new DeviceSettingsManager(communicator);
     }
 
     /**
@@ -274,7 +268,7 @@ public class Device {
      *         active screen fails.
      */
     public Screen getActiveScreen() {
-        return new Screen(this, gestureEntity,imeEntity);
+        return new Screen(this, gestureEntity, imeEntity, settingsEntity);
     }
 
     /**
@@ -284,20 +278,7 @@ public class Device {
      *         getting airplane mode fails.
      */
     public Boolean getAirplaneMode() {
-        DeviceInformation deviceInformation = getInformation();
-        int apiLevel = deviceInformation.getApiLevel();
-
-        IAndroidSettings airplaneSetting = apiLevel >= 17 ? AndroidGlobalSettings.AIRPLANE_MODE_ON
-                : AndroidSystemSettings.AIRPLANE_MODE_ON;
-
-        try {
-            int airplaneMode = deviceSettings.getInt(airplaneSetting);
-            return airplaneMode == 1;
-        } catch (SettingsParsingException e) {
-            String message = "Getting the Airplane mode of the device failed.";
-            LOGGER.error(message, e);
-            return null;
-        }
+        return settingsEntity.getAirplaneMode();
     }
 
     DeviceCommunicator getCommunicator() {
@@ -427,15 +408,7 @@ public class Device {
      * @see ScreenOrientation
      */
     public ScreenOrientation getScreenOrientation() {
-        ScreenOrientation screenOrientation = null;
-        try {
-            int obtainedScreenOrientationValue = deviceSettings.getInt(AndroidSystemSettings.USER_ROTATION);
-            screenOrientation = ScreenOrientation.getValueOfInt(obtainedScreenOrientationValue);
-        } catch (SettingsParsingException e) {
-            String message = "Failed to get screen orientation of the device.";
-            LOGGER.error(message, e);
-        }
-        return screenOrientation;
+        return settingsEntity.getScreenOrientation();
     }
 
     /**
@@ -455,16 +428,7 @@ public class Device {
      *         method failed to get device auto rotation state.
      */
     public Boolean isAutoRotationOn() {
-        Boolean isAutoRotationOn = null;
-        try {
-            int autoRotationVelue = deviceSettings.getInt(AndroidSystemSettings.ACCELEROMETER_ROTATION);
-            isAutoRotationOn = autoRotationVelue == 1 ? true : false;
-
-        } catch (SettingsParsingException e) {
-            String message = "Getting autorotation status failed.";
-            LOGGER.error(message, e);
-        }
-        return isAutoRotationOn;
+        return settingsEntity.isAutoRotationOn();
     }
 
     /**
@@ -728,44 +692,7 @@ public class Device {
      * @return <code>true</code> if the airplane mode setting is successful, <code>false</code> if it fails.
      */
     public boolean setAirplaneMode(boolean airplaneMode) {
-        DeviceInformation deviceInformation = getInformation();
-        int apiLevel = deviceInformation.getApiLevel();
-        boolean isEmulator = deviceInformation.isEmulator();
-        if (isEmulator) {
-            String message = "Enabling airplane mode on emulator disconnects it from ATMOSPHERE Agent and this emulator can be connected back only after Agent restart. Setting airplane mode for emulators is prohibited.";
-            LOGGER.warn(message);
-            return false;
-        }
-
-        int airplaneModeIntValue = airplaneMode ? 1 : 0;
-
-        IntentBuilder intentBuilder = new IntentBuilder(IntentAction.AIRPLANE_MODE_NOTIFICATION);
-        intentBuilder.putExtraBoolean("state", airplaneMode);
-        String intentCommand = intentBuilder.buildIntentCommand();
-
-        final String INTENT_COMMAND_RESPONSE = "Broadcast completed: result=0";
-
-        IAndroidSettings airplaneSetting = apiLevel >= 17 ? AndroidGlobalSettings.AIRPLANE_MODE_ON
-                : AndroidSystemSettings.AIRPLANE_MODE_ON;
-
-        boolean success = deviceSettings.putInt(airplaneSetting, airplaneModeIntValue);
-        if (!success) {
-            String message = "Updating airplane mode status failed.";
-            LOGGER.error(message);
-            return false;
-        }
-
-        String intentCommandResponse = (String) communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND,
-                                                                        intentCommand);
-        Pattern intentCommandResponsePattern = Pattern.compile(INTENT_COMMAND_RESPONSE);
-        Matcher intentCommandResponseMatcher = intentCommandResponsePattern.matcher(intentCommandResponse);
-        if (!intentCommandResponseMatcher.find()) {
-            String message = "Broadcasting notification intent failed.";
-            LOGGER.error(message);
-            return false;
-        }
-
-        return true;
+        return settingsEntity.setAirplaneMode(airplaneMode);
     }
 
     /**
@@ -774,7 +701,7 @@ public class Device {
      * @return <code>true</code> if the auto rotation setting is successful, and <code>false</code> if it fails
      */
     public boolean enableScreenAutoRotation() {
-        return deviceSettings.putInt(AndroidSystemSettings.ACCELEROMETER_ROTATION, 1);
+        return settingsEntity.enableScreenAutoRotation();
     }
 
     /**
@@ -783,7 +710,7 @@ public class Device {
      * @return <code>true</code> if the auto rotation setting is successful, and <code>false</code> if it fails
      */
     public boolean disableScreenAutoRotation() {
-        return deviceSettings.putInt(AndroidSystemSettings.ACCELEROMETER_ROTATION, 0);
+        return settingsEntity.disableScreenAutoRotation();
     }
 
     /**
@@ -927,16 +854,7 @@ public class Device {
      * @return <code>true</code> if the screen orientation setting is successful, <code>false</code> if it fails.
      */
     public boolean setScreenOrientation(ScreenOrientation screenOrientation) {
-
-        if (!disableScreenAutoRotation()) {
-            String message = "Screen orientation was not set due to setting auto rotation failure.";
-            LOGGER.error(message);
-            return false;
-        }
-        boolean success = deviceSettings.putInt(AndroidSystemSettings.USER_ROTATION,
-                                                screenOrientation.getOrientationNumber());
-
-        return success;
+        return settingsEntity.setScreenOrientation(screenOrientation);
     }
 
     /**
@@ -1235,7 +1153,7 @@ public class Device {
      * @Note On emulators the screen is only dimmed.
      */
     public boolean setScreenOffTimeout(long screenOffTimeout) {
-        return deviceSettings.putLong(AndroidSystemSettings.SCREEN_OFF_TIMEOUT, screenOffTimeout);
+        return settingsEntity.setScreenOffTimeout(screenOffTimeout);
     }
 
     /**
@@ -1244,7 +1162,7 @@ public class Device {
      * @return timeout in milliseconds, after which the screen is turned off.
      */
     public long getScreenOffTimeout() {
-        return deviceSettings.getLong(AndroidSystemSettings.SCREEN_OFF_TIMEOUT, 0);
+        return settingsEntity.getScreenOffTimeout();
     }
 
     /**
@@ -1274,7 +1192,7 @@ public class Device {
      * @return {@link DeviceSettingsManager} instance for this device
      */
     public DeviceSettingsManager getDeviceSettingsManager() {
-        return deviceSettings;
+        return settingsEntity.getDeviceSettingsManager();
     }
 
     /**
@@ -1650,5 +1568,15 @@ public class Device {
      */
     void setImeEntity(ImeEntity imeEntity) {
         this.imeEntity = imeEntity;
+    }
+
+    /**
+     * Sets the {@link DeviceSettingsEntity entity} responsible for retrieving and updating device settings.
+     *
+     * @param settingsEntity
+     *        - instance of the entity that handles changing and receiving information for device settings
+     */
+    void setSettingsEntity(DeviceSettingsEntity settingsEntity) {
+        this.settingsEntity = settingsEntity;
     }
 }

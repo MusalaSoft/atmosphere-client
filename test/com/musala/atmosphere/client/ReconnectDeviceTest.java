@@ -17,9 +17,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 
+import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
+import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.PowerProperties;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.ScreenOrientation;
@@ -49,6 +51,9 @@ public class ReconnectDeviceTest {
 
     private static ImeEntity imeEntity;
 
+    @InjectMocks
+    private static DeviceSettingsEntity settingsEntity;
+
     private static Device testDevice;
 
     @BeforeClass
@@ -62,6 +67,12 @@ public class ReconnectDeviceTest {
         Constructor<?> imeEntityConstructor = ImeEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
         imeEntityConstructor.setAccessible(true);
         imeEntity = (ImeEntity) imeEntityConstructor.newInstance(new Object[] {deviceCommunicator});
+
+        Constructor<?> settingsEntitiyConstructor = DeviceSettingsEntity.class.getDeclaredConstructor(DeviceCommunicator.class,
+                                                                                                      DeviceInformation.class);
+        settingsEntitiyConstructor.setAccessible(true);
+        settingsEntity = (DeviceSettingsEntity) settingsEntitiyConstructor.newInstance(new Object[] {deviceCommunicator,
+                mock(DeviceInformation.class)});
 
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
                                                                       eq(RoutingAction.GET_POWER_PROPERTIES));
@@ -118,6 +129,7 @@ public class ReconnectDeviceTest {
         testDevice = new Device(deviceCommunicator);
         testDevice.setHardwareButtonEntity(hardwareButtonEntity);
         testDevice.setImeEntity(imeEntity);
+        testDevice.setSettingsEntity(settingsEntity);
     }
 
     @Test(expected = DeviceReleasedException.class)

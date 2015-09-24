@@ -17,6 +17,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
@@ -31,9 +32,9 @@ import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 
 /**
  * Class that holds a device screen information.
- * 
+ *
  * @author georgi.gaydarov
- * 
+ *
  */
 
 public class Screen {
@@ -57,6 +58,8 @@ public class Screen {
 
     private ImeEntity imeEntity;
 
+    private DeviceSettingsEntity settingsEntity;
+
     private Document xPathDomDocument;
 
     private org.jsoup.nodes.Document jSoupDocument;
@@ -64,10 +67,15 @@ public class Screen {
     private final DeviceCommunicator communicator;
 
     @Deprecated
-    Screen(Device onDevice, GestureEntity gestureEntity, ImeEntity imeEntity, String uiHierarchyXml) {
+    Screen(Device onDevice,
+            GestureEntity gestureEntity,
+            ImeEntity imeEntity,
+            DeviceSettingsEntity settingsEntity,
+            String uiHierarchyXml) {
         this.onDevice = onDevice;
         this.gestureEntity = gestureEntity;
         this.imeEntity = imeEntity;
+        this.settingsEntity = settingsEntity;
         communicator = onDevice.getCommunicator();
         screenXml = uiHierarchyXml;
 
@@ -86,10 +94,11 @@ public class Screen {
         jSoupDocument = Jsoup.parse(screenXml);
     }
 
-    Screen(Device onDevice, GestureEntity gestureEntity, ImeEntity imeEntity) {
+    Screen(Device onDevice, GestureEntity gestureEntity, ImeEntity imeEntity, DeviceSettingsEntity settingsEntity) {
         this.onDevice = onDevice;
         this.gestureEntity = gestureEntity;
         this.imeEntity = imeEntity;
+        this.settingsEntity = settingsEntity;
         communicator = onDevice.getCommunicator();
     }
 
@@ -124,7 +133,7 @@ public class Screen {
 
         List<UiElement> uiElements = new ArrayList<UiElement>();
         for (AccessibilityElement element : foundElements) {
-            uiElements.add(new AccessibilityUiElement(element, onDevice, gestureEntity, imeEntity));
+            uiElements.add(new AccessibilityUiElement(element, onDevice, gestureEntity, imeEntity, settingsEntity));
         }
 
         return uiElements;
@@ -145,7 +154,7 @@ public class Screen {
 
     /**
      * Saves the underlying device UI XML into a file.
-     * 
+     *
      * @param path
      *        - full path to file in which the UI XML should be saved.
      * @throws FileNotFoundException
@@ -165,7 +174,7 @@ public class Screen {
      * <p>
      * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
      * </p>
-     * 
+     *
      * @param query
      *        - CSS selector query.
      * @return the requested {@link UiElement UiElement}.
@@ -184,7 +193,7 @@ public class Screen {
 
     /**
      * Searches for given ScrollableView in the current screen using CSS
-     * 
+     *
      * @param query
      *        CSS selector query
      * @return the requested ScrollableView
@@ -208,7 +217,7 @@ public class Screen {
      * <p>
      * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
      * </p>
-     * 
+     *
      * @param query
      *        - an XPath query
      * @return the requested ScrollableView
@@ -228,7 +237,7 @@ public class Screen {
      * <p>
      * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
      * </p>
-     * 
+     *
      * @param query
      *        - XPath query by which the element will be selected
      * @return the requested {@link UiElement UiElement}
@@ -251,7 +260,7 @@ public class Screen {
 
     /**
      * Searches for {@link AccessibilityUiElement UI element} on the active screen that matches the given selector.
-     * 
+     *
      * @param selector
      *        - by which the {@link AccessibilityUiElement UI element} will be searched
      * @param visibleOnly
@@ -282,7 +291,7 @@ public class Screen {
      * <p>
      * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
      * </p>
-     * 
+     *
      * @param xpathQuery
      *        - contains the matching criteria
      * @param visibleOnly
@@ -303,7 +312,7 @@ public class Screen {
 
         List<UiElement> uiElements = new ArrayList<UiElement>();
         for (AccessibilityElement element : foundElements) {
-            uiElements.add(new AccessibilityUiElement(element, onDevice, gestureEntity, imeEntity));
+            uiElements.add(new AccessibilityUiElement(element, onDevice, gestureEntity, imeEntity, settingsEntity));
         }
 
         return uiElements;
@@ -312,7 +321,7 @@ public class Screen {
     /**
      * Searches for {@link AccessibilityUiElement UI element} on the active screen that matches the given selector.
      * Searches only visible elements.
-     * 
+     *
      * @param selector
      *        - by which the {@link AccessibilityUiElement UI element} will be searched
      * @return the found {@link AccessibilityUiElement UI element}
@@ -330,7 +339,7 @@ public class Screen {
     /**
      * Searches for given ScrollableView in the current screen using a {@link UiElementSelector UiElementSelector}
      * instance.
-     * 
+     *
      * @param selector
      *        - {@link UiElementSelector} object that contains all the selection criteria for the required elements.
      * @return the requested {@link ScrollableView ScrollableView}
@@ -348,7 +357,7 @@ public class Screen {
     /**
      * Waits for an element matching the given selector to appear with a given timeout. If the element appears on
      * screen, returns it.
-     * 
+     *
      * @param selector
      *        - an {@link UiElementSelector} describing the desired element
      * @param waitTimeout
@@ -378,7 +387,7 @@ public class Screen {
     /**
      * Waits for an element matching the given selector to appear on screen. If the element appears on screen, returns
      * it. Uses the value specified in {@link #WAIT_AND_GET_DEFAULT_TIMEOUT} as a timeout for the wait operation.
-     * 
+     *
      * @param selector
      *        - an {@link UiElementSelector} describing the desired element
      * @return an {@link UiElement} matching the passed selector
@@ -399,7 +408,7 @@ public class Screen {
      * <p>
      * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
      * </p>
-     * 
+     *
      * @param cssQuery
      *        - CSS selector query.
      * @return List containing all found elements of type {@link XmlNodeUiElement XmlNodeUiElement}.
@@ -422,7 +431,7 @@ public class Screen {
      * <p>
      * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
      * </p>
-     * 
+     *
      * @param xPathQuery
      *        - an XPath query that should match the elements
      * @return List containing all found elements of type {@link XmlNodeUiElement XmlNodeUiElement}.
@@ -436,7 +445,7 @@ public class Screen {
 
     /**
      * Tap on first found {@link UiElement UiElement}, displaying exactly the supplied search text.
-     * 
+     *
      * @param text
      *        - search text.
      * @return <code>true</code> if the tapping of element is successful, <code>false</code> if it fails.
@@ -449,7 +458,7 @@ public class Screen {
 
     /**
      * Tap on {@link UiElement}, displaying exactly the supplied search text.
-     * 
+     *
      * @param text
      *        - search text.
      * @param match
@@ -476,7 +485,7 @@ public class Screen {
 
     /**
      * Check existence of element, displaying exactly the supplied search text.
-     * 
+     *
      * @param text
      *        - search text.
      * @return - true if element with supplied search text exists on screen.
@@ -495,7 +504,7 @@ public class Screen {
 
     /**
      * Gets an instance for android TimePicker widgets.
-     * 
+     *
      * @return a {@link TimePicker} object representing the only time picker widget on screen.
      * @throws UiElementFetchingException
      *         if no active time pickers are found in the screen
@@ -520,7 +529,7 @@ public class Screen {
 
     /**
      * Gets the date picker currently on screen.
-     * 
+     *
      * @return a {@link DatePicker} object representing the time picker widget on screen.
      * @throws UiElementFetchingException
      *         if there is no date picker available on the screen
@@ -545,13 +554,11 @@ public class Screen {
 
     /**
      * Waits for the existence of a given UiElement with a given timeout.
-     * 
+     *
      * @param selector
      *        - the selector of the given UI element.
-     * 
      * @param timeout
      *        - the given timeout.
-     * 
      * @return boolean indicating if this action was successful.
      */
     public boolean waitForElementExists(UiElementSelector selector, Integer timeout) {
@@ -562,13 +569,11 @@ public class Screen {
 
     /**
      * Waits until a given UiElement disappears with a given timeout.
-     * 
+     *
      * @param selector
      *        - the selector of the given UI element.
-     * 
      * @param timeout
      *        - the given timeout.
-     * 
      * @return boolean indicating if this action was successful.
      */
     public boolean waitUntilElementGone(UiElementSelector selector, Integer timeout) {
@@ -580,7 +585,7 @@ public class Screen {
     /**
      * Waits for a window content update event to occur. If a package name for the window is specified, but the current
      * window does not have the same package name, the function returns immediately.
-     * 
+     *
      * @param packageName
      *        - the specified window package name (can be null). If null, a window update from any front-end window will
      *        end the wait
@@ -600,7 +605,7 @@ public class Screen {
 
     /**
      * Gets the present {@link WebView} on the active screen.
-     * 
+     *
      * @param packageName
      *        - package of the application from which the {@link WebView} will be selected
      * @return the present {@link WebView} on the active screen

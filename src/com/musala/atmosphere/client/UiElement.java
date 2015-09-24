@@ -13,6 +13,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
 
+import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
@@ -51,6 +52,8 @@ public abstract class UiElement {
 
     protected ImeEntity imeEntity;
 
+    protected DeviceSettingsEntity settingsEntity;
+
     protected DeviceCommunicator communicator;
 
     protected boolean isStale;
@@ -58,18 +61,24 @@ public abstract class UiElement {
     UiElement(UiElementPropertiesContainer properties,
             Device device,
             GestureEntity gestureEntity,
-            ImeEntity imeEntity) {
+            ImeEntity imeEntity,
+            DeviceSettingsEntity settingsEntity) {
         this.propertiesContainer = properties;
         this.onDevice = device;
         this.gestureEntity = gestureEntity;
         this.imeEntity = imeEntity;
+        this.settingsEntity = settingsEntity;
         this.communicator = device.getCommunicator();
 
         isStale = false;
     }
 
     UiElement(UiElement uiElement) {
-        this(uiElement.propertiesContainer, uiElement.onDevice, uiElement.gestureEntity, uiElement.imeEntity);
+        this(uiElement.propertiesContainer,
+             uiElement.onDevice,
+             uiElement.gestureEntity,
+             uiElement.imeEntity,
+             uiElement.settingsEntity);
     }
 
     /**
@@ -680,9 +689,8 @@ public abstract class UiElement {
         BufferedImage bufferedImage = ImageIO.read(inputStream);
 
         Bounds elementBounds = propertiesContainer.getBounds();
-
         Pair<Integer, Integer> resolution = onDevice.getInformation().getResolution();
-        ScreenOrientation screenOrientation = onDevice.getScreenOrientation();
+        ScreenOrientation screenOrientation = settingsEntity.getScreenOrientation();
 
         Image newImage = new Image(bufferedImage);
         return newImage.getSubimage(elementBounds, screenOrientation, resolution);

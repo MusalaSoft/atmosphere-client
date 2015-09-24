@@ -59,11 +59,7 @@ public class Screen {
 
     private final DeviceCommunicator communicator;
 
-    /**
-     * 
-     * @param onDevice
-     * @param uiHierarchyXml
-     */
+    @Deprecated
     Screen(Device onDevice, String uiHierarchyXml) {
         this.onDevice = onDevice;
         communicator = onDevice.getCommunicator();
@@ -86,15 +82,19 @@ public class Screen {
         onDevice.getUiValidator().setActiveScreen(this);
     }
 
+    Screen(Device onDevice) {
+        this.onDevice = onDevice;
+        communicator = onDevice.getCommunicator();
+        onDevice.getUiValidator().setActiveScreen(this);
+    }
+
     /**
      * Updates the current {@link Screen} instance to contain the newest possible device screen information. Equivalent
      * to reinvoking the {@link Device#getActiveScreen()} method.
      */
+    @Deprecated
     public void updateScreen() {
-        Screen newScreen = onDevice.getActiveScreen();
-        screenXml = newScreen.screenXml;
-        xPathDomDocument = newScreen.xPathDomDocument;
-        jSoupDocument = newScreen.jSoupDocument;
+        // This will be removed.
     }
 
     /**
@@ -147,7 +147,9 @@ public class Screen {
      *         when the passed argument does not denote already existing and writable file or such can not be created
      *         for some reason
      */
+    @Deprecated
     public void exportToXml(String path) throws FileNotFoundException {
+        // FIXME this implementation is not valid anymore. UiAutomator should be used here.
         PrintStream export = new PrintStream(path);
         export.print(screenXml);
         export.close();

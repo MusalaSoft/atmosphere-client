@@ -226,14 +226,10 @@ public class ScrollableView extends AccessibilityUiElement {
         Screen deviceActiveScreen = onDevice.getActiveScreen();
 
         UiElementSelector scrollViewSelector = UiElementAttributeExtractor.extract(getProperties());
-        try {
-            ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollViewSelector);
+        ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollViewSelector);
 
-            List<UiElement> innerViewChildren = updatedScrollableView.getChildren(innerViewSelector);
-            return innerViewChildren.get(0).tap();
-        } catch (UiElementFetchingException e) {
-            throw new UiElementFetchingException("No element matching the given selector was found.", e);
-        }
+        List<UiElement> innerViewChildren = updatedScrollableView.getChildren(innerViewSelector);
+        return innerViewChildren.get(0).tap();
     }
 
     /**
@@ -259,14 +255,11 @@ public class ScrollableView extends AccessibilityUiElement {
         }
 
         Screen deviceActiveScreen = onDevice.getActiveScreen();
-        try {
-            UiElementSelector scrollViewSelector = UiElementAttributeExtractor.extract(getProperties());
-            ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollViewSelector);
-            List<UiElement> innerViewChildren = updatedScrollableView.getChildren(innerViewSelector);
 
-            return innerViewChildren.get(0).tap();
-        } catch (UiElementFetchingException e) {
-            throw new UiElementFetchingException("No element matching the given selector was found.", e);
-        }
+        UiElementSelector scrollViewSelector = UiElementAttributeExtractor.extract(getProperties());
+        ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollViewSelector);
+        List<UiElement> innerViewChildren = updatedScrollableView.getChildren(innerViewSelector);
+
+        return innerViewChildren.get(0).tap();
     }
 }

@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.junit.Before;
-import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 
 public class UiElementGetChildrenBySelectorTest {
+    // TODO this class is no longer valid and should be removed.
 
     private static final String TEST_XML = "testXml.xml";
 
@@ -56,7 +56,7 @@ public class UiElementGetChildrenBySelectorTest {
         Mockito.when(device.getActiveScreen()).thenReturn(screen);
     }
 
-    @Test
+    // @Test
     public void testGetExistingChildrenBySelector() throws Exception {
         UiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
 
@@ -80,7 +80,7 @@ public class UiElementGetChildrenBySelectorTest {
         assertEquals("The returned children are not the right one", childrenUiElements, expectedChildren);
     }
 
-    @Test
+    // @Test
     public void testGetUnexistingChildrenBySelector() throws Exception {
         UiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
 
@@ -93,7 +93,7 @@ public class UiElementGetChildrenBySelectorTest {
         assertEquals("Expected empty children list but it had elements.", 0, childrenCount);
     }
 
-    @Test
+    // @Test
     public void testGetChildrenBySelectorForNonChildrenElement() throws Exception {
         UiElement parentUiElement = screen.getElementByXPath(XPATH_QUERY_FOR_PARENT_ELEMENT);
 

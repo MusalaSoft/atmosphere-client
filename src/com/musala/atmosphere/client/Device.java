@@ -18,6 +18,7 @@ import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.GpsLocationEntity;
 import com.musala.atmosphere.client.entity.HardwareButtonEntity;
+import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
@@ -86,6 +87,8 @@ public class Device {
     private ImeEntity imeEntity;
 
     private DeviceSettingsEntity settingsEntity;
+
+    private ImageEntity imageEntity;
 
     private GpsLocationEntity gpsLocationEntity;
 
@@ -268,7 +271,7 @@ public class Device {
      *         active screen fails.
      */
     public Screen getActiveScreen() {
-        return new Screen(this, gestureEntity, imeEntity, settingsEntity);
+        return new Screen(this, gestureEntity, imeEntity, settingsEntity, imageEntity);
     }
 
     /**
@@ -376,8 +379,7 @@ public class Device {
      *         It can be subsequently dumped to a file and directly opened as a PNG image.
      */
     public byte[] getScreenshot() {
-        byte[] screenshot = (byte[]) communicator.sendAction(RoutingAction.GET_SCREENSHOT);
-        return screenshot;
+        return imageEntity.getScreenshot();
     }
 
     /**
@@ -1568,6 +1570,16 @@ public class Device {
      */
     void setImeEntity(ImeEntity imeEntity) {
         this.imeEntity = imeEntity;
+    }
+
+    /**
+     * Sets the {@link ImageEntity entity} responsible for operations related with getting screenshots.
+     *
+     * @param imageEntity
+     *        - instance of the entity that handles operations related with getting screenshots
+     */
+    void setImageEntity(ImageEntity imageEntity) {
+        this.imageEntity = imageEntity;
     }
 
     /**

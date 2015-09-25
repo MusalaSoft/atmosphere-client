@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
+import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
@@ -33,8 +34,9 @@ public class ScrollableView extends AccessibilityUiElement {
             Device onDevice,
             GestureEntity gestureEntity,
             ImeEntity imeEntity,
-            DeviceSettingsEntity settingsEntity) {
-        super(accessibilityElement, onDevice, gestureEntity, imeEntity, settingsEntity);
+            DeviceSettingsEntity settingsEntity,
+            ImageEntity imageEntity) {
+        super(accessibilityElement, onDevice, gestureEntity, imeEntity, settingsEntity, imageEntity);
     }
 
     ScrollableView(UiElement uiElement) {

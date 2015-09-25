@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
+import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
@@ -54,6 +55,8 @@ public abstract class UiElement {
 
     protected DeviceSettingsEntity settingsEntity;
 
+    protected ImageEntity imageEntity;
+
     protected DeviceCommunicator communicator;
 
     protected boolean isStale;
@@ -62,12 +65,14 @@ public abstract class UiElement {
             Device device,
             GestureEntity gestureEntity,
             ImeEntity imeEntity,
-            DeviceSettingsEntity settingsEntity) {
+            DeviceSettingsEntity settingsEntity,
+            ImageEntity imageEntity) {
         this.propertiesContainer = properties;
         this.onDevice = device;
         this.gestureEntity = gestureEntity;
         this.imeEntity = imeEntity;
         this.settingsEntity = settingsEntity;
+        this.imageEntity = imageEntity;
         this.communicator = device.getCommunicator();
 
         isStale = false;
@@ -78,7 +83,8 @@ public abstract class UiElement {
              uiElement.onDevice,
              uiElement.gestureEntity,
              uiElement.imeEntity,
-             uiElement.settingsEntity);
+             uiElement.settingsEntity,
+             uiElement.imageEntity);
     }
 
     /**
@@ -684,7 +690,7 @@ public abstract class UiElement {
      *         - if getting screenshot from the device fails
      */
     public Image getElementImage() throws IOException {
-        byte[] imageInByte = onDevice.getScreenshot();
+        byte[] imageInByte = imageEntity.getScreenshot();
         InputStream inputStream = new ByteArrayInputStream(imageInByte);
         BufferedImage bufferedImage = ImageIO.read(inputStream);
 

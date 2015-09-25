@@ -8,6 +8,7 @@ import com.musala.atmosphere.client.entity.EntityTypeResolver;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.GpsLocationEntity;
 import com.musala.atmosphere.client.entity.HardwareButtonEntity;
+import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.UnresolvedEntityTypeException;
 import com.musala.atmosphere.commons.DeviceInformation;
@@ -70,6 +71,10 @@ public class DeviceBuilder {
             settingsEntitiyConstructor.setAccessible(true);
             device.setSettingsEntity((DeviceSettingsEntity) settingsEntitiyConstructor.newInstance(new Object[] {
                     deviceCommunicator, deviceInformation}));
+
+            Constructor<?> imageEntityConstructor = ImageEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
+            imageEntityConstructor.setAccessible(true);
+            device.setImageEntity((ImageEntity) imageEntityConstructor.newInstance(new Object[] {deviceCommunicator}));
 
             Class<?> locationEntityClass = typeResolver.getEntityClass(GpsLocationEntity.class);
             Constructor<?> locationEntityConstructor = locationEntityClass.getDeclaredConstructor(Screen.class,

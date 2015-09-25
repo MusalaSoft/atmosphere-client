@@ -19,6 +19,7 @@ import org.mockito.Spy;
 
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.HardwareButtonEntity;
+import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.commons.DeviceInformation;
@@ -49,10 +50,14 @@ public class ReconnectDeviceTest {
     @InjectMocks
     private static HardwareButtonEntity hardwareButtonEntity;
 
+    @InjectMocks
     private static ImeEntity imeEntity;
 
     @InjectMocks
     private static DeviceSettingsEntity settingsEntity;
+
+    @InjectMocks
+    private static ImageEntity imageEntity;
 
     private static Device testDevice;
 
@@ -73,6 +78,10 @@ public class ReconnectDeviceTest {
         settingsEntitiyConstructor.setAccessible(true);
         settingsEntity = (DeviceSettingsEntity) settingsEntitiyConstructor.newInstance(new Object[] {deviceCommunicator,
                 mock(DeviceInformation.class)});
+
+        Constructor<?> imageEntityConstructor = ImageEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
+        imageEntityConstructor.setAccessible(true);
+        imageEntity = (ImageEntity) imageEntityConstructor.newInstance(new Object[] {deviceCommunicator});
 
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
                                                                       eq(RoutingAction.GET_POWER_PROPERTIES));
@@ -130,6 +139,7 @@ public class ReconnectDeviceTest {
         testDevice.setHardwareButtonEntity(hardwareButtonEntity);
         testDevice.setImeEntity(imeEntity);
         testDevice.setSettingsEntity(settingsEntity);
+        testDevice.setImageEntity(imageEntity);
     }
 
     @Test(expected = DeviceReleasedException.class)

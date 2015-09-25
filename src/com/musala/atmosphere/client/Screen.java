@@ -19,6 +19,7 @@ import org.xml.sax.SAXException;
 
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
+import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
@@ -58,6 +59,8 @@ public class Screen {
 
     private ImeEntity imeEntity;
 
+    private ImageEntity imageEntity;
+
     private DeviceSettingsEntity settingsEntity;
 
     private Document xPathDomDocument;
@@ -67,15 +70,18 @@ public class Screen {
     private final DeviceCommunicator communicator;
 
     @Deprecated
+
     Screen(Device onDevice,
             GestureEntity gestureEntity,
             ImeEntity imeEntity,
             DeviceSettingsEntity settingsEntity,
+            ImageEntity imageEntity,
             String uiHierarchyXml) {
         this.onDevice = onDevice;
         this.gestureEntity = gestureEntity;
         this.imeEntity = imeEntity;
         this.settingsEntity = settingsEntity;
+        this.imageEntity = imageEntity;
         communicator = onDevice.getCommunicator();
         screenXml = uiHierarchyXml;
 
@@ -94,11 +100,16 @@ public class Screen {
         jSoupDocument = Jsoup.parse(screenXml);
     }
 
-    Screen(Device onDevice, GestureEntity gestureEntity, ImeEntity imeEntity, DeviceSettingsEntity settingsEntity) {
+    Screen(Device onDevice,
+            GestureEntity gestureEntity,
+            ImeEntity imeEntity,
+            DeviceSettingsEntity settingsEntity,
+            ImageEntity imageEntity) {
         this.onDevice = onDevice;
         this.gestureEntity = gestureEntity;
         this.imeEntity = imeEntity;
         this.settingsEntity = settingsEntity;
+        this.imageEntity = imageEntity;
         communicator = onDevice.getCommunicator();
     }
 
@@ -133,7 +144,12 @@ public class Screen {
 
         List<UiElement> uiElements = new ArrayList<UiElement>();
         for (AccessibilityElement element : foundElements) {
-            uiElements.add(new AccessibilityUiElement(element, onDevice, gestureEntity, imeEntity, settingsEntity));
+            uiElements.add(new AccessibilityUiElement(element,
+                                                      onDevice,
+                                                      gestureEntity,
+                                                      imeEntity,
+                                                      settingsEntity,
+                                                      imageEntity));
         }
 
         return uiElements;
@@ -312,7 +328,12 @@ public class Screen {
 
         List<UiElement> uiElements = new ArrayList<UiElement>();
         for (AccessibilityElement element : foundElements) {
-            uiElements.add(new AccessibilityUiElement(element, onDevice, gestureEntity, imeEntity, settingsEntity));
+            uiElements.add(new AccessibilityUiElement(element,
+                                                      onDevice,
+                                                      gestureEntity,
+                                                      imeEntity,
+                                                      settingsEntity,
+                                                      imageEntity));
         }
 
         return uiElements;

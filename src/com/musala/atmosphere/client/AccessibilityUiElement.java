@@ -3,7 +3,12 @@ package com.musala.atmosphere.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
+import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
+import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
 import com.musala.atmosphere.commons.RoutingAction;
+import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 
@@ -15,13 +20,18 @@ import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
  *
  */
 public class AccessibilityUiElement extends UiElement {
+    private static final Logger LOGGER = Logger.getLogger(AccessibilityUiElement.class);
 
     protected AccessibilityUiElement(AccessibilityElement properties, Device device) {
         super(properties, device);
     }
 
+    public AccessibilityUiElement(UiElement uiElement) {
+        super(uiElement);
+    }
+
     @Override
-    public List<UiElement> getChildren(UiElementSelector childrenSelector) {
+    public List<UiElement> getChildren(UiElementSelector childrenSelector) throws UiElementFetchingException {
         AccessibilityElement accessibilityElement = (AccessibilityElement) propertiesContainer;
         boolean directChildrenOnly = false;
         boolean visibleNodesOnly = true;
@@ -34,12 +44,12 @@ public class AccessibilityUiElement extends UiElement {
     }
 
     @Override
-    public List<UiElement> getDirectChildren() {
+    public List<UiElement> getDirectChildren() throws UiElementFetchingException {
         return getDirectChildren(new UiElementSelector());
     }
 
     @Override
-    public List<UiElement> getDirectChildren(UiElementSelector childrenSelector) {
+    public List<UiElement> getDirectChildren(UiElementSelector childrenSelector) throws UiElementFetchingException {
         AccessibilityElement accessibilityElement = (AccessibilityElement) propertiesContainer;
         boolean directChildrenOnly = true;
         boolean visibleNodesOnly = true;
@@ -61,13 +71,65 @@ public class AccessibilityUiElement extends UiElement {
     private List<AccessibilityElement> getChildren(AccessibilityElement accessibilityElement,
                                                    UiElementSelector selector,
                                                    boolean directChildrenOnly,
-                                                   boolean visibleNodesOnly) {
+                                                   boolean visibleNodesOnly) throws UiElementFetchingException {
         List<AccessibilityElement> children = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_CHILDREN,
                                                                                                    accessibilityElement,
                                                                                                    selector,
                                                                                                    directChildrenOnly,
                                                                                                    visibleNodesOnly);
+
+        if (children.isEmpty()) {
+            throw new UiElementFetchingException("No elements found matching the given selector.");
+        }
+
         return children;
+    }
+
+    /**
+     * Gets a list with all UI element's children present on the {@link Screen active screen} and matching the given
+     * xpath query.
+     *
+     * @param xpathQuery
+     *        - contains the matching criteria
+     * @param visibleOnly
+     *        - <code>true</code> to search for visible elements only and <code>false</code> to search all elements
+     * @return list with all UI element's children present on the screen and matching the given xpath query
+     * @throws UiElementFetchingException
+     *         if no children matching the given xpath query are found
+     */
+    @SuppressWarnings("unchecked")
+    private List<UiElement> getChildrenByXPath(String xpathQuery, boolean visibleOnly)
+        throws UiElementFetchingException {
+        AccessibilityElement accessibilityElement = (AccessibilityElement) propertiesContainer;
+
+        List<AccessibilityElement> children = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.EXECUTE_XPATH_QUERY_ON_LOCAL_ROOT,
+                                                                                                   xpathQuery,
+                                                                                                   visibleOnly,
+                                                                                                   accessibilityElement);
+        if (children.isEmpty()) {
+            throw new UiElementFetchingException("No elements found matching the given xpath query.");
+        }
+
+        return wrapAccessibilityElements(children);
+    }
+
+    @Override
+    public List<UiElement> getChildrenByXPath(String xpathQuery) throws UiElementFetchingException {
+        return getChildrenByXPath(xpathQuery, true);
+    }
+
+    @Override
+    public List<UiElement> getChildrenByCssQuery(String cssQuery) throws UiElementFetchingException {
+        String childRetrievalErrorMessage = String.format("Failed attempt to retrieve children from %s.",
+                                                          propertiesContainer.getPackageName());
+        String convertedXPathQuery = null;
+        try {
+            convertedXPathQuery = CssToXPathConverter.convertCssToXPath(cssQuery);
+        } catch (InvalidCssQueryException e) {
+            LOGGER.error(childRetrievalErrorMessage, e);
+        }
+
+        return getChildrenByXPath(convertedXPathQuery);
     }
 
     private List<UiElement> wrapAccessibilityElements(List<AccessibilityElement> accessibilityElements) {

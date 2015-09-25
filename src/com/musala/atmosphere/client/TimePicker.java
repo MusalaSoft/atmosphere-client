@@ -5,10 +5,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
-import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 
@@ -47,12 +43,7 @@ public class TimePicker extends PickerView {
     }
 
     @Override
-    public boolean setValue(Calendar value)
-        throws XPathExpressionException,
-            InvalidCssQueryException,
-            UiElementFetchingException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+    public boolean setValue(Calendar value) throws MultipleElementsFoundException, UiElementFetchingException {
         boolean is24HourFormat = false;
 
         try {
@@ -79,12 +70,7 @@ public class TimePicker extends PickerView {
     }
 
     @Override
-    public Calendar getValue()
-        throws XPathExpressionException,
-            InvalidCssQueryException,
-            UiElementFetchingException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+    public Calendar getValue() throws MultipleElementsFoundException, UiElementFetchingException {
         String response = getStringValue();
         Date parsedTime = null;
         parsedTime = parseTime(response, TIME_FORMAT);
@@ -107,23 +93,14 @@ public class TimePicker extends PickerView {
      * @param pickerIndex
      *        - the index of the given picker editText field.
      * @return <code>true</code> if the method succeed, <code>false</code> if it fails.
-     * @throws ParserConfigurationException
-     *         if an error with internal XPath configuration occurs
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws MultipleElementsFoundException
      *         if more than one element is found for the given pickerIndex
      */
     public boolean setText(String value, int pickerIndex)
-        throws XPathExpressionException,
-            InvalidCssQueryException,
-            UiElementFetchingException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
         String currentValue = pickerHelper.getNumberPickerFieldValue(pickerIndex);
 
         if (!value.equals(currentValue)) {
@@ -157,12 +134,7 @@ public class TimePicker extends PickerView {
     }
 
     @Override
-    public String getStringValue()
-        throws XPathExpressionException,
-            InvalidCssQueryException,
-            UiElementFetchingException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+    public String getStringValue() throws MultipleElementsFoundException, UiElementFetchingException {
         String meridiem = null;
         String hour = pickerHelper.getNumberPickerFieldValue(HOUR_INDEX);
         String minute = pickerHelper.getNumberPickerFieldValue(MINUTE_INDEX);

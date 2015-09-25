@@ -8,13 +8,12 @@ import java.io.InputStream;
 import java.util.Scanner;
 
 import org.junit.Before;
-import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 public class UiElementRevalidationTest {
-    // TODO: Some of the tests in this class may not be valid anymore, or must be fixed, so they are commented out.
+    // TODO: this class is no longer valid and should be removed.
     private static final String POPULATED_TEST_XML = "testXml.xml";
 
     private static final String UNPOPULATED_TEST_XML = "testXml2.xml";
@@ -34,7 +33,7 @@ public class UiElementRevalidationTest {
         Mockito.when(usedDevice.getActiveScreen()).thenReturn(screen);
     }
 
-    @Test
+    // @Test
     public void testRevalidationWithValidElement() throws Throwable {
         Mockito.when(usedDevice.getActiveScreen()).then(new Answer<Screen>() {
             @Override

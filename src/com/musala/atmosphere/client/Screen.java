@@ -10,28 +10,24 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
-import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
 import com.musala.atmosphere.client.uiutils.UiXmlParser;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
-import com.musala.atmosphere.commons.ui.UiElementDescriptor;
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelectionOption;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
+import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 
 /**
  * Class that holds a device screen information.
@@ -63,11 +59,7 @@ public class Screen {
 
     private final DeviceCommunicator communicator;
 
-    /**
-     * 
-     * @param onDevice
-     * @param uiHierarchyXml
-     */
+    @Deprecated
     Screen(Device onDevice, String uiHierarchyXml) {
         this.onDevice = onDevice;
         communicator = onDevice.getCommunicator();
@@ -90,15 +82,60 @@ public class Screen {
         onDevice.getUiValidator().setActiveScreen(this);
     }
 
+    Screen(Device onDevice) {
+        this.onDevice = onDevice;
+        communicator = onDevice.getCommunicator();
+        onDevice.getUiValidator().setActiveScreen(this);
+    }
+
     /**
      * Updates the current {@link Screen} instance to contain the newest possible device screen information. Equivalent
      * to reinvoking the {@link Device#getActiveScreen()} method.
      */
+    @Deprecated
     public void updateScreen() {
-        Screen newScreen = onDevice.getActiveScreen();
-        screenXml = newScreen.screenXml;
-        xPathDomDocument = newScreen.xPathDomDocument;
-        jSoupDocument = newScreen.jSoupDocument;
+        // This will be removed.
+    }
+
+    /**
+     * Gets a list with all UI elements present on the {@link Screen active screen} and matching the given selector.
+     *
+     * @param selector
+     *        - contains the matching criteria
+     * @param visibleOnly
+     *        - <code>true</code> to search for visible elements only and <code>false</code> to search all elements
+     * @return list with all UI elements present on the screen and matching the given selector
+     * @throws UiElementFetchingException
+     */
+    @SuppressWarnings("unchecked")
+    private List<UiElement> getElements(UiElementSelector selector, Boolean visibleOnly)
+        throws UiElementFetchingException {
+        List<AccessibilityElement> foundElements = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_UI_ELEMENTS,
+                                                                                                        selector,
+                                                                                                        visibleOnly);
+        if (foundElements.isEmpty()) {
+            throw new UiElementFetchingException("No elements found matching the given selector.");
+        }
+
+        List<UiElement> uiElements = new ArrayList<UiElement>();
+        for (AccessibilityElement element : foundElements) {
+            uiElements.add(new AccessibilityUiElement(element, onDevice));
+        }
+
+        return uiElements;
+    }
+
+    /**
+     * Gets a list with all UI elements present on the {@link Screen active screen} and matching the given selector.
+     *
+     * @param selector
+     *        - contains the matching criteria
+     * @return list with all UI elements present on the screen and matching the given selector
+     * @throws UiElementFetchingException
+     *         if no elements are found
+     */
+    public List<UiElement> getElements(UiElementSelector selector) throws UiElementFetchingException {
+        return getElements(selector, true);
     }
 
     /**
@@ -110,46 +147,44 @@ public class Screen {
      *         when the passed argument does not denote already existing and writable file or such can not be created
      *         for some reason
      */
+    @Deprecated
     public void exportToXml(String path) throws FileNotFoundException {
+        // FIXME this implementation is not valid anymore. UiAutomator should be used here.
         PrintStream export = new PrintStream(path);
         export.print(screenXml);
         export.close();
     }
 
     /**
-     * Searches for given UI element in the current screen XML structure using CSS.
+     * Searches for given UI element in the current screen using CSS.
+     * <p>
+     * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
+     * </p>
      * 
      * @param query
      *        - CSS selector query.
-     * @return the requested {@link XmlNodeUiElement XmlNodeUiElement}.
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
-     * @throws UiElementFetchingException
-     *         if no elements are found for the passed query
+     * @return the requested {@link UiElement UiElement}.
      * @throws MultipleElementsFoundException
      *         if more than one element is found for the passed query
+     * @throws UiElementFetchingException
+     *         if no elements are found
      */
-    public XmlNodeUiElement getElementByCSS(String query)
+    public UiElement getElementByCSS(String query)
         throws InvalidCssQueryException,
-            XPathExpressionException,
-            UiElementFetchingException,
-            MultipleElementsFoundException {
+            MultipleElementsFoundException,
+            UiElementFetchingException {
         String xpathQuery = CssToXPathConverter.convertCssToXPath(query);
         return getElementByXPath(xpathQuery);
     }
 
     /**
-     * Searches for given ScrollableView in the current screen XML structure using CSS
+     * Searches for given ScrollableView in the current screen using CSS
      * 
      * @param query
      *        CSS selector query
      * @return the requested ScrollableView
      * @throws InvalidCssQueryException
      *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
      * @throws MultipleElementsFoundException
@@ -157,57 +192,56 @@ public class Screen {
      */
     public ScrollableView getScrollableViewtByCSS(String query)
         throws UiElementFetchingException,
-            InvalidCssQueryException,
-            XPathExpressionException,
-            MultipleElementsFoundException {
+            MultipleElementsFoundException,
+            InvalidCssQueryException {
         String xpathQuery = CssToXPathConverter.convertCssToXPath(query);
         return getScrollableViewByXPath(xpathQuery);
     }
 
     /**
-     * Searches for given ScrollableView in the current screen XML structure using XPath
+     * Searches for given ScrollableView in the current screen using XPath.
+     * <p>
+     * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
+     * </p>
      * 
      * @param query
      *        - an XPath query
      * @return the requested ScrollableView
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
      * @throws MultipleElementsFoundException
      *         if more than one element is found for the passed query
      */
     public ScrollableView getScrollableViewByXPath(String query)
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            MultipleElementsFoundException {
-        updateScreen();
-        Node node = UiXmlParser.getXPathNode(xPathDomDocument, query);
-        ScrollableView scrollableView = new ScrollableView(node, onDevice);
-        return scrollableView;
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
+        return new ScrollableView(getElementByXPath(query));
     }
 
     /**
-     * Searches for given UI element in the current screen XML structure using XPath.
+     * Searches for given UI element in the current screen using XPath.
+     * <p>
+     * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
+     * </p>
      * 
      * @param query
-     *        XPath query.
-     * @return the requested {@link XmlNodeUiElement XmlNodeUiElement}.
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
-     * @throws UiElementFetchingException
-     *         if no elements are found for the passed query
+     *        - XPath query by which the element will be selected
+     * @return the requested {@link UiElement UiElement}
      * @throws MultipleElementsFoundException
      *         if more than one element is found for the passed query
+     * @throws UiElementFetchingException
+     *         if no elements are found
      */
-    public XmlNodeUiElement getElementByXPath(String query)
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            MultipleElementsFoundException {
-        updateScreen();
-        Node node = UiXmlParser.getXPathNode(xPathDomDocument, query);
-        XmlNodeUiElement returnElement = new XmlNodeUiElement(node, onDevice);
-        return returnElement;
+    public UiElement getElementByXPath(String query) throws MultipleElementsFoundException, UiElementFetchingException {
+        List<UiElement> foundElements = getAllElementsByXPath(query, true);
+        int foundElementsCount = foundElements.size();
+        if (foundElementsCount > 1) {
+            throw new MultipleElementsFoundException(String.format("Searching for a single UiElement but %d that match the given properties %s were found.",
+                                                                   foundElementsCount,
+                                                                   query));
+        } else {
+            return foundElements.get(0);
+        }
     }
 
     /**
@@ -223,10 +257,10 @@ public class Screen {
      * @throws UiElementFetchingException
      *         if no element was found matching the given selector
      */
-    public AccessibilityUiElement getAccessibilityUiElement(UiElementSelector selector, Boolean visibleOnly)
+    public UiElement getElement(UiElementSelector selector, Boolean visibleOnly)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        List<AccessibilityUiElement> foundElements = getAccessibilityUiElements(selector, visibleOnly);
+        List<UiElement> foundElements = getElements(selector, visibleOnly);
 
         int foundElementsCount = foundElements.size();
         if (foundElementsCount > 1) {
@@ -234,8 +268,40 @@ public class Screen {
                                                                    foundElementsCount,
                                                                    selector));
         } else {
-            return onDevice.getAccessibilityUiElements(selector, true).get(0);
+            return getElements(selector, true).get(0);
         }
+    }
+
+    /**
+     * Gets a list with all UI elements present on the {@link Screen active screen} and matching the given xpath query.
+     * <p>
+     * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
+     * </p>
+     * 
+     * @param xpathQuery
+     *        - contains the matching criteria
+     * @param visibleOnly
+     *        - <code>true</code> to search for visible elements only and <code>false</code> to search all elements
+     * @return list with all UI elements present on the screen and matching the given selector
+     * @throws UiElementFetchingException
+     *         if no elements are found
+     */
+    @SuppressWarnings("unchecked")
+    private List<UiElement> getAllElementsByXPath(String xpathQuery, boolean visibleOnly)
+        throws UiElementFetchingException {
+        List<AccessibilityElement> foundElements = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.EXECUTE_XPATH_QUERY,
+                                                                                                        xpathQuery,
+                                                                                                        visibleOnly);
+        if (foundElements.isEmpty()) {
+            throw new UiElementFetchingException("No elements found matching the given selector.");
+        }
+
+        List<UiElement> uiElements = new ArrayList<UiElement>();
+        for (AccessibilityElement element : foundElements) {
+            uiElements.add(new AccessibilityUiElement(element, onDevice));
+        }
+
+        return uiElements;
     }
 
     /**
@@ -250,91 +316,28 @@ public class Screen {
      * @throws UiElementFetchingException
      *         if no element was found matching the given selector
      */
-    public AccessibilityUiElement getAccessibilityUiElement(UiElementSelector selector)
-        throws MultipleElementsFoundException,
-            UiElementFetchingException {
-        return getAccessibilityUiElement(selector, true);
-    }
-
-    /**
-     * Searches for list of {@link AccessibilityUiElement UI elements} on the active screen that are matching the given
-     * selector.
-     * 
-     * @param selector
-     *        - by which the {@link AccessibilityUiElement UI elements} will be searched
-     * @param visibleOnly
-     *        - <code>true</code> to search for visible elements only and <code>false</code> to search all elements
-     * @return list containing the found {@link AccessibilityUiElement UI elements}
-     * @throws UiElementFetchingException
-     *         if no element was found matching the given selector
-     */
-    public List<AccessibilityUiElement> getAccessibilityUiElements(UiElementSelector selector, Boolean visibleOnly)
-        throws UiElementFetchingException {
-        List<AccessibilityUiElement> foundElements = onDevice.getAccessibilityUiElements(selector, visibleOnly);
-        if (foundElements.isEmpty()) {
-            throw new UiElementFetchingException("No elements found matching the given selector.");
-        }
-        return foundElements;
-    }
-
-    /**
-     * Searches for list of {@link AccessibilityUiElement UI elements} on the active screen that are matching the given
-     * selector. Searches only visible elements.
-     * 
-     * @param selector
-     *        - by which the {@link AccessibilityUiElement UI elements} will be searched
-     * @return list containing the found {@link AccessibilityUiElement UI elements}
-     * @throws UiElementFetchingException
-     *         if no element was found matching the given selector
-     */
-    public List<AccessibilityUiElement> getAccessibilityUiElements(UiElementSelector selector)
-        throws UiElementFetchingException {
-        return getAccessibilityUiElements(selector, true);
-    }
-
-    /**
-     * Searches for given UI element in the current screen XML structure using a {@link UiElementSelector
-     * UiElementSelector} instance.
-     * 
-     * @param selector
-     *        - {@link UiElementSelector} object that contains all the selection criteria for the required elements.
-     * @return the requested {@link UiElement UiElement}.
-     * @throws UiElementFetchingException
-     *         if no elements are found for the passed query
-     * @throws MultipleElementsFoundException
-     *         if more than one element is found for the passed query
-     */
     public UiElement getElement(UiElementSelector selector)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        UiElement result = getAccessibilityUiElement(selector);
-        return result;
+        return getElement(selector, true);
     }
 
     /**
-     * Searches for given ScrollableView in the current screen XML structure using a {@link UiElementSelector
-     * UiElementSelector} instance.
+     * Searches for given ScrollableView in the current screen using a {@link UiElementSelector UiElementSelector}
+     * instance.
      * 
      * @param selector
      *        - {@link UiElementSelector} object that contains all the selection criteria for the required elements.
      * @return the requested {@link ScrollableView ScrollableView}
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
      * @throws MultipleElementsFoundException
      *         if more than one element is found for the passed query
      */
     public ScrollableView getScrollableView(UiElementSelector selector)
-        throws UiElementFetchingException,
-            XPathExpressionException,
-            InvalidCssQueryException,
-            MultipleElementsFoundException {
-        String cssQuery = selector.buildCssQuery();
-        ScrollableView result = getScrollableViewtByCSS(cssQuery);
-        return result;
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
+        return new ScrollableView(getElement(selector));
     }
 
     /**
@@ -346,20 +349,14 @@ public class Screen {
      * @param waitTimeout
      *        - a timeout for the wait operation
      * @return an {@link UiElement} matching the passed selector
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
      * @throws MultipleElementsFoundException
      *         if more than one element is found for the passed query
      */
     public UiElement getElementWhenPresent(UiElementSelector selector, int waitTimeout)
-        throws UiElementFetchingException,
-            XPathExpressionException,
-            InvalidCssQueryException,
-            MultipleElementsFoundException {
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
         boolean isElementPresent = waitForElementExists(selector, waitTimeout);
 
         if (isElementPresent) {
@@ -380,87 +377,56 @@ public class Screen {
      * @param selector
      *        - an {@link UiElementSelector} describing the desired element
      * @return an {@link UiElement} matching the passed selector
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
      * @throws MultipleElementsFoundException
      *         if more than one element is found for the passed query
      */
     public UiElement getElementWhenPresent(UiElementSelector selector)
-        throws UiElementFetchingException,
-            XPathExpressionException,
-            InvalidCssQueryException,
-            MultipleElementsFoundException {
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
         return getElementWhenPresent(selector, WAIT_AND_GET_DEFAULT_TIMEOUT);
     }
 
     /**
-     * Searches for UI elements in the current screen XML structure using given CSS. Returns a list of all found
-     * elements having the used CSS.
+     * Searches for UI elements in the current screen using given CSS. Returns a list of all found elements having the
+     * used CSS.
+     * <p>
+     * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
+     * </p>
      * 
      * @param cssQuery
      *        - CSS selector query.
      * @return List containing all found elements of type {@link XmlNodeUiElement XmlNodeUiElement}.
      * @throws InvalidCssQueryException
      *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
      */
-    public List<XmlNodeUiElement> getAllElementsByCSS(String cssQuery)
-        throws UiElementFetchingException,
-            InvalidCssQueryException,
-            XPathExpressionException {
+    public List<UiElement> getAllElementsByCSS(String cssQuery)
+        throws InvalidCssQueryException,
+            UiElementFetchingException {
         String xPathQuery = CssToXPathConverter.convertCssToXPath(cssQuery);
 
         return getAllElementsByXPath(xPathQuery);
     }
 
     /**
-     * Searches for UI elements in the current screen XML structure using given XPath. Returns a list of all found
-     * elements having the used XPath.
+     * Searches for UI elements in the current screen using given XPath. Returns a list of all found elements having the
+     * used XPath.
+     * <p>
+     * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
+     * </p>
      * 
      * @param xPathQuery
      *        - an XPath query that should match the elements
      * @return List containing all found elements of type {@link XmlNodeUiElement XmlNodeUiElement}.
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
      */
-    public List<XmlNodeUiElement> getAllElementsByXPath(String xPathQuery)
-        throws XPathExpressionException,
-            UiElementFetchingException {
-        updateScreen();
-        List<XmlNodeUiElement> uiElementList = new ArrayList<XmlNodeUiElement>();
-        NodeList xPathNodeList = UiXmlParser.getXPathNodeChildren(xPathDomDocument, xPathQuery);
-
-        for (int index = 0; index < xPathNodeList.getLength(); index++) {
-            Node xPathNode = xPathNodeList.item(index);
-            XmlNodeUiElement returnElement = new XmlNodeUiElement(xPathNode, onDevice);
-            uiElementList.add(returnElement);
-        }
-
-        return uiElementList;
-    }
-
-    /**
-     * Searches for UI elements in the current screen XML structure using a given {@link UiElementSelector
-     * UiElementSelector}. Returns a list of all found elements having the used selector.
-     * 
-     * @param selector
-     *        - {@link UiElementSelector} object that contains all the selection criteria for the required elements.
-     * @return List containing all found elements of type {@link UiElement UiElement}.
-     * @throws UiElementFetchingException
-     *         if no elements or more than 1 are found for the passed query
-     */
-    public List<UiElement> getElements(UiElementSelector selector) throws UiElementFetchingException {
-        List<UiElement> result = new ArrayList<UiElement>(getAccessibilityUiElements(selector));
-        return result;
+    public List<UiElement> getAllElementsByXPath(String xPathQuery) throws UiElementFetchingException {
+        // TODO The query should start with "//*".
+        return getAllElementsByXPath(xPathQuery, true);
     }
 
     /**
@@ -469,17 +435,10 @@ public class Screen {
      * @param text
      *        - search text.
      * @return <code>true</code> if the tapping of element is successful, <code>false</code> if it fails.
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements or more than 1 are found for the passed query
      */
-    public boolean tapElementWithText(String text)
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            InvalidCssQueryException {
+    public boolean tapElementWithText(String text) throws UiElementFetchingException, InvalidCssQueryException {
         return tapElementWithText(text, 0);
     }
 
@@ -491,17 +450,10 @@ public class Screen {
      * @param match
      *        - determines which element to tap if multiple matches exist; zero based index.
      * @return <code>true</code> if the tapping of element is successful, <code>false</code> if it fails.
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      * @throws UiElementFetchingException
      *         if no elements or more than 1 are found for the passed query
      */
-    public boolean tapElementWithText(String text, int match)
-        throws UiElementFetchingException,
-            XPathExpressionException,
-            InvalidCssQueryException {
+    public boolean tapElementWithText(String text, int match) throws UiElementFetchingException {
         UiElementSelector selector = new UiElementSelector();
         selector.addSelectionAttribute(CssAttribute.TEXT, UiElementSelectionOption.EQUALS, text);
         List<UiElement> elementList = getElements(selector);
@@ -523,19 +475,15 @@ public class Screen {
      * @param text
      *        - search text.
      * @return - true if element with supplied search text exists on screen.
-     * @throws InvalidCssQueryException
-     *         if the passed argument is invalid CSS query
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
      */
-    public boolean hasElementWithText(String text) throws XPathExpressionException, InvalidCssQueryException {
+    public boolean hasElementWithText(String text) {
+        UiElementSelector selector = new UiElementSelector();
+        selector.addSelectionAttribute(CssAttribute.TEXT, UiElementSelectionOption.EQUALS, text);
+
         try {
-            UiElementSelector selector = new UiElementSelector();
-            selector.addSelectionAttribute(CssAttribute.TEXT, UiElementSelectionOption.EQUALS, text);
             List<UiElement> elementList = getElements(selector);
             return elementList.size() > 0;
         } catch (UiElementFetchingException e) {
-            // no elements were found by the supplied text
             return false;
         }
     }
@@ -549,16 +497,13 @@ public class Screen {
      * @throws MultipleElementsFoundException
      *         if there are more than one time pickers
      */
-    public TimePicker getTimePicker() throws UiElementFetchingException, MultipleElementsFoundException {
+    public TimePicker getTimePicker() throws MultipleElementsFoundException, UiElementFetchingException {
         String message = String.format(PICKERS_MESSAGE, "time");
         UiElementSelector timePickerSelector = new UiElementSelector();
         timePickerSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, TIME_PICKER_WIDGET);
 
         try {
             getElement(timePickerSelector);
-        } catch (UiElementFetchingException e) {
-            LOGGER.error(message, e);
-            throw new UiElementFetchingException(message);
         } catch (MultipleElementsFoundException e) {
             message = String.format(MULTIPLE_PICKERS_AVAILABLE_MESSAGE, "time");
             LOGGER.error(message, e);
@@ -574,32 +519,16 @@ public class Screen {
      * @return a {@link DatePicker} object representing the time picker widget on screen.
      * @throws UiElementFetchingException
      *         if there is no date picker available on the screen
-     * @throws XPathExpressionException
-     *         if the conversion from CSS to XPath is unsuccessful for some reason
-     * @throws UiElementFetchingException
-     *         if there are any elements that are not present
-     * @throws InvalidCssQueryException
-     *         when the CssToXPathConverter is given an invalid CssQuery
-     * @throws ParserConfigurationException
-     *         if an error with internal XPath configuration occurs
      * @throws MultipleElementsFoundException
      *         if multiple date pickers are present on the screen
      */
-    public DatePicker getDatePicker()
-        throws UiElementFetchingException,
-            MultipleElementsFoundException,
-            XPathExpressionException,
-            InvalidCssQueryException,
-            ParserConfigurationException {
+    public DatePicker getDatePicker() throws UiElementFetchingException, MultipleElementsFoundException {
         String message = String.format(PICKERS_MESSAGE, "date");
         UiElementSelector timePickerSelector = new UiElementSelector();
         timePickerSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, DATE_PICKER_WIDGET);
 
         try {
             getElement(timePickerSelector);
-        } catch (UiElementFetchingException e) {
-            LOGGER.error(message, e);
-            throw new UiElementFetchingException(message);
         } catch (MultipleElementsFoundException e) {
             message = String.format(MULTIPLE_PICKERS_AVAILABLE_MESSAGE, "date");
             LOGGER.error(message, e);
@@ -611,6 +540,9 @@ public class Screen {
 
     /**
      * Checks if an element is present in the current {@link Screen} instance.
+     * <p>
+     * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
+     * </p>
      * 
      * @param query
      *        - the CSS element query with all selection criteria for the searched element.
@@ -639,8 +571,7 @@ public class Screen {
      * @return boolean indicating if this action was successful.
      */
     public boolean waitForElementExists(UiElementSelector selector, Integer timeout) {
-        UiElementDescriptor descriptor = UiElementAttributeExtractor.extract(selector);
-        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_EXISTS, descriptor, timeout);
+        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_EXISTS, selector, timeout);
         updateScreen();
         return response;
     }
@@ -657,8 +588,7 @@ public class Screen {
      * @return boolean indicating if this action was successful.
      */
     public boolean waitUntilElementGone(UiElementSelector selector, Integer timeout) {
-        UiElementDescriptor descriptor = UiElementAttributeExtractor.extract(selector);
-        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_UNTIL_GONE, descriptor, timeout);
+        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_UNTIL_GONE, selector, timeout);
         updateScreen();
         return response;
     }
@@ -677,7 +607,9 @@ public class Screen {
      * @Note The behavior of this method depends on the application that it is used on.
      */
     public boolean waitForWindowUpdate(String packageName, int timeout) {
-        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_WINDOW_UPDATE, packageName, timeout);
+        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_WINDOW_UPDATE,
+                                                             packageName,
+                                                             timeout);
         updateScreen();
         return response;
     }

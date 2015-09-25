@@ -2,7 +2,6 @@ package com.musala.atmosphere.client;
 
 import java.util.List;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.log4j.Logger;
@@ -22,11 +21,11 @@ import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
  */
 public class NotificationBar {
 
-    private static final String NOTIFICATION_BAR_XPATH_QUERY = "//*[@resource-id='com.android.systemui:id/notification_panel']";
+    private static final String NOTIFICATION_BAR_XPATH_QUERY = "//*[@resourceId='com.android.systemui:id/notification_panel']";
 
-    private static final String CLEAR_ALL_NOTIFICATIONS_BUTTON_XPATH_QUERY = "//*[@content-desc='Clear all notifications.']";
+    private static final String CLEAR_ALL_NOTIFICATIONS_BUTTON_XPATH_QUERY = "//*[@contentDesc='Clear all notifications.']";
 
-    private static final String NOTIFICATIONS_RESOURCE_ID_XPATH_QUERY = "//*[@resource-id='android:id/status_bar_latest_event_content']";
+    private static final String NOTIFICATIONS_RESOURCE_ID_XPATH_QUERY = "//*[@resourceId='android:id/status_bar_latest_event_content']";
 
     private static final String NO_NOTIFICATION_MESSAGE = "No notification matched the passes XPath query: %s";
 
@@ -40,7 +39,7 @@ public class NotificationBar {
 
     private Device onDevice = null;
 
-    public NotificationBar(Device onDevice) throws XPathExpressionException, UiElementFetchingException {
+    public NotificationBar(Device onDevice) throws UiElementFetchingException {
         this.onDevice = onDevice;
         notificationBarSelector = new UiElementSelector();
         notificationBarSelector.addSelectionAttribute(CssAttribute.RESOURCE_ID, NOTIFICATION_BAR_RESOURCE_ID);
@@ -78,26 +77,18 @@ public class NotificationBar {
      * @throws XPathExpressionException
      *         if element is searched by invalid XPath query
      */
-    public boolean clearAllNotifications() throws XPathExpressionException, UiElementFetchingException {
+    public boolean clearAllNotifications() throws UiElementFetchingException {
         open();
         Screen deviceActiveScreen = onDevice.getActiveScreen();
 
         try {
-            UiElement clearAllNotificationsButton;
-            try {
-                clearAllNotificationsButton = deviceActiveScreen.getElementByXPath(CLEAR_ALL_NOTIFICATIONS_BUTTON_XPATH_QUERY);
-            } catch (MultipleElementsFoundException e) {
-                LOGGER.error(String.format("Clearing all notifications failed, because multiple elements were found for the XPath query %s",
-                                           CLEAR_ALL_NOTIFICATIONS_BUTTON_XPATH_QUERY),
-                             e);
-                return false;
-            }
-
+            UiElement clearAllNotificationsButton = deviceActiveScreen.getElementByXPath(CLEAR_ALL_NOTIFICATIONS_BUTTON_XPATH_QUERY);
             return clearAllNotificationsButton.tap();
-        } catch (UiElementFetchingException e) {
-            onDevice.pressButton(HardwareButton.BACK);
-
-            return true;
+        } catch (MultipleElementsFoundException e) {
+            LOGGER.error(String.format("Clearing all notifications failed, because multiple elements were found for the XPath query %s",
+                                       CLEAR_ALL_NOTIFICATIONS_BUTTON_XPATH_QUERY),
+                         e);
+            return false;
         }
     }
 
@@ -110,18 +101,12 @@ public class NotificationBar {
      * @return UiElement that matches the found notification
      * @throws UiElementFetchingException
      *         - if element could not be found
-     * @throws XPathExpressionException
-     *         - if element is searched by invalid XPath query
-     * @throws ParserConfigurationException
-     *         - if an error with internal XPath configuration occurs
      * @throws MultipleElementsFoundException
      *         if multiple elements are matching the given query
      */
     public UiElement getNotificationByXPath(String xPathQuery)
-        throws XPathExpressionException,
-            UiElementFetchingException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+        throws MultipleElementsFoundException,
+            UiElementFetchingException {
         open();
 
         // The method first check if there is more than one notification that contains an UI element corresponding to
@@ -132,8 +117,8 @@ public class NotificationBar {
 
         try {
             Screen deviceActiveScreen = onDevice.getActiveScreen();
-            XmlNodeUiElement notificationBarElement = deviceActiveScreen.getElementByXPath(NOTIFICATION_BAR_XPATH_QUERY);
-            List<XmlNodeUiElement> childrenNotifications = notificationBarElement.getChildrenByXPath(xPathQuery);
+            UiElement notificationBarElement = deviceActiveScreen.getElementByXPath(NOTIFICATION_BAR_XPATH_QUERY);
+            List<UiElement> childrenNotifications = notificationBarElement.getChildrenByXPath(xPathQuery);
 
             if (childrenNotifications.size() > 1) {
                 String message = String.format("More than one notification matched the passed XPath query %s.",
@@ -142,14 +127,11 @@ public class NotificationBar {
                 throw new MultipleElementsFoundException(message);
             }
 
-            List<XmlNodeUiElement> allNotifications = deviceActiveScreen.getAllElementsByXPath(NOTIFICATIONS_RESOURCE_ID_XPATH_QUERY);
-            for (XmlNodeUiElement currentNotification : allNotifications) {
-                try {
-                    currentNotification.getChildrenByXPath(xPathQuery);
+            List<UiElement> allNotifications = deviceActiveScreen.getAllElementsByXPath(NOTIFICATIONS_RESOURCE_ID_XPATH_QUERY);
+            for (UiElement currentNotification : allNotifications) {
+                currentNotification.getChildrenByXPath(xPathQuery);
 
-                    return currentNotification;
-                } catch (UiElementFetchingException e) {
-                }
+                return currentNotification;
             }
             LOGGER.error(missingNotificationError);
             throw new UiElementFetchingException(missingNotificationError);
@@ -170,19 +152,13 @@ public class NotificationBar {
      *         - if element is searched by invalid CSS query
      * @throws UiElementFetchingException
      *         - if element could not be found
-     * @throws XPathExpressionException
-     *         - if element is searched by invalid XPath query
-     * @throws ParserConfigurationException
-     *         - if an error with internal XPath configuration occurs
      * @throws MultipleElementsFoundException
      *         if multiple elements are found for the given query
      */
     public UiElement getNotificationByCssQuery(String cssQuery)
-        throws XPathExpressionException,
-            InvalidCssQueryException,
-            UiElementFetchingException,
-            ParserConfigurationException,
-            MultipleElementsFoundException {
+        throws InvalidCssQueryException,
+            MultipleElementsFoundException,
+            UiElementFetchingException {
         String xPathQuery = CssToXPathConverter.convertCssToXPath(cssQuery);
 
         return getNotificationByXPath(xPathQuery);

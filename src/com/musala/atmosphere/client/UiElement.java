@@ -56,29 +56,54 @@ public abstract class UiElement {
         isStale = false;
     }
 
+    protected UiElement(UiElement uiElement) {
+        this(uiElement.propertiesContainer, uiElement.onDevice);
+    }
+
     /**
      * Gets all child UiElements that match the given {@link UiElementSelector}.
      *
      * @param childrenSelector
      *        - an object of type {@link UiElementSelector} that needs to match child UI elements
      * @return a list of {@link UiElement} children that match the given selector
+     * @throws UiElementFetchingException
+     *         if no children matching the given selector are found
      */
-    public abstract List<UiElement> getChildren(UiElementSelector childrenSelector);
+    public abstract List<UiElement> getChildren(UiElementSelector childrenSelector) throws UiElementFetchingException;
+
+    /**
+     * Gets a list with all UI element's children present on the {@link Screen active screen} and matching the given
+     * xpath query.
+     * <p>
+     * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
+     * </p>
+     * 
+     * @param xpathQuery
+     *        - a string representing an XPath query
+     * @return list with all UI element's children present on the screen and matching the given xpath query
+     * @throws UiElementFetchingException
+     *         if no children matching the given xpath query are found
+     */
+    public abstract List<UiElement> getChildrenByXPath(String xpathQuery) throws UiElementFetchingException;
 
     /**
      * Gets all direct children of a {@link UiElement}, represented by XPath node.
      *
      * @return list, containing all {@link UiElements} that directly ascend the current {@link UiElement}
+     * @throws UiElementFetchingException
+     *         if no direct children are found
      */
-    public abstract List<UiElement> getDirectChildren();
+    public abstract List<UiElement> getDirectChildren() throws UiElementFetchingException;
 
     /**
      * Gets all direct children of a {@link UiElement} that match the given {@link UiElementSelector}.
      *
      * @return list, containing all {@link UiElement UI elements} matching the {@link UiElementSelector selector} and
      *         directly ascend the current {@link UiElement}
+     * @throws UiElementFetchingException
+     *         if no direct children matching the given selector are found
      */
-    public abstract List<UiElement> getDirectChildren(UiElementSelector selector);
+    public abstract List<UiElement> getDirectChildren(UiElementSelector selector) throws UiElementFetchingException;
 
     /**
      * Checks if the current element is still valid (on the screen) and updates it's attributes container. This is
@@ -685,4 +710,14 @@ public abstract class UiElement {
     public int hashCode() {
         return new HashCodeBuilder().append(propertiesContainer).toHashCode();
     }
+
+    /**
+     * Gets all child UiElements that match the given CSS query.
+     * 
+     * @param cssQuery
+     *        - a string representing a CSS Query
+     * @return Returns all children of the UiElement that match the given CSS query
+     * @throws UiElementFetchingException
+     */
+    public abstract List<UiElement> getChildrenByCssQuery(String cssQuery) throws UiElementFetchingException;
 }

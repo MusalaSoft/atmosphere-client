@@ -15,6 +15,7 @@ import java.util.Scanner;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
@@ -47,6 +48,11 @@ public class UiElementFetchingTest {
         scanXml.close();
         screen = new Screen(device, xmlFileContents);
         Mockito.doReturn(screen).when(device).getActiveScreen();
+    }
+
+    @Test
+    public void testDummy() {
+        // Dummy test in order to run successfully
     }
 
     // @Test

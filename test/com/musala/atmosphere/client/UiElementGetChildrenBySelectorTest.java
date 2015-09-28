@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
@@ -54,6 +55,11 @@ public class UiElementGetChildrenBySelectorTest {
         scanXml.close();
         screen = new Screen(device, xmlFileContents);
         Mockito.when(device.getActiveScreen()).thenReturn(screen);
+    }
+
+    @Test
+    public void testDummy() {
+        // Dummy test in order to run successfully
     }
 
     // @Test

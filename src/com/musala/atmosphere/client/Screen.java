@@ -13,7 +13,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
-import org.jsoup.select.Elements;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -21,7 +20,6 @@ import org.xml.sax.SAXException;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
-import com.musala.atmosphere.client.uiutils.UiXmlParser;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
@@ -78,14 +76,11 @@ public class Screen {
 
         // JSoup Document building
         jSoupDocument = Jsoup.parse(screenXml);
-
-        onDevice.getUiValidator().setActiveScreen(this);
     }
 
     Screen(Device onDevice) {
         this.onDevice = onDevice;
         communicator = onDevice.getCommunicator();
-        onDevice.getUiValidator().setActiveScreen(this);
     }
 
     /**
@@ -536,27 +531,6 @@ public class Screen {
         }
 
         return new DatePicker(this);
-    }
-
-    /**
-     * Checks if an element is present in the current {@link Screen} instance.
-     * <p>
-     * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
-     * </p>
-     * 
-     * @param query
-     *        - the CSS element query with all selection criteria for the searched element.
-     * @return <b><true/b> if the element is present in the screen, <b>false</b> otherwise.
-     */
-    public boolean containsElementByCSS(String query) {
-        Elements elements = null;
-        try {
-            elements = UiXmlParser.getJSoupElements(jSoupDocument, query);
-        } catch (UiElementFetchingException e) {
-            return false;
-        }
-
-        return elements.size() > 0;
     }
 
     /**

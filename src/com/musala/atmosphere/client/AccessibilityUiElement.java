@@ -22,11 +22,11 @@ import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 public class AccessibilityUiElement extends UiElement {
     private static final Logger LOGGER = Logger.getLogger(AccessibilityUiElement.class);
 
-    protected AccessibilityUiElement(AccessibilityElement properties, Device device) {
+    AccessibilityUiElement(AccessibilityElement properties, Device device) {
         super(properties, device);
     }
 
-    public AccessibilityUiElement(UiElement uiElement) {
+    AccessibilityUiElement(UiElement uiElement) {
         super(uiElement);
     }
 

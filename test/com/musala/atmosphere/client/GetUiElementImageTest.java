@@ -2,6 +2,7 @@ package com.musala.atmosphere.client;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.awt.image.BufferedImage;
@@ -9,16 +10,22 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.imageio.ImageIO;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.ScreenOrientation;
+import com.musala.atmosphere.commons.geometry.Bounds;
+import com.musala.atmosphere.commons.geometry.Point;
+import com.musala.atmosphere.commons.ui.UiElementPropertiesContainer;
+import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 import com.musala.atmosphere.commons.util.Pair;
 
 /**
@@ -27,11 +34,18 @@ import com.musala.atmosphere.commons.util.Pair;
  *
  */
 public class GetUiElementImageTest {
+    @Mock(name = "onDevice")
     private Device mockedDevice;
 
-    private UiElement element;
+    @Spy
+    private UiElementPropertiesContainer propertiesContainer;
 
-    private UiElementValidator validator;
+    @InjectMocks
+    private AccessibilityUiElement element;
+
+    private Bounds boundsLandscape;
+
+    private Bounds boundsPortrait;
 
     private static String screenshotPathLandscape = ".%stest-resources%stestLandscapeImage.png";
 
@@ -48,10 +62,6 @@ public class GetUiElementImageTest {
     private static String elementPathPortrait = ".%stest-resources%stestCropImagePortrait.png";
 
     private static String elementPathUpsideDownPortrait = ".%stest-resources%stestCropImageUpsideDownPortrait.png";
-
-    private Map<String, String> nodeAttributeMapLandscape;
-
-    private Map<String, String> nodeAttributeMapPortrait;
 
     private Pair<Integer, Integer> resolutionLandscape = new Pair<Integer, Integer>(1280, 800);
 
@@ -79,26 +89,14 @@ public class GetUiElementImageTest {
                                                          File.separator);
         elementPathUpsideDownPortrait = String.format(elementPathUpsideDownPortrait, File.separator, File.separator);
 
-        nodeAttributeMapLandscape = new HashMap<>();
-        nodeAttributeMapLandscape.put("bounds", "[1074,278][1154,322]");
-        nodeAttributeMapLandscape.put("index", "1");
-        nodeAttributeMapLandscape.put("content-desc", "");
-        nodeAttributeMapLandscape.put("text", "MORE");
-        nodeAttributeMapLandscape.put("long-clickable", "false");
-        nodeAttributeMapLandscape.put("password", "false");
+        propertiesContainer = spy(new AccessibilityElement());
 
-        nodeAttributeMapPortrait = new HashMap<>();
-        nodeAttributeMapPortrait.put("bounds", "[669,278][749,322]");
-        nodeAttributeMapPortrait.put("index", "1");
-        nodeAttributeMapPortrait.put("content-desc", "");
-        nodeAttributeMapPortrait.put("text", "MORE");
-        nodeAttributeMapPortrait.put("long-clickable", "false");
-        nodeAttributeMapPortrait.put("password", "false");
+        boundsLandscape = new Bounds(new Point(1074, 278), new Point(1154, 322));
+        boundsPortrait = new Bounds(new Point(669, 278), new Point(749, 322));
 
         mockedDevice = mock(Device.class);
-        validator = mock(UiElementValidator.class);
-        when(mockedDevice.getUiValidator()).thenReturn(validator);
 
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
@@ -111,8 +109,9 @@ public class GetUiElementImageTest {
 
         when(mockedDevice.getInformation()).thenReturn(deviceInformation);
         when(mockedDevice.getScreenOrientation()).thenReturn(ScreenOrientation.LANDSCAPE);
-        element = new XmlNodeUiElement(nodeAttributeMapLandscape, mockedDevice);
         when(mockedDevice.getScreenshot()).thenReturn(screenshotLandscapeData);
+
+        when(propertiesContainer.getBounds()).thenReturn(boundsLandscape);
 
         File expectedImageFile = new File(elementPathLandscape);
         BufferedImage expectedBufferedElementImage = ImageIO.read(expectedImageFile);
@@ -134,8 +133,9 @@ public class GetUiElementImageTest {
 
         when(mockedDevice.getInformation()).thenReturn(deviceInformation);
         when(mockedDevice.getScreenOrientation()).thenReturn(ScreenOrientation.UPSIDE_DOWN_LANDSCAPE);
-        element = new XmlNodeUiElement(nodeAttributeMapLandscape, mockedDevice);
         when(mockedDevice.getScreenshot()).thenReturn(screenshotUpsideDownLandscapeData);
+
+        when(propertiesContainer.getBounds()).thenReturn(boundsLandscape);
 
         File expectedImageFile = new File(elementPathUpsideDownLandscape);
         BufferedImage expectedBufferedElementImage = ImageIO.read(expectedImageFile);
@@ -156,8 +156,9 @@ public class GetUiElementImageTest {
 
         when(mockedDevice.getInformation()).thenReturn(deviceInformation);
         when(mockedDevice.getScreenOrientation()).thenReturn(ScreenOrientation.PORTRAIT);
-        element = new XmlNodeUiElement(nodeAttributeMapPortrait, mockedDevice);
         when(mockedDevice.getScreenshot()).thenReturn(screenshotPortraitData);
+
+        when(propertiesContainer.getBounds()).thenReturn(boundsPortrait);
 
         File expectedImageFile = new File(elementPathPortrait);
         BufferedImage expectedBufferedElementImage = ImageIO.read(expectedImageFile);
@@ -178,8 +179,9 @@ public class GetUiElementImageTest {
 
         when(mockedDevice.getInformation()).thenReturn(deviceInformation);
         when(mockedDevice.getScreenOrientation()).thenReturn(ScreenOrientation.UPSIDE_DOWN_PORTRAIT);
-        element = new XmlNodeUiElement(nodeAttributeMapPortrait, mockedDevice);
         when(mockedDevice.getScreenshot()).thenReturn(screenshotUpsideDownPortraitData);
+
+        when(propertiesContainer.getBounds()).thenReturn(boundsPortrait);
 
         File expectedImageFile = new File(elementPathUpsideDownPortrait);
         BufferedImage expectedBufferedElementImage = ImageIO.read(expectedImageFile);

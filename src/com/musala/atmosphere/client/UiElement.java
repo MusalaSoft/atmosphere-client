@@ -49,14 +49,14 @@ public abstract class UiElement {
 
     protected boolean isStale;
 
-    protected UiElement(UiElementPropertiesContainer properties, Device device) {
+    UiElement(UiElementPropertiesContainer properties, Device device) {
         propertiesContainer = properties;
         onDevice = device;
         communicator = device.getCommunicator();
         isStale = false;
     }
 
-    protected UiElement(UiElement uiElement) {
+    UiElement(UiElement uiElement) {
         this(uiElement.propertiesContainer, uiElement.onDevice);
     }
 

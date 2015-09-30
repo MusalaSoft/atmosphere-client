@@ -2,6 +2,7 @@ package com.musala.atmosphere.client;
 
 import java.util.Map;
 
+import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.util.Pair;
@@ -17,10 +18,11 @@ public class UiWebElement extends WebElement {
 
     private Map<String, Object> elementProperties;
 
-    UiWebElement(Device device,
+    UiWebElement(DeviceCommunicator communicator,
+            ImeEntity imeEntity,
             Map<String, Object> elementProperties,
             String criterionValue) {
-        super(device);
+        super(communicator, imeEntity);
         this.elementProperties = elementProperties;
         this.xpathQuery = criterionValue;
     }
@@ -31,9 +33,7 @@ public class UiWebElement extends WebElement {
      */
     public void tap() {
         revalidate();
-        deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
-                                      WebElementAction.TAP,
-                                      xpathQuery);
+        deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION, WebElementAction.TAP, xpathQuery);
     }
 
     /**
@@ -46,8 +46,8 @@ public class UiWebElement extends WebElement {
     public boolean clearText() {
         revalidate();
         focus();
-        device.selectAllText();
-        return device.clearText();
+        imeEntity.selectAllText();
+        return imeEntity.clearText();
     }
 
     /**
@@ -98,7 +98,7 @@ public class UiWebElement extends WebElement {
         revalidate();
         focus();
 
-        return device.inputText(text, interval);
+        return imeEntity.inputText(text, interval);
     }
 
     /**
@@ -106,9 +106,7 @@ public class UiWebElement extends WebElement {
      * server. If this causes the current page to change, then this method will block until the new page is loaded.
      */
     public void submitForm() {
-        deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
-                                      WebElementAction.SUBMIT_FORM,
-                                      xpathQuery);
+        deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION, WebElementAction.SUBMIT_FORM, xpathQuery);
     }
 
     /**
@@ -190,9 +188,7 @@ public class UiWebElement extends WebElement {
      * @return String representing the value of the wanted property
      */
     public String getCssValue(String cssProperty) {
-        return (String) deviceCommunicator.sendAction(RoutingAction.GET_CSS_VALUE,
-                                                      xpathQuery,
-                                                      cssProperty);
+        return (String) deviceCommunicator.sendAction(RoutingAction.GET_CSS_VALUE, xpathQuery, cssProperty);
     }
 
     /**
@@ -231,8 +227,6 @@ public class UiWebElement extends WebElement {
      * Focuses the current web element.
      */
     private void focus() {
-        deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
-                                      WebElementAction.FOCUS,
-                                      xpathQuery);
+        deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION, WebElementAction.FOCUS, xpathQuery);
     }
 }

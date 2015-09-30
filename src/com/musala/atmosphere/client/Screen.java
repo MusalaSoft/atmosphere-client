@@ -17,6 +17,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
@@ -53,8 +54,6 @@ public class Screen {
 
     private String screenXml;
 
-    private final Device onDevice;
-
     private GestureEntity gestureEntity;
 
     private ImeEntity imeEntity;
@@ -62,6 +61,8 @@ public class Screen {
     private ImageEntity imageEntity;
 
     private DeviceSettingsEntity settingsEntity;
+
+    private AccessibilityElementEntity elementEntity;
 
     private Document xPathDomDocument;
 
@@ -71,18 +72,17 @@ public class Screen {
 
     @Deprecated
 
-    Screen(Device onDevice,
-            GestureEntity gestureEntity,
+    Screen(GestureEntity gestureEntity,
             ImeEntity imeEntity,
             DeviceSettingsEntity settingsEntity,
             ImageEntity imageEntity,
-            String uiHierarchyXml) {
-        this.onDevice = onDevice;
+            String uiHierarchyXml,
+            DeviceCommunicator communicator) {
         this.gestureEntity = gestureEntity;
         this.imeEntity = imeEntity;
         this.settingsEntity = settingsEntity;
         this.imageEntity = imageEntity;
-        communicator = onDevice.getCommunicator();
+        this.communicator = communicator;
         screenXml = uiHierarchyXml;
 
         // XPath DOM Document building
@@ -100,17 +100,18 @@ public class Screen {
         jSoupDocument = Jsoup.parse(screenXml);
     }
 
-    Screen(Device onDevice,
-            GestureEntity gestureEntity,
+    Screen(GestureEntity gestureEntity,
             ImeEntity imeEntity,
             DeviceSettingsEntity settingsEntity,
-            ImageEntity imageEntity) {
-        this.onDevice = onDevice;
+            ImageEntity imageEntity,
+            AccessibilityElementEntity elementEntity,
+            DeviceCommunicator communicator) {
         this.gestureEntity = gestureEntity;
         this.imeEntity = imeEntity;
         this.settingsEntity = settingsEntity;
         this.imageEntity = imageEntity;
-        communicator = onDevice.getCommunicator();
+        this.elementEntity = elementEntity;
+        this.communicator = communicator;
     }
 
     /**
@@ -132,27 +133,9 @@ public class Screen {
      * @return list with all UI elements present on the screen and matching the given selector
      * @throws UiElementFetchingException
      */
-    @SuppressWarnings("unchecked")
     private List<UiElement> getElements(UiElementSelector selector, Boolean visibleOnly)
         throws UiElementFetchingException {
-        List<AccessibilityElement> foundElements = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_UI_ELEMENTS,
-                                                                                                        selector,
-                                                                                                        visibleOnly);
-        if (foundElements.isEmpty()) {
-            throw new UiElementFetchingException("No elements found matching the given selector.");
-        }
-
-        List<UiElement> uiElements = new ArrayList<UiElement>();
-        for (AccessibilityElement element : foundElements) {
-            uiElements.add(new AccessibilityUiElement(element,
-                                                      onDevice,
-                                                      gestureEntity,
-                                                      imeEntity,
-                                                      settingsEntity,
-                                                      imageEntity));
-        }
-
-        return uiElements;
+        return elementEntity.getElements(selector, visibleOnly);
     }
 
     /**
@@ -245,7 +228,7 @@ public class Screen {
     public ScrollableView getScrollableViewByXPath(String query)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        return new ScrollableView(getElementByXPath(query));
+        return new ScrollableView(getElementByXPath(query), communicator);
     }
 
     /**
@@ -290,16 +273,7 @@ public class Screen {
     public UiElement getElement(UiElementSelector selector, Boolean visibleOnly)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        List<UiElement> foundElements = getElements(selector, visibleOnly);
-
-        int foundElementsCount = foundElements.size();
-        if (foundElementsCount > 1) {
-            throw new MultipleElementsFoundException(String.format("Searching for a single UiElement but %d that match the given properties %s were found.",
-                                                                   foundElementsCount,
-                                                                   selector));
-        } else {
-            return getElements(selector, true).get(0);
-        }
+        return elementEntity.getElement(selector, visibleOnly);
     }
 
     /**
@@ -329,11 +303,11 @@ public class Screen {
         List<UiElement> uiElements = new ArrayList<UiElement>();
         for (AccessibilityElement element : foundElements) {
             uiElements.add(new AccessibilityUiElement(element,
-                                                      onDevice,
                                                       gestureEntity,
                                                       imeEntity,
                                                       settingsEntity,
-                                                      imageEntity));
+                                                      imageEntity,
+                                                      elementEntity));
         }
 
         return uiElements;
@@ -354,7 +328,7 @@ public class Screen {
     public UiElement getElement(UiElementSelector selector)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        return getElement(selector, true);
+        return elementEntity.getElement(selector, true);
     }
 
     /**
@@ -372,7 +346,7 @@ public class Screen {
     public ScrollableView getScrollableView(UiElementSelector selector)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        return new ScrollableView(getElement(selector));
+        return new ScrollableView(getElement(selector), communicator);
     }
 
     /**
@@ -633,6 +607,6 @@ public class Screen {
      */
     public WebView getWebView(String packageName) {
         communicator.sendAction(RoutingAction.GET_WEB_VIEW, packageName);
-        return new WebView(onDevice);
+        return new WebView(communicator, imeEntity);
     }
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
@@ -25,22 +26,27 @@ import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 public class ScrollableView extends AccessibilityUiElement {
     private static final Logger LOGGER = Logger.getLogger(ScrollableView.class);
 
+    private DeviceCommunicator communicator;
+
     /**
      * Used to determine scroll direction
      */
     private boolean isVertical = true;
 
     ScrollableView(AccessibilityElement accessibilityElement,
-            Device onDevice,
             GestureEntity gestureEntity,
             ImeEntity imeEntity,
             DeviceSettingsEntity settingsEntity,
-            ImageEntity imageEntity) {
-        super(accessibilityElement, onDevice, gestureEntity, imeEntity, settingsEntity, imageEntity);
+            ImageEntity imageEntity,
+            AccessibilityElementEntity elementEntity,
+            DeviceCommunicator communicator) {
+        super(accessibilityElement, gestureEntity, imeEntity, settingsEntity, imageEntity, elementEntity);
+        this.communicator = communicator;
     }
 
-    ScrollableView(UiElement uiElement) {
+    ScrollableView(UiElement uiElement, DeviceCommunicator communicator) {
         super(uiElement);
+        this.communicator = communicator;
     }
 
     /**
@@ -194,7 +200,6 @@ public class ScrollableView extends AccessibilityUiElement {
     public boolean scrollToElementBySelector(Integer maxSwipes, UiElementSelector innerViewSelector)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        Screen deviceActiveScreen = onDevice.getActiveScreen();
 
         UiElementSelector scrollViewSelector = UiElementAttributeExtractor.extract(getProperties());
 
@@ -204,7 +209,9 @@ public class ScrollableView extends AccessibilityUiElement {
 
         for (int i = 0; i < maxSwipes; i++) {
             try {
-                ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollViewSelector);
+                ScrollableView updatedScrollableView = new ScrollableView(elementEntity.getElement(scrollViewSelector,
+                                                                                                   true),
+                                                                          communicator);
                 updatedScrollableView.getChildren(innerViewSelector);
                 return true;
             } catch (UiElementFetchingException e) {
@@ -232,10 +239,10 @@ public class ScrollableView extends AccessibilityUiElement {
     public boolean tapElementBySelectorWithoutScrolling(UiElementSelector innerViewSelector)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        Screen deviceActiveScreen = onDevice.getActiveScreen();
 
         UiElementSelector scrollViewSelector = UiElementAttributeExtractor.extract(getProperties());
-        ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollViewSelector);
+        ScrollableView updatedScrollableView = new ScrollableView(elementEntity.getElement(scrollViewSelector, true),
+                                                                  communicator);
 
         List<UiElement> innerViewChildren = updatedScrollableView.getChildren(innerViewSelector);
         return innerViewChildren.get(0).tap();
@@ -263,10 +270,9 @@ public class ScrollableView extends AccessibilityUiElement {
             return false;
         }
 
-        Screen deviceActiveScreen = onDevice.getActiveScreen();
-
         UiElementSelector scrollViewSelector = UiElementAttributeExtractor.extract(getProperties());
-        ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollViewSelector);
+        ScrollableView updatedScrollableView = new ScrollableView(elementEntity.getElement(scrollViewSelector, true),
+                                                                  communicator);
         List<UiElement> innerViewChildren = updatedScrollableView.getChildren(innerViewSelector);
 
         return innerViewChildren.get(0).tap();

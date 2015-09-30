@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.HardwareButton;
+import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.GpsLocationEntity;
@@ -89,6 +90,8 @@ public class Device {
     private DeviceSettingsEntity settingsEntity;
 
     private ImageEntity imageEntity;
+
+    private AccessibilityElementEntity elementEntity;
 
     private GpsLocationEntity gpsLocationEntity;
 
@@ -271,7 +274,7 @@ public class Device {
      *         active screen fails.
      */
     public Screen getActiveScreen() {
-        return new Screen(this, gestureEntity, imeEntity, settingsEntity, imageEntity);
+        return new Screen(gestureEntity, imeEntity, settingsEntity, imageEntity, elementEntity, communicator);
     }
 
     /**
@@ -1590,5 +1593,16 @@ public class Device {
      */
     void setSettingsEntity(DeviceSettingsEntity settingsEntity) {
         this.settingsEntity = settingsEntity;
+    }
+
+    /**
+     * Sets the {@link AccessibilityElementEntity entity} responsible for operations realated with
+     * {@link AccessibilityUiElement}.
+     *
+     * @param elementEntity
+     *        - instance of the entity that handles operations related with {@link AccessibilityUiElement}
+     */
+    void setAccessibilityElementEntity(AccessibilityElementEntity elementEntity) {
+        this.elementEntity = elementEntity;
     }
 }

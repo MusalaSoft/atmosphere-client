@@ -1,18 +1,15 @@
 package com.musala.atmosphere.client;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
 
+import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
@@ -20,7 +17,6 @@ import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
-import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Bounds;
@@ -28,7 +24,6 @@ import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.ui.UiElementPropertiesContainer;
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
-import com.musala.atmosphere.commons.util.Pair;
 
 /**
  * Used to access and manipulate certain views on the testing device, for example tapping, double-taping or holding
@@ -47,8 +42,6 @@ public abstract class UiElement {
 
     protected UiElementPropertiesContainer propertiesContainer;
 
-    protected Device onDevice;
-
     protected GestureEntity gestureEntity;
 
     protected ImeEntity imeEntity;
@@ -57,34 +50,33 @@ public abstract class UiElement {
 
     protected ImageEntity imageEntity;
 
-    protected DeviceCommunicator communicator;
+    protected AccessibilityElementEntity elementEntity;
 
     protected boolean isStale;
 
     UiElement(UiElementPropertiesContainer properties,
-            Device device,
             GestureEntity gestureEntity,
             ImeEntity imeEntity,
             DeviceSettingsEntity settingsEntity,
-            ImageEntity imageEntity) {
+            ImageEntity imageEntity,
+            AccessibilityElementEntity elementEntity) {
         this.propertiesContainer = properties;
-        this.onDevice = device;
         this.gestureEntity = gestureEntity;
         this.imeEntity = imeEntity;
         this.settingsEntity = settingsEntity;
         this.imageEntity = imageEntity;
-        this.communicator = device.getCommunicator();
+        this.elementEntity = elementEntity;
 
         isStale = false;
     }
 
     UiElement(UiElement uiElement) {
         this(uiElement.propertiesContainer,
-             uiElement.onDevice,
              uiElement.gestureEntity,
              uiElement.imeEntity,
              uiElement.settingsEntity,
-             uiElement.imageEntity);
+             uiElement.imageEntity,
+             uiElement.elementEntity);
     }
 
     /**
@@ -350,12 +342,10 @@ public abstract class UiElement {
             UiElementFetchingException,
             MultipleElementsFoundException,
             InvalidCssQueryException {
-        Screen deviceScreen = onDevice.getActiveScreen();
-
         UiElementSelector selector = new UiElementSelector();
         selector.addSelectionAttribute(CssAttribute.TEXT, destinationElementText);
 
-        UiElement destinationElement = deviceScreen.getElement(selector);
+        UiElement destinationElement = elementEntity.getElement(selector, true);
 
         Point startPoint = propertiesContainer.getBounds().getCenter();
         Point endPoint = destinationElement.propertiesContainer.getBounds().getCenter();
@@ -383,9 +373,7 @@ public abstract class UiElement {
             UiElementFetchingException,
             InvalidCssQueryException,
             MultipleElementsFoundException {
-        Screen deviceScreen = onDevice.getActiveScreen();
-
-        UiElement destinationElement = deviceScreen.getElement(destinationSelector);
+        UiElement destinationElement = elementEntity.getElement(destinationSelector, true);
 
         Point startPoint = propertiesContainer.getBounds().getCenter();
         Point endPoint = destinationElement.getProperties().getBounds().getCenter();
@@ -690,16 +678,7 @@ public abstract class UiElement {
      *         - if getting screenshot from the device fails
      */
     public Image getElementImage() throws IOException {
-        byte[] imageInByte = imageEntity.getScreenshot();
-        InputStream inputStream = new ByteArrayInputStream(imageInByte);
-        BufferedImage bufferedImage = ImageIO.read(inputStream);
-
-        Bounds elementBounds = propertiesContainer.getBounds();
-        Pair<Integer, Integer> resolution = onDevice.getInformation().getResolution();
-        ScreenOrientation screenOrientation = settingsEntity.getScreenOrientation();
-
-        Image newImage = new Image(bufferedImage);
-        return newImage.getSubimage(elementBounds, screenOrientation, resolution);
+        return imageEntity.getElementImage(propertiesContainer);
     }
 
     /**

@@ -17,9 +17,7 @@ public class UiWebElement extends WebElement {
 
     private Map<String, Object> elementProperties;
 
-    UiWebElement(Device device,
-            Map<String, Object> elementProperties,
-            String criterionValue) {
+    UiWebElement(Device device, Map<String, Object> elementProperties, String criterionValue) {
         super(device);
         this.elementProperties = elementProperties;
         this.xpathQuery = criterionValue;
@@ -31,9 +29,7 @@ public class UiWebElement extends WebElement {
      */
     public void tap() {
         revalidate();
-        deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
-                                      WebElementAction.TAP,
-                                      xpathQuery);
+        deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION, WebElementAction.TAP, xpathQuery);
     }
 
     /**
@@ -99,16 +95,6 @@ public class UiWebElement extends WebElement {
         focus();
 
         return device.inputText(text, interval);
-    }
-
-    /**
-     * If the current element is a form, or an element within a form, then the element will be submitted to the remote
-     * server. If this causes the current page to change, then this method will block until the new page is loaded.
-     */
-    public void submitForm() {
-        deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
-                                      WebElementAction.SUBMIT_FORM,
-                                      xpathQuery);
     }
 
     /**
@@ -190,9 +176,7 @@ public class UiWebElement extends WebElement {
      * @return String representing the value of the wanted property
      */
     public String getCssValue(String cssProperty) {
-        return (String) deviceCommunicator.sendAction(RoutingAction.GET_CSS_VALUE,
-                                                      xpathQuery,
-                                                      cssProperty);
+        return (String) deviceCommunicator.sendAction(RoutingAction.GET_CSS_VALUE, xpathQuery, cssProperty);
     }
 
     /**
@@ -231,8 +215,6 @@ public class UiWebElement extends WebElement {
      * Focuses the current web element.
      */
     private void focus() {
-        deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION,
-                                      WebElementAction.FOCUS,
-                                      xpathQuery);
+        deviceCommunicator.sendAction(RoutingAction.WEB_ELEMENT_ACTION, WebElementAction.FOCUS, xpathQuery);
     }
 }

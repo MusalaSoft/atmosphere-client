@@ -557,9 +557,7 @@ public class Screen {
      * @return boolean indicating if this action was successful.
      */
     public boolean waitForElementExists(UiElementSelector selector, Integer timeout) {
-        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_EXISTS, selector, timeout);
-        updateScreen();
-        return response;
+        return waitForElementExists(selector, timeout);
     }
 
     /**
@@ -572,9 +570,7 @@ public class Screen {
      * @return boolean indicating if this action was successful.
      */
     public boolean waitUntilElementGone(UiElementSelector selector, Integer timeout) {
-        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_UNTIL_GONE, selector, timeout);
-        updateScreen();
-        return response;
+        return elementEntity.waitUntilElementGone(selector, timeout);
     }
 
     /**
@@ -591,11 +587,7 @@ public class Screen {
      * @Note The behavior of this method depends on the application that it is used on.
      */
     public boolean waitForWindowUpdate(String packageName, int timeout) {
-        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_WINDOW_UPDATE,
-                                                             packageName,
-                                                             timeout);
-        updateScreen();
-        return response;
+        return elementEntity.waitForWindowUpdate(packageName, timeout);
     }
 
     /**

@@ -1,7 +1,6 @@
 package com.musala.atmosphere.client.entity;
 
 import com.musala.atmosphere.client.DeviceCommunicator;
-import com.musala.atmosphere.client.Screen;
 import com.musala.atmosphere.client.UiElement;
 import com.musala.atmosphere.client.entity.annotations.Default;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
@@ -20,8 +19,10 @@ import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 public class GpsLocationSwitchViewEntity extends GpsLocationEntity {
     private static final String ANDROID_WIDGET_SWITCH_CLASS_NAME = "android.widget.Switch";
 
-    GpsLocationSwitchViewEntity(Screen screen, DeviceCommunicator communicator) {
-        super(screen, communicator);
+    GpsLocationSwitchViewEntity(DeviceCommunicator communicator,
+            AccessibilityElementEntity elementEntity,
+            HardwareButtonEntity hardwareButtonEntity) {
+        super(communicator, elementEntity, hardwareButtonEntity);
     }
 
     @Override
@@ -29,6 +30,6 @@ public class GpsLocationSwitchViewEntity extends GpsLocationEntity {
         UiElementSelector switchWidgetSelector = new UiElementSelector();
         switchWidgetSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, ANDROID_WIDGET_SWITCH_CLASS_NAME);
 
-        return screen.getElement(switchWidgetSelector);
+        return elementEntity.getElement(switchWidgetSelector, true);
     }
 }

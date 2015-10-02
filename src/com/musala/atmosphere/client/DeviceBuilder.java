@@ -54,8 +54,9 @@ public class DeviceBuilder {
         try {
             Constructor<?> hardwareButtonEntityConstructor = HardwareButtonEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
             hardwareButtonEntityConstructor.setAccessible(true);
-            device.setHardwareButtonEntity((HardwareButtonEntity) hardwareButtonEntityConstructor.newInstance(new Object[] {
-                    deviceCommunicator}));
+            HardwareButtonEntity hardwareButtonEntity = (HardwareButtonEntity) hardwareButtonEntityConstructor.newInstance(new Object[] {
+                    deviceCommunicator});
+            device.setHardwareButtonEntity(hardwareButtonEntity);
 
             Constructor<?> gestureEntitiyConstructor = GestureEntity.class.getDeclaredConstructor(DeviceCommunicator.class,
                                                                                                   DeviceInformation.class);
@@ -94,11 +95,12 @@ public class DeviceBuilder {
             device.setAccessibilityElementEntity(accessibilityElementEntity);
 
             Class<?> locationEntityClass = typeResolver.getEntityClass(GpsLocationEntity.class);
-            Constructor<?> locationEntityConstructor = locationEntityClass.getDeclaredConstructor(Screen.class,
-                                                                                                  DeviceCommunicator.class);
+            Constructor<?> locationEntityConstructor = locationEntityClass.getDeclaredConstructor(DeviceCommunicator.class,
+                                                                                                  AccessibilityElementEntity.class,
+                                                                                                  HardwareButtonEntity.class);
             locationEntityConstructor.setAccessible(true);
-            device.setGpsLocationEntity((GpsLocationEntity) locationEntityConstructor.newInstance(new Object[] {screen,
-                    deviceCommunicator}));
+            device.setGpsLocationEntity((GpsLocationEntity) locationEntityConstructor.newInstance(new Object[] {
+                    deviceCommunicator, accessibilityElementEntity, hardwareButtonEntity}));
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException e) {
             throw new UnresolvedEntityTypeException("Failed to find the correct set of entities implmentations matching the given device information.",

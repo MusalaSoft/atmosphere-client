@@ -3,7 +3,6 @@ package com.musala.atmosphere.client.entity;
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.DeviceCommunicator;
-import com.musala.atmosphere.client.Screen;
 import com.musala.atmosphere.client.UiElement;
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
@@ -25,13 +24,18 @@ public abstract class GpsLocationEntity {
 
     private static final int AGREE_BUTTON_TIMEOUT = 3000;
 
+    protected AccessibilityElementEntity elementEntity;
+
     protected DeviceCommunicator communicator;
 
-    protected Screen screen;
+    protected HardwareButtonEntity hardwareButtonEntity;
 
-    GpsLocationEntity(Screen screen, DeviceCommunicator communicator) {
-        this.screen = screen;
+    GpsLocationEntity(DeviceCommunicator communicator,
+            AccessibilityElementEntity elementEntity,
+            HardwareButtonEntity hardwareButtonEntity) {
         this.communicator = communicator;
+        this.elementEntity = elementEntity;
+        this.hardwareButtonEntity = hardwareButtonEntity;
     }
 
     /**
@@ -101,19 +105,17 @@ public abstract class GpsLocationEntity {
     }
 
     private void pressHardwareButton(HardwareButton button) {
-        // TODO: This logic must be extracted in another component with base functionalities.
-        int keycode = button.getKeycode();
+        int keyCode = button.getKeycode();
 
-        String query = "input keyevent " + Integer.toString(keycode);
-        communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, query);
+        hardwareButtonEntity.pressButton(keyCode);
     }
 
     private void pressAgreeButton() throws MultipleElementsFoundException, UiElementFetchingException {
         UiElementSelector agreeButtonSelector = new UiElementSelector();
         agreeButtonSelector.addSelectionAttribute(CssAttribute.RESOURCE_ID, AGREE_BUTTON_RESOURCE_ID);
 
-        if (screen.waitForElementExists(agreeButtonSelector, AGREE_BUTTON_TIMEOUT)) {
-            UiElement agreeButton = screen.getElement(agreeButtonSelector);
+        if (elementEntity.waitForElementExists(agreeButtonSelector, AGREE_BUTTON_TIMEOUT)) {
+            UiElement agreeButton = elementEntity.getElement(agreeButtonSelector, true);
             agreeButton.tap();
         }
     }

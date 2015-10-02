@@ -25,7 +25,7 @@ public class GestureEntity {
 
     private DeviceInformation deviceInformation;
 
-    protected GestureEntity(DeviceCommunicator deviceCommunicator, DeviceInformation deviceInformation) {
+    GestureEntity(DeviceCommunicator deviceCommunicator, DeviceInformation deviceInformation) {
         this.deviceCommunicator = deviceCommunicator;
         this.deviceInformation = deviceInformation;
     }

@@ -202,4 +202,55 @@ public class AccessibilityElementEntity {
 
         return wrappedElements;
     }
+
+    /**
+     * Waits for the existence of a given UiElement with a given timeout.
+     *
+     * @param selector
+     *        - the selector of the given UI element.
+     * @param timeout
+     *        - the given timeout.
+     * @return boolean indicating if this action was successful.
+     */
+    public boolean waitForElementExists(UiElementSelector selector, Integer timeout) {
+        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_EXISTS, selector, timeout);
+
+        return response;
+    }
+
+    /**
+     * Waits until a given UiElement disappears with a given timeout.
+     *
+     * @param selector
+     *        - the selector of the given UI element.
+     * @param timeout
+     *        - the given timeout.
+     * @return boolean indicating if this action was successful.
+     */
+    public boolean waitUntilElementGone(UiElementSelector selector, Integer timeout) {
+        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_UNTIL_GONE, selector, timeout);
+
+        return response;
+    }
+
+    /**
+     * Waits for a window content update event to occur. If a package name for the window is specified, but the current
+     * window does not have the same package name, the function returns immediately.
+     *
+     * @param packageName
+     *        - the specified window package name (can be null). If null, a window update from any front-end window will
+     *        end the wait
+     * @param timeout
+     *        - the timeout of the operation
+     * @return <code>true</code> if a window update occurred, <code>false</code> if timeout has elapsed or if the
+     *         current window does not have the specified package name
+     * @Note The behavior of this method depends on the application that it is used on.
+     */
+    public boolean waitForWindowUpdate(String packageName, int timeout) {
+        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_WINDOW_UPDATE,
+                                                             packageName,
+                                                             timeout);
+
+        return response;
+    }
 }

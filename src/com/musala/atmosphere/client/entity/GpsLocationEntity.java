@@ -24,6 +24,8 @@ public abstract class GpsLocationEntity {
 
     private static final int AGREE_BUTTON_TIMEOUT = 3000;
 
+    protected static final int CHANGE_STATE_WIDGET_TIMEOUT = 5000;
+
     protected AccessibilityElementEntity elementEntity;
 
     protected DeviceCommunicator communicator;
@@ -86,9 +88,9 @@ public abstract class GpsLocationEntity {
         openLocationSettings();
 
         try {
-            getChangeStateWidget().tap();
-
-            pressAgreeButton();
+            if (getChangeStateWidget().tap()) {
+                pressAgreeButton();
+            }
         } catch (MultipleElementsFoundException | UiElementFetchingException e) {
             LOGGER.error("Failed to get the wanted widget, or there are more than one widgets on the screen that are matching the given selector.",
                          e);

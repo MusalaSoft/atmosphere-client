@@ -1,5 +1,7 @@
 package com.musala.atmosphere.client.entity;
 
+import java.util.List;
+
 import com.musala.atmosphere.client.DeviceCommunicator;
 import com.musala.atmosphere.client.UiElement;
 import com.musala.atmosphere.client.entity.annotations.Restriction;
@@ -29,10 +31,16 @@ public class GpsLocationCheckBoxEntity extends GpsLocationEntity {
         UiElementSelector checkBoxWidgetSelector = new UiElementSelector();
         checkBoxWidgetSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, ANDROID_WIDGET_CHECK_BOX_CLASS_NAME);
 
-        // There are more than one check box on the screen, but only the first one is for setting the GPS location
-        // state.
-        UiElement checkBox = elementEntity.getElements(checkBoxWidgetSelector, true).get(0);
+        elementEntity.waitForElementExists(checkBoxWidgetSelector, CHANGE_STATE_WIDGET_TIMEOUT);
 
-        return checkBox;
+        List<UiElement> widgetList = elementEntity.getElements(checkBoxWidgetSelector, true);
+
+        if (!widgetList.isEmpty()) {
+            // There are more than one check box on the screen, but only the first one is for setting the GPS location
+            // state.
+            return widgetList.get(0);
+        }
+
+        return null;
     }
 }

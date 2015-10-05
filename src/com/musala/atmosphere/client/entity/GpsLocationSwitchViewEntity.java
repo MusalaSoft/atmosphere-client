@@ -30,6 +30,8 @@ public class GpsLocationSwitchViewEntity extends GpsLocationEntity {
         UiElementSelector switchWidgetSelector = new UiElementSelector();
         switchWidgetSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, ANDROID_WIDGET_SWITCH_CLASS_NAME);
 
+        elementEntity.waitForElementExists(switchWidgetSelector, CHANGE_STATE_WIDGET_TIMEOUT);
+
         return elementEntity.getElement(switchWidgetSelector, true);
     }
 }

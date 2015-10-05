@@ -40,15 +40,11 @@ import com.musala.atmosphere.commons.beans.PhoneNumber;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
 import com.musala.atmosphere.commons.connectivity.WifiConnectionProperties;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
-import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.gesture.Gesture;
-import com.musala.atmosphere.commons.ui.selector.CssAttribute;
-import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 import com.musala.atmosphere.commons.util.GeoLocation;
 import com.musala.atmosphere.commons.util.IntentBuilder;
 import com.musala.atmosphere.commons.util.IntentBuilder.IntentAction;
-import com.musala.atmosphere.commons.util.Pair;
 
 /**
  * Android device representing class.
@@ -62,12 +58,6 @@ public class Device {
     private static final Logger LOGGER = Logger.getLogger(Device.class.getCanonicalName());
 
     private static final String ATMOSPHERE_SERVICE_PACKAGE = "com.musala.atmosphere.service";
-
-    private static final String ANDROID_WIDGET_SWITCH_CLASS_NAME = "android.widget.Switch";
-
-    private static final String ANDROID_WIDGET_CHECKBOX_CLASS_NAME = "android.widget.CheckBox";
-
-    private static final String AGREE_BUTTON_RESOURCE_ID = "android:id/button1";
 
     private static final String ATMOSPHERE_UNLOCK_DEVICE_ACTIVITY = ".UnlockDeviceActivity";
 
@@ -168,6 +158,7 @@ public class Device {
      *        - command to be executed in background
      */
     private void executeShellCommandInBackground(String shellCommand) {
+        // TODO: Remove this method.
         communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND_IN_BACKGROUND, shellCommand);
     }
 
@@ -178,6 +169,7 @@ public class Device {
      *        - name of the process to be interrupted
      */
     private void interruptBackgroundShellProcess(String processName) {
+        // TODO: Remove this method.
         communicator.sendAction(RoutingAction.INTERRUPT_BACKGROUND_SHELL_PROCESS, processName);
     }
 
@@ -1064,33 +1056,6 @@ public class Device {
     }
 
     /**
-     * Checks whether the given point is inside the bounds of the screen, and throws an {@link IllegalArgumentException}
-     * otherwise.
-     *
-     * @param point
-     *        - the point to be checked
-     */
-    private void validatePointOnScreen(Point point) {
-        DeviceInformation information = getInformation();
-        Pair<Integer, Integer> resolution = information.getResolution();
-
-        boolean hasPositiveCoordinates = point.getX() >= 0 && point.getY() >= 0;
-        boolean isOnScreen = point.getX() <= resolution.getKey() && point.getY() <= resolution.getValue();
-
-        if (!hasPositiveCoordinates || !isOnScreen) {
-            String exeptionMessageFormat = "The passed point with coordinates (%d, %d) is outside the bounds of the screen. Screen dimentions (%d, %d)";
-            String message = String.format(exeptionMessageFormat,
-                                           point.getX(),
-                                           point.getY(),
-                                           resolution.getKey(),
-                                           resolution.getValue());
-            LOGGER.error(message);
-            throw new IllegalArgumentException(message);
-
-        }
-    }
-
-    /**
      * Check if there are running processes on the device with the given package
      *
      * @param packageName
@@ -1354,7 +1319,7 @@ public class Device {
      * @return <code>true</code> if the GPS location is enabled, <code>false</code> if it's disabled
      */
     public boolean isGpsLocationEnabled() {
-        return (boolean) communicator.sendAction(RoutingAction.IS_GPS_LOCATION_ENABLED);
+        return gpsLocationEntity.isGpsLocationEnabled();
     }
 
     /**
@@ -1363,7 +1328,7 @@ public class Device {
      * @return <code>true</code> if the GPS location enabling is successful, <code>false</code> if it fails
      */
     public boolean enableGpsLocation() {
-        return setGpsLocationState(true);
+        return gpsLocationEntity.enableGpsLocation();
     }
 
     /**
@@ -1372,7 +1337,7 @@ public class Device {
      * @return <code>true</code> if the GPS location disabling is successful, <code>false</code> if it fails
      */
     public boolean disableGpsLocation() {
-        return setGpsLocationState(false);
+        return gpsLocationEntity.disableGpsLocation();
     }
 
     /**
@@ -1382,84 +1347,6 @@ public class Device {
      */
     public Boolean isAudioPlaying() {
         return (boolean) communicator.sendAction(RoutingAction.IS_AUDIO_PLAYING);
-    }
-
-    /**
-     * Changes the GPS location state of this device.
-     *
-     * @param state
-     *        - desired GPS location state: <code>true</code> - enable GPS location, <code>false</code> - disable GPS
-     *        location
-     * @return <code>true</code> if the GPS location state setting is successful, <code>false</code> if it fails
-     */
-    private boolean setGpsLocationState(boolean state) {
-        if (isGpsLocationEnabled() == state) {
-            return true;
-        }
-
-        boolean isActionSuccessful = false;
-
-        openLocationSettings();
-
-        UiElementSelector switchButtonSelector = new UiElementSelector();
-        switchButtonSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, ANDROID_WIDGET_SWITCH_CLASS_NAME);
-
-        UiElementSelector checkBoxSelector = new UiElementSelector();
-        checkBoxSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, ANDROID_WIDGET_CHECKBOX_CLASS_NAME);
-
-        if (tapLocationSettingsActivityElement(switchButtonSelector)
-                || tapLocationSettingsActivityElement(checkBoxSelector)) {
-            isActionSuccessful = true;
-        }
-
-        UiElementSelector agreeButtonSelector = new UiElementSelector();
-        agreeButtonSelector.addSelectionAttribute(CssAttribute.RESOURCE_ID, AGREE_BUTTON_RESOURCE_ID);
-        /*
-         * TODO: Remove the Thread.sleep after wait for element start working with selectors created by resource ID.
-         */
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-        }
-
-        tapLocationSettingsActivityElement(agreeButtonSelector);
-
-        pressButton(HardwareButton.BACK);
-
-        return isActionSuccessful;
-    }
-
-    /**
-     * Taps element from location settings activity.
-     *
-     * @param selector
-     *        - the {@link UiElementSelector} instance of the desired element
-     * @return <code>true</code> if tapping the element is successful, <code>false</code> if it fails
-     */
-    private boolean tapLocationSettingsActivityElement(UiElementSelector selector) {
-        Screen screen = getActiveScreen();
-        int waitForElementTimeout = 5000;
-
-        boolean isElementPresent = screen.waitForElementExists(selector, waitForElementTimeout);
-
-        if (isElementPresent) {
-            try {
-                // We use getElements to use this logic for both switch view elements and check box elements. The reason
-                // is that there is only one switch view element and many check boxes, but we need only the first one.
-                UiElement element = screen.getElements(selector).get(0);
-                return element.tap();
-            } catch (UiElementFetchingException e) {
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Opens the location settings activity.
-     */
-    private void openLocationSettings() {
-        communicator.sendAction(RoutingAction.OPEN_LOCATION_SETTINGS);
     }
 
     /**
@@ -1475,16 +1362,6 @@ public class Device {
         }
 
         return (String) response;
-    }
-
-    /**
-     * Shows the tap location on the current device screen.
-     *
-     * @param point
-     *        - the point where the tap will be placed
-     */
-    private void showTapLocation(Point point) {
-        communicator.sendAction(RoutingAction.SHOW_TAP_LOCATION, point);
     }
 
     /**

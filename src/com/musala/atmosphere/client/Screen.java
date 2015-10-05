@@ -557,7 +557,7 @@ public class Screen {
      * @return boolean indicating if this action was successful.
      */
     public boolean waitForElementExists(UiElementSelector selector, Integer timeout) {
-        return waitForElementExists(selector, timeout);
+        return elementEntity.waitForElementExists(selector, timeout);
     }
 
     /**

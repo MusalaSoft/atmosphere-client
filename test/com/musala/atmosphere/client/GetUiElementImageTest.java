@@ -20,6 +20,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
+import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
+import com.musala.atmosphere.client.entity.GestureEntity;
+import com.musala.atmosphere.client.entity.ImageEntity;
+import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.geometry.Bounds;
@@ -69,6 +73,14 @@ public class GetUiElementImageTest {
 
     private DeviceInformation deviceInformation = new DeviceInformation();
 
+    private GestureEntity gestureEntity;
+
+    private ImeEntity imeEntity;
+
+    private ImageEntity imageEntity;
+
+    private DeviceSettingsEntity settingsEntity;
+
     private static final String RECEIVED_DIFFERENT_IMAGES_MESSAGE = "Received image is different than the expected one.";
 
     @Before
@@ -95,20 +107,24 @@ public class GetUiElementImageTest {
         boundsPortrait = new Bounds(new Point(669, 278), new Point(749, 322));
 
         mockedDevice = mock(Device.class);
+        gestureEntity = mock(GestureEntity.class);
+        imeEntity = mock(ImeEntity.class);
+        settingsEntity = mock(DeviceSettingsEntity.class);
+        imageEntity = mock(ImageEntity.class);
+
 
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
     public void testGetUiElementImageLandscape() throws Exception {
-
         Path screenshotLandscapeImagePath = Paths.get(screenshotPathLandscape);
         byte[] screenshotLandscapeData = Files.readAllBytes(screenshotLandscapeImagePath);
 
         deviceInformation.setResolution(resolutionLandscape);
 
         when(mockedDevice.getInformation()).thenReturn(deviceInformation);
-        when(mockedDevice.getScreenOrientation()).thenReturn(ScreenOrientation.LANDSCAPE);
+        when(settingsEntity.getScreenOrientation()).thenReturn(ScreenOrientation.LANDSCAPE);
         when(mockedDevice.getScreenshot()).thenReturn(screenshotLandscapeData);
 
         when(propertiesContainer.getBounds()).thenReturn(boundsLandscape);
@@ -125,14 +141,13 @@ public class GetUiElementImageTest {
 
     @Test
     public void testGetUiElementImageUpsideDownLandscape() throws Exception {
-
         Path screenshotUpsideDownLandscapeImagePath = Paths.get(screenshotPathUpsideDownLandscape);
         byte[] screenshotUpsideDownLandscapeData = Files.readAllBytes(screenshotUpsideDownLandscapeImagePath);
 
         deviceInformation.setResolution(resolutionLandscape);
 
         when(mockedDevice.getInformation()).thenReturn(deviceInformation);
-        when(mockedDevice.getScreenOrientation()).thenReturn(ScreenOrientation.UPSIDE_DOWN_LANDSCAPE);
+        when(settingsEntity.getScreenOrientation()).thenReturn(ScreenOrientation.UPSIDE_DOWN_LANDSCAPE);
         when(mockedDevice.getScreenshot()).thenReturn(screenshotUpsideDownLandscapeData);
 
         when(propertiesContainer.getBounds()).thenReturn(boundsLandscape);
@@ -155,7 +170,7 @@ public class GetUiElementImageTest {
         deviceInformation.setResolution(resolutionPortrait);
 
         when(mockedDevice.getInformation()).thenReturn(deviceInformation);
-        when(mockedDevice.getScreenOrientation()).thenReturn(ScreenOrientation.PORTRAIT);
+        when(settingsEntity.getScreenOrientation()).thenReturn(ScreenOrientation.PORTRAIT);
         when(mockedDevice.getScreenshot()).thenReturn(screenshotPortraitData);
 
         when(propertiesContainer.getBounds()).thenReturn(boundsPortrait);
@@ -178,7 +193,7 @@ public class GetUiElementImageTest {
         deviceInformation.setResolution(resolutionPortrait);
 
         when(mockedDevice.getInformation()).thenReturn(deviceInformation);
-        when(mockedDevice.getScreenOrientation()).thenReturn(ScreenOrientation.UPSIDE_DOWN_PORTRAIT);
+        when(settingsEntity.getScreenOrientation()).thenReturn(ScreenOrientation.UPSIDE_DOWN_PORTRAIT);
         when(mockedDevice.getScreenshot()).thenReturn(screenshotUpsideDownPortraitData);
 
         when(propertiesContainer.getBounds()).thenReturn(boundsPortrait);

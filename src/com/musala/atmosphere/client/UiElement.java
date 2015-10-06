@@ -1,22 +1,22 @@
 package com.musala.atmosphere.client;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
 
+import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
+import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
+import com.musala.atmosphere.client.entity.GestureEntity;
+import com.musala.atmosphere.client.entity.ImageEntity;
+import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
-import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Bounds;
@@ -24,7 +24,6 @@ import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.ui.UiElementPropertiesContainer;
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
-import com.musala.atmosphere.commons.util.Pair;
 
 /**
  * Used to access and manipulate certain views on the testing device, for example tapping, double-taping or holding
@@ -43,21 +42,41 @@ public abstract class UiElement {
 
     protected UiElementPropertiesContainer propertiesContainer;
 
-    protected Device onDevice;
+    protected GestureEntity gestureEntity;
 
-    protected DeviceCommunicator communicator;
+    protected ImeEntity imeEntity;
+
+    protected DeviceSettingsEntity settingsEntity;
+
+    protected ImageEntity imageEntity;
+
+    protected AccessibilityElementEntity elementEntity;
 
     protected boolean isStale;
 
-    UiElement(UiElementPropertiesContainer properties, Device device) {
-        propertiesContainer = properties;
-        onDevice = device;
-        communicator = device.getCommunicator();
+    UiElement(UiElementPropertiesContainer properties,
+            GestureEntity gestureEntity,
+            ImeEntity imeEntity,
+            DeviceSettingsEntity settingsEntity,
+            ImageEntity imageEntity,
+            AccessibilityElementEntity elementEntity) {
+        this.propertiesContainer = properties;
+        this.gestureEntity = gestureEntity;
+        this.imeEntity = imeEntity;
+        this.settingsEntity = settingsEntity;
+        this.imageEntity = imageEntity;
+        this.elementEntity = elementEntity;
+
         isStale = false;
     }
 
     UiElement(UiElement uiElement) {
-        this(uiElement.propertiesContainer, uiElement.onDevice);
+        this(uiElement.propertiesContainer,
+             uiElement.gestureEntity,
+             uiElement.imeEntity,
+             uiElement.settingsEntity,
+             uiElement.imageEntity,
+             uiElement.elementEntity);
     }
 
     /**
@@ -138,7 +157,7 @@ public abstract class UiElement {
         tapPoint.addVector(point);
 
         if (elementBounds.contains(tapPoint)) {
-            boolean isElementTapped = onDevice.tapScreenLocation(tapPoint);
+            boolean isElementTapped = gestureEntity.tapScreenLocation(tapPoint);
             finalizeUiElementOperation();
             return isElementTapped;
         } else {
@@ -247,7 +266,7 @@ public abstract class UiElement {
         tapPoint.addVector(point);
 
         if (elementBounds.contains(tapPoint)) {
-            boolean isElementTapped = onDevice.doubleTap(tapPoint);
+            boolean isElementTapped = gestureEntity.doubleTap(tapPoint);
             finalizeUiElementOperation();
             return isElementTapped;
         } else {
@@ -285,7 +304,7 @@ public abstract class UiElement {
         int secondFingerInitialY = upperLeft.getY() + HEIGHT_OFFSET;
         Point secondFingerInitial = new Point(secondFingerInitialX, secondFingerInitialY);
 
-        boolean result = onDevice.pinchIn(firstFingerInitial, secondFingerInitial);
+        boolean result = gestureEntity.pinchIn(firstFingerInitial, secondFingerInitial);
 
         return result;
     }
@@ -305,7 +324,7 @@ public abstract class UiElement {
         Point firstFingerEnd = elementBounds.getUpperLeftCorner();
         Point secondFingerEnd = elementBounds.getLowerRightCorner();
 
-        boolean result = onDevice.pinchOut(firstFingerEnd, secondFingerEnd);
+        boolean result = gestureEntity.pinchOut(firstFingerEnd, secondFingerEnd);
         return result;
     }
 
@@ -323,17 +342,15 @@ public abstract class UiElement {
             UiElementFetchingException,
             MultipleElementsFoundException,
             InvalidCssQueryException {
-        Screen deviceScreen = onDevice.getActiveScreen();
-
         UiElementSelector selector = new UiElementSelector();
         selector.addSelectionAttribute(CssAttribute.TEXT, destinationElementText);
 
-        UiElement destinationElement = deviceScreen.getElement(selector);
+        UiElement destinationElement = elementEntity.getElement(selector, true);
 
         Point startPoint = propertiesContainer.getBounds().getCenter();
         Point endPoint = destinationElement.propertiesContainer.getBounds().getCenter();
 
-        return onDevice.drag(startPoint, endPoint);
+        return gestureEntity.drag(startPoint, endPoint);
     }
 
     /**
@@ -356,14 +373,12 @@ public abstract class UiElement {
             UiElementFetchingException,
             InvalidCssQueryException,
             MultipleElementsFoundException {
-        Screen deviceScreen = onDevice.getActiveScreen();
-
-        UiElement destinationElement = deviceScreen.getElement(destinationSelector);
+        UiElement destinationElement = elementEntity.getElement(destinationSelector, true);
 
         Point startPoint = propertiesContainer.getBounds().getCenter();
         Point endPoint = destinationElement.getProperties().getBounds().getCenter();
 
-        return onDevice.drag(startPoint, endPoint);
+        return gestureEntity.drag(startPoint, endPoint);
     }
 
     /**
@@ -388,7 +403,7 @@ public abstract class UiElement {
         Point startPoint = propertiesContainer.getBounds().getCenter();
         Point endPoint = destinationElement.getProperties().getBounds().getCenter();
 
-        return onDevice.drag(startPoint, endPoint);
+        return gestureEntity.drag(startPoint, endPoint);
     }
 
     /**
@@ -400,7 +415,7 @@ public abstract class UiElement {
      */
     public boolean drag(Point endPoint) {
         Point startPoint = propertiesContainer.getBounds().getCenter();
-        return onDevice.drag(startPoint, endPoint);
+        return gestureEntity.drag(startPoint, endPoint);
     }
 
     /**
@@ -432,7 +447,7 @@ public abstract class UiElement {
      */
     public boolean swipe(Point point, SwipeDirection direction) {
         revalidateThrowing();
-        boolean response = onDevice.swipe(point, direction);
+        boolean response = gestureEntity.swipe(point, direction);
         return response;
     }
 
@@ -446,7 +461,7 @@ public abstract class UiElement {
     public boolean cutText() {
         revalidateThrowing();
 
-        return onDevice.cutText();
+        return imeEntity.cutText();
     }
 
     /**
@@ -459,7 +474,7 @@ public abstract class UiElement {
     public boolean copyText() {
         revalidateThrowing();
 
-        return onDevice.copyText();
+        return imeEntity.copyText();
     }
 
     /**
@@ -471,7 +486,7 @@ public abstract class UiElement {
      */
     public boolean pasteText() {
         focus();
-        return onDevice.pasteText();
+        return imeEntity.pasteText();
     }
 
     /**
@@ -494,7 +509,7 @@ public abstract class UiElement {
             }
         }
 
-        return onDevice.selectAllText();
+        return imeEntity.selectAllText();
     }
 
     /**
@@ -508,7 +523,7 @@ public abstract class UiElement {
         // TODO validate when an element can get it's text cleared
         focus();
 
-        return onDevice.clearText();
+        return imeEntity.clearText();
     }
 
     /**
@@ -528,7 +543,7 @@ public abstract class UiElement {
     public boolean inputText(String text, long intervalInMs) {
         focus();
 
-        boolean success = onDevice.inputText(text, intervalInMs);
+        boolean success = imeEntity.inputText(text, intervalInMs);
         return success;
     }
 
@@ -614,7 +629,7 @@ public abstract class UiElement {
         longPressPoint.addVector(innerPoint);
 
         if (elementBounds.contains(longPressPoint)) {
-            boolean isElementTapped = onDevice.longPress(longPressPoint, timeout);
+            boolean isElementTapped = gestureEntity.longPress(longPressPoint, timeout);
             finalizeUiElementOperation();
             return isElementTapped;
         } else {
@@ -663,17 +678,7 @@ public abstract class UiElement {
      *         - if getting screenshot from the device fails
      */
     public Image getElementImage() throws IOException {
-        byte[] imageInByte = onDevice.getScreenshot();
-        InputStream inputStream = new ByteArrayInputStream(imageInByte);
-        BufferedImage bufferedImage = ImageIO.read(inputStream);
-
-        Bounds elementBounds = propertiesContainer.getBounds();
-
-        Pair<Integer, Integer> resolution = onDevice.getInformation().getResolution();
-        ScreenOrientation screenOrientation = onDevice.getScreenOrientation();
-
-        Image newImage = new Image(bufferedImage);
-        return newImage.getSubimage(elementBounds, screenOrientation, resolution);
+        return imageEntity.getElementImage(propertiesContainer);
     }
 
     /**

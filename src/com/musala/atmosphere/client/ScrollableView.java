@@ -4,6 +4,11 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
+import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
+import com.musala.atmosphere.client.entity.GestureEntity;
+import com.musala.atmosphere.client.entity.ImageEntity;
+import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
 import com.musala.atmosphere.commons.RoutingAction;
@@ -15,23 +20,33 @@ import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 /**
  * UI element representing ScrollableView used to perform scroll actions to end, beginning, forward, backward, to a
  * certain text or into inner view.
- * 
+ *
  * @author filareta.yordanova
  */
 public class ScrollableView extends AccessibilityUiElement {
     private static final Logger LOGGER = Logger.getLogger(ScrollableView.class);
+
+    private DeviceCommunicator communicator;
 
     /**
      * Used to determine scroll direction
      */
     private boolean isVertical = true;
 
-    ScrollableView(AccessibilityElement accessibilityElement, Device onDevice) {
-        super(accessibilityElement, onDevice);
+    ScrollableView(AccessibilityElement accessibilityElement,
+            GestureEntity gestureEntity,
+            ImeEntity imeEntity,
+            DeviceSettingsEntity settingsEntity,
+            ImageEntity imageEntity,
+            AccessibilityElementEntity elementEntity,
+            DeviceCommunicator communicator) {
+        super(accessibilityElement, gestureEntity, imeEntity, settingsEntity, imageEntity, elementEntity);
+        this.communicator = communicator;
     }
 
-    ScrollableView(UiElement uiElement) {
+    ScrollableView(UiElement uiElement, DeviceCommunicator communicator) {
         super(uiElement);
+        this.communicator = communicator;
     }
 
     /**
@@ -51,7 +66,7 @@ public class ScrollableView extends AccessibilityUiElement {
     /**
      * Scrolls to the end of a scrollable UI element. The end could be the bottom most in case of vertical controls or
      * the right most for horizontal controls.
-     * 
+     *
      * @param steps
      *        used to control the speed
      * @param maxSwipes
@@ -65,7 +80,7 @@ public class ScrollableView extends AccessibilityUiElement {
     /**
      * Scrolls to the beginning of a scrollable UI element. The beginning could be the top most in case of vertical
      * controls or the left most for horizontal controls.
-     * 
+     *
      * @param steps
      *        used to control the speed
      * @param maxSwipes
@@ -81,7 +96,7 @@ public class ScrollableView extends AccessibilityUiElement {
     /**
      * Scrolls to the beginning of a scrollable UI element. The beginning could be the top most in case of vertical
      * controls or the left most for horizontal controls. A default value (55) for the steps count will be used.
-     * 
+     *
      * @param maxSwipes
      *        maximum swipes to perform a scroll action
      * @return true if the scroll to the beginning was successful, false otherwise
@@ -93,7 +108,7 @@ public class ScrollableView extends AccessibilityUiElement {
     /**
      * Scrolls to the end of a scrollable UI element. The end could be the bottom most in case of vertical controls or
      * the right most for horizontal controls. A default value (55) for the steps count will be used.
-     * 
+     *
      * @param maxSwipes
      *        maximum swipes to perform a scroll action
      * @return true if the scroll to the end was successful, false otherwise
@@ -105,7 +120,7 @@ public class ScrollableView extends AccessibilityUiElement {
     /**
      * Perform a scroll backward. If this view is set to vertical then the scroll will be executed from bottom to top.
      * If this view is set to horizontal then the scroll will be executed from right to left.
-     * 
+     *
      * @param steps
      *        used to control the speed
      * @return true if the backward scroll was successful, false otherwise
@@ -117,7 +132,7 @@ public class ScrollableView extends AccessibilityUiElement {
     /**
      * Perform a scroll forward. If this view is set to vertical then the scroll will be executed from top to bottom. If
      * this view is set to horizontal then the scroll will be executed from left to right.
-     * 
+     *
      * @param steps
      *        used to control the speed
      * @return true if the forward scroll was successful, false otherwise
@@ -130,7 +145,7 @@ public class ScrollableView extends AccessibilityUiElement {
      * Perform a scroll backward. If this view is set to vertical then the scroll will be executed from bottom to top.
      * If this view is set to horizontal then the scroll will be executed from right to left. A default value (55) for
      * the steps count will be used.
-     * 
+     *
      * @return true if the backward scroll was successful, false otherwise
      */
     public boolean scrollBackward() {
@@ -141,7 +156,7 @@ public class ScrollableView extends AccessibilityUiElement {
      * Perform a scroll forward. If this view is set to vertical then the scroll will be executed from top to bottom. If
      * this view is set to horizontal then the scroll will be executed from left to right. A default value (55) for the
      * steps count will be used.
-     * 
+     *
      * @return true if the forward scroll was successful, false otherwise
      */
     public boolean scrollForward() {
@@ -150,7 +165,7 @@ public class ScrollableView extends AccessibilityUiElement {
 
     /**
      * Method that scrolls in the given direction
-     * 
+     *
      * @param maxSwipes
      *        - maximum number of swipes to perform a scroll action
      * @param maxSteps
@@ -171,7 +186,7 @@ public class ScrollableView extends AccessibilityUiElement {
 
     /**
      * Finds a specific element in ScrollableView corresponding to the given selector using scrolling if necessary
-     * 
+     *
      * @param maxSwipes
      *        - the maximum number of swipes to perform a scroll action
      * @param innerViewSelector
@@ -185,7 +200,6 @@ public class ScrollableView extends AccessibilityUiElement {
     public boolean scrollToElementBySelector(Integer maxSwipes, UiElementSelector innerViewSelector)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        Screen deviceActiveScreen = onDevice.getActiveScreen();
 
         UiElementSelector scrollViewSelector = UiElementAttributeExtractor.extract(getProperties());
 
@@ -195,7 +209,9 @@ public class ScrollableView extends AccessibilityUiElement {
 
         for (int i = 0; i < maxSwipes; i++) {
             try {
-                ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollViewSelector);
+                ScrollableView updatedScrollableView = new ScrollableView(elementEntity.getElement(scrollViewSelector,
+                                                                                                   true),
+                                                                          communicator);
                 updatedScrollableView.getChildren(innerViewSelector);
                 return true;
             } catch (UiElementFetchingException e) {
@@ -210,7 +226,7 @@ public class ScrollableView extends AccessibilityUiElement {
 
     /**
      * Tries to find an UI element in the view without the usage of scroll and taps on it.
-     * 
+     *
      * @param innerViewSelector
      *        - a {@link UiElementSelector} that needs to match a certain element in the scrollable view
      * @return true if you can find and tap on an element in ScrollableView corresponding to the given selector without
@@ -223,10 +239,10 @@ public class ScrollableView extends AccessibilityUiElement {
     public boolean tapElementBySelectorWithoutScrolling(UiElementSelector innerViewSelector)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        Screen deviceActiveScreen = onDevice.getActiveScreen();
 
         UiElementSelector scrollViewSelector = UiElementAttributeExtractor.extract(getProperties());
-        ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollViewSelector);
+        ScrollableView updatedScrollableView = new ScrollableView(elementEntity.getElement(scrollViewSelector, true),
+                                                                  communicator);
 
         List<UiElement> innerViewChildren = updatedScrollableView.getChildren(innerViewSelector);
         return innerViewChildren.get(0).tap();
@@ -234,7 +250,7 @@ public class ScrollableView extends AccessibilityUiElement {
 
     /**
      * Tries to find an UI element in the view with the usage of scroll and taps on it.
-     * 
+     *
      * @param maxSwipes
      *        - the maximum number of swipes to perform a scroll action
      * @param innerViewSelector
@@ -254,10 +270,9 @@ public class ScrollableView extends AccessibilityUiElement {
             return false;
         }
 
-        Screen deviceActiveScreen = onDevice.getActiveScreen();
-
         UiElementSelector scrollViewSelector = UiElementAttributeExtractor.extract(getProperties());
-        ScrollableView updatedScrollableView = deviceActiveScreen.getScrollableView(scrollViewSelector);
+        ScrollableView updatedScrollableView = new ScrollableView(elementEntity.getElement(scrollViewSelector, true),
+                                                                  communicator);
         List<UiElement> innerViewChildren = updatedScrollableView.getChildren(innerViewSelector);
 
         return innerViewChildren.get(0).tap();

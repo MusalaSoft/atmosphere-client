@@ -2,6 +2,7 @@ package com.musala.atmosphere.client;
 
 import java.util.Map;
 
+import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.util.Pair;
@@ -17,8 +18,11 @@ public class UiWebElement extends WebElement {
 
     private Map<String, Object> elementProperties;
 
-    UiWebElement(Device device, Map<String, Object> elementProperties, String criterionValue) {
-        super(device);
+    UiWebElement(DeviceCommunicator communicator,
+            ImeEntity imeEntity,
+            Map<String, Object> elementProperties,
+            String criterionValue) {
+        super(communicator, imeEntity);
         this.elementProperties = elementProperties;
         this.xpathQuery = criterionValue;
     }
@@ -42,8 +46,8 @@ public class UiWebElement extends WebElement {
     public boolean clearText() {
         revalidate();
         focus();
-        device.selectAllText();
-        return device.clearText();
+        imeEntity.selectAllText();
+        return imeEntity.clearText();
     }
 
     /**
@@ -94,7 +98,7 @@ public class UiWebElement extends WebElement {
         revalidate();
         focus();
 
-        return device.inputText(text, interval);
+        return imeEntity.inputText(text, interval);
     }
 
     /**

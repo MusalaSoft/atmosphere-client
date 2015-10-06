@@ -9,42 +9,46 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.net.URLDecoder;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import com.musala.atmosphere.client.util.ServerAnnotationProperties;
+import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 
+@RunWith(MockitoJUnitRunner.class)
 public class InstallApkTest {
+    private static final int TEST_PASSKEY = 0;
+
     private final String PATH_TO_APK_FILE = "object-browser.apk";
 
     private final String PATH_TO_NOT_EXISTING_APK_FILE = "E:\\NoExistingFolder\\NotExistingFile.apk";
 
     private IClientDevice innerClientDeviceMock;
 
+    private DeviceCommunicator deviceCommunicator;
+
     private Device device;
 
     @Before
-    public void setUpDevice() {
-        long testPasskey = 0;
+    public void setUpDevice() throws Exception {
+        DeviceInformation deviceInfoMock = mock(DeviceInformation.class);
         innerClientDeviceMock = mock(IClientDevice.class);
-        ServerAnnotationProperties serverAnnotationProperties = mock(ServerAnnotationProperties.class);
-        ServerConnectionHandler serverConnectionHandler = new ServerConnectionHandler(serverAnnotationProperties);
-        device = new Device(innerClientDeviceMock, testPasskey, serverConnectionHandler);
-    }
+        when(innerClientDeviceMock.route(eq(TEST_PASSKEY),
+                                         eq(RoutingAction.GET_DEVICE_INFORMATION))).thenReturn(deviceInfoMock);
+        deviceCommunicator = new DeviceCommunicator(innerClientDeviceMock, TEST_PASSKEY);
 
-    @After
-    public void tearDown() {
-
+        device = new Device(deviceCommunicator);
     }
 
     @Test
@@ -80,9 +84,10 @@ public class InstallApkTest {
             }
         };
         Mockito.doAnswer(routeAnswer).when(innerClientDeviceMock).route(anyLong(), any(RoutingAction.class));
-        Mockito.doAnswer(routeAnswer)
-               .when(innerClientDeviceMock)
-               .route(anyLong(), any(RoutingAction.class), any(), anyInt());
+        Mockito.doAnswer(routeAnswer).when(innerClientDeviceMock).route(anyLong(),
+                                                                        any(RoutingAction.class),
+                                                                        any(),
+                                                                        anyInt());
 
         // FIXME: This should be revised!
         String file = getClass().getResource(PATH_TO_APK_FILE).getFile();

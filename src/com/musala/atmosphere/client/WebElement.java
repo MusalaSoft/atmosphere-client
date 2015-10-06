@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.util.webview.WebElementSelectionCriterionConverter;
 import com.musala.atmosphere.commons.RoutingAction;
@@ -16,15 +17,15 @@ import com.musala.atmosphere.commons.webelement.selection.WebElementSelectionCri
  *
  */
 public abstract class WebElement {
-    protected Device device;
-
     protected DeviceCommunicator deviceCommunicator;
+
+    protected ImeEntity imeEntity;
 
     protected String xpathQuery;
 
-    WebElement(Device device) {
-        this.device = device;
-        this.deviceCommunicator = device.getCommunicator();
+    WebElement(DeviceCommunicator communicator, ImeEntity imeEntity) {
+        this.deviceCommunicator = communicator;
+        this.imeEntity = imeEntity;
         xpathQuery = "";
     }
 
@@ -44,7 +45,7 @@ public abstract class WebElement {
         String findElementQuery = this.xpathQuery + xpathCriterionValue;
         Map<String, Object> attributes = (Map<String, Object>) deviceCommunicator.sendAction(RoutingAction.FIND_WEB_ELEMENT,
                                                                                              findElementQuery);
-        return new UiWebElement(device, attributes, findElementQuery);
+        return new UiWebElement(deviceCommunicator, imeEntity, attributes, findElementQuery);
     }
 
     /**
@@ -71,7 +72,10 @@ public abstract class WebElement {
                                                                                                           criterionValue,
                                                                                                           index);
             String findSingleElementQuery = this.xpathQuery + elementXpathCriterionValue;
-            UiWebElement webElement = new UiWebElement(device, elementAttributes, findSingleElementQuery);
+            UiWebElement webElement = new UiWebElement(deviceCommunicator,
+                                                       imeEntity,
+                                                       elementAttributes,
+                                                       findSingleElementQuery);
             webElements.add(webElement);
             index++;
         }

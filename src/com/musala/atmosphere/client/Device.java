@@ -8,22 +8,22 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.HardwareButton;
+import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
+import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
+import com.musala.atmosphere.client.entity.GestureEntity;
+import com.musala.atmosphere.client.entity.GpsLocationEntity;
+import com.musala.atmosphere.client.entity.HardwareButtonEntity;
+import com.musala.atmosphere.client.entity.ImageEntity;
+import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
-import com.musala.atmosphere.client.uiutils.GestureCreator;
-import com.musala.atmosphere.client.util.settings.AndroidGlobalSettings;
-import com.musala.atmosphere.client.util.settings.AndroidSystemSettings;
 import com.musala.atmosphere.client.util.settings.DeviceSettingsManager;
-import com.musala.atmosphere.client.util.settings.IAndroidSettings;
-import com.musala.atmosphere.client.util.settings.SettingsParsingException;
 import com.musala.atmosphere.commons.ConnectionType;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.PowerProperties;
@@ -39,19 +39,12 @@ import com.musala.atmosphere.commons.beans.MobileDataState;
 import com.musala.atmosphere.commons.beans.PhoneNumber;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
 import com.musala.atmosphere.commons.connectivity.WifiConnectionProperties;
-import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
-import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.gesture.Gesture;
-import com.musala.atmosphere.commons.ime.KeyboardAction;
-import com.musala.atmosphere.commons.ui.selector.CssAttribute;
-import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
-import com.musala.atmosphere.commons.util.AtmosphereIntent;
 import com.musala.atmosphere.commons.util.GeoLocation;
 import com.musala.atmosphere.commons.util.IntentBuilder;
 import com.musala.atmosphere.commons.util.IntentBuilder.IntentAction;
-import com.musala.atmosphere.commons.util.Pair;
 
 /**
  * Android device representing class.
@@ -66,12 +59,6 @@ public class Device {
 
     private static final String ATMOSPHERE_SERVICE_PACKAGE = "com.musala.atmosphere.service";
 
-    private static final String ANDROID_WIDGET_SWITCH_CLASS_NAME = "android.widget.Switch";
-
-    private static final String ANDROID_WIDGET_CHECKBOX_CLASS_NAME = "android.widget.CheckBox";
-
-    private static final String AGREE_BUTTON_RESOURCE_ID = "android:id/button1";
-
     private static final String ATMOSPHERE_UNLOCK_DEVICE_ACTIVITY = ".UnlockDeviceActivity";
 
     private static final int WAIT_FOR_AWAKE_STATE_INTERVAL = 100;
@@ -82,23 +69,30 @@ public class Device {
      */
     public static final int LONG_PRESS_DEFAULT_TIMEOUT = 1500; // ms
 
-    private final DeviceSettingsManager deviceSettings;
-
-    private final ServerConnectionHandler serverConnectionHandler;
-
     private final DeviceCommunicator communicator;
 
+    private GestureEntity gestureEntity;
+
+    private HardwareButtonEntity hardwareButtonEntity;
+
+    private ImeEntity imeEntity;
+
+    private DeviceSettingsEntity settingsEntity;
+
+    private ImageEntity imageEntity;
+
+    private AccessibilityElementEntity elementEntity;
+
+    private GpsLocationEntity gpsLocationEntity;
+
     /**
-     * Constructor that creates a usable Device object by a given IClientDevice, it's invocation passkey.
+     * Constructor that creates a usable Device object by a given {@link DeviceCommunicator device communicator}.
      *
-     * @param iClientDevice
-     * @param devicePasskey
-     * @param serverConnectionHandler
+     * @param deviceCommunicator
+     * @param hardwareButtonEntity
      */
-    Device(IClientDevice clientDevice, long devicePasskey, ServerConnectionHandler serverConnectionHandler) {
-        this.serverConnectionHandler = serverConnectionHandler;
-        communicator = new DeviceCommunicator(clientDevice, devicePasskey);
-        deviceSettings = new DeviceSettingsManager(communicator);
+    Device(DeviceCommunicator deviceCommunicator) {
+        this.communicator = deviceCommunicator;
     }
 
     /**
@@ -164,6 +158,7 @@ public class Device {
      *        - command to be executed in background
      */
     private void executeShellCommandInBackground(String shellCommand) {
+        // TODO: Remove this method.
         communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND_IN_BACKGROUND, shellCommand);
     }
 
@@ -174,6 +169,7 @@ public class Device {
      *        - name of the process to be interrupted
      */
     private void interruptBackgroundShellProcess(String processName) {
+        // TODO: Remove this method.
         communicator.sendAction(RoutingAction.INTERRUPT_BACKGROUND_SHELL_PROCESS, processName);
     }
 
@@ -250,10 +246,7 @@ public class Device {
      * @return <code>true</code> if the double tap is successful, <code>false</code> if it fails.
      */
     public boolean doubleTap(Point point) {
-        Gesture doubleTap = GestureCreator.createDoubleTap(point.getX(), point.getY());
-        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, doubleTap);
-
-        return response == DeviceCommunicator.VOID_SUCCESS;
+        return gestureEntity.doubleTap(point);
     }
 
     /**
@@ -273,7 +266,7 @@ public class Device {
      *         active screen fails.
      */
     public Screen getActiveScreen() {
-        return new Screen(this);
+        return new Screen(gestureEntity, imeEntity, settingsEntity, imageEntity, elementEntity, communicator);
     }
 
     /**
@@ -283,20 +276,7 @@ public class Device {
      *         getting airplane mode fails.
      */
     public Boolean getAirplaneMode() {
-        DeviceInformation deviceInformation = getInformation();
-        int apiLevel = deviceInformation.getApiLevel();
-
-        IAndroidSettings airplaneSetting = apiLevel >= 17 ? AndroidGlobalSettings.AIRPLANE_MODE_ON
-                : AndroidSystemSettings.AIRPLANE_MODE_ON;
-
-        try {
-            int airplaneMode = deviceSettings.getInt(airplaneSetting);
-            return airplaneMode == 1;
-        } catch (SettingsParsingException e) {
-            String message = "Getting the Airplane mode of the device failed.";
-            LOGGER.error(message, e);
-            return null;
-        }
+        return settingsEntity.getAirplaneMode();
     }
 
     DeviceCommunicator getCommunicator() {
@@ -394,8 +374,7 @@ public class Device {
      *         It can be subsequently dumped to a file and directly opened as a PNG image.
      */
     public byte[] getScreenshot() {
-        byte[] screenshot = (byte[]) communicator.sendAction(RoutingAction.GET_SCREENSHOT);
-        return screenshot;
+        return imageEntity.getScreenshot();
     }
 
     /**
@@ -426,15 +405,7 @@ public class Device {
      * @see ScreenOrientation
      */
     public ScreenOrientation getScreenOrientation() {
-        ScreenOrientation screenOrientation = null;
-        try {
-            int obtainedScreenOrientationValue = deviceSettings.getInt(AndroidSystemSettings.USER_ROTATION);
-            screenOrientation = ScreenOrientation.getValueOfInt(obtainedScreenOrientationValue);
-        } catch (SettingsParsingException e) {
-            String message = "Failed to get screen orientation of the device.";
-            LOGGER.error(message, e);
-        }
-        return screenOrientation;
+        return settingsEntity.getScreenOrientation();
     }
 
     /**
@@ -454,16 +425,7 @@ public class Device {
      *         method failed to get device auto rotation state.
      */
     public Boolean isAutoRotationOn() {
-        Boolean isAutoRotationOn = null;
-        try {
-            int autoRotationVelue = deviceSettings.getInt(AndroidSystemSettings.ACCELEROMETER_ROTATION);
-            isAutoRotationOn = autoRotationVelue == 1 ? true : false;
-
-        } catch (SettingsParsingException e) {
-            String message = "Getting autorotation status failed.";
-            LOGGER.error(message, e);
-        }
-        return isAutoRotationOn;
+        return settingsEntity.isAutoRotationOn();
     }
 
     /**
@@ -504,19 +466,7 @@ public class Device {
      * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
      */
     public boolean inputText(String text, long interval) {
-        if (text.isEmpty()) {
-            String message = "Text input requested, but an empty String is given.";
-            LOGGER.warn(message);
-            return true;
-        }
-
-        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.INPUT_TEXT.intentAction);
-        intent.putExtra(KeyboardAction.INTENT_EXTRA_TEXT, text);
-        intent.putExtra(KeyboardAction.INTENT_EXTRA_INPUT_SPEED, interval);
-
-        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
-
-        return communicator.getLastException() == null;
+        return imeEntity.inputText(text, interval);
     }
 
     /**
@@ -525,10 +475,7 @@ public class Device {
      * @return <code>true</code> if clear text is successful, <code>false</code> if it fails
      */
     public boolean clearText() {
-        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.DELETE_ALL.intentAction);
-        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
-
-        return communicator.getLastException() == null;
+        return imeEntity.clearText();
     }
 
     /**
@@ -537,10 +484,7 @@ public class Device {
      * @return <code>true</code> if the text selecting is successful, <code>false</code> if it fails
      */
     public boolean selectAllText() {
-        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.SELECT_ALL.intentAction);
-        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
-
-        return communicator.getLastException() == null;
+        return imeEntity.selectAllText();
     }
 
     /**
@@ -549,10 +493,7 @@ public class Device {
      * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
      */
     public boolean pasteText() {
-        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.PASTE_TEXT.intentAction);
-        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
-
-        return communicator.getLastException() == null;
+        return imeEntity.pasteText();
     }
 
     /**
@@ -561,10 +502,7 @@ public class Device {
      * @return <code>true</code> if copy operation is successful, <code>false</code> if it fails
      */
     public boolean copyText() {
-        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.COPY_TEXT.intentAction);
-        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
-
-        return communicator.getLastException() == null;
+        return imeEntity.copyText();
     }
 
     /**
@@ -573,10 +511,7 @@ public class Device {
      * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
      */
     public boolean cutText() {
-        AtmosphereIntent intent = new AtmosphereIntent(KeyboardAction.CUT_TEXT.intentAction);
-        communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
-
-        return communicator.getLastException() == null;
+        return imeEntity.cutText();
     }
 
     /**
@@ -634,13 +569,7 @@ public class Device {
      * @return <code>true</code> if the pinch in is successful, <code>false</code> if it fails.
      */
     public boolean pinchIn(Point firstFingerInitial, Point secondFingerInitial) {
-        validatePointOnScreen(firstFingerInitial);
-        validatePointOnScreen(secondFingerInitial);
-
-        Gesture pinchIn = GestureCreator.createPinchIn(firstFingerInitial, secondFingerInitial);
-        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, pinchIn);
-
-        return response == DeviceCommunicator.VOID_SUCCESS;
+        return gestureEntity.pinchIn(firstFingerInitial, secondFingerInitial);
     }
 
     /**
@@ -653,13 +582,7 @@ public class Device {
      * @return <code>true</code> if the pinch out is successful, <code>false</code> if it fails.
      */
     public boolean pinchOut(Point firstFingerEnd, Point secondFingerEnd) {
-        validatePointOnScreen(firstFingerEnd);
-        validatePointOnScreen(secondFingerEnd);
-
-        Gesture pinchOut = GestureCreator.createPinchOut(firstFingerEnd, secondFingerEnd);
-        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, pinchOut);
-
-        return response == DeviceCommunicator.VOID_SUCCESS;
+        return gestureEntity.pinchOut(firstFingerEnd, secondFingerEnd);
     }
 
     /**
@@ -682,10 +605,7 @@ public class Device {
      * @return <code>true</code> if the hardware button press is successful, <code>false</code> if it fails.
      */
     public boolean pressButton(int keyCode) {
-        String query = "input keyevent " + Integer.toString(keyCode);
-        communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, query);
-
-        return communicator.getLastException() == null;
+        return hardwareButtonEntity.pressButton(keyCode);
     }
 
     /**
@@ -769,44 +689,7 @@ public class Device {
      * @return <code>true</code> if the airplane mode setting is successful, <code>false</code> if it fails.
      */
     public boolean setAirplaneMode(boolean airplaneMode) {
-        DeviceInformation deviceInformation = getInformation();
-        int apiLevel = deviceInformation.getApiLevel();
-        boolean isEmulator = deviceInformation.isEmulator();
-        if (isEmulator) {
-            String message = "Enabling airplane mode on emulator disconnects it from ATMOSPHERE Agent and this emulator can be connected back only after Agent restart. Setting airplane mode for emulators is prohibited.";
-            LOGGER.warn(message);
-            return false;
-        }
-
-        int airplaneModeIntValue = airplaneMode ? 1 : 0;
-
-        IntentBuilder intentBuilder = new IntentBuilder(IntentAction.AIRPLANE_MODE_NOTIFICATION);
-        intentBuilder.putExtraBoolean("state", airplaneMode);
-        String intentCommand = intentBuilder.buildIntentCommand();
-
-        final String INTENT_COMMAND_RESPONSE = "Broadcast completed: result=0";
-
-        IAndroidSettings airplaneSetting = apiLevel >= 17 ? AndroidGlobalSettings.AIRPLANE_MODE_ON
-                : AndroidSystemSettings.AIRPLANE_MODE_ON;
-
-        boolean success = deviceSettings.putInt(airplaneSetting, airplaneModeIntValue);
-        if (!success) {
-            String message = "Updating airplane mode status failed.";
-            LOGGER.error(message);
-            return false;
-        }
-
-        String intentCommandResponse = (String) communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND,
-                                                                        intentCommand);
-        Pattern intentCommandResponsePattern = Pattern.compile(INTENT_COMMAND_RESPONSE);
-        Matcher intentCommandResponseMatcher = intentCommandResponsePattern.matcher(intentCommandResponse);
-        if (!intentCommandResponseMatcher.find()) {
-            String message = "Broadcasting notification intent failed.";
-            LOGGER.error(message);
-            return false;
-        }
-
-        return true;
+        return settingsEntity.setAirplaneMode(airplaneMode);
     }
 
     /**
@@ -815,7 +698,7 @@ public class Device {
      * @return <code>true</code> if the auto rotation setting is successful, and <code>false</code> if it fails
      */
     public boolean enableScreenAutoRotation() {
-        return deviceSettings.putInt(AndroidSystemSettings.ACCELEROMETER_ROTATION, 1);
+        return settingsEntity.enableScreenAutoRotation();
     }
 
     /**
@@ -824,7 +707,7 @@ public class Device {
      * @return <code>true</code> if the auto rotation setting is successful, and <code>false</code> if it fails
      */
     public boolean disableScreenAutoRotation() {
-        return deviceSettings.putInt(AndroidSystemSettings.ACCELEROMETER_ROTATION, 0);
+        return settingsEntity.disableScreenAutoRotation();
     }
 
     /**
@@ -968,16 +851,7 @@ public class Device {
      * @return <code>true</code> if the screen orientation setting is successful, <code>false</code> if it fails.
      */
     public boolean setScreenOrientation(ScreenOrientation screenOrientation) {
-
-        if (!disableScreenAutoRotation()) {
-            String message = "Screen orientation was not set due to setting auto rotation failure.";
-            LOGGER.error(message);
-            return false;
-        }
-        boolean success = deviceSettings.putInt(AndroidSystemSettings.USER_ROTATION,
-                                                screenOrientation.getOrientationNumber());
-
-        return success;
+        return settingsEntity.setScreenOrientation(screenOrientation);
     }
 
     /**
@@ -1128,14 +1002,7 @@ public class Device {
      * @return <code>true</code> if the swipe is successful, <code>false</code> if it fails.
      */
     public boolean swipe(Point point, SwipeDirection swipeDirection) {
-        validatePointOnScreen(point);
-
-        DeviceInformation information = getInformation();
-        Pair<Integer, Integer> resolution = information.getResolution();
-        Gesture swipe = GestureCreator.createSwipe(point, swipeDirection, resolution);
-        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, swipe);
-
-        return response == DeviceCommunicator.VOID_SUCCESS;
+        return gestureEntity.swipe(point, swipeDirection);
     }
 
     /**
@@ -1147,14 +1014,7 @@ public class Device {
      * @return <code>true</code> if tapping screen is successful, <code>false</code> if it fails.
      */
     public boolean tapScreenLocation(Point tapPoint) {
-        int tapPointX = tapPoint.getX();
-        int tapPointY = tapPoint.getY();
-        String query = "input tap " + tapPointX + " " + tapPointY;
-
-        showTapLocation(tapPoint);
-
-        communicator.sendAction(RoutingAction.EXECUTE_SHELL_COMMAND, query);
-        return communicator.getLastException() == null;
+        return gestureEntity.tapScreenLocation(tapPoint);
     }
 
     /**
@@ -1179,10 +1039,7 @@ public class Device {
      * @return - true, if operation is successful, and false otherwise.
      */
     public boolean longPress(Point pressPoint, int timeout) {
-        Gesture longPress = GestureCreator.createLongPress(pressPoint.getX(), pressPoint.getY(), timeout);
-        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, longPress);
-
-        return response == DeviceCommunicator.VOID_SUCCESS;
+        return gestureEntity.longPress(pressPoint, timeout);
     }
 
     /**
@@ -1195,37 +1052,7 @@ public class Device {
      * @return <code>true</code>, if operation is successful, <code>false</code>otherwise
      */
     public boolean drag(Point startPoint, Point endPoint) {
-        validatePointOnScreen(endPoint);
-        Gesture drag = GestureCreator.createDrag(startPoint, endPoint);
-        Object response = communicator.sendAction(RoutingAction.PLAY_GESTURE, drag);
-        return response == DeviceCommunicator.VOID_SUCCESS;
-    }
-
-    /**
-     * Checks whether the given point is inside the bounds of the screen, and throws an {@link IllegalArgumentException}
-     * otherwise.
-     *
-     * @param point
-     *        - the point to be checked
-     */
-    private void validatePointOnScreen(Point point) {
-        DeviceInformation information = getInformation();
-        Pair<Integer, Integer> resolution = information.getResolution();
-
-        boolean hasPositiveCoordinates = point.getX() >= 0 && point.getY() >= 0;
-        boolean isOnScreen = point.getX() <= resolution.getKey() && point.getY() <= resolution.getValue();
-
-        if (!hasPositiveCoordinates || !isOnScreen) {
-            String exeptionMessageFormat = "The passed point with coordinates (%d, %d) is outside the bounds of the screen. Screen dimentions (%d, %d)";
-            String message = String.format(exeptionMessageFormat,
-                                           point.getX(),
-                                           point.getY(),
-                                           resolution.getKey(),
-                                           resolution.getValue());
-            LOGGER.error(message);
-            throw new IllegalArgumentException(message);
-
-        }
+        return gestureEntity.drag(startPoint, endPoint);
     }
 
     /**
@@ -1296,7 +1123,7 @@ public class Device {
      * @Note On emulators the screen is only dimmed.
      */
     public boolean setScreenOffTimeout(long screenOffTimeout) {
-        return deviceSettings.putLong(AndroidSystemSettings.SCREEN_OFF_TIMEOUT, screenOffTimeout);
+        return settingsEntity.setScreenOffTimeout(screenOffTimeout);
     }
 
     /**
@@ -1305,7 +1132,7 @@ public class Device {
      * @return timeout in milliseconds, after which the screen is turned off.
      */
     public long getScreenOffTimeout() {
-        return deviceSettings.getLong(AndroidSystemSettings.SCREEN_OFF_TIMEOUT, 0);
+        return settingsEntity.getScreenOffTimeout();
     }
 
     /**
@@ -1335,7 +1162,7 @@ public class Device {
      * @return {@link DeviceSettingsManager} instance for this device
      */
     public DeviceSettingsManager getDeviceSettingsManager() {
-        return deviceSettings;
+        return settingsEntity.getDeviceSettingsManager();
     }
 
     /**
@@ -1492,7 +1319,7 @@ public class Device {
      * @return <code>true</code> if the GPS location is enabled, <code>false</code> if it's disabled
      */
     public boolean isGpsLocationEnabled() {
-        return (boolean) communicator.sendAction(RoutingAction.IS_GPS_LOCATION_ENABLED);
+        return gpsLocationEntity.isGpsLocationEnabled();
     }
 
     /**
@@ -1501,7 +1328,7 @@ public class Device {
      * @return <code>true</code> if the GPS location enabling is successful, <code>false</code> if it fails
      */
     public boolean enableGpsLocation() {
-        return setGpsLocationState(true);
+        return gpsLocationEntity.enableGpsLocation();
     }
 
     /**
@@ -1510,7 +1337,7 @@ public class Device {
      * @return <code>true</code> if the GPS location disabling is successful, <code>false</code> if it fails
      */
     public boolean disableGpsLocation() {
-        return setGpsLocationState(false);
+        return gpsLocationEntity.disableGpsLocation();
     }
 
     /**
@@ -1520,84 +1347,6 @@ public class Device {
      */
     public Boolean isAudioPlaying() {
         return (boolean) communicator.sendAction(RoutingAction.IS_AUDIO_PLAYING);
-    }
-
-    /**
-     * Changes the GPS location state of this device.
-     *
-     * @param state
-     *        - desired GPS location state: <code>true</code> - enable GPS location, <code>false</code> - disable GPS
-     *        location
-     * @return <code>true</code> if the GPS location state setting is successful, <code>false</code> if it fails
-     */
-    private boolean setGpsLocationState(boolean state) {
-        if (isGpsLocationEnabled() == state) {
-            return true;
-        }
-
-        boolean isActionSuccessful = false;
-
-        openLocationSettings();
-
-        UiElementSelector switchButtonSelector = new UiElementSelector();
-        switchButtonSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, ANDROID_WIDGET_SWITCH_CLASS_NAME);
-
-        UiElementSelector checkBoxSelector = new UiElementSelector();
-        checkBoxSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, ANDROID_WIDGET_CHECKBOX_CLASS_NAME);
-
-        if (tapLocationSettingsActivityElement(switchButtonSelector)
-                || tapLocationSettingsActivityElement(checkBoxSelector)) {
-            isActionSuccessful = true;
-        }
-
-        UiElementSelector agreeButtonSelector = new UiElementSelector();
-        agreeButtonSelector.addSelectionAttribute(CssAttribute.RESOURCE_ID, AGREE_BUTTON_RESOURCE_ID);
-        /*
-         * TODO: Remove the Thread.sleep after wait for element start working with selectors created by resource ID.
-         */
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-        }
-
-        tapLocationSettingsActivityElement(agreeButtonSelector);
-
-        pressButton(HardwareButton.BACK);
-
-        return isActionSuccessful;
-    }
-
-    /**
-     * Taps element from location settings activity.
-     *
-     * @param selector
-     *        - the {@link UiElementSelector} instance of the desired element
-     * @return <code>true</code> if tapping the element is successful, <code>false</code> if it fails
-     */
-    private boolean tapLocationSettingsActivityElement(UiElementSelector selector) {
-        Screen screen = getActiveScreen();
-        int waitForElementTimeout = 5000;
-
-        boolean isElementPresent = screen.waitForElementExists(selector, waitForElementTimeout);
-
-        if (isElementPresent) {
-            try {
-                // We use getElements to use this logic for both switch view elements and check box elements. The reason
-                // is that there is only one switch view element and many check boxes, but we need only the first one.
-                UiElement element = screen.getElements(selector).get(0);
-                return element.tap();
-            } catch (UiElementFetchingException e) {
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Opens the location settings activity.
-     */
-    private void openLocationSettings() {
-        communicator.sendAction(RoutingAction.OPEN_LOCATION_SETTINGS);
     }
 
     /**
@@ -1613,16 +1362,6 @@ public class Device {
         }
 
         return (String) response;
-    }
-
-    /**
-     * Shows the tap location on the current device screen.
-     *
-     * @param point
-     *        - the point where the tap will be placed
-     */
-    private void showTapLocation(Point point) {
-        communicator.sendAction(RoutingAction.SHOW_TAP_LOCATION, point);
     }
 
     /**
@@ -1669,5 +1408,78 @@ public class Device {
      */
     private void closeChromeDriver() {
         communicator.sendAction(RoutingAction.CLOSE_CHROME_DRIVER);
+    }
+
+    /**
+     * Sets the {@link GpsLocationEntity entity} responsible for executing operations related with changing the GPS
+     * location state.
+     *
+     * @param gpsLocationEntity
+     *        - instance of the entity which executes GPS location related operations
+     */
+    void setGpsLocationEntity(GpsLocationEntity gpsLocationEntity) {
+        this.gpsLocationEntity = gpsLocationEntity;
+    }
+
+    /**
+     * Sets the {@link HardwareButtonEntity entity} responsible for executing operations with {@link HardwareButton
+     * hardware buttons}.
+     *
+     * @param hardwareButtonEntity
+     *        - instance of the entity that handles pressing hardware buttons
+     */
+    void setHardwareButtonEntity(HardwareButtonEntity hardwareButtonEntity) {
+        this.hardwareButtonEntity = hardwareButtonEntity;
+    }
+
+    /**
+     * Sets the {@link GestureEntity entity} responsible for executing gestures.
+     *
+     * @param gestureEntity
+     *        - instance of the entity that handles pressing hardware buttons
+     */
+    void setGestureEntity(GestureEntity gestureEntity) {
+        this.gestureEntity = gestureEntity;
+    }
+
+    /**
+     * Sets the {@link ImeEntity entity} responsible for operations related with the input method engine.
+     *
+     * @param imeEntity
+     *        - instance of the entity that handles operations related with the input method engine
+     */
+    void setImeEntity(ImeEntity imeEntity) {
+        this.imeEntity = imeEntity;
+    }
+
+    /**
+     * Sets the {@link ImageEntity entity} responsible for operations related with getting screenshots.
+     *
+     * @param imageEntity
+     *        - instance of the entity that handles operations related with getting screenshots
+     */
+    void setImageEntity(ImageEntity imageEntity) {
+        this.imageEntity = imageEntity;
+    }
+
+    /**
+     * Sets the {@link DeviceSettingsEntity entity} responsible for retrieving and updating device settings.
+     *
+     * @param settingsEntity
+     *        - instance of the entity that handles changing and receiving information for device settings
+     */
+    void setSettingsEntity(DeviceSettingsEntity settingsEntity) {
+        this.settingsEntity = settingsEntity;
+    }
+
+    /**
+     * Sets the {@link AccessibilityElementEntity entity} responsible for operations realated with
+     * {@link AccessibilityUiElement}.
+     *
+     * @param elementEntity
+     *        - instance of the entity that handles operations related with {@link AccessibilityUiElement}
+     */
+    void setAccessibilityElementEntity(AccessibilityElementEntity elementEntity) {
+        this.elementEntity = elementEntity;
     }
 }

@@ -17,6 +17,11 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
+import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
+import com.musala.atmosphere.client.entity.GestureEntity;
+import com.musala.atmosphere.client.entity.ImageEntity;
+import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
@@ -29,9 +34,9 @@ import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 
 /**
  * Class that holds a device screen information.
- * 
+ *
  * @author georgi.gaydarov
- * 
+ *
  */
 
 public class Screen {
@@ -49,7 +54,15 @@ public class Screen {
 
     private String screenXml;
 
-    private final Device onDevice;
+    private GestureEntity gestureEntity;
+
+    private ImeEntity imeEntity;
+
+    private ImageEntity imageEntity;
+
+    private DeviceSettingsEntity settingsEntity;
+
+    private AccessibilityElementEntity elementEntity;
 
     private Document xPathDomDocument;
 
@@ -58,9 +71,18 @@ public class Screen {
     private final DeviceCommunicator communicator;
 
     @Deprecated
-    Screen(Device onDevice, String uiHierarchyXml) {
-        this.onDevice = onDevice;
-        communicator = onDevice.getCommunicator();
+
+    Screen(GestureEntity gestureEntity,
+            ImeEntity imeEntity,
+            DeviceSettingsEntity settingsEntity,
+            ImageEntity imageEntity,
+            String uiHierarchyXml,
+            DeviceCommunicator communicator) {
+        this.gestureEntity = gestureEntity;
+        this.imeEntity = imeEntity;
+        this.settingsEntity = settingsEntity;
+        this.imageEntity = imageEntity;
+        this.communicator = communicator;
         screenXml = uiHierarchyXml;
 
         // XPath DOM Document building
@@ -78,9 +100,18 @@ public class Screen {
         jSoupDocument = Jsoup.parse(screenXml);
     }
 
-    Screen(Device onDevice) {
-        this.onDevice = onDevice;
-        communicator = onDevice.getCommunicator();
+    Screen(GestureEntity gestureEntity,
+            ImeEntity imeEntity,
+            DeviceSettingsEntity settingsEntity,
+            ImageEntity imageEntity,
+            AccessibilityElementEntity elementEntity,
+            DeviceCommunicator communicator) {
+        this.gestureEntity = gestureEntity;
+        this.imeEntity = imeEntity;
+        this.settingsEntity = settingsEntity;
+        this.imageEntity = imageEntity;
+        this.elementEntity = elementEntity;
+        this.communicator = communicator;
     }
 
     /**
@@ -102,22 +133,9 @@ public class Screen {
      * @return list with all UI elements present on the screen and matching the given selector
      * @throws UiElementFetchingException
      */
-    @SuppressWarnings("unchecked")
     private List<UiElement> getElements(UiElementSelector selector, Boolean visibleOnly)
         throws UiElementFetchingException {
-        List<AccessibilityElement> foundElements = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_UI_ELEMENTS,
-                                                                                                        selector,
-                                                                                                        visibleOnly);
-        if (foundElements.isEmpty()) {
-            throw new UiElementFetchingException("No elements found matching the given selector.");
-        }
-
-        List<UiElement> uiElements = new ArrayList<UiElement>();
-        for (AccessibilityElement element : foundElements) {
-            uiElements.add(new AccessibilityUiElement(element, onDevice));
-        }
-
-        return uiElements;
+        return elementEntity.getElements(selector, visibleOnly);
     }
 
     /**
@@ -135,7 +153,7 @@ public class Screen {
 
     /**
      * Saves the underlying device UI XML into a file.
-     * 
+     *
      * @param path
      *        - full path to file in which the UI XML should be saved.
      * @throws FileNotFoundException
@@ -155,7 +173,7 @@ public class Screen {
      * <p>
      * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
      * </p>
-     * 
+     *
      * @param query
      *        - CSS selector query.
      * @return the requested {@link UiElement UiElement}.
@@ -174,7 +192,7 @@ public class Screen {
 
     /**
      * Searches for given ScrollableView in the current screen using CSS
-     * 
+     *
      * @param query
      *        CSS selector query
      * @return the requested ScrollableView
@@ -198,7 +216,7 @@ public class Screen {
      * <p>
      * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
      * </p>
-     * 
+     *
      * @param query
      *        - an XPath query
      * @return the requested ScrollableView
@@ -210,7 +228,7 @@ public class Screen {
     public ScrollableView getScrollableViewByXPath(String query)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        return new ScrollableView(getElementByXPath(query));
+        return new ScrollableView(getElementByXPath(query), communicator);
     }
 
     /**
@@ -218,7 +236,7 @@ public class Screen {
      * <p>
      * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
      * </p>
-     * 
+     *
      * @param query
      *        - XPath query by which the element will be selected
      * @return the requested {@link UiElement UiElement}
@@ -241,7 +259,7 @@ public class Screen {
 
     /**
      * Searches for {@link AccessibilityUiElement UI element} on the active screen that matches the given selector.
-     * 
+     *
      * @param selector
      *        - by which the {@link AccessibilityUiElement UI element} will be searched
      * @param visibleOnly
@@ -255,16 +273,7 @@ public class Screen {
     public UiElement getElement(UiElementSelector selector, Boolean visibleOnly)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        List<UiElement> foundElements = getElements(selector, visibleOnly);
-
-        int foundElementsCount = foundElements.size();
-        if (foundElementsCount > 1) {
-            throw new MultipleElementsFoundException(String.format("Searching for a single UiElement but %d that match the given properties %s were found.",
-                                                                   foundElementsCount,
-                                                                   selector));
-        } else {
-            return getElements(selector, true).get(0);
-        }
+        return elementEntity.getElement(selector, visibleOnly);
     }
 
     /**
@@ -272,7 +281,7 @@ public class Screen {
      * <p>
      * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
      * </p>
-     * 
+     *
      * @param xpathQuery
      *        - contains the matching criteria
      * @param visibleOnly
@@ -293,7 +302,12 @@ public class Screen {
 
         List<UiElement> uiElements = new ArrayList<UiElement>();
         for (AccessibilityElement element : foundElements) {
-            uiElements.add(new AccessibilityUiElement(element, onDevice));
+            uiElements.add(new AccessibilityUiElement(element,
+                                                      gestureEntity,
+                                                      imeEntity,
+                                                      settingsEntity,
+                                                      imageEntity,
+                                                      elementEntity));
         }
 
         return uiElements;
@@ -302,7 +316,7 @@ public class Screen {
     /**
      * Searches for {@link AccessibilityUiElement UI element} on the active screen that matches the given selector.
      * Searches only visible elements.
-     * 
+     *
      * @param selector
      *        - by which the {@link AccessibilityUiElement UI element} will be searched
      * @return the found {@link AccessibilityUiElement UI element}
@@ -314,13 +328,13 @@ public class Screen {
     public UiElement getElement(UiElementSelector selector)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        return getElement(selector, true);
+        return elementEntity.getElement(selector, true);
     }
 
     /**
      * Searches for given ScrollableView in the current screen using a {@link UiElementSelector UiElementSelector}
      * instance.
-     * 
+     *
      * @param selector
      *        - {@link UiElementSelector} object that contains all the selection criteria for the required elements.
      * @return the requested {@link ScrollableView ScrollableView}
@@ -332,13 +346,13 @@ public class Screen {
     public ScrollableView getScrollableView(UiElementSelector selector)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        return new ScrollableView(getElement(selector));
+        return new ScrollableView(getElement(selector), communicator);
     }
 
     /**
      * Waits for an element matching the given selector to appear with a given timeout. If the element appears on
      * screen, returns it.
-     * 
+     *
      * @param selector
      *        - an {@link UiElementSelector} describing the desired element
      * @param waitTimeout
@@ -368,7 +382,7 @@ public class Screen {
     /**
      * Waits for an element matching the given selector to appear on screen. If the element appears on screen, returns
      * it. Uses the value specified in {@link #WAIT_AND_GET_DEFAULT_TIMEOUT} as a timeout for the wait operation.
-     * 
+     *
      * @param selector
      *        - an {@link UiElementSelector} describing the desired element
      * @return an {@link UiElement} matching the passed selector
@@ -389,7 +403,7 @@ public class Screen {
      * <p>
      * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
      * </p>
-     * 
+     *
      * @param cssQuery
      *        - CSS selector query.
      * @return List containing all found elements of type {@link XmlNodeUiElement XmlNodeUiElement}.
@@ -412,7 +426,7 @@ public class Screen {
      * <p>
      * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
      * </p>
-     * 
+     *
      * @param xPathQuery
      *        - an XPath query that should match the elements
      * @return List containing all found elements of type {@link XmlNodeUiElement XmlNodeUiElement}.
@@ -426,7 +440,7 @@ public class Screen {
 
     /**
      * Tap on first found {@link UiElement UiElement}, displaying exactly the supplied search text.
-     * 
+     *
      * @param text
      *        - search text.
      * @return <code>true</code> if the tapping of element is successful, <code>false</code> if it fails.
@@ -439,7 +453,7 @@ public class Screen {
 
     /**
      * Tap on {@link UiElement}, displaying exactly the supplied search text.
-     * 
+     *
      * @param text
      *        - search text.
      * @param match
@@ -466,7 +480,7 @@ public class Screen {
 
     /**
      * Check existence of element, displaying exactly the supplied search text.
-     * 
+     *
      * @param text
      *        - search text.
      * @return - true if element with supplied search text exists on screen.
@@ -485,7 +499,7 @@ public class Screen {
 
     /**
      * Gets an instance for android TimePicker widgets.
-     * 
+     *
      * @return a {@link TimePicker} object representing the only time picker widget on screen.
      * @throws UiElementFetchingException
      *         if no active time pickers are found in the screen
@@ -510,7 +524,7 @@ public class Screen {
 
     /**
      * Gets the date picker currently on screen.
-     * 
+     *
      * @return a {@link DatePicker} object representing the time picker widget on screen.
      * @throws UiElementFetchingException
      *         if there is no date picker available on the screen
@@ -535,42 +549,34 @@ public class Screen {
 
     /**
      * Waits for the existence of a given UiElement with a given timeout.
-     * 
+     *
      * @param selector
      *        - the selector of the given UI element.
-     * 
      * @param timeout
      *        - the given timeout.
-     * 
      * @return boolean indicating if this action was successful.
      */
     public boolean waitForElementExists(UiElementSelector selector, Integer timeout) {
-        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_EXISTS, selector, timeout);
-        updateScreen();
-        return response;
+        return elementEntity.waitForElementExists(selector, timeout);
     }
 
     /**
      * Waits until a given UiElement disappears with a given timeout.
-     * 
+     *
      * @param selector
      *        - the selector of the given UI element.
-     * 
      * @param timeout
      *        - the given timeout.
-     * 
      * @return boolean indicating if this action was successful.
      */
     public boolean waitUntilElementGone(UiElementSelector selector, Integer timeout) {
-        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_UNTIL_GONE, selector, timeout);
-        updateScreen();
-        return response;
+        return elementEntity.waitUntilElementGone(selector, timeout);
     }
 
     /**
      * Waits for a window content update event to occur. If a package name for the window is specified, but the current
      * window does not have the same package name, the function returns immediately.
-     * 
+     *
      * @param packageName
      *        - the specified window package name (can be null). If null, a window update from any front-end window will
      *        end the wait
@@ -581,22 +587,18 @@ public class Screen {
      * @Note The behavior of this method depends on the application that it is used on.
      */
     public boolean waitForWindowUpdate(String packageName, int timeout) {
-        boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_WINDOW_UPDATE,
-                                                             packageName,
-                                                             timeout);
-        updateScreen();
-        return response;
+        return elementEntity.waitForWindowUpdate(packageName, timeout);
     }
 
     /**
      * Gets the present {@link WebView} on the active screen.
-     * 
+     *
      * @param packageName
      *        - package of the application from which the {@link WebView} will be selected
      * @return the present {@link WebView} on the active screen
      */
     public WebView getWebView(String packageName) {
         communicator.sendAction(RoutingAction.GET_WEB_VIEW, packageName);
-        return new WebView(onDevice);
+        return new WebView(communicator, imeEntity);
     }
 }

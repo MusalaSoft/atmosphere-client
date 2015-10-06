@@ -16,7 +16,7 @@ import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
  * @author yavor.stankov
  *
  */
-@Restriction(manufacturer = "Samsung")
+@Restriction(apiLevel = {17, 18})
 public class GpsLocationCheckBoxEntity extends GpsLocationEntity {
     private static final String ANDROID_WIDGET_CHECK_BOX_CLASS_NAME = "android.widget.CheckBox";
 

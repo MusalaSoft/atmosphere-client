@@ -67,11 +67,27 @@ public class EntityTypeResolver {
     // in the annotation it is not considered when checking for applicability.
     private boolean isApplicable(Restriction restriction) {
         String manufacturer = restriction.manufacturer();
+
         if (!manufacturer.equals(DeviceInformation.FALLBACK_MANUFACTURER_NAME)
                 && !manufacturer.equalsIgnoreCase(deviceInformation.getManufacturer())) {
             return false;
         }
 
-        return true;
+        boolean isApplicable = true;
+        int[] apiLevels = restriction.apiLevel();
+
+        if (apiLevels.length > 0) {
+            int deviceApiLevel = deviceInformation.getApiLevel();
+            isApplicable = false;
+
+            for (int applicableApiLevel : apiLevels) {
+                if (applicableApiLevel == deviceApiLevel) {
+                    isApplicable = true;
+                    break;
+                }
+            }
+        }
+
+        return isApplicable;
     }
 }

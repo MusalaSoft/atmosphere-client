@@ -22,4 +22,9 @@ public @interface Restriction {
      * Manufacturer of the device that must be built with the annotated entity.
      */
     String manufacturer() default DeviceInformation.FALLBACK_MANUFACTURER_NAME;
+
+    /**
+     * Api level of the device that must be built with the annotated entity.
+     */
+    int[]apiLevel() default {};
 }

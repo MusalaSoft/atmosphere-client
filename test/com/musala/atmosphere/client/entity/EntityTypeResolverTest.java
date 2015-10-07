@@ -19,9 +19,9 @@ public class EntityTypeResolverTest {
     private EntityTypeResolver entityFactory;
 
     @Test
-    public void testGetGpsLocationEntityForManufacturer() {
+    public void testGetGpsLocationEntityForApiLevel() {
         DeviceInformation requiredInformation = new DeviceInformation();
-        requiredInformation.setManufacturer("samsung");
+        requiredInformation.setApiLevel(17);
         entityFactory = new EntityTypeResolver(requiredInformation);
 
         Class<?> entityClass = entityFactory.getEntityClass(GpsLocationEntity.class);
@@ -31,7 +31,7 @@ public class EntityTypeResolverTest {
     @Test
     public void testGetGpsLocationEntityWhenNoMatchFound() {
         DeviceInformation requiredInformation = new DeviceInformation();
-        requiredInformation.setManufacturer("LG");
+        requiredInformation.setApiLevel(21);
         entityFactory = new EntityTypeResolver(requiredInformation);
 
         Class<?> entityClass = entityFactory.getEntityClass(GpsLocationEntity.class);

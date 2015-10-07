@@ -112,7 +112,6 @@ public class GetUiElementImageTest {
         settingsEntity = mock(DeviceSettingsEntity.class);
         imageEntity = mock(ImageEntity.class);
 
-
         MockitoAnnotations.initMocks(this);
     }
 
@@ -133,6 +132,7 @@ public class GetUiElementImageTest {
         BufferedImage expectedBufferedElementImage = ImageIO.read(expectedImageFile);
         Image expectedImage = new Image(expectedBufferedElementImage);
 
+        when(imageEntity.getElementImage(propertiesContainer)).thenReturn(expectedImage);
         Image elementImage = element.getElementImage();
 
         assertTrue(RECEIVED_DIFFERENT_IMAGES_MESSAGE, expectedImage.equals(elementImage));
@@ -156,6 +156,7 @@ public class GetUiElementImageTest {
         BufferedImage expectedBufferedElementImage = ImageIO.read(expectedImageFile);
         Image expectedImage = new Image(expectedBufferedElementImage);
 
+        when(imageEntity.getElementImage(propertiesContainer)).thenReturn(expectedImage);
         Image elementImage = element.getElementImage();
 
         assertTrue(RECEIVED_DIFFERENT_IMAGES_MESSAGE, expectedImage.equals(elementImage));
@@ -179,6 +180,7 @@ public class GetUiElementImageTest {
         BufferedImage expectedBufferedElementImage = ImageIO.read(expectedImageFile);
         Image expectedImage = new Image(expectedBufferedElementImage);
 
+        when(imageEntity.getElementImage(propertiesContainer)).thenReturn(expectedImage);
         Image elementImage = element.getElementImage();
 
         assertTrue(RECEIVED_DIFFERENT_IMAGES_MESSAGE, expectedImage.equals(elementImage));
@@ -202,6 +204,7 @@ public class GetUiElementImageTest {
         BufferedImage expectedBufferedElementImage = ImageIO.read(expectedImageFile);
         Image expectedImage = new Image(expectedBufferedElementImage);
 
+        when(imageEntity.getElementImage(propertiesContainer)).thenReturn(expectedImage);
         Image elementImage = element.getElementImage();
 
         assertTrue(RECEIVED_DIFFERENT_IMAGES_MESSAGE, expectedImage.equals(elementImage));

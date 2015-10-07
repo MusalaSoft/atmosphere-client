@@ -79,9 +79,11 @@ public class ReconnectDeviceTest {
         settingsEntity = (DeviceSettingsEntity) settingsEntitiyConstructor.newInstance(new Object[] {deviceCommunicator,
                 mock(DeviceInformation.class)});
 
-        Constructor<?> imageEntityConstructor = ImageEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
+        Constructor<?> imageEntityConstructor = ImageEntity.class.getDeclaredConstructor(DeviceCommunicator.class,
+                                                                                         DeviceSettingsEntity.class);
         imageEntityConstructor.setAccessible(true);
-        imageEntity = (ImageEntity) imageEntityConstructor.newInstance(new Object[] {deviceCommunicator});
+        imageEntity = (ImageEntity) imageEntityConstructor.newInstance(new Object[] {deviceCommunicator,
+                settingsEntity});
 
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
                                                                       eq(RoutingAction.GET_POWER_PROPERTIES));

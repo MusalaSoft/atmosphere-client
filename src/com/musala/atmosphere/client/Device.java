@@ -1426,6 +1426,14 @@ public class Device {
     }
 
     /**
+     * Gives access to the device logcat.
+     */
+    public void getDeviceLog() {
+        // TODO: Only invokes the method on the Agent. Stored data must be transfered to the Client.
+        communicator.sendAction(RoutingAction.GET_DEVICE_LOGCAT);
+    }
+
+    /**
      * Closes the instance of the Chrome driver that is currently in use.
      */
     private void closeChromeDriver() {

@@ -2,7 +2,9 @@ package com.musala.atmosphere.client;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -1426,11 +1428,27 @@ public class Device {
     }
 
     /**
-     * Gives access to the device logcat.
+     * Stores currently available logs from the device LogCat into a file with the given path.
+     *
+     * @param logFilePath
+     *        - path to the log file where device log will be stored
+     * @return <code>true</code> if device log is stored successfully, <code>false</code> otherwise
      */
-    public void getDeviceLog() {
-        // TODO: Only invokes the method on the Agent. Stored data must be transfered to the Client.
-        communicator.sendAction(RoutingAction.GET_DEVICE_LOGCAT);
+    public boolean getDeviceLog(String logFilePath) {
+        byte[] data = (byte[]) communicator.sendAction(RoutingAction.GET_DEVICE_LOGCAT);
+        File localFile = new File(logFilePath);
+
+        try {
+            FileOutputStream logFileOutputStream = new FileOutputStream(localFile);
+            logFileOutputStream.write(data);
+            logFileOutputStream.close();
+        } catch (IOException e) {
+            String serialNumber = getInformation().getSerialNumber();
+            LOGGER.error(String.format("Storing log file for device with serial number %s failed.", serialNumber), e);
+            return false;
+        }
+
+        return true;
     }
 
     /**

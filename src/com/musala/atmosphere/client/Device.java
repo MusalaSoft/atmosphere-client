@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.HardwareButton;
+import com.musala.atmosphere.client.device.log.LogCatLevel;
 import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
@@ -1428,23 +1429,67 @@ public class Device {
     }
 
     /**
-     * Stores currently available logs from the device LogCat into a file with the given path.
+     * Stores currently available logs from the device LogCat into a file with the given path. {@link LogCatLevel LogCat
+     * levels} are applied as filters, if present. Multiple levels can be used at once for filtering.
      *
      * @param logFilePath
      *        - path to the log file where device log will be stored
+     * @param logLevels
+     *        - log levels that can be use for filtering, tag can be set to each level
      * @return <code>true</code> if device log is stored successfully, <code>false</code> otherwise
      */
-    public boolean getDeviceLog(String logFilePath) {
-        byte[] data = (byte[]) communicator.sendAction(RoutingAction.GET_DEVICE_LOGCAT);
-        File localFile = new File(logFilePath);
+    public boolean getDeviceLog(String logFilePath, LogCatLevel... logLevels) {
+        StringBuilder logFilters = new StringBuilder();
+
+        if (logLevels.length == 0) {
+            logFilters.append(LogCatLevel.VERBOSE.getFilterValue());
+        }
+
+        for (int i = 0; i < logLevels.length; i++) {
+            logFilters.append(logLevels[i].getFilterValue());
+        }
+
+        byte[] data = (byte[]) communicator.sendAction(RoutingAction.GET_DEVICE_LOGCAT, logFilters.toString());
+
+        return writeLogFile(logFilePath, data);
+    }
+
+    /**
+     * Stores currently available logs from the device LogCat into a file with the given path. All the tags are filtered
+     * using the {@link LogCatLevel} and tag given, the other logs are suppressed.
+     *
+     * @param logFilePath
+     *        - path to the log file where device log will be stored
+     * @param logLevel
+     *        - log level to be set for filtering
+     * @param tag
+     *        - tag for filtering used in combination with the given logLevel
+     * @return <code>true</code> if device log is stored successfully, <code>false</code> otherwise
+     */
+    public boolean getDeviceLog(String logFilePath, LogCatLevel logLevel, String tag) {
+        logLevel.setTag(tag);
+        return getDeviceLog(logFilePath, logLevel, LogCatLevel.SILENT);
+    }
+
+    /**
+     * Stores the given byte sequence into a file with the specified path.
+     *
+     * @param filePath
+     *        - path to the file
+     * @param data
+     *        - sequence of bytes to be stored
+     * @return <code>true</code> if data is stored in the file, <code>false</code> otherwise
+     */
+    private boolean writeLogFile(String filePath, byte[] data) {
+        File localFile = new File(filePath);
 
         try {
-            FileOutputStream logFileOutputStream = new FileOutputStream(localFile);
-            logFileOutputStream.write(data);
-            logFileOutputStream.close();
+            FileOutputStream fileOutputStream = new FileOutputStream(localFile);
+            fileOutputStream.write(data);
+            fileOutputStream.close();
         } catch (IOException e) {
             String serialNumber = getInformation().getSerialNumber();
-            LOGGER.error(String.format("Storing log file for device with serial number %s failed.", serialNumber), e);
+            LOGGER.error(String.format("Storing file for device with serial number %s failed.", serialNumber), e);
             return false;
         }
 

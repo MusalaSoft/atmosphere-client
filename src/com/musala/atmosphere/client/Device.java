@@ -69,6 +69,8 @@ public class Device {
      */
     public static final int LONG_PRESS_DEFAULT_TIMEOUT = 1500; // ms
 
+    public static final int DEFAULT_SCREEN_RECORD_TIME_LIMIT = 30; // minutes
+
     private final DeviceCommunicator communicator;
 
     private GestureEntity gestureEntity;
@@ -1299,11 +1301,31 @@ public class Device {
     /**
      * Starts screen recording.
      * <p>
-     * Note: This method works only for Android 4.4 and above.
+     * <b>Note:</b> This method works only for Android 4.4 and above.
+     * </p>
+     * <p>
+     * <b>Note:</b> The maximum recording duration is 30 minutes - if the recording process exceeds the time limit, the
+     * recorded files will be lost.
      * </p>
      */
     public void startScreenRecording() {
-        communicator.sendAction(RoutingAction.START_RECORDING);
+        startScreenRecording(DEFAULT_SCREEN_RECORD_TIME_LIMIT);
+    }
+
+    /**
+     * Starts screen recording with given maximum duration. *
+     * <p>
+     * <b>Note:</b> This method works only for Android 4.4 and above.
+     * </p>
+     * <p>
+     * <b>Note:</b> If the recording process exceeds the time limit, the recorded files will be lost.
+     * </p>
+     * 
+     * @param timeLimit
+     *        - the maximum recording duration in minutes
+     */
+    public void startScreenRecording(int timeLimit) {
+        communicator.sendAction(RoutingAction.START_RECORDING, timeLimit);
     }
 
     /**

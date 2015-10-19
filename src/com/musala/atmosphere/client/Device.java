@@ -1449,9 +1449,7 @@ public class Device {
             logFilters.append(logLevels[i].getFilterValue());
         }
 
-        byte[] data = (byte[]) communicator.sendAction(RoutingAction.GET_DEVICE_LOGCAT, logFilters.toString());
-
-        return writeLogFile(logFilePath, data);
+        return sendLogCatCommand(logFilePath, logFilters.toString());
     }
 
     /**
@@ -1467,8 +1465,22 @@ public class Device {
      * @return <code>true</code> if device log is stored successfully, <code>false</code> otherwise
      */
     public boolean getDeviceLog(String logFilePath, LogCatLevel logLevel, String tag) {
-        logLevel.setTag(tag);
-        return getDeviceLog(logFilePath, logLevel, LogCatLevel.SILENT);
+        return sendLogCatCommand(logFilePath, logLevel.getLevelTagFilter(tag) + LogCatLevel.SILENT.getFilterValue());
+    }
+
+    /**
+     * Sends LogCat command for retrieving log information to be executed on the device.
+     *
+     * @param logFilePath
+     *        - path to the log file where device log will be stored
+     * @param logFilters
+     *        - all the filters that must applied with the command
+     * @return <code>true</code> if device log is stored successfully, <code>false</code> otherwise
+     */
+    private boolean sendLogCatCommand(String logFilePath, String logFilters) {
+        byte[] data = (byte[]) communicator.sendAction(RoutingAction.GET_DEVICE_LOGCAT, logFilters);
+
+        return writeLogFile(logFilePath, data);
     }
 
     /**

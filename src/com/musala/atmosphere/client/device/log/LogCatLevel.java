@@ -29,7 +29,7 @@ public enum LogCatLevel {
      */
     ERROR("E"),
     /**
-     * Sets the priority to failure.
+     * Sets the priority to fatal.
      */
     FATAL("F"),
     /**
@@ -39,29 +39,32 @@ public enum LogCatLevel {
 
     private String level;
 
-    private String tag;
-
     LogCatLevel(String level) {
         this.level = level;
-        this.tag = "*";
     }
 
     /**
-     * Sets the tag, which will be used in a combination with this log level. By default the tag is '*'.
+     * Gets the LogCat level combined with the given tag as a filter value.
      *
      * @param tag
-     *        - tag to be set for filtering used with the current level
+     *        - tag to be used for filtering
+     * @return tag:level filter
      */
-    public void setTag(String tag) {
-        this.tag = tag;
+    public String getLevelTagFilter(String tag) {
+        return String.format(" %s:%s", tag, level);
     }
 
     /**
-     * Gets the value applied as a filter to the LogCat command.
+     * Gets the default value applied as a filter to the LogCat command.
      *
      * @return the value applied as a filter
      */
     public String getFilterValue() {
-        return String.format(" %s:%s", tag, level);
+        return String.format(" *:%s", level);
+    }
+
+    @Override
+    public String toString() {
+        return level;
     }
 }

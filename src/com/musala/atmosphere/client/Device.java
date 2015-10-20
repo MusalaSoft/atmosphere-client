@@ -1453,8 +1453,8 @@ public class Device {
     }
 
     /**
-     * Stores currently available logs from the device LogCat into a file with the given path. All the tags are filtered
-     * using the {@link LogCatLevel} and tag given, the other logs are suppressed.
+     * Stores currently available logs from the device LogCat into a file with the given path. Retrieved logs are
+     * filtered using the {@link LogCatLevel} and the given tag, all the other logs are suppressed.
      *
      * @param logFilePath
      *        - path to the log file where device log will be stored
@@ -1466,6 +1466,19 @@ public class Device {
      */
     public boolean getDeviceLog(String logFilePath, LogCatLevel logLevel, String tag) {
         return sendLogCatCommand(logFilePath, logLevel.getLevelTagFilter(tag) + LogCatLevel.SILENT.getFilterValue());
+    }
+
+    /**
+     * Stores into a file currently available logs filtered by tag.
+     *
+     * @param logFilePath
+     *        - path to the log file where device log will be stored
+     * @param tag
+     *        - tag used for filtering retrieved logs
+     * @return <code>true</code> if device log is stored successfully, <code>false</code> otherwise
+     */
+    public boolean getDeviceLog(String logFilePath, String tag) {
+        return sendLogCatCommand(logFilePath, " -s " + tag);
     }
 
     /**

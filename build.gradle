@@ -1,0 +1,57 @@
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+
+version = '0.0.1'
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Atmosphere Client',
+                   'Implementation-Version': version
+    }
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+
+dependencies {
+    compile 'com.musala.atmosphere:atmosphere-cs-commons:0.0.1'
+    compile 'com.musala.atmosphere:atmosphere-bitmap-comparison:0.0.1'
+    compile 'com.google.guava:guava:18.0'
+    compile 'org.javassist:javassist:3.18.2-GA'
+    compile 'org.jsoup:jsoup:1.7.2'
+    compile 'org.reflections:reflections:0.9.10'
+
+    testCompile 'org.mockito:mockito-all:1.9.5'
+    testCompile 'junit:junit:4.12'
+}
+
+sourceSets {
+    main.java.srcDir 'src'
+    test.java.srcDir 'test'
+    test.resources.srcDir 'test-resources'
+}
+
+publishing {
+    publications {
+        atmosphereCommons(MavenPublication) {
+            groupId 'com.musala.atmosphere'
+            artifactId 'atmosphere-client'
+            version version
+
+            from components.java
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
+}
+
+tasks.withType(Test) {
+    scanForTestClasses = false
+    include "**/*Test.class"
+}

@@ -51,22 +51,6 @@ public class GetUiElementImageTest {
 
     private Bounds boundsPortrait;
 
-    private static String screenshotPathLandscape = ".%stest-resources%stestLandscapeImage.png";
-
-    private static String screenshotPathUpsideDownLandscape = ".%stest-resources%stestUpsideDownLandscape.png";
-
-    private static String screenshotPathPortrait = ".%stest-resources%stestportraitImage.png";
-
-    private static String screenshotPathUpsideDownPortrait = ".%stest-resources%stestUpsideDownPortrait.png";
-
-    private static String elementPathLandscape = ".%stest-resources%stestCropImageLandscape.png";
-
-    private static String elementPathUpsideDownLandscape = ".%stest-resources%stestCropImageUpsideDownLandscape.png";
-
-    private static String elementPathPortrait = ".%stest-resources%stestCropImagePortrait.png";
-
-    private static String elementPathUpsideDownPortrait = ".%stest-resources%stestCropImageUpsideDownPortrait.png";
-
     private Pair<Integer, Integer> resolutionLandscape = new Pair<Integer, Integer>(1280, 800);
 
     private Pair<Integer, Integer> resolutionPortrait = new Pair<Integer, Integer>(800, 1280);
@@ -85,22 +69,6 @@ public class GetUiElementImageTest {
 
     @Before
     public void setUp() throws Exception {
-        screenshotPathLandscape = String.format(screenshotPathLandscape, File.separator, File.separator);
-        elementPathLandscape = String.format(elementPathLandscape, File.separator, File.separator);
-
-        screenshotPathUpsideDownLandscape = String.format(screenshotPathUpsideDownLandscape,
-                                                          File.separator,
-                                                          File.separator);
-        elementPathUpsideDownLandscape = String.format(elementPathUpsideDownLandscape, File.separator, File.separator);
-
-        screenshotPathPortrait = String.format(screenshotPathPortrait, File.separator, File.separator);
-        elementPathPortrait = String.format(elementPathPortrait, File.separator, File.separator);
-
-        screenshotPathUpsideDownPortrait = String.format(screenshotPathUpsideDownPortrait,
-                                                         File.separator,
-                                                         File.separator);
-        elementPathUpsideDownPortrait = String.format(elementPathUpsideDownPortrait, File.separator, File.separator);
-
         propertiesContainer = spy(new AccessibilityElement());
 
         boundsLandscape = new Bounds(new Point(1074, 278), new Point(1154, 322));
@@ -117,7 +85,7 @@ public class GetUiElementImageTest {
 
     @Test
     public void testGetUiElementImageLandscape() throws Exception {
-        Path screenshotLandscapeImagePath = Paths.get(screenshotPathLandscape);
+        Path screenshotLandscapeImagePath = Paths.get(TestResources.SCREENSHOT_LANDSCAPE_PATH);
         byte[] screenshotLandscapeData = Files.readAllBytes(screenshotLandscapeImagePath);
 
         deviceInformation.setResolution(resolutionLandscape);
@@ -128,7 +96,7 @@ public class GetUiElementImageTest {
 
         when(propertiesContainer.getBounds()).thenReturn(boundsLandscape);
 
-        File expectedImageFile = new File(elementPathLandscape);
+        File expectedImageFile = new File(TestResources.ELEMENT_LANDSCAPE_PATH);
         BufferedImage expectedBufferedElementImage = ImageIO.read(expectedImageFile);
         Image expectedImage = new Image(expectedBufferedElementImage);
 
@@ -141,7 +109,7 @@ public class GetUiElementImageTest {
 
     @Test
     public void testGetUiElementImageUpsideDownLandscape() throws Exception {
-        Path screenshotUpsideDownLandscapeImagePath = Paths.get(screenshotPathUpsideDownLandscape);
+        Path screenshotUpsideDownLandscapeImagePath = Paths.get(TestResources.SCREENSHOT_UPSIDE_DOWN_LANDSCAPE_PATH);
         byte[] screenshotUpsideDownLandscapeData = Files.readAllBytes(screenshotUpsideDownLandscapeImagePath);
 
         deviceInformation.setResolution(resolutionLandscape);
@@ -152,7 +120,7 @@ public class GetUiElementImageTest {
 
         when(propertiesContainer.getBounds()).thenReturn(boundsLandscape);
 
-        File expectedImageFile = new File(elementPathUpsideDownLandscape);
+        File expectedImageFile = new File(TestResources.ELEMENT_UPSIDE_DOWN_LANDSCAPE_PATH);
         BufferedImage expectedBufferedElementImage = ImageIO.read(expectedImageFile);
         Image expectedImage = new Image(expectedBufferedElementImage);
 
@@ -165,7 +133,7 @@ public class GetUiElementImageTest {
 
     @Test
     public void testGetUiElementImagePortrait() throws Exception {
-        Path screenshotPortraitImagePath = Paths.get(screenshotPathPortrait);
+        Path screenshotPortraitImagePath = Paths.get(TestResources.SCREENSHOT_PORTRAIT_PATH);
         byte[] screenshotPortraitData = Files.readAllBytes(screenshotPortraitImagePath);
 
         deviceInformation.setResolution(resolutionPortrait);
@@ -176,7 +144,7 @@ public class GetUiElementImageTest {
 
         when(propertiesContainer.getBounds()).thenReturn(boundsPortrait);
 
-        File expectedImageFile = new File(elementPathPortrait);
+        File expectedImageFile = new File(TestResources.ELEMENT_PORTRAIT_PATH);
         BufferedImage expectedBufferedElementImage = ImageIO.read(expectedImageFile);
         Image expectedImage = new Image(expectedBufferedElementImage);
 
@@ -189,7 +157,7 @@ public class GetUiElementImageTest {
 
     @Test
     public void testGetUiElementImageUpsideDownPortrait() throws Exception {
-        Path screenshotUpsideDownPortraitImagePath = Paths.get(screenshotPathUpsideDownPortrait);
+        Path screenshotUpsideDownPortraitImagePath = Paths.get(TestResources.SCREENSHOT_UPSIDE_DOWN_PORTRAIT_PATH);
         byte[] screenshotUpsideDownPortraitData = Files.readAllBytes(screenshotUpsideDownPortraitImagePath);
 
         deviceInformation.setResolution(resolutionPortrait);
@@ -200,7 +168,7 @@ public class GetUiElementImageTest {
 
         when(propertiesContainer.getBounds()).thenReturn(boundsPortrait);
 
-        File expectedImageFile = new File(elementPathUpsideDownPortrait);
+        File expectedImageFile = new File(TestResources.ELEMENT_UPSIDE_DOWN_PORTRAIT_PATH);
         BufferedImage expectedBufferedElementImage = ImageIO.read(expectedImageFile);
         Image expectedImage = new Image(expectedBufferedElementImage);
 

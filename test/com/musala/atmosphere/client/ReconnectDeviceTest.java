@@ -116,24 +116,18 @@ public class ReconnectDeviceTest {
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
                                                                       eq(RoutingAction.SET_WIFI_STATE),
                                                                       anyBoolean());
-        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
-                                                                      eq(RoutingAction.SMS_RECEIVE),
-                                                                      any(SmsMessage.class));
-        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
-                                                                      eq(RoutingAction.CALL_RECEIVE),
-                                                                      any(PhoneNumber.class));
-        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
-                                                                      eq(RoutingAction.CALL_ACCEPT),
-                                                                      any(PhoneNumber.class));
-        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
-                                                                      eq(RoutingAction.CALL_HOLD),
-                                                                      any(PhoneNumber.class));
-        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
-                                                                      eq(RoutingAction.CALL_CANCEL),
-                                                                      any(PhoneNumber.class));
-        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
-                                                                      eq(RoutingAction.SEND_BROADCAST),
-                                                                      any(AtmosphereIntent.class));
+        doThrow(new RemoteException()).when(mockedClientDevice)
+                                      .route(anyLong(), eq(RoutingAction.SMS_RECEIVE), any(SmsMessage.class));
+        doThrow(new RemoteException()).when(mockedClientDevice)
+                                      .route(anyLong(), eq(RoutingAction.CALL_RECEIVE), any(PhoneNumber.class));
+        doThrow(new RemoteException()).when(mockedClientDevice)
+                                      .route(anyLong(), eq(RoutingAction.CALL_ACCEPT), any(PhoneNumber.class));
+        doThrow(new RemoteException()).when(mockedClientDevice)
+                                      .route(anyLong(), eq(RoutingAction.CALL_HOLD), any(PhoneNumber.class));
+        doThrow(new RemoteException()).when(mockedClientDevice)
+                                      .route(anyLong(), eq(RoutingAction.CALL_CANCEL), any(PhoneNumber.class));
+        doThrow(new RemoteException()).when(mockedClientDevice)
+                                      .route(anyLong(), eq(RoutingAction.SEND_BROADCAST), any(AtmosphereIntent.class));
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.GET_AWAKE_STATUS));
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.IS_LOCKED));
 

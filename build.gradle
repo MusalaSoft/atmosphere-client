@@ -18,7 +18,7 @@ apply plugin: 'java'
 apply plugin: 'maven-publish'
 
 dependencies {
-    compile 'com.musala.atmosphere:atmosphere-cs-commons:0.0.1'
+    compile 'com.musala.atmosphere:atmosphere-client-server-lib:0.0.1'
     compile 'com.musala.atmosphere:atmosphere-bitmap-comparison:0.0.1'
     compile 'com.google.guava:guava:18.0'
     compile 'org.javassist:javassist:3.18.2-GA'

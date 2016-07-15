@@ -13,7 +13,7 @@ import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 
 /**
  * Base entity responsible for handling GPS location state changing.
- * 
+ *
  * @author yavor.stankov
  *
  */
@@ -30,19 +30,15 @@ public abstract class GpsLocationEntity {
 
     protected DeviceCommunicator communicator;
 
-    protected HardwareButtonEntity hardwareButtonEntity;
-
     GpsLocationEntity(DeviceCommunicator communicator,
-            AccessibilityElementEntity elementEntity,
-            HardwareButtonEntity hardwareButtonEntity) {
+            AccessibilityElementEntity elementEntity) {
         this.communicator = communicator;
         this.elementEntity = elementEntity;
-        this.hardwareButtonEntity = hardwareButtonEntity;
     }
 
     /**
      * Gets the right widget that is responsible for setting the GPS location state.
-     * 
+     *
      * @return the widget that should be used for setting the GPS location state.
      * @throws UiElementFetchingException
      *         if the required widget is not present on the screen
@@ -109,7 +105,7 @@ public abstract class GpsLocationEntity {
     private void pressHardwareButton(HardwareButton button) {
         int keyCode = button.getKeycode();
 
-        hardwareButtonEntity.pressButton(keyCode);
+        communicator.sendAction(RoutingAction.PRESS_HARDWARE_BUTTON, keyCode);
     }
 
     private void pressAgreeButton() throws MultipleElementsFoundException, UiElementFetchingException {

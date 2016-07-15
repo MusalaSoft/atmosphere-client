@@ -16,7 +16,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
-import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
@@ -45,9 +44,6 @@ public class ReconnectDeviceTest {
     private static DeviceCommunicator deviceCommunicator;
 
     @InjectMocks
-    private static HardwareButtonEntity hardwareButtonEntity;
-
-    @InjectMocks
     private static ImeEntity imeEntity;
 
     @InjectMocks
@@ -73,11 +69,6 @@ public class ReconnectDeviceTest {
         // deviceCommunicator.release();
 
         // Constructor visibility is package
-        Constructor<?> hardwareButtonEntityConstructor = HardwareButtonEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
-        hardwareButtonEntityConstructor.setAccessible(true);
-        hardwareButtonEntity = (HardwareButtonEntity) hardwareButtonEntityConstructor.newInstance(new Object[] {
-                deviceCommunicator});
-
         Constructor<?> imeEntityConstructor = ImeEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
         imeEntityConstructor.setAccessible(true);
         imeEntity = (ImeEntity) imeEntityConstructor.newInstance(new Object[] {deviceCommunicator});
@@ -159,6 +150,7 @@ public class ReconnectDeviceTest {
         doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
                                                                                   anyLong(),
                                                                                   eq(RoutingAction.CALL_HOLD),
+        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.PRESS_HARDWARE_BUTTON), anyLong());
                                                                                   any(PhoneNumber.class));
         doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
                                                                                   anyLong(),
@@ -174,7 +166,6 @@ public class ReconnectDeviceTest {
                                                       .route(any(), anyLong(), eq(RoutingAction.IS_LOCKED));
 
         testDevice = new Device(deviceCommunicator);
-        testDevice.setHardwareButtonEntity(hardwareButtonEntity);
         testDevice.setImeEntity(imeEntity);
         testDevice.setSettingsEntity(settingsEntity);
         testDevice.setImageEntity(imageEntity);

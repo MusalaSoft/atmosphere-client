@@ -12,7 +12,7 @@ import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 
 /**
  * {@link GpsLocationEntity} responsible for setting the GPS location state on all Samsung devices.
- * 
+ *
  * @author yavor.stankov
  *
  */
@@ -21,9 +21,8 @@ public class GpsLocationCheckBoxEntity extends GpsLocationEntity {
     private static final String ANDROID_WIDGET_CHECK_BOX_CLASS_NAME = "android.widget.CheckBox";
 
     GpsLocationCheckBoxEntity(DeviceCommunicator communicator,
-            AccessibilityElementEntity elementEntity,
-            HardwareButtonEntity hardwareButtonEntity) {
-        super(communicator, elementEntity, hardwareButtonEntity);
+            AccessibilityElementEntity elementEntity) {
+        super(communicator, elementEntity);
     }
 
     @Override

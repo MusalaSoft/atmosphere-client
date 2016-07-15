@@ -26,7 +26,6 @@ import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.GpsLocationEntity;
-import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
@@ -86,8 +85,6 @@ public class Device {
     private final DeviceCommunicator communicator;
 
     private GestureEntity gestureEntity;
-
-    private HardwareButtonEntity hardwareButtonEntity;
 
     private ImeEntity imeEntity;
 
@@ -630,7 +627,7 @@ public class Device {
      * @return <code>true</code> if the hardware button press is successful, <code>false</code> if it fails.
      */
     public boolean pressButton(int keyCode) {
-        return hardwareButtonEntity.pressButton(keyCode);
+        return (boolean) communicator.sendAction(RoutingAction.PRESS_HARDWARE_BUTTON, keyCode);
     }
 
     /**
@@ -1907,17 +1904,6 @@ public class Device {
      */
     void setGpsLocationEntity(GpsLocationEntity gpsLocationEntity) {
         this.gpsLocationEntity = gpsLocationEntity;
-    }
-
-    /**
-     * Sets the {@link HardwareButtonEntity entity} responsible for executing operations with {@link HardwareButton
-     * hardware buttons}.
-     *
-     * @param hardwareButtonEntity
-     *        - instance of the entity that handles pressing hardware buttons
-     */
-    void setHardwareButtonEntity(HardwareButtonEntity hardwareButtonEntity) {
-        this.hardwareButtonEntity = hardwareButtonEntity;
     }
 
     /**

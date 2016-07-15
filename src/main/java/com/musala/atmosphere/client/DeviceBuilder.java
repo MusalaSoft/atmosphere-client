@@ -8,7 +8,6 @@ import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.EntityTypeResolver;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.GpsLocationEntity;
-import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.UnresolvedEntityTypeException;
@@ -51,12 +50,6 @@ public class DeviceBuilder {
         Device device = new Device(deviceCommunicator);
 
         try {
-            Constructor<?> hardwareButtonEntityConstructor = HardwareButtonEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
-            hardwareButtonEntityConstructor.setAccessible(true);
-            HardwareButtonEntity hardwareButtonEntity = (HardwareButtonEntity) hardwareButtonEntityConstructor.newInstance(new Object[] {
-                    deviceCommunicator});
-            device.setHardwareButtonEntity(hardwareButtonEntity);
-
             Constructor<?> gestureEntitiyConstructor = GestureEntity.class.getDeclaredConstructor(DeviceCommunicator.class,
                                                                                                   DeviceInformation.class);
             gestureEntitiyConstructor.setAccessible(true);
@@ -95,11 +88,10 @@ public class DeviceBuilder {
 
             Class<?> locationEntityClass = typeResolver.getEntityClass(GpsLocationEntity.class);
             Constructor<?> locationEntityConstructor = locationEntityClass.getDeclaredConstructor(DeviceCommunicator.class,
-                                                                                                  AccessibilityElementEntity.class,
-                                                                                                  HardwareButtonEntity.class);
+                                                                                                  AccessibilityElementEntity.class);
             locationEntityConstructor.setAccessible(true);
             device.setGpsLocationEntity((GpsLocationEntity) locationEntityConstructor.newInstance(new Object[] {
-                    deviceCommunicator, accessibilityElementEntity, hardwareButtonEntity}));
+                    deviceCommunicator, accessibilityElementEntity}));
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException e) {
             throw new UnresolvedEntityTypeException("Failed to find the correct set of entities implmentations matching the given device information.",

@@ -20,9 +20,8 @@ public class GpsLocationSwitchViewEntity extends GpsLocationEntity {
     private static final String ANDROID_WIDGET_SWITCH_RESOURCE_ID = "com.android.settings:id/switch_widget";
 
     GpsLocationSwitchViewEntity(DeviceCommunicator communicator,
-            AccessibilityElementEntity elementEntity,
-            HardwareButtonEntity hardwareButtonEntity) {
-        super(communicator, elementEntity, hardwareButtonEntity);
+            AccessibilityElementEntity elementEntity) {
+        super(communicator, elementEntity);
     }
 
     @Override

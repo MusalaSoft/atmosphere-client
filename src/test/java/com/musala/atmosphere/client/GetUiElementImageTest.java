@@ -23,7 +23,6 @@ import org.mockito.Spy;
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
-import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.geometry.Bounds;
@@ -59,8 +58,6 @@ public class GetUiElementImageTest {
 
     private GestureEntity gestureEntity;
 
-    private ImeEntity imeEntity;
-
     private ImageEntity imageEntity;
 
     private DeviceSettingsEntity settingsEntity;
@@ -76,7 +73,6 @@ public class GetUiElementImageTest {
 
         mockedDevice = mock(Device.class);
         gestureEntity = mock(GestureEntity.class);
-        imeEntity = mock(ImeEntity.class);
         settingsEntity = mock(DeviceSettingsEntity.class);
         imageEntity = mock(ImageEntity.class);
 

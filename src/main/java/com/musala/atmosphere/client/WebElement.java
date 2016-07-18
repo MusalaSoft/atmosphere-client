@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.util.webview.WebElementSelectionCriterionConverter;
 import com.musala.atmosphere.commons.RoutingAction;
@@ -19,13 +18,10 @@ import com.musala.atmosphere.commons.webelement.selection.WebElementSelectionCri
 public abstract class WebElement {
     protected DeviceCommunicator deviceCommunicator;
 
-    protected ImeEntity imeEntity;
-
     protected String xpathQuery;
 
-    WebElement(DeviceCommunicator communicator, ImeEntity imeEntity) {
+    WebElement(DeviceCommunicator communicator) {
         this.deviceCommunicator = communicator;
-        this.imeEntity = imeEntity;
         xpathQuery = "";
     }
 
@@ -49,7 +45,7 @@ public abstract class WebElement {
         String findElementQuery = this.xpathQuery + xpathCriterionValue;
         Map<String, Object> attributes = (Map<String, Object>) deviceCommunicator.sendAction(RoutingAction.FIND_WEB_ELEMENT,
                                                                                              findElementQuery);
-        return new UiWebElement(deviceCommunicator, imeEntity, attributes, findElementQuery);
+        return new UiWebElement(deviceCommunicator, attributes, findElementQuery);
     }
 
     /**
@@ -81,7 +77,6 @@ public abstract class WebElement {
                                                                                                           index);
             String findSingleElementQuery = this.xpathQuery + elementXpathCriterionValue;
             UiWebElement webElement = new UiWebElement(deviceCommunicator,
-                                                       imeEntity,
                                                        elementAttributes,
                                                        findSingleElementQuery);
             webElements.add(webElement);

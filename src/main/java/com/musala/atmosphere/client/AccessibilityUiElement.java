@@ -8,12 +8,13 @@ import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
-import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
+
+import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
  * {@link UiElement} represented as {@link AccessibilityElement} structure. Containing methods operating with
@@ -25,17 +26,38 @@ import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 public class AccessibilityUiElement extends UiElement {
     private static final Logger LOGGER = Logger.getLogger(AccessibilityUiElement.class);
 
+    // TODO Remove the obsolete constructors when all entities are migrated to the Agent
+    @Deprecated
     protected AccessibilityUiElement(AccessibilityElement properties,
             GestureEntity gestureEntity,
-            ImeEntity imeEntity,
             DeviceSettingsEntity settingsEntity,
             ImageEntity imageEntity,
             AccessibilityElementEntity elementEntity) {
-        super(properties, gestureEntity, imeEntity, settingsEntity, imageEntity, elementEntity);
+        super(properties, gestureEntity, settingsEntity, imageEntity, elementEntity);
     }
 
+    @Deprecated
+    protected AccessibilityUiElement(AccessibilityElement properties,
+            GestureEntity gestureEntity,
+            DeviceSettingsEntity settingsEntity,
+            ImageEntity imageEntity,
+            AccessibilityElementEntity elementEntity,
+            DeviceCommunicator communicator) {
+        super(properties, gestureEntity, settingsEntity, imageEntity, elementEntity);
+        this.communicator = communicator;
+    }
+
+    @Deprecated
     AccessibilityUiElement(UiElement uiElement) {
         super(uiElement);
+    }
+
+    protected AccessibilityUiElement(AccessibilityElement properties, DeviceCommunicator communicator) {
+        super(properties, communicator);
+    }
+
+    AccessibilityUiElement(UiElement uiElement, DeviceCommunicator communicator) {
+        super(uiElement, communicator);
     }
 
     @Override

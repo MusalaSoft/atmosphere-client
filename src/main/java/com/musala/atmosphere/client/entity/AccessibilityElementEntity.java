@@ -30,8 +30,6 @@ public class AccessibilityElementEntity {
 
     private GestureEntity gestureEntity;
 
-    private ImeEntity imeEntity;
-
     private DeviceSettingsEntity settingsEntity;
 
     private ImageEntity imageEntity;
@@ -40,12 +38,10 @@ public class AccessibilityElementEntity {
 
     AccessibilityElementEntity(DeviceCommunicator communicator,
             GestureEntity gestureEntity,
-            ImeEntity imeEntity,
             DeviceSettingsEntity settingsEntity,
             ImageEntity imageEntity) {
         this.communicator = communicator;
         this.gestureEntity = gestureEntity;
-        this.imeEntity = imeEntity;
         this.settingsEntity = settingsEntity;
         this.imageEntity = imageEntity;
     }
@@ -197,14 +193,14 @@ public class AccessibilityElementEntity {
             try {
                 Constructor<?> accessibilityUiElementConstructor = AccessibilityUiElement.class.getDeclaredConstructor(AccessibilityElement.class,
                                                                                                                        GestureEntity.class,
-                                                                                                                       ImeEntity.class,
                                                                                                                        DeviceSettingsEntity.class,
                                                                                                                        ImageEntity.class,
-                                                                                                                       AccessibilityElementEntity.class);
+                                                                                                                       AccessibilityElementEntity.class,
+                                                                                                                       DeviceCommunicator.class);
                 accessibilityUiElementConstructor.setAccessible(true);
 
                 wrappedElements.add((AccessibilityUiElement) accessibilityUiElementConstructor.newInstance(new Object[] {
-                        element, gestureEntity, imeEntity, settingsEntity, imageEntity, this}));
+                        element, gestureEntity, settingsEntity, imageEntity, this, communicator}));
             } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                     | IllegalArgumentException | InvocationTargetException e) {
                 LOGGER.error("Failed to access the AccessibilityUiElement constructor, or the parameters passed to the constructor are illegal"

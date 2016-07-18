@@ -13,10 +13,10 @@ import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
-import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
+import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Bounds;
@@ -44,8 +44,6 @@ public abstract class UiElement {
 
     protected GestureEntity gestureEntity;
 
-    protected ImeEntity imeEntity;
-
     protected DeviceSettingsEntity settingsEntity;
 
     protected ImageEntity imageEntity;
@@ -54,15 +52,17 @@ public abstract class UiElement {
 
     protected boolean isStale;
 
+    protected DeviceCommunicator communicator;
+
+    // TODO Remove the obsolete constructors when all entities are migrated to the Agent
+    @Deprecated
     UiElement(UiElementPropertiesContainer properties,
             GestureEntity gestureEntity,
-            ImeEntity imeEntity,
             DeviceSettingsEntity settingsEntity,
             ImageEntity imageEntity,
             AccessibilityElementEntity elementEntity) {
         this.propertiesContainer = properties;
         this.gestureEntity = gestureEntity;
-        this.imeEntity = imeEntity;
         this.settingsEntity = settingsEntity;
         this.imageEntity = imageEntity;
         this.elementEntity = elementEntity;
@@ -70,13 +70,24 @@ public abstract class UiElement {
         isStale = false;
     }
 
+    @Deprecated
     UiElement(UiElement uiElement) {
         this(uiElement.propertiesContainer,
              uiElement.gestureEntity,
-             uiElement.imeEntity,
              uiElement.settingsEntity,
              uiElement.imageEntity,
              uiElement.elementEntity);
+    }
+
+    UiElement(UiElementPropertiesContainer properties, DeviceCommunicator communicator) {
+        this.propertiesContainer = properties;
+        this.communicator = communicator;
+
+        isStale = false;
+    }
+
+    UiElement(UiElement uiElement, DeviceCommunicator communicator) {
+        this(uiElement.propertiesContainer, communicator);
     }
 
     /**
@@ -467,7 +478,7 @@ public abstract class UiElement {
     public boolean cutText() {
         revalidateThrowing();
 
-        return imeEntity.cutText();
+        return (boolean) communicator.sendAction(RoutingAction.IME_CUT_TEXT);
     }
 
     /**
@@ -480,7 +491,7 @@ public abstract class UiElement {
     public boolean copyText() {
         revalidateThrowing();
 
-        return imeEntity.copyText();
+        return (boolean) communicator.sendAction(RoutingAction.IME_COPY_TEXT);
     }
 
     /**
@@ -492,7 +503,7 @@ public abstract class UiElement {
      */
     public boolean pasteText() {
         focus();
-        return imeEntity.pasteText();
+        return (boolean) communicator.sendAction(RoutingAction.IME_PASTE_TEXT);
     }
 
     /**
@@ -515,7 +526,7 @@ public abstract class UiElement {
             }
         }
 
-        return imeEntity.selectAllText();
+        return (boolean) communicator.sendAction(RoutingAction.IME_SELECT_ALL_TEXT);
     }
 
     /**
@@ -529,7 +540,7 @@ public abstract class UiElement {
         // TODO validate when an element can get it's text cleared
         focus();
 
-        return imeEntity.clearText();
+        return (boolean) communicator.sendAction(RoutingAction.IME_CLEAR_TEXT);
     }
 
     /**
@@ -547,8 +558,7 @@ public abstract class UiElement {
     public boolean inputText(String text, long intervalInMs) {
         focus();
 
-        boolean success = imeEntity.inputText(text, intervalInMs);
-        return success;
+        return (boolean) communicator.sendAction(RoutingAction.IME_INPUT_TEXT, text, intervalInMs);
     }
 
     /**

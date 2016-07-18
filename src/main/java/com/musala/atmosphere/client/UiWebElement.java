@@ -2,7 +2,6 @@ package com.musala.atmosphere.client;
 
 import java.util.Map;
 
-import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.util.Pair;
@@ -19,10 +18,9 @@ public class UiWebElement extends WebElement {
     private Map<String, Object> elementProperties;
 
     UiWebElement(DeviceCommunicator communicator,
-            ImeEntity imeEntity,
             Map<String, Object> elementProperties,
             String criterionValue) {
-        super(communicator, imeEntity);
+        super(communicator);
         this.elementProperties = elementProperties;
         this.xpathQuery = criterionValue;
     }
@@ -48,8 +46,8 @@ public class UiWebElement extends WebElement {
     public boolean clearText() {
         revalidate();
         focus();
-        imeEntity.selectAllText();
-        return imeEntity.clearText();
+        deviceCommunicator.sendAction(RoutingAction.IME_SELECT_ALL_TEXT);
+        return (boolean) deviceCommunicator.sendAction(RoutingAction.IME_CLEAR_TEXT);
     }
 
     /**
@@ -100,7 +98,7 @@ public class UiWebElement extends WebElement {
         revalidate();
         focus();
 
-        return imeEntity.inputText(text, interval);
+        return (boolean) deviceCommunicator.sendAction(RoutingAction.IME_INPUT_TEXT, text, interval);
     }
 
     /**
@@ -186,7 +184,12 @@ public class UiWebElement extends WebElement {
     }
 
     /**
+<<<<<<< HEAD
      * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element.
+=======
+     * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element
+     * <input name="foo" />.
+>>>>>>> Migrate ImeEntity to agent
      *
      * @return the tag name of the element
      */

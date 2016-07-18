@@ -19,7 +19,6 @@ import org.xml.sax.SAXException;
 
 import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
-import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.exceptions.ActionFailedException;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
@@ -54,8 +53,6 @@ public class Screen {
 
     private String screenXml;
 
-    private GestureEntity gestureEntity;
-
     private ImageEntity imageEntity;
 
     private DeviceSettingsEntity settingsEntity;
@@ -70,12 +67,10 @@ public class Screen {
 
     @Deprecated
 
-    Screen(GestureEntity gestureEntity,
-            DeviceSettingsEntity settingsEntity,
+    Screen(DeviceSettingsEntity settingsEntity,
             ImageEntity imageEntity,
             String uiHierarchyXml,
             DeviceCommunicator communicator) {
-        this.gestureEntity = gestureEntity;
         this.settingsEntity = settingsEntity;
         this.imageEntity = imageEntity;
         this.communicator = communicator;
@@ -97,12 +92,10 @@ public class Screen {
     }
 
     @Deprecated
-    Screen(GestureEntity gestureEntity,
-            DeviceSettingsEntity settingsEntity,
+    Screen(DeviceSettingsEntity settingsEntity,
             ImageEntity imageEntity,
             AccessibilityElementEntity elementEntity,
             DeviceCommunicator communicator) {
-        this.gestureEntity = gestureEntity;
         this.settingsEntity = settingsEntity;
         this.imageEntity = imageEntity;
         this.elementEntity = elementEntity;
@@ -302,7 +295,6 @@ public class Screen {
         List<UiElement> uiElements = new ArrayList<>();
         for (AccessibilityElement element : foundElements) {
             uiElements.add(new AccessibilityUiElement(element,
-                                                      gestureEntity,
                                                       settingsEntity,
                                                       imageEntity,
                                                       elementEntity,

@@ -28,8 +28,6 @@ public class AccessibilityElementEntity {
 
     private DeviceCommunicator communicator;
 
-    private GestureEntity gestureEntity;
-
     private DeviceSettingsEntity settingsEntity;
 
     private ImageEntity imageEntity;
@@ -37,11 +35,9 @@ public class AccessibilityElementEntity {
     private int implicitWaitTimeout = 0;
 
     AccessibilityElementEntity(DeviceCommunicator communicator,
-            GestureEntity gestureEntity,
             DeviceSettingsEntity settingsEntity,
             ImageEntity imageEntity) {
         this.communicator = communicator;
-        this.gestureEntity = gestureEntity;
         this.settingsEntity = settingsEntity;
         this.imageEntity = imageEntity;
     }
@@ -192,7 +188,6 @@ public class AccessibilityElementEntity {
             // directly the constructor.
             try {
                 Constructor<?> accessibilityUiElementConstructor = AccessibilityUiElement.class.getDeclaredConstructor(AccessibilityElement.class,
-                                                                                                                       GestureEntity.class,
                                                                                                                        DeviceSettingsEntity.class,
                                                                                                                        ImageEntity.class,
                                                                                                                        AccessibilityElementEntity.class,
@@ -200,7 +195,7 @@ public class AccessibilityElementEntity {
                 accessibilityUiElementConstructor.setAccessible(true);
 
                 wrappedElements.add((AccessibilityUiElement) accessibilityUiElementConstructor.newInstance(new Object[] {
-                        element, gestureEntity, settingsEntity, imageEntity, this, communicator}));
+                        element, settingsEntity, imageEntity, this, communicator}));
             } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                     | IllegalArgumentException | InvocationTargetException e) {
                 LOGGER.error("Failed to access the AccessibilityUiElement constructor, or the parameters passed to the constructor are illegal"

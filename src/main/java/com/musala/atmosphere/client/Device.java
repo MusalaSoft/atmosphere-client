@@ -24,7 +24,6 @@ import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.device.log.LogCatLevel;
 import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
-import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.GpsLocationEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
@@ -82,8 +81,6 @@ public class Device {
     private static final String LOCAL_DIR = System.getProperty("user.dir");
 
     private final DeviceCommunicator communicator;
-
-    private GestureEntity gestureEntity;
 
     private DeviceSettingsEntity settingsEntity;
 
@@ -261,7 +258,7 @@ public class Device {
      * @return <code>true</code> if the double tap is successful, <code>false</code> if it fails.
      */
     public boolean doubleTap(Point point) {
-        return gestureEntity.doubleTap(point);
+        return (boolean) communicator.sendAction(RoutingAction.GESTURE_DOUBLE_TAP, point);
     }
 
     /**
@@ -281,7 +278,7 @@ public class Device {
      *         active screen fails.
      */
     public Screen getActiveScreen() {
-        return new Screen(gestureEntity, settingsEntity, imageEntity, elementEntity, communicator);
+        return new Screen(settingsEntity, imageEntity, elementEntity, communicator);
     }
 
     /**
@@ -588,7 +585,7 @@ public class Device {
      * @return <code>true</code> if the pinch in is successful, <code>false</code> if it fails.
      */
     public boolean pinchIn(Point firstFingerInitial, Point secondFingerInitial) {
-        return gestureEntity.pinchIn(firstFingerInitial, secondFingerInitial);
+        return (boolean) communicator.sendAction(RoutingAction.GESTURE_PINCH_IN, firstFingerInitial, secondFingerInitial);
     }
 
     /**
@@ -601,7 +598,7 @@ public class Device {
      * @return <code>true</code> if the pinch out is successful, <code>false</code> if it fails.
      */
     public boolean pinchOut(Point firstFingerEnd, Point secondFingerEnd) {
-        return gestureEntity.pinchOut(firstFingerEnd, secondFingerEnd);
+        return (boolean) communicator.sendAction(RoutingAction.GESTURE_PINCH_OUT, firstFingerEnd, secondFingerEnd);
     }
 
     /**
@@ -1063,7 +1060,7 @@ public class Device {
      * @return <code>true</code> if the swipe is successful, <code>false</code> if it fails.
      */
     public boolean swipe(Point point, SwipeDirection swipeDirection) {
-        return gestureEntity.swipe(point, swipeDirection);
+        return (boolean) communicator.sendAction(RoutingAction.GESTURE_SWIPE, point, swipeDirection);
     }
 
     /**
@@ -1075,7 +1072,7 @@ public class Device {
      * @return <code>true</code> if tapping screen is successful, <code>false</code> if it fails.
      */
     public boolean tapScreenLocation(Point tapPoint) {
-        return gestureEntity.tapScreenLocation(tapPoint);
+        return (boolean) communicator.sendAction(RoutingAction.GESTURE_TAP, tapPoint);
     }
 
     /**
@@ -1100,7 +1097,7 @@ public class Device {
      * @return - true, if operation is successful, and false otherwise.
      */
     public boolean longPress(Point pressPoint, int timeout) {
-        return gestureEntity.longPress(pressPoint, timeout);
+        return (boolean) communicator.sendAction(RoutingAction.GESTURE_LONG_PRESS, pressPoint, timeout);
     }
 
     /**
@@ -1113,7 +1110,7 @@ public class Device {
      * @return <code>true</code>, if operation is successful, <code>false</code>otherwise
      */
     public boolean drag(Point startPoint, Point endPoint) {
-        return gestureEntity.drag(startPoint, endPoint);
+        return (boolean) communicator.sendAction(RoutingAction.GESTURE_DRAG, startPoint, endPoint);
     }
 
     /**
@@ -1901,16 +1898,6 @@ public class Device {
      */
     void setGpsLocationEntity(GpsLocationEntity gpsLocationEntity) {
         this.gpsLocationEntity = gpsLocationEntity;
-    }
-
-    /**
-     * Sets the {@link GestureEntity entity} responsible for executing gestures.
-     *
-     * @param gestureEntity
-     *        - instance of the entity that handles pressing hardware buttons
-     */
-    void setGestureEntity(GestureEntity gestureEntity) {
-        this.gestureEntity = gestureEntity;
     }
 
     /**

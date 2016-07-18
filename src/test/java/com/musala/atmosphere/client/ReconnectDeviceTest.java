@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
-import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
 import com.musala.atmosphere.client.websocket.ClientDispatcher;
 import com.musala.atmosphere.commons.DeviceInformation;
@@ -44,9 +43,6 @@ public class ReconnectDeviceTest {
     private static DeviceCommunicator deviceCommunicator;
 
     @InjectMocks
-    private static ImeEntity imeEntity;
-
-    @InjectMocks
     private static DeviceSettingsEntity settingsEntity;
 
     @InjectMocks
@@ -69,10 +65,6 @@ public class ReconnectDeviceTest {
         // deviceCommunicator.release();
 
         // Constructor visibility is package
-        Constructor<?> imeEntityConstructor = ImeEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
-        imeEntityConstructor.setAccessible(true);
-        imeEntity = (ImeEntity) imeEntityConstructor.newInstance(new Object[] {deviceCommunicator});
-
         Constructor<?> settingsEntitiyConstructor = DeviceSettingsEntity.class.getDeclaredConstructor(DeviceCommunicator.class,
                                                                                                       DeviceInformation.class);
         settingsEntitiyConstructor.setAccessible(true);
@@ -151,7 +143,7 @@ public class ReconnectDeviceTest {
                                                                                   anyLong(),
                                                                                   eq(RoutingAction.CALL_HOLD),
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.PRESS_HARDWARE_BUTTON), anyLong());
-                                                                                  any(PhoneNumber.class));
+        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.IME_INPUT_TEXT), anyString(), anyLong());
         doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
                                                                                   anyLong(),
                                                                                   eq(RoutingAction.CALL_CANCEL),
@@ -166,7 +158,6 @@ public class ReconnectDeviceTest {
                                                       .route(any(), anyLong(), eq(RoutingAction.IS_LOCKED));
 
         testDevice = new Device(deviceCommunicator);
-        testDevice.setImeEntity(imeEntity);
         testDevice.setSettingsEntity(settingsEntity);
         testDevice.setImageEntity(imageEntity);
     }

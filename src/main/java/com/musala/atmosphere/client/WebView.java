@@ -2,8 +2,6 @@ package com.musala.atmosphere.client;
 
 import java.util.Set;
 
-import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
-import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.util.webview.WebElementSelectionCriterionConverter;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.webelement.action.WebElementWaitCondition;
@@ -21,8 +19,8 @@ public class WebView extends WebElement {
     // TODO: Some additional fields and information might be kept in the class after the prototype supports more than
     // one WebView visible on the screen.
 
-    WebView(DeviceCommunicator communicator, ImeEntity imeEntity) {
-        super(communicator, imeEntity);
+    WebView(DeviceCommunicator communicator) {
+        super(communicator);
     }
 
     /**

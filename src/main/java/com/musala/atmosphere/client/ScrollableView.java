@@ -8,7 +8,6 @@ import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
-import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
 import com.musala.atmosphere.commons.RoutingAction;
@@ -26,8 +25,6 @@ import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 public class ScrollableView extends AccessibilityUiElement {
     private static final Logger LOGGER = Logger.getLogger(ScrollableView.class);
 
-    private DeviceCommunicator communicator;
-
     /**
      * Used to determine scroll direction
      */
@@ -35,12 +32,11 @@ public class ScrollableView extends AccessibilityUiElement {
 
     ScrollableView(AccessibilityElement accessibilityElement,
             GestureEntity gestureEntity,
-            ImeEntity imeEntity,
             DeviceSettingsEntity settingsEntity,
             ImageEntity imageEntity,
             AccessibilityElementEntity elementEntity,
             DeviceCommunicator communicator) {
-        super(accessibilityElement, gestureEntity, imeEntity, settingsEntity, imageEntity, elementEntity);
+        super(accessibilityElement, gestureEntity, settingsEntity, imageEntity, elementEntity);
         this.communicator = communicator;
     }
 

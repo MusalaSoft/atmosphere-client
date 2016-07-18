@@ -9,7 +9,6 @@ import com.musala.atmosphere.client.entity.EntityTypeResolver;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.GpsLocationEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
-import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.UnresolvedEntityTypeException;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.RoutingAction;
@@ -57,11 +56,6 @@ public class DeviceBuilder {
                     deviceCommunicator, deviceInformation});
             device.setGestureEntity(gestureEntity);
 
-            Constructor<?> imeEntitiyConstructor = ImeEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
-            imeEntitiyConstructor.setAccessible(true);
-            ImeEntity imeEntity = (ImeEntity) imeEntitiyConstructor.newInstance(new Object[] {deviceCommunicator});
-            device.setImeEntity(imeEntity);
-
             Constructor<?> settingsEntitiyConstructor = DeviceSettingsEntity.class.getDeclaredConstructor(DeviceCommunicator.class,
                                                                                                           DeviceInformation.class);
             settingsEntitiyConstructor.setAccessible(true);
@@ -78,12 +72,11 @@ public class DeviceBuilder {
 
             Constructor<?> accessibilityElementEntityConstructor = AccessibilityElementEntity.class.getDeclaredConstructor(DeviceCommunicator.class,
                                                                                                                            GestureEntity.class,
-                                                                                                                           ImeEntity.class,
                                                                                                                            DeviceSettingsEntity.class,
                                                                                                                            ImageEntity.class);
             accessibilityElementEntityConstructor.setAccessible(true);
             AccessibilityElementEntity accessibilityElementEntity = (AccessibilityElementEntity) accessibilityElementEntityConstructor.newInstance(new Object[] {
-                    deviceCommunicator, gestureEntity, imeEntity, settingsEntity, imageEntity});
+                    deviceCommunicator, gestureEntity, settingsEntity, imageEntity});
             device.setAccessibilityElementEntity(accessibilityElementEntity);
 
             Class<?> locationEntityClass = typeResolver.getEntityClass(GpsLocationEntity.class);

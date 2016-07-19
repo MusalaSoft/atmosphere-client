@@ -6,6 +6,7 @@ import com.musala.atmosphere.client.DeviceCommunicator;
 import com.musala.atmosphere.client.UiElement;
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
+import com.musala.atmosphere.client.uiutils.AccessibilityElementUtils;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
@@ -26,14 +27,14 @@ public abstract class GpsLocationEntity {
 
     protected static final int CHANGE_STATE_WIDGET_TIMEOUT = 5000;
 
-    protected AccessibilityElementEntity elementEntity;
+    protected AccessibilityElementUtils elementUtils;
 
     protected DeviceCommunicator communicator;
 
     GpsLocationEntity(DeviceCommunicator communicator,
-            AccessibilityElementEntity elementEntity) {
+            AccessibilityElementUtils elementUtils) {
         this.communicator = communicator;
-        this.elementEntity = elementEntity;
+        this.elementUtils = elementUtils;
     }
 
     /**
@@ -112,8 +113,8 @@ public abstract class GpsLocationEntity {
         UiElementSelector agreeButtonSelector = new UiElementSelector();
         agreeButtonSelector.addSelectionAttribute(CssAttribute.RESOURCE_ID, AGREE_BUTTON_RESOURCE_ID);
 
-        if (elementEntity.waitForElementExists(agreeButtonSelector, AGREE_BUTTON_TIMEOUT)) {
-            UiElement agreeButton = elementEntity.getElement(agreeButtonSelector, true);
+        if (elementUtils.waitForElementExists(agreeButtonSelector, AGREE_BUTTON_TIMEOUT)) {
+            UiElement agreeButton = elementUtils.getElement(agreeButtonSelector, true);
             agreeButton.tap();
         }
     }

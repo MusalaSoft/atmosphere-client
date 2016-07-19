@@ -1,20 +1,25 @@
 package com.musala.atmosphere.client;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
 
-import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
-import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.exceptions.StaleElementReferenceException;
+import com.musala.atmosphere.client.uiutils.AccessibilityElementUtils;
+import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.RoutingAction;
+import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.beans.SwipeDirection;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.geometry.Bounds;
@@ -22,6 +27,7 @@ import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.ui.UiElementPropertiesContainer;
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
+import com.musala.atmosphere.commons.util.Pair;
 
 /**
  * Used to access and manipulate certain views on the testing device, for example tapping, double-taping or holding
@@ -40,42 +46,21 @@ public abstract class UiElement {
 
     protected UiElementPropertiesContainer propertiesContainer;
 
-    protected ImageEntity imageEntity;
-
-    protected AccessibilityElementEntity elementEntity;
-
     protected boolean isStale;
 
     protected DeviceCommunicator communicator;
 
-    // TODO Remove the obsolete constructors when all entities are migrated to the Agent
-    @Deprecated
-    UiElement(UiElementPropertiesContainer properties,
-            ImageEntity imageEntity,
-            AccessibilityElementEntity elementEntity) {
-        this.propertiesContainer = properties;
-        this.imageEntity = imageEntity;
-        this.elementEntity = elementEntity;
+    protected AccessibilityElementUtils elementUtils;
 
-        isStale = false;
-    }
-
-    @Deprecated
-    UiElement(UiElement uiElement) {
-        this(uiElement.propertiesContainer,
-             uiElement.imageEntity,
-             uiElement.elementEntity);
-    }
-
-    UiElement(UiElementPropertiesContainer properties, DeviceCommunicator communicator) {
+    UiElement(UiElementPropertiesContainer properties, AccessibilityElementUtils elementUtils, DeviceCommunicator communicator) {
         this.propertiesContainer = properties;
         this.communicator = communicator;
-
+        this.elementUtils = elementUtils;
         isStale = false;
     }
 
-    UiElement(UiElement uiElement, DeviceCommunicator communicator) {
-        this(uiElement.propertiesContainer, communicator);
+    UiElement(UiElement uiElement, AccessibilityElementUtils elementUtils, DeviceCommunicator communicator) {
+        this(uiElement.propertiesContainer, elementUtils, communicator);
     }
 
     /**
@@ -352,7 +337,7 @@ public abstract class UiElement {
         UiElementSelector selector = new UiElementSelector();
         selector.addSelectionAttribute(CssAttribute.TEXT, destinationElementText);
 
-        UiElement destinationElement = elementEntity.getElement(selector, true);
+        UiElement destinationElement = elementUtils.getElement(selector, true);
 
         Point startPoint = propertiesContainer.getBounds().getCenter();
         Point endPoint = destinationElement.propertiesContainer.getBounds().getCenter();
@@ -380,7 +365,7 @@ public abstract class UiElement {
             UiElementFetchingException,
             InvalidCssQueryException,
             MultipleElementsFoundException {
-        UiElement destinationElement = elementEntity.getElement(destinationSelector, true);
+        UiElement destinationElement = elementUtils.getElement(destinationSelector, true);
 
         Point startPoint = propertiesContainer.getBounds().getCenter();
         Point endPoint = destinationElement.getProperties().getBounds().getCenter();
@@ -680,7 +665,23 @@ public abstract class UiElement {
      *         - if getting screenshot from the device fails
      */
     public Image getElementImage() throws IOException {
-        return imageEntity.getElementImage(propertiesContainer);
+        byte[] imageInByte = (byte[]) communicator.sendAction(RoutingAction.GET_SCREENSHOT);
+        InputStream inputStream = new ByteArrayInputStream(imageInByte);
+        BufferedImage bufferedImage = ImageIO.read(inputStream);
+
+        Bounds elementBounds = propertiesContainer.getBounds();
+        Pair<Integer, Integer> resolution = getDeviceResolution();
+        ScreenOrientation screenOrientation = (ScreenOrientation) communicator.sendAction(RoutingAction.GET_SCREEN_ORIENTATION);
+
+        Image newImage = new Image(bufferedImage);
+        return newImage.getSubimage(elementBounds, screenOrientation, resolution);
+    }
+
+    private Pair<Integer, Integer> getDeviceResolution() {
+        // TODO: Move the device information in a entity, or think for a better way to pass it to the UiElement.
+        DeviceInformation deviceInformation = (DeviceInformation) communicator.sendAction(RoutingAction.GET_DEVICE_INFORMATION);
+
+        return deviceInformation.getResolution();
     }
 
     /**

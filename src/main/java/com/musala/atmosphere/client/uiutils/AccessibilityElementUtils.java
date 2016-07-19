@@ -1,4 +1,4 @@
-package com.musala.atmosphere.client.entity;
+package com.musala.atmosphere.client.uiutils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -18,24 +18,20 @@ import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 
 /**
- * Entity responsible for operations related with {@link AccessibilityUiElement}.
+ * A utility class for operations related to {@link AccessibilityUiElement}.
  *
  * @author yavor.stankov
  *
  */
-public class AccessibilityElementEntity {
-    private static final Logger LOGGER = Logger.getLogger(AccessibilityElementEntity.class);
+public class AccessibilityElementUtils {
+    private static final Logger LOGGER = Logger.getLogger(AccessibilityElementUtils.class);
 
     private DeviceCommunicator communicator;
 
-    private ImageEntity imageEntity;
-
     private int implicitWaitTimeout = 0;
 
-    AccessibilityElementEntity(DeviceCommunicator communicator,
-            ImageEntity imageEntity) {
+    public AccessibilityElementUtils(DeviceCommunicator communicator) {
         this.communicator = communicator;
-        this.imageEntity = imageEntity;
     }
 
     /**
@@ -51,7 +47,7 @@ public class AccessibilityElementEntity {
      */
     @SuppressWarnings("unchecked")
     public List<UiElement> getElements(UiElementSelector selector, Boolean visibleOnly)
-        throws UiElementFetchingException {
+            throws UiElementFetchingException {
 
         if (implicitWaitTimeout > 0) {
             waitForElementExists(selector, implicitWaitTimeout);
@@ -81,7 +77,7 @@ public class AccessibilityElementEntity {
      *         if more than one elements are found matching the given selector
      */
     public UiElement getElement(UiElementSelector selector, Boolean visibleOnly)
-        throws UiElementFetchingException,
+            throws UiElementFetchingException,
             MultipleElementsFoundException {
         List<UiElement> uiElements = getElements(selector, visibleOnly);
 
@@ -121,10 +117,10 @@ public class AccessibilityElementEntity {
      */
     @SuppressWarnings("unchecked")
     public List<AccessibilityElement> getChildren(AccessibilityElement accessibilityElement,
-                                                  UiElementSelector selector,
-                                                  boolean directChildrenOnly,
-                                                  boolean visibleNodesOnly)
-        throws UiElementFetchingException {
+                                                         UiElementSelector selector,
+                                                         boolean directChildrenOnly,
+                                                         boolean visibleNodesOnly)
+                                                                 throws UiElementFetchingException {
         List<AccessibilityElement> children = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_CHILDREN,
                                                                                                    accessibilityElement,
                                                                                                    selector,
@@ -155,7 +151,7 @@ public class AccessibilityElementEntity {
     public List<UiElement> getChildrenByXPath(String xpathQuery,
                                               boolean visibleOnly,
                                               UiElementPropertiesContainer propertiesContainer)
-        throws UiElementFetchingException {
+                                                      throws UiElementFetchingException {
         AccessibilityElement accessibilityElement = (AccessibilityElement) propertiesContainer;
 
         List<AccessibilityElement> children = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.EXECUTE_XPATH_QUERY_ON_LOCAL_ROOT,
@@ -184,13 +180,12 @@ public class AccessibilityElementEntity {
             // directly the constructor.
             try {
                 Constructor<?> accessibilityUiElementConstructor = AccessibilityUiElement.class.getDeclaredConstructor(AccessibilityElement.class,
-                                                                                                                       ImageEntity.class,
-                                                                                                                       AccessibilityElementEntity.class,
+                                                                                                                       AccessibilityElementUtils.class,
                                                                                                                        DeviceCommunicator.class);
                 accessibilityUiElementConstructor.setAccessible(true);
 
                 wrappedElements.add((AccessibilityUiElement) accessibilityUiElementConstructor.newInstance(new Object[] {
-                        element, imageEntity, this, communicator}));
+                        element, this, communicator}));
             } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                     | IllegalArgumentException | InvocationTargetException e) {
                 LOGGER.error("Failed to access the AccessibilityUiElement constructor, or the parameters passed to the constructor are illegal"

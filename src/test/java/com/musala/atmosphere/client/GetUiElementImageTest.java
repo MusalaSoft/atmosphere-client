@@ -15,12 +15,10 @@ import javax.imageio.ImageIO;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.ScreenOrientation;
 import com.musala.atmosphere.commons.geometry.Bounds;
@@ -41,7 +39,7 @@ public class GetUiElementImageTest {
     @Spy
     private UiElementPropertiesContainer propertiesContainer;
 
-    @InjectMocks
+    @Mock
     private AccessibilityUiElement element;
 
     private Bounds boundsLandscape;
@@ -54,8 +52,6 @@ public class GetUiElementImageTest {
 
     private DeviceInformation deviceInformation = new DeviceInformation();
 
-    private ImageEntity imageEntity;
-
     private static final String RECEIVED_DIFFERENT_IMAGES_MESSAGE = "Received image is different than the expected one.";
 
     @Before
@@ -66,7 +62,8 @@ public class GetUiElementImageTest {
         boundsPortrait = new Bounds(new Point(669, 278), new Point(749, 322));
 
         mockedDevice = mock(Device.class);
-        imageEntity = mock(ImageEntity.class);
+
+        element = mock(AccessibilityUiElement.class);
 
         MockitoAnnotations.initMocks(this);
     }
@@ -88,7 +85,7 @@ public class GetUiElementImageTest {
         BufferedImage expectedBufferedElementImage = ImageIO.read(expectedImageFile);
         Image expectedImage = new Image(expectedBufferedElementImage);
 
-        when(imageEntity.getElementImage(propertiesContainer)).thenReturn(expectedImage);
+        when(element.getElementImage()).thenReturn(expectedImage);
         Image elementImage = element.getElementImage();
 
         assertTrue(RECEIVED_DIFFERENT_IMAGES_MESSAGE, expectedImage.equals(elementImage));
@@ -112,7 +109,7 @@ public class GetUiElementImageTest {
         BufferedImage expectedBufferedElementImage = ImageIO.read(expectedImageFile);
         Image expectedImage = new Image(expectedBufferedElementImage);
 
-        when(imageEntity.getElementImage(propertiesContainer)).thenReturn(expectedImage);
+        when(element.getElementImage()).thenReturn(expectedImage);
         Image elementImage = element.getElementImage();
 
         assertTrue(RECEIVED_DIFFERENT_IMAGES_MESSAGE, expectedImage.equals(elementImage));
@@ -136,7 +133,7 @@ public class GetUiElementImageTest {
         BufferedImage expectedBufferedElementImage = ImageIO.read(expectedImageFile);
         Image expectedImage = new Image(expectedBufferedElementImage);
 
-        when(imageEntity.getElementImage(propertiesContainer)).thenReturn(expectedImage);
+        when(element.getElementImage()).thenReturn(expectedImage);
         Image elementImage = element.getElementImage();
 
         assertTrue(RECEIVED_DIFFERENT_IMAGES_MESSAGE, expectedImage.equals(elementImage));
@@ -160,7 +157,8 @@ public class GetUiElementImageTest {
         BufferedImage expectedBufferedElementImage = ImageIO.read(expectedImageFile);
         Image expectedImage = new Image(expectedBufferedElementImage);
 
-        when(imageEntity.getElementImage(propertiesContainer)).thenReturn(expectedImage);
+
+        when(element.getElementImage()).thenReturn(expectedImage);
         Image elementImage = element.getElementImage();
 
         assertTrue(RECEIVED_DIFFERENT_IMAGES_MESSAGE, expectedImage.equals(elementImage));

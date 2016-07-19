@@ -4,9 +4,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
-import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
+import com.musala.atmosphere.client.uiutils.AccessibilityElementUtils;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
@@ -24,34 +23,12 @@ import android.view.accessibility.AccessibilityNodeInfo;
 public class AccessibilityUiElement extends UiElement {
     private static final Logger LOGGER = Logger.getLogger(AccessibilityUiElement.class);
 
-    // TODO Remove the obsolete constructors when all entities are migrated to the Agent
-    @Deprecated
-    protected AccessibilityUiElement(AccessibilityElement properties,
-            ImageEntity imageEntity,
-            AccessibilityElementEntity elementEntity) {
-        super(properties, imageEntity, elementEntity);
+    protected AccessibilityUiElement(AccessibilityElement properties, AccessibilityElementUtils elementUtils, DeviceCommunicator communicator) {
+        super(properties, elementUtils, communicator);
     }
 
-    @Deprecated
-    protected AccessibilityUiElement(AccessibilityElement properties,
-            ImageEntity imageEntity,
-            AccessibilityElementEntity elementEntity,
-            DeviceCommunicator communicator) {
-        super(properties, imageEntity, elementEntity);
-        this.communicator = communicator;
-    }
-
-    @Deprecated
-    AccessibilityUiElement(UiElement uiElement) {
-        super(uiElement);
-    }
-
-    protected AccessibilityUiElement(AccessibilityElement properties, DeviceCommunicator communicator) {
-        super(properties, communicator);
-    }
-
-    AccessibilityUiElement(UiElement uiElement, DeviceCommunicator communicator) {
-        super(uiElement, communicator);
+    AccessibilityUiElement(UiElement uiElement, AccessibilityElementUtils elementUtils, DeviceCommunicator communicator) {
+        super(uiElement, elementUtils, communicator);
     }
 
     @Override
@@ -59,12 +36,12 @@ public class AccessibilityUiElement extends UiElement {
         AccessibilityElement accessibilityElement = (AccessibilityElement) propertiesContainer;
         boolean directChildrenOnly = false;
         boolean visibleNodesOnly = true;
-        List<AccessibilityElement> children = elementEntity.getChildren(accessibilityElement,
-                                                                        childrenSelector,
-                                                                        directChildrenOnly,
-                                                                        visibleNodesOnly);
+        List<AccessibilityElement> children = elementUtils.getChildren(accessibilityElement,
+                                                                       childrenSelector,
+                                                                       directChildrenOnly,
+                                                                       visibleNodesOnly);
 
-        return elementEntity.wrapAccessibilityElements(children);
+        return elementUtils.wrapAccessibilityElements(children);
     }
 
     @Override
@@ -77,22 +54,22 @@ public class AccessibilityUiElement extends UiElement {
         AccessibilityElement accessibilityElement = (AccessibilityElement) propertiesContainer;
         boolean directChildrenOnly = true;
         boolean visibleNodesOnly = true;
-        List<AccessibilityElement> children = elementEntity.getChildren(accessibilityElement,
-                                                                        childrenSelector,
-                                                                        directChildrenOnly,
-                                                                        visibleNodesOnly);
+        List<AccessibilityElement> children = elementUtils.getChildren(accessibilityElement,
+                                                                       childrenSelector,
+                                                                       directChildrenOnly,
+                                                                       visibleNodesOnly);
 
-        return elementEntity.wrapAccessibilityElements(children);
+        return elementUtils.wrapAccessibilityElements(children);
     }
 
     @Override
     public boolean revalidate() {
-        return elementEntity.revalidate(propertiesContainer);
+        return elementUtils.revalidate(propertiesContainer);
     }
 
     @Override
     public List<UiElement> getChildrenByXPath(String xpathQuery) throws UiElementFetchingException {
-        return elementEntity.getChildrenByXPath(xpathQuery, true, propertiesContainer);
+        return elementUtils.getChildrenByXPath(xpathQuery, true, propertiesContainer);
     }
 
     @Override

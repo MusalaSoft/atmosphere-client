@@ -4,6 +4,7 @@ import com.musala.atmosphere.client.DeviceCommunicator;
 import com.musala.atmosphere.client.UiElement;
 import com.musala.atmosphere.client.entity.annotations.Default;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
+import com.musala.atmosphere.client.uiutils.AccessibilityElementUtils;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
 import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
@@ -20,8 +21,8 @@ public class GpsLocationSwitchViewEntity extends GpsLocationEntity {
     private static final String ANDROID_WIDGET_SWITCH_RESOURCE_ID = "com.android.settings:id/switch_widget";
 
     GpsLocationSwitchViewEntity(DeviceCommunicator communicator,
-            AccessibilityElementEntity elementEntity) {
-        super(communicator, elementEntity);
+            AccessibilityElementUtils elementUtils) {
+        super(communicator, elementUtils);
     }
 
     @Override
@@ -29,8 +30,8 @@ public class GpsLocationSwitchViewEntity extends GpsLocationEntity {
         UiElementSelector switchWidgetSelector = new UiElementSelector();
         switchWidgetSelector.addSelectionAttribute(CssAttribute.RESOURCE_ID, ANDROID_WIDGET_SWITCH_RESOURCE_ID);
 
-        elementEntity.waitForElementExists(switchWidgetSelector, CHANGE_STATE_WIDGET_TIMEOUT);
+        elementUtils.waitForElementExists(switchWidgetSelector, CHANGE_STATE_WIDGET_TIMEOUT);
 
-        return elementEntity.getElement(switchWidgetSelector, true);
+        return elementUtils.getElement(switchWidgetSelector, true);
     }
 }

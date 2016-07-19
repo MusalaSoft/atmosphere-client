@@ -17,11 +17,10 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
-import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.exceptions.ActionFailedException;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
+import com.musala.atmosphere.client.uiutils.AccessibilityElementUtils;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
@@ -52,24 +51,20 @@ public class Screen {
 
     private String screenXml;
 
-    private ImageEntity imageEntity;
-
-
-    private AccessibilityElementEntity elementEntity;
-
     private Document xPathDomDocument;
 
     private org.jsoup.nodes.Document jSoupDocument;
 
     private final DeviceCommunicator communicator;
 
+    private final AccessibilityElementUtils elementUtils;
+
     @Deprecated
 
-    Screen(ImageEntity imageEntity,
-            String uiHierarchyXml,
+    Screen(String uiHierarchyXml,
             DeviceCommunicator communicator) {
-        this.imageEntity = imageEntity;
         this.communicator = communicator;
+        this.elementUtils = new AccessibilityElementUtils(communicator);
         screenXml = uiHierarchyXml;
 
         // XPath DOM Document building
@@ -87,17 +82,9 @@ public class Screen {
         jSoupDocument = Jsoup.parse(screenXml);
     }
 
-    @Deprecated
-    Screen(ImageEntity imageEntity,
-            AccessibilityElementEntity elementEntity,
-            DeviceCommunicator communicator) {
-        this.imageEntity = imageEntity;
-        this.elementEntity = elementEntity;
-        this.communicator = communicator;
-    }
-
     Screen(DeviceCommunicator communicator) {
         this.communicator = communicator;
+        this.elementUtils = new AccessibilityElementUtils(communicator);
     }
 
     /**
@@ -121,7 +108,7 @@ public class Screen {
      */
     private List<UiElement> getElements(UiElementSelector selector, Boolean visibleOnly)
         throws UiElementFetchingException {
-        return elementEntity.getElements(selector, visibleOnly);
+        return elementUtils.getElements(selector, visibleOnly);
     }
 
     /**
@@ -214,7 +201,7 @@ public class Screen {
     public ScrollableView getScrollableViewByXPath(String query)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        return new ScrollableView(getElementByXPath(query), communicator);
+        return new ScrollableView(getElementByXPath(query), elementUtils, communicator);
     }
 
     /**
@@ -259,7 +246,7 @@ public class Screen {
     public UiElement getElement(UiElementSelector selector, Boolean visibleOnly)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        return elementEntity.getElement(selector, visibleOnly);
+        return elementUtils.getElement(selector, visibleOnly);
     }
 
     /**
@@ -289,8 +276,7 @@ public class Screen {
         List<UiElement> uiElements = new ArrayList<>();
         for (AccessibilityElement element : foundElements) {
             uiElements.add(new AccessibilityUiElement(element,
-                                                      imageEntity,
-                                                      elementEntity,
+                                                      elementUtils,
                                                       communicator));
         }
 
@@ -312,7 +298,7 @@ public class Screen {
     public UiElement getElement(UiElementSelector selector)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        return elementEntity.getElement(selector, true);
+        return elementUtils.getElement(selector, true);
     }
 
     /**
@@ -330,7 +316,7 @@ public class Screen {
     public ScrollableView getScrollableView(UiElementSelector selector)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-
+        return new ScrollableView(getElement(selector), elementUtils, communicator);
         // There is a problem with the ScrollableViews created from ListView elements. They can scroll but
         // cannot find inner elements. Make sure we throw an exception if such ScrollableView is created.
         String className = getElement(selector).getProperties().getClassName();
@@ -339,7 +325,6 @@ public class Screen {
                     + "Instead, please select the first parent element of the ListView, which has a resource id.";
             throw new ActionFailedException(message);
         }
-        return new ScrollableView(getElement(selector), communicator);
     }
 
     /**
@@ -550,7 +535,7 @@ public class Screen {
      * @return boolean indicating if this action was successful.
      */
     public boolean waitForElementExists(UiElementSelector selector, Integer timeout) {
-        return elementEntity.waitForElementExists(selector, timeout);
+        return elementUtils.waitForElementExists(selector, timeout);
     }
 
     /**
@@ -563,7 +548,7 @@ public class Screen {
      * @return boolean indicating if this action was successful.
      */
     public boolean waitUntilElementGone(UiElementSelector selector, Integer timeout) {
-        return elementEntity.waitUntilElementGone(selector, timeout);
+        return elementUtils.waitUntilElementGone(selector, timeout);
     }
 
     /**
@@ -580,7 +565,7 @@ public class Screen {
      *         current window does not have the specified package name
      */
     public boolean waitForWindowUpdate(String packageName, int timeout) {
-        return elementEntity.waitForWindowUpdate(packageName, timeout);
+        return elementUtils.waitForWindowUpdate(packageName, timeout);
     }
 
     /**
@@ -597,12 +582,12 @@ public class Screen {
 
     /**
      * Waits for a certain amount of time when trying to find an element/s if they are not immediately available. Sets
-     * an implicit wait timeout value to {@link AccessibilityElementEntity} elementEntity. The default value is 0.
+     * an implicit wait timeout value to {@link AccessibilityElementUtils} elementUtils. The default value is 0.
      *
      * @param implicitWaitTimeout
      *        - an implicit wait timeout in milliseconds
      */
     public void setImplicitWaitTimeout(int implicitWaitTimeout) {
-        elementEntity.setImplicitWaitTimeout(implicitWaitTimeout);
+        elementUtils.setImplicitWaitTimeout(implicitWaitTimeout);
     }
 }

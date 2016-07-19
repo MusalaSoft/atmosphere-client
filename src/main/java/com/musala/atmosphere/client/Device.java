@@ -22,9 +22,7 @@ import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.device.log.LogCatLevel;
-import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.entity.GpsLocationEntity;
-import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
 import com.musala.atmosphere.client.util.ClientConstants;
@@ -79,10 +77,6 @@ public class Device {
     private static final String LOCAL_DIR = System.getProperty("user.dir");
 
     private final DeviceCommunicator communicator;
-
-    private ImageEntity imageEntity;
-
-    private AccessibilityElementEntity elementEntity;
 
     private GpsLocationEntity gpsLocationEntity;
 
@@ -274,7 +268,7 @@ public class Device {
      *         active screen fails.
      */
     public Screen getActiveScreen() {
-        return new Screen(imageEntity, elementEntity, communicator);
+        return new Screen(communicator);
     }
 
     /**
@@ -382,7 +376,7 @@ public class Device {
      *         It can be subsequently dumped to a file and directly opened as a PNG image.
      */
     public byte[] getScreenshot() {
-        return imageEntity.getScreenshot();
+        return (byte[]) communicator.sendAction(RoutingAction.GET_SCREENSHOT);
     }
 
     /**
@@ -1884,26 +1878,5 @@ public class Device {
      */
     void setGpsLocationEntity(GpsLocationEntity gpsLocationEntity) {
         this.gpsLocationEntity = gpsLocationEntity;
-    }
-
-    /**
-     * Sets the {@link ImageEntity entity} responsible for operations related with getting screenshots.
-     *
-     * @param imageEntity
-     *        - instance of the entity that handles operations related with getting screenshots
-     */
-    void setImageEntity(ImageEntity imageEntity) {
-        this.imageEntity = imageEntity;
-    }
-
-    /**
-     * Sets the {@link AccessibilityElementEntity entity} responsible for operations realated with
-     * {@link AccessibilityUiElement}.
-     *
-     * @param elementEntity
-     *        - instance of the entity that handles operations related with {@link AccessibilityUiElement}
-     */
-    void setAccessibilityElementEntity(AccessibilityElementEntity elementEntity) {
-        this.elementEntity = elementEntity;
     }
 }

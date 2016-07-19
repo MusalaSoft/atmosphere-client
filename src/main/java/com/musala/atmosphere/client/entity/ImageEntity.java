@@ -27,17 +27,14 @@ import com.musala.atmosphere.commons.util.Pair;
 public class ImageEntity {
     DeviceCommunicator communicator;
 
-    DeviceSettingsEntity settingsEntity;
-
     /**
      * Constructs a new {@link ImageEntity} object by given {@link DeviceCommunicator device communicator}.
      *
      * @param communicator
      *        - a communicator to the remote device
      */
-    ImageEntity(DeviceCommunicator communicator, DeviceSettingsEntity settingsEntity) {
+    ImageEntity(DeviceCommunicator communicator) {
         this.communicator = communicator;
-        this.settingsEntity = settingsEntity;
     }
 
     /**
@@ -70,7 +67,7 @@ public class ImageEntity {
 
         Bounds elementBounds = propertiesContainer.getBounds();
         Pair<Integer, Integer> resolution = getDeviceResolution();
-        ScreenOrientation screenOrientation = settingsEntity.getScreenOrientation();
+        ScreenOrientation screenOrientation = (ScreenOrientation) communicator.sendAction(RoutingAction.GET_SCREEN_ORIENTATION);
 
         Image newImage = new Image(bufferedImage);
         return newImage.getSubimage(elementBounds, screenOrientation, resolution);

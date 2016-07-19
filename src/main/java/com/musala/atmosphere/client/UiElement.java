@@ -10,7 +10,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
-import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
@@ -41,8 +40,6 @@ public abstract class UiElement {
 
     protected UiElementPropertiesContainer propertiesContainer;
 
-    protected DeviceSettingsEntity settingsEntity;
-
     protected ImageEntity imageEntity;
 
     protected AccessibilityElementEntity elementEntity;
@@ -54,11 +51,9 @@ public abstract class UiElement {
     // TODO Remove the obsolete constructors when all entities are migrated to the Agent
     @Deprecated
     UiElement(UiElementPropertiesContainer properties,
-            DeviceSettingsEntity settingsEntity,
             ImageEntity imageEntity,
             AccessibilityElementEntity elementEntity) {
         this.propertiesContainer = properties;
-        this.settingsEntity = settingsEntity;
         this.imageEntity = imageEntity;
         this.elementEntity = elementEntity;
 
@@ -68,7 +63,6 @@ public abstract class UiElement {
     @Deprecated
     UiElement(UiElement uiElement) {
         this(uiElement.propertiesContainer,
-             uiElement.settingsEntity,
              uiElement.imageEntity,
              uiElement.elementEntity);
     }

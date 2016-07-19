@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
-import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
@@ -30,11 +29,10 @@ public class ScrollableView extends AccessibilityUiElement {
     private boolean isVertical = true;
 
     ScrollableView(AccessibilityElement accessibilityElement,
-            DeviceSettingsEntity settingsEntity,
             ImageEntity imageEntity,
             AccessibilityElementEntity elementEntity,
             DeviceCommunicator communicator) {
-        super(accessibilityElement, settingsEntity, imageEntity, elementEntity);
+        super(accessibilityElement, imageEntity, elementEntity);
         this.communicator = communicator;
     }
 

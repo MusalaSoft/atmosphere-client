@@ -20,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.ScreenOrientation;
@@ -57,8 +56,6 @@ public class GetUiElementImageTest {
 
     private ImageEntity imageEntity;
 
-    private DeviceSettingsEntity settingsEntity;
-
     private static final String RECEIVED_DIFFERENT_IMAGES_MESSAGE = "Received image is different than the expected one.";
 
     @Before
@@ -69,7 +66,6 @@ public class GetUiElementImageTest {
         boundsPortrait = new Bounds(new Point(669, 278), new Point(749, 322));
 
         mockedDevice = mock(Device.class);
-        settingsEntity = mock(DeviceSettingsEntity.class);
         imageEntity = mock(ImageEntity.class);
 
         MockitoAnnotations.initMocks(this);
@@ -83,7 +79,7 @@ public class GetUiElementImageTest {
         deviceInformation.setResolution(resolutionLandscape);
 
         when(mockedDevice.getInformation()).thenReturn(deviceInformation);
-        when(settingsEntity.getScreenOrientation()).thenReturn(ScreenOrientation.LANDSCAPE);
+        when(mockedDevice.getScreenOrientation()).thenReturn(ScreenOrientation.LANDSCAPE);
         when(mockedDevice.getScreenshot()).thenReturn(screenshotLandscapeData);
 
         when(propertiesContainer.getBounds()).thenReturn(boundsLandscape);
@@ -107,7 +103,7 @@ public class GetUiElementImageTest {
         deviceInformation.setResolution(resolutionLandscape);
 
         when(mockedDevice.getInformation()).thenReturn(deviceInformation);
-        when(settingsEntity.getScreenOrientation()).thenReturn(ScreenOrientation.UPSIDE_DOWN_LANDSCAPE);
+        when(mockedDevice.getScreenOrientation()).thenReturn(ScreenOrientation.UPSIDE_DOWN_LANDSCAPE);
         when(mockedDevice.getScreenshot()).thenReturn(screenshotUpsideDownLandscapeData);
 
         when(propertiesContainer.getBounds()).thenReturn(boundsLandscape);
@@ -131,7 +127,7 @@ public class GetUiElementImageTest {
         deviceInformation.setResolution(resolutionPortrait);
 
         when(mockedDevice.getInformation()).thenReturn(deviceInformation);
-        when(settingsEntity.getScreenOrientation()).thenReturn(ScreenOrientation.PORTRAIT);
+        when(mockedDevice.getScreenOrientation()).thenReturn(ScreenOrientation.PORTRAIT);
         when(mockedDevice.getScreenshot()).thenReturn(screenshotPortraitData);
 
         when(propertiesContainer.getBounds()).thenReturn(boundsPortrait);
@@ -155,7 +151,7 @@ public class GetUiElementImageTest {
         deviceInformation.setResolution(resolutionPortrait);
 
         when(mockedDevice.getInformation()).thenReturn(deviceInformation);
-        when(settingsEntity.getScreenOrientation()).thenReturn(ScreenOrientation.UPSIDE_DOWN_PORTRAIT);
+        when(mockedDevice.getScreenOrientation()).thenReturn(ScreenOrientation.UPSIDE_DOWN_PORTRAIT);
         when(mockedDevice.getScreenshot()).thenReturn(screenshotUpsideDownPortraitData);
 
         when(propertiesContainer.getBounds()).thenReturn(boundsPortrait);

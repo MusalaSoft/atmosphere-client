@@ -28,17 +28,13 @@ public class AccessibilityElementEntity {
 
     private DeviceCommunicator communicator;
 
-    private DeviceSettingsEntity settingsEntity;
-
     private ImageEntity imageEntity;
 
     private int implicitWaitTimeout = 0;
 
     AccessibilityElementEntity(DeviceCommunicator communicator,
-            DeviceSettingsEntity settingsEntity,
             ImageEntity imageEntity) {
         this.communicator = communicator;
-        this.settingsEntity = settingsEntity;
         this.imageEntity = imageEntity;
     }
 
@@ -188,14 +184,13 @@ public class AccessibilityElementEntity {
             // directly the constructor.
             try {
                 Constructor<?> accessibilityUiElementConstructor = AccessibilityUiElement.class.getDeclaredConstructor(AccessibilityElement.class,
-                                                                                                                       DeviceSettingsEntity.class,
                                                                                                                        ImageEntity.class,
                                                                                                                        AccessibilityElementEntity.class,
                                                                                                                        DeviceCommunicator.class);
                 accessibilityUiElementConstructor.setAccessible(true);
 
                 wrappedElements.add((AccessibilityUiElement) accessibilityUiElementConstructor.newInstance(new Object[] {
-                        element, settingsEntity, imageEntity, this, communicator}));
+                        element, imageEntity, this, communicator}));
             } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                     | IllegalArgumentException | InvocationTargetException e) {
                 LOGGER.error("Failed to access the AccessibilityUiElement constructor, or the parameters passed to the constructor are illegal"

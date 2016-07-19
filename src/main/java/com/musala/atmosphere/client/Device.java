@@ -23,7 +23,6 @@ import org.apache.log4j.Logger;
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.device.log.LogCatLevel;
 import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
-import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GpsLocationEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
@@ -31,7 +30,6 @@ import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
 import com.musala.atmosphere.client.util.ClientConstants;
 import com.musala.atmosphere.client.util.ConfigurationPropertiesLoader;
 import com.musala.atmosphere.client.util.LogcatAnnotationProperties;
-import com.musala.atmosphere.client.util.settings.DeviceSettingsManager;
 import com.musala.atmosphere.commons.ConnectionType;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.PowerProperties;
@@ -81,8 +79,6 @@ public class Device {
     private static final String LOCAL_DIR = System.getProperty("user.dir");
 
     private final DeviceCommunicator communicator;
-
-    private DeviceSettingsEntity settingsEntity;
 
     private ImageEntity imageEntity;
 
@@ -278,7 +274,7 @@ public class Device {
      *         active screen fails.
      */
     public Screen getActiveScreen() {
-        return new Screen(settingsEntity, imageEntity, elementEntity, communicator);
+        return new Screen(imageEntity, elementEntity, communicator);
     }
 
     /**
@@ -288,7 +284,7 @@ public class Device {
      *         getting airplane mode fails.
      */
     public Boolean getAirplaneMode() {
-        return settingsEntity.getAirplaneMode();
+        return (Boolean) communicator.sendAction(RoutingAction.GET_AIRPLANE_MODE);
     }
 
     DeviceCommunicator getCommunicator() {
@@ -417,7 +413,7 @@ public class Device {
      * @see ScreenOrientation
      */
     public ScreenOrientation getScreenOrientation() {
-        return settingsEntity.getScreenOrientation();
+        return (ScreenOrientation) communicator.sendAction(RoutingAction.GET_SCREEN_ORIENTATION);
     }
 
     /**
@@ -437,7 +433,7 @@ public class Device {
      *         method failed to get device auto rotation state.
      */
     public Boolean isAutoRotationOn() {
-        return settingsEntity.isAutoRotationOn();
+        return (Boolean) communicator.sendAction(RoutingAction.IS_AUTO_ROTATION_ON);
     }
 
     /**
@@ -712,7 +708,7 @@ public class Device {
      * @return <code>true</code> if the airplane mode setting is successful, <code>false</code> if it fails.
      */
     public boolean setAirplaneMode(boolean airplaneMode) {
-        return settingsEntity.setAirplaneMode(airplaneMode);
+        return (boolean) communicator.sendAction(RoutingAction.SET_AIRPLANE_MODE, airplaneMode);
     }
 
     /**
@@ -721,7 +717,7 @@ public class Device {
      * @return <code>true</code> if the auto rotation setting is successful, and <code>false</code> if it fails
      */
     public boolean enableScreenAutoRotation() {
-        return settingsEntity.enableScreenAutoRotation();
+        return (boolean) communicator.sendAction(RoutingAction.SET_SCREEN_AUTO_ROTATION, true);
     }
 
     /**
@@ -730,7 +726,7 @@ public class Device {
      * @return <code>true</code> if the auto rotation setting is successful, and <code>false</code> if it fails
      */
     public boolean disableScreenAutoRotation() {
-        return settingsEntity.disableScreenAutoRotation();
+        return (boolean) communicator.sendAction(RoutingAction.SET_SCREEN_AUTO_ROTATION, false);
     }
 
     /**
@@ -874,7 +870,7 @@ public class Device {
      * @return <code>true</code> if the screen orientation setting is successful, <code>false</code> if it fails.
      */
     public boolean setScreenOrientation(ScreenOrientation screenOrientation) {
-        return settingsEntity.setScreenOrientation(screenOrientation);
+        return (boolean) communicator.sendAction(RoutingAction.SET_SCREEN_ORIENTATION, screenOrientation);
     }
 
     /**
@@ -1178,7 +1174,7 @@ public class Device {
      * @return true if the given screen off timeout is successfully set.
      */
     public boolean setScreenOffTimeout(long screenOffTimeout) {
-        return settingsEntity.setScreenOffTimeout(screenOffTimeout);
+        return (boolean) communicator.sendAction(RoutingAction.SET_SCREEN_OFF_TIMEOUT, screenOffTimeout);
     }
 
     /**
@@ -1187,7 +1183,7 @@ public class Device {
      * @return timeout in milliseconds, after which the screen is turned off.
      */
     public long getScreenOffTimeout() {
-        return settingsEntity.getScreenOffTimeout();
+        return (long) communicator.sendAction(RoutingAction.GET_SCREEN_OFF_TIMEOUT);
     }
 
     /**
@@ -1210,16 +1206,6 @@ public class Device {
      */
     public boolean setAtmosphereIME() {
         return (boolean) communicator.sendAction(RoutingAction.SET_ATMOSPHERE_IME_AS_DEFAULT);
-    }
-
-    /**
-     * Gets the {@link DeviceSettingsManager settings manager} of the current device, that allows getting and inserting
-     * device settings.
-     *
-     * @return {@link DeviceSettingsManager} instance for this device
-     */
-    public DeviceSettingsManager getDeviceSettingsManager() {
-        return settingsEntity.getDeviceSettingsManager();
     }
 
     /**
@@ -1908,16 +1894,6 @@ public class Device {
      */
     void setImageEntity(ImageEntity imageEntity) {
         this.imageEntity = imageEntity;
-    }
-
-    /**
-     * Sets the {@link DeviceSettingsEntity entity} responsible for retrieving and updating device settings.
-     *
-     * @param settingsEntity
-     *        - instance of the entity that handles changing and receiving information for device settings
-     */
-    void setSettingsEntity(DeviceSettingsEntity settingsEntity) {
-        this.settingsEntity = settingsEntity;
     }
 
     /**

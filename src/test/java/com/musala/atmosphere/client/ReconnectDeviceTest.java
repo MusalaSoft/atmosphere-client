@@ -8,14 +8,11 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.InjectMocks;
 
-import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
 import com.musala.atmosphere.client.websocket.ClientDispatcher;
 import com.musala.atmosphere.commons.PowerProperties;
@@ -40,9 +37,6 @@ public class ReconnectDeviceTest {
 
     private static DeviceCommunicator deviceCommunicator;
 
-    @InjectMocks
-    private static ImageEntity imageEntity;
-
     private static Device testDevice;
 
     @BeforeClass
@@ -58,11 +52,6 @@ public class ReconnectDeviceTest {
         testDevice = new Device(deviceCommunicator);
 
         // deviceCommunicator.release();
-
-        // Constructor visibility is package
-        Constructor<?> imageEntityConstructor = ImageEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
-        imageEntityConstructor.setAccessible(true);
-        imageEntity = (ImageEntity) imageEntityConstructor.newInstance(new Object[] {deviceCommunicator});
 
         doThrow(new ServerConnectionFailedException()).when(dispatcherMock)
                                                       .route(any(), anyLong(), eq(RoutingAction.GET_POWER_PROPERTIES));
@@ -154,7 +143,6 @@ public class ReconnectDeviceTest {
                                                       .route(any(), anyLong(), eq(RoutingAction.IS_LOCKED));
 
         testDevice = new Device(deviceCommunicator);
-        testDevice.setImageEntity(imageEntity);
     }
 
     @Test(expected = ServerConnectionFailedException.class)

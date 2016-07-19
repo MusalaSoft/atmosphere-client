@@ -3,11 +3,10 @@ package com.musala.atmosphere.client;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.entity.EntityTypeResolver;
 import com.musala.atmosphere.client.entity.GpsLocationEntity;
-import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.exceptions.UnresolvedEntityTypeException;
+import com.musala.atmosphere.client.uiutils.AccessibilityElementUtils;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.RoutingAction;
 
@@ -47,24 +46,12 @@ public class DeviceBuilder {
         Device device = new Device(deviceCommunicator);
 
         try {
-            Constructor<?> imageEntityConstructor = ImageEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
-            imageEntityConstructor.setAccessible(true);
-            ImageEntity imageEntity = (ImageEntity) imageEntityConstructor.newInstance(new Object[] {deviceCommunicator});
-            device.setImageEntity(imageEntity);
-
-            Constructor<?> accessibilityElementEntityConstructor = AccessibilityElementEntity.class.getDeclaredConstructor(DeviceCommunicator.class,
-                                                                                                                           ImageEntity.class);
-            accessibilityElementEntityConstructor.setAccessible(true);
-            AccessibilityElementEntity accessibilityElementEntity = (AccessibilityElementEntity) accessibilityElementEntityConstructor.newInstance(new Object[] {
-                    deviceCommunicator, imageEntity});
-            device.setAccessibilityElementEntity(accessibilityElementEntity);
-
             Class<?> locationEntityClass = typeResolver.getEntityClass(GpsLocationEntity.class);
             Constructor<?> locationEntityConstructor = locationEntityClass.getDeclaredConstructor(DeviceCommunicator.class,
-                                                                                                  AccessibilityElementEntity.class);
+                                                                                                  AccessibilityElementUtils.class);
             locationEntityConstructor.setAccessible(true);
             device.setGpsLocationEntity((GpsLocationEntity) locationEntityConstructor.newInstance(new Object[] {
-                    deviceCommunicator, accessibilityElementEntity}));
+                    deviceCommunicator, new AccessibilityElementUtils(deviceCommunicator)}));
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException e) {
             throw new UnresolvedEntityTypeException("Failed to find the correct set of entities implmentations matching the given device information.",

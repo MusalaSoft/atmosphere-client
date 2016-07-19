@@ -4,9 +4,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
-import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
+import com.musala.atmosphere.client.uiutils.AccessibilityElementUtils;
 import com.musala.atmosphere.client.uiutils.UiElementAttributeExtractor;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.ScrollDirection;
@@ -29,16 +28,13 @@ public class ScrollableView extends AccessibilityUiElement {
     private boolean isVertical = true;
 
     ScrollableView(AccessibilityElement accessibilityElement,
-            ImageEntity imageEntity,
-            AccessibilityElementEntity elementEntity,
-            DeviceCommunicator communicator) {
-        super(accessibilityElement, imageEntity, elementEntity);
-        this.communicator = communicator;
+                   AccessibilityElementUtils elementUtils,
+                   DeviceCommunicator communicator) {
+        super(accessibilityElement, elementUtils, communicator);
     }
 
-    ScrollableView(UiElement uiElement, DeviceCommunicator communicator) {
-        super(uiElement);
-        this.communicator = communicator;
+    ScrollableView(UiElement uiElement, AccessibilityElementUtils elementUtils, DeviceCommunicator communicator) {
+        super(uiElement, elementUtils, communicator);
     }
 
     /**
@@ -201,8 +197,8 @@ public class ScrollableView extends AccessibilityUiElement {
 
         for (int i = 0; i < maxSwipes; i++) {
             try {
-                ScrollableView updatedScrollableView = new ScrollableView(elementEntity.getElement(scrollViewSelector,
-                                                                                                   true),
+                ScrollableView updatedScrollableView = new ScrollableView(elementUtils.getElement(scrollViewSelector, true),
+                                                                          elementUtils,
                                                                           communicator);
                 updatedScrollableView.getChildren(innerViewSelector);
                 return true;
@@ -233,7 +229,8 @@ public class ScrollableView extends AccessibilityUiElement {
             UiElementFetchingException {
 
         UiElementSelector scrollViewSelector = UiElementAttributeExtractor.extract(getProperties());
-        ScrollableView updatedScrollableView = new ScrollableView(elementEntity.getElement(scrollViewSelector, true),
+        ScrollableView updatedScrollableView = new ScrollableView(elementUtils.getElement(scrollViewSelector, true),
+                                                                  elementUtils,
                                                                   communicator);
 
         List<UiElement> innerViewChildren = updatedScrollableView.getChildren(innerViewSelector);
@@ -263,7 +260,8 @@ public class ScrollableView extends AccessibilityUiElement {
         }
 
         UiElementSelector scrollViewSelector = UiElementAttributeExtractor.extract(getProperties());
-        ScrollableView updatedScrollableView = new ScrollableView(elementEntity.getElement(scrollViewSelector, true),
+        ScrollableView updatedScrollableView = new ScrollableView(elementUtils.getElement(scrollViewSelector, true),
+                                                                  elementUtils,
                                                                   communicator);
         List<UiElement> innerViewChildren = updatedScrollableView.getChildren(innerViewSelector);
 

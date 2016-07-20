@@ -1,12 +1,5 @@
 package com.musala.atmosphere.client;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
-import com.musala.atmosphere.client.entity.EntityTypeResolver;
-import com.musala.atmosphere.client.entity.GpsLocationEntity;
-import com.musala.atmosphere.client.exceptions.UnresolvedEntityTypeException;
-import com.musala.atmosphere.client.uiutils.AccessibilityElementUtils;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.RoutingAction;
 
@@ -42,21 +35,7 @@ public class DeviceBuilder {
     public Device build() {
         populateDeviceInformation();
 
-        EntityTypeResolver typeResolver = new EntityTypeResolver(deviceInformation);
         Device device = new Device(deviceCommunicator);
-
-        try {
-            Class<?> locationEntityClass = typeResolver.getEntityClass(GpsLocationEntity.class);
-            Constructor<?> locationEntityConstructor = locationEntityClass.getDeclaredConstructor(DeviceCommunicator.class,
-                                                                                                  AccessibilityElementUtils.class);
-            locationEntityConstructor.setAccessible(true);
-            device.setGpsLocationEntity((GpsLocationEntity) locationEntityConstructor.newInstance(new Object[] {
-                    deviceCommunicator, new AccessibilityElementUtils(deviceCommunicator)}));
-        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
-                | IllegalArgumentException | InvocationTargetException e) {
-            throw new UnresolvedEntityTypeException("Failed to find the correct set of entities implmentations matching the given device information.",
-                                                    e);
-        }
 
         return device;
     }

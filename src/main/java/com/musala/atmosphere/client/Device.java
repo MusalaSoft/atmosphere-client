@@ -22,7 +22,6 @@ import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.HardwareButton;
 import com.musala.atmosphere.client.device.log.LogCatLevel;
-import com.musala.atmosphere.client.entity.GpsLocationEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
 import com.musala.atmosphere.client.util.ClientConstants;
@@ -77,8 +76,6 @@ public class Device {
     private static final String LOCAL_DIR = System.getProperty("user.dir");
 
     private final DeviceCommunicator communicator;
-
-    private GpsLocationEntity gpsLocationEntity;
 
     private boolean isLogcatEnabled = true;
 
@@ -1410,7 +1407,7 @@ public class Device {
      * @return <code>true</code> if the GPS location is enabled, <code>false</code> if it's disabled
      */
     public boolean isGpsLocationEnabled() {
-        return gpsLocationEntity.isGpsLocationEnabled();
+        return (boolean) communicator.sendAction(RoutingAction.IS_GPS_LOCATION_ENABLED);
     }
 
     /**
@@ -1419,7 +1416,7 @@ public class Device {
      * @return <code>true</code> if the GPS location enabling is successful, <code>false</code> if it fails
      */
     public boolean enableGpsLocation() {
-        return gpsLocationEntity.enableGpsLocation();
+        return (boolean) communicator.sendAction(RoutingAction.ENABLE_GPS_LOCATION);
     }
 
     /**
@@ -1428,7 +1425,7 @@ public class Device {
      * @return <code>true</code> if the GPS location disabling is successful, <code>false</code> if it fails
      */
     public boolean disableGpsLocation() {
-        return gpsLocationEntity.disableGpsLocation();
+        return (boolean) communicator.sendAction(RoutingAction.DISABLE_GPS_LOCATION);
     }
 
     /**
@@ -1867,16 +1864,5 @@ public class Device {
      */
     private void closeChromeDriver() {
         communicator.sendAction(RoutingAction.CLOSE_CHROME_DRIVER);
-    }
-
-    /**
-     * Sets the {@link GpsLocationEntity entity} responsible for executing operations related with changing the GPS
-     * location state.
-     *
-     * @param gpsLocationEntity
-     *        - instance of the entity which executes GPS location related operations
-     */
-    void setGpsLocationEntity(GpsLocationEntity gpsLocationEntity) {
-        this.gpsLocationEntity = gpsLocationEntity;
     }
 }

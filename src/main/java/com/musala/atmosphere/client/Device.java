@@ -24,6 +24,7 @@ import com.musala.atmosphere.client.entity.GpsLocationEntity;
 import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
+import com.musala.atmosphere.client.entity.MockLocationSettingsEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
 import com.musala.atmosphere.client.util.settings.DeviceSettingsManager;
@@ -89,6 +90,8 @@ public class Device {
     private AccessibilityElementEntity elementEntity;
 
     private GpsLocationEntity gpsLocationEntity;
+
+    private MockLocationSettingsEntity mockLocationSettingsEntity;
 
     /**
      * Constructor that creates a usable Device object by a given {@link DeviceCommunicator device communicator}.
@@ -1192,6 +1195,37 @@ public class Device {
     }
 
     /**
+     * Enables mocking the location in Developer options.
+     *
+     * @param packageName
+     *        - the package name of the application that should be allowed to mock the location
+     * @return <code>true</code> if enabled successfully, <code>false</code> otherwise
+     */
+    public boolean allowMockLocations(String packageName) {
+        return mockLocationSettingsEntity.enableMockLocations(packageName);
+    }
+
+    /**
+     * Disables mocking the location in Developer options.
+     *
+     * @param packageName
+     *        - the package name of the application that should be denied to mock the location
+     * @return <code>true</code> if disabled successfully, <code>false</code> otherwise
+     */
+    public boolean denyMockLocations(String packageName) {
+        return mockLocationSettingsEntity.disableMockLocations(packageName);
+    }
+
+    /**
+     * Checks if Allow mock locations is enabled on this device.
+     *
+     * @return <code>true</code> if it is enabled, <code>false</code> otherwise
+     */
+    public boolean isAllowMockLocationsEnabled() {
+        return mockLocationSettingsEntity.isAllowMockLocationsEnabled();
+    }
+
+    /**
      * Dismisses and re-enables the keyguard of the device in order to Lock and Unlock it.
      *
      * @param keyguardStatus
@@ -1323,7 +1357,7 @@ public class Device {
      * <p>
      * <b>Note:</b> If the recording process exceeds the time limit, the recorded files will be lost.
      * </p>
-     * 
+     *
      * @param timeLimit
      *        - the maximum recording duration in minutes
      */
@@ -1537,6 +1571,10 @@ public class Device {
      */
     void setGpsLocationEntity(GpsLocationEntity gpsLocationEntity) {
         this.gpsLocationEntity = gpsLocationEntity;
+    }
+
+    void setMockLocationSettingsEntity(MockLocationSettingsEntity mockLocationSettingsEntity) {
+        this.mockLocationSettingsEntity = mockLocationSettingsEntity;
     }
 
     /**

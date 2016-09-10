@@ -11,6 +11,7 @@ import com.musala.atmosphere.client.entity.GpsLocationEntity;
 import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
+import com.musala.atmosphere.client.entity.MockLocationSettingsEntity;
 import com.musala.atmosphere.client.exceptions.UnresolvedEntityTypeException;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.RoutingAction;
@@ -100,6 +101,14 @@ public class DeviceBuilder {
                                                                                                   HardwareButtonEntity.class);
             locationEntityConstructor.setAccessible(true);
             device.setGpsLocationEntity((GpsLocationEntity) locationEntityConstructor.newInstance(new Object[] {
+                    deviceCommunicator, accessibilityElementEntity, hardwareButtonEntity}));
+
+            Class<?> mockLocationSettingsEntityClass = typeResolver.getEntityClass(MockLocationSettingsEntity.class);
+            Constructor<?> mockLocationSettingsEntityConstructor = mockLocationSettingsEntityClass.getDeclaredConstructor(DeviceCommunicator.class,
+                                                                                                  AccessibilityElementEntity.class,
+                                                                                                  HardwareButtonEntity.class);
+            mockLocationSettingsEntityConstructor.setAccessible(true);
+            device.setMockLocationSettingsEntity((MockLocationSettingsEntity) mockLocationSettingsEntityConstructor.newInstance(new Object[] {
                     deviceCommunicator, accessibilityElementEntity, hardwareButtonEntity}));
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException e) {

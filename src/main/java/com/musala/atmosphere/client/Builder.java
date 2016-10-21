@@ -20,17 +20,21 @@ import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
 import com.musala.atmosphere.commons.cs.exception.DeviceNotFoundException;
 import com.musala.atmosphere.commons.cs.exception.InvalidPasskeyException;
+import com.musala.atmosphere.commons.exceptions.NoAvailableDeviceFoundException;
 import com.musala.atmosphere.commons.util.Pair;
 
 /**
  * Used by the user to get appropriate device in the server's pool.
- * 
+ *
  * @author vladimir.vladimirov
  */
 public class Builder {
     private static final Logger LOGGER = Logger.getLogger(Builder.class.getCanonicalName());
 
-    private static Map<ServerConnectionProperties, Builder> builders = new HashMap<ServerConnectionProperties, Builder>();
+    // timeout between attempts to get a device
+    private static final int RETRY_SLEEP_TIMEOUT = 1000;
+
+    private static Map<ServerConnectionProperties, Builder> builders = new HashMap<>();
 
     private IClientBuilder clientBuilder;
 
@@ -40,9 +44,12 @@ public class Builder {
 
     private ServerConnectionHandler serverConnectionHandler;
 
+    // the count of the attempts to get a device
+    private int allocateDeviceRetryCount = 300;
+
     /**
      * Initializes {@link Builder} and connects to Server through given {@link ServerConnectionHandler}.
-     * 
+     *
      * @param serverConnectionHandler
      *        - the given {@link ServerConnectionHandler}.
      */
@@ -57,7 +64,7 @@ public class Builder {
 
     /**
      * Gets the {@link Builder Builder} instance for the annotated Server address.
-     * 
+     *
      * @return {@link Builder Builder} instance for the annotated Server address.
      */
     public static Builder getInstance() {
@@ -85,10 +92,10 @@ public class Builder {
 
     /**
      * Gets the {@link Builder Builder} instance for the given {@link ServerConnectionProperties}
-     * 
+     *
      * @param serverConnectionProperties
      *        - the given server connection properties.
-     * 
+     *
      * @return {@link Builder Builder} instance for the given server connection properties.
      */
     public static Builder getInstance(ServerConnectionProperties serverConnectionProperties) {
@@ -113,15 +120,45 @@ public class Builder {
     }
 
     /**
+     * Gets a {@link DeviceAllocationInformation} instance with the given {@link DeviceSelector device characteristics}.
+     *
+     * @param deviceSelector
+     *        - required {@link DeviceSelector parameters} needed to construct new {@link DeviceAllocationInformation}
+     *        instance.
+     * @return a {@link DeviceAllocationInformation} instance with the given device selector.
+     * @throws NoAvailableDeviceFoundException
+     * @throws RemoteException
+     */
+    private DeviceAllocationInformation getDeviceDescriptor(DeviceSelector deviceSelector)
+        throws NoAvailableDeviceFoundException,
+            RemoteException {
+        while (this.allocateDeviceRetryCount > 0) {
+            try {
+                return clientBuilder.allocateDevice(deviceSelector);
+            } catch (NoAvailableDeviceFoundException e) {
+                try {
+                    Thread.sleep(RETRY_SLEEP_TIMEOUT);
+                } catch (InterruptedException e1) {
+                    // Nothing to do here.
+                }
+                this.allocateDeviceRetryCount--;
+            }
+        }
+
+        throw new NoAvailableDeviceFoundException();
+    }
+
+    /**
      * Gets a {@link Device Device} instance with the given {@link DeviceSelector device characteristics}.
-     * 
+     *
      * @param deviceSelector
      *        - required {@link DeviceSelector parameters} needed to construct new {@link Device Device} instance.
      * @return a {@link Device Device} instance with the given device parameters.
      */
     public Device getDevice(DeviceSelector deviceSelector) {
         try {
-            DeviceAllocationInformation deviceDescriptor = clientBuilder.allocateDevice(deviceSelector);
+            DeviceAllocationInformation deviceDescriptor = getDeviceDescriptor(deviceSelector);
+
             String deviceProxyRmiId = deviceDescriptor.getProxyRmiId();
             String messageReleasedDevice = String.format("Fetched device with proxy RMI ID: %s .", deviceProxyRmiId);
             LOGGER.info(messageReleasedDevice);
@@ -133,6 +170,10 @@ public class Builder {
             deviceToDescriptor.put(device, deviceDescriptor);
 
             return device;
+        } catch (NoAvailableDeviceFoundException e) {
+            String message = "No devices matching the requested parameters were found";
+            LOGGER.error(message, e);
+            throw new NoAvailableDeviceFoundException(message, e);
         } catch (RemoteException | NotBoundException e) {
             String message = "Fetching device failed (server connection failure).";
             LOGGER.error(message, e);
@@ -141,8 +182,23 @@ public class Builder {
     }
 
     /**
+     * Gets a {@link Device Device} instance with the given {@link DeviceSelector device characteristics} and maximum
+     * wait time for available device
+     *
+     * @param deviceSelector
+     *        - required {@link DeviceSelector parameters} needed to construct new {@link Device Device} instance.
+     * @param maxWaitTime
+     *        - maximum wait time for available device
+     * @return a {@link Device Device} instance with the given device parameters.
+     */
+    public Device getDevice(DeviceSelector deviceSelector, int maxWaitTime) {
+        this.allocateDeviceRetryCount = maxWaitTime / RETRY_SLEEP_TIMEOUT;
+        return getDevice(deviceSelector);
+    }
+
+    /**
      * Releases a given device.
-     * 
+     *
      * @param device
      *        - device to be released.
      * @throws DeviceNotFoundException
@@ -169,11 +225,11 @@ public class Builder {
 
     /**
      * Releases all allocated devices.
-     * 
+     *
      * @throws DeviceNotFoundException
      */
     public void releaseAllDevices() throws DeviceNotFoundException {
-        Set<Device> devicesToRelease = new HashSet<Device>(deviceToDescriptor.keySet());
+        Set<Device> devicesToRelease = new HashSet<>(deviceToDescriptor.keySet());
         for (Device device : devicesToRelease) {
             releaseDevice(device);
         }
@@ -181,7 +237,7 @@ public class Builder {
 
     /**
      * Gets the {@link ServerConnectionProperties} that are used for connection.
-     * 
+     *
      * @return the {@link ServerConnectionProperties} that are used for connection.
      */
     public ServerConnectionProperties getServerConnectionProperties() {

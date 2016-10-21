@@ -23,7 +23,7 @@ dependencies {
     compile 'com.google.guava:guava:18.0'
     compile 'org.javassist:javassist:3.18.2-GA'
     compile 'org.jsoup:jsoup:1.7.2'
-    compile 'org.reflections:reflections:0.9.10'
+    compile 'org.reflections:reflections:0.9.9-RC1'
 
     testCompile 'org.mockito:mockito-all:1.9.5'
     testCompile 'junit:junit:4.12'

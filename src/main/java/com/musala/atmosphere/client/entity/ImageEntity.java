@@ -30,7 +30,7 @@ public class ImageEntity {
 
     /**
      * Constructs a new {@link ImageEntity} object by given {@link DeviceCommunicator device communicator}.
-     * 
+     *
      * @param communicator
      *        - a communicator to the remote device
      */
@@ -53,6 +53,8 @@ public class ImageEntity {
     /**
      * Crops this {@link UiElement} as an image, using the bounds of the element.
      *
+     * @param propertiesContainer
+     *        - a container of properties
      * @return {@link Image} contained in the element's bounds
      * @throws IOException
      *         - if getting screenshot from the device fails

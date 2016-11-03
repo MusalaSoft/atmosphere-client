@@ -14,7 +14,7 @@ import com.musala.atmosphere.commons.util.Pair;
 
 /**
  * Entity that contains the base gesture functionalities that can be executed on {@link UiElement}.
- * 
+ *
  * @author yavor.stankov
  *
  */
@@ -122,6 +122,8 @@ public class GestureEntity {
      *
      * @param point
      *        - the starting point
+     * @param swipeDirection
+     *        - a direction for the swipe action
      * @return <code>true</code> if the swipe is successful, <code>false</code> if it fails
      */
     public boolean swipe(Point point, SwipeDirection swipeDirection) {

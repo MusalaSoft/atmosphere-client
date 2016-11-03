@@ -300,7 +300,7 @@ public class Screen {
             throw new UiElementFetchingException("No elements found matching the given selector.");
         }
 
-        List<UiElement> uiElements = new ArrayList<UiElement>();
+        List<UiElement> uiElements = new ArrayList<>();
         for (AccessibilityElement element : foundElements) {
             uiElements.add(new AccessibilityUiElement(element,
                                                       gestureEntity,
@@ -406,7 +406,7 @@ public class Screen {
      *
      * @param cssQuery
      *        - CSS selector query.
-     * @return List containing all found elements of type {@link XmlNodeUiElement XmlNodeUiElement}.
+     * @return List containing all found elements of type {@link UiElement UiElement}.
      * @throws InvalidCssQueryException
      *         if the passed argument is invalid CSS query
      * @throws UiElementFetchingException
@@ -429,7 +429,7 @@ public class Screen {
      *
      * @param xPathQuery
      *        - an XPath query that should match the elements
-     * @return List containing all found elements of type {@link XmlNodeUiElement XmlNodeUiElement}.
+     * @return List containing all found elements of type {@link UiElement UiElement}.
      * @throws UiElementFetchingException
      *         if no elements are found for the passed query
      */
@@ -575,7 +575,8 @@ public class Screen {
 
     /**
      * Waits for a window content update event to occur. If a package name for the window is specified, but the current
-     * window does not have the same package name, the function returns immediately.
+     * window does not have the same package name, the function returns immediately. The behavior of this method depends
+     * on the application that it is used on.
      *
      * @param packageName
      *        - the specified window package name (can be null). If null, a window update from any front-end window will
@@ -584,7 +585,6 @@ public class Screen {
      *        - the timeout of the operation
      * @return <code>true</code> if a window update occurred, <code>false</code> if timeout has elapsed or if the
      *         current window does not have the specified package name
-     * @Note The behavior of this method depends on the application that it is used on.
      */
     public boolean waitForWindowUpdate(String packageName, int timeout) {
         return elementEntity.waitForWindowUpdate(packageName, timeout);

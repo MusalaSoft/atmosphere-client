@@ -3,11 +3,11 @@ package com.musala.atmosphere.client.util.settings;
 /**
  * System settings, containing miscellaneous system preferences. We can get or change these settings using the 'content'
  * command utility provided by Android's shell.
- * 
+ *
  * @see <a href="http://developer.android.com/reference/android/provider/Settings.System.html">developer.android.com</a>
- * 
+ *
  * @author nikola.taushanov
- * 
+ *
  */
 public enum AndroidSystemSettings implements IAndroidSettings {
     /**
@@ -123,24 +123,21 @@ public enum AndroidSystemSettings implements IAndroidSettings {
      * If you need to play the default ringtone at any given time, it is recommended you give
      * DEFAULT_RINGTONE_URI(checkout the android public api doc for more information) to the media player. It will
      * resolve to the set default ringtone at the time of playing.
-     * 
-     * @see #DEFAULT_RINGTONE_URI
+     *
      */
     RINGTONE("ringtone"),
 
     /**
      * Persistent store for the system-wide default notification sound.
-     * 
+     *
      * @see #RINGTONE
-     * @see #DEFAULT_NOTIFICATION_URI
      */
     NOTIFICATION_SOUND("notification_sound"),
 
     /**
      * Persistent store for the system-wide default alarm alert.
-     * 
+     *
      * @see #RINGTONE
-     * @see #DEFAULT_ALARM_ALERT_URI
      */
     ALARM_ALERT("alarm_alert"),
 
@@ -182,7 +179,7 @@ public enum AndroidSystemSettings implements IAndroidSettings {
 
     /**
      * Whether the setup wizard has been run before (on first boot), or if it still needs to be run.
-     * 
+     *
      * nonzero(it has been run in the past 0(it has not been run in the past
      */
     SETUP_WIZARD_HAS_RUN("setup_wizard_has_run"),
@@ -196,8 +193,8 @@ public enum AndroidSystemSettings implements IAndroidSettings {
 
     /**
      * Default screen rotation when no other policy applies. When {@link #ACCELEROMETER_ROTATION} is zero and no
-     * on-screen Activity expresses a preference, this rotation value will be used. Must be one of the
-     * {@link com.musala.atmosphere.agent.devicewrapper.util.ScreenOrientation#LANDSCAPE Surface rotation constants}.
+     * on-screen Activity expresses a preference, this rotation value will be used. Must be one of the Surface rotation
+     * constants.
      */
     USER_ROTATION("user_rotation"),
 
@@ -217,13 +214,15 @@ public enum AndroidSystemSettings implements IAndroidSettings {
     HAPTIC_FEEDBACK_ENABLED("haptic_feedback_enabled"),
 
     /**
-     * What happens when the user presses the end call button if they're not on a call.<br/>
-     * <b>Values:</b><br/>
-     * 0 - The end button does nothing.<br/>
-     * 1 - The end button goes to the home screen.<br/>
-     * 2 - The end button puts the device to sleep and locks the keyguard.<br/>
-     * 3 - The end button goes to the home screen. If the user is already on the home screen, it puts the device to
-     * sleep.
+     * <p>
+     * What happens when the user presses the end call button if they're not on a call.
+     * </p>
+     * <b>Values:</b>
+     * <p>
+     * 0 - The end button does nothing 1 - The end button goes to the home screen. 2 - The end button puts the device to
+     * sleep and locks the keyguard. 3 - The end button goes to the home screen. If the user is already on the home
+     * screen, it puts the device to sleep.
+     * </p>
      */
     END_BUTTON_BEHAVIOR("end_button_behavior");
 

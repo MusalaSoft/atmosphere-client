@@ -15,9 +15,9 @@ import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 
 /**
  * Class used for handling all requests to the remote devices and the possible exceptions.
- * 
+ *
  * @author georgi.gaydarov
- * 
+ *
  */
 public class DeviceCommunicator {
     private long invocationPasskey;
@@ -32,7 +32,7 @@ public class DeviceCommunicator {
 
     /**
      * Creates an instance for specified client device.
-     * 
+     *
      * @param wrappedDevice
      *        - the {@link IClientDevice} instance which this instance will communicate with.
      * @param passkey
@@ -52,7 +52,7 @@ public class DeviceCommunicator {
 
     /**
      * Shows the exception that was thrown during the last action if such exception occurred.
-     * 
+     *
      * @return the {@link CommandFailedException} instance that was thrown during the last action if such exception
      *         occurred, <code>null</code> otherwise.
      */
@@ -62,9 +62,7 @@ public class DeviceCommunicator {
 
     /**
      * Requests an action invocation on the device wrapper.
-     * 
-     * @param invocationPasskey
-     *        - the passkey that authorizes this invocation
+     *
      * @param action
      *        - a {@link RoutingAction} instance that specifies the action to be invoked
      * @param args
@@ -95,7 +93,7 @@ public class DeviceCommunicator {
 
     /**
      * Attempts to reconnect to the ATMOSPHERE server.
-     * 
+     *
      * @throws ServerConnectionFailedException
      * @throws DeviceReleasedException
      */

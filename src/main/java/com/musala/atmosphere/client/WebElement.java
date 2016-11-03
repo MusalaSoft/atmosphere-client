@@ -33,6 +33,10 @@ public abstract class WebElement {
      * Finds {@link UiWebElement} within the current {@link WebElement} by the given {@link WebElementSelectionCriterion
      * selection criterion} and the corresponding value.
      *
+     * @param selectionCriterion
+     *        - a {@link WebElementSelectionCriterion selection criterion}
+     * @param criterionValue
+     *        - a {@link WebElementSelectionCriterion selection criterion value}
      * @return the wanted element
      * @throws InvalidCssQueryException
      *         if {@link WebElementSelectionCriterion selection criterion} is set to CSS_SELECTOR and the query is
@@ -52,6 +56,10 @@ public abstract class WebElement {
      * Finds {@link UiWebElement UiWebElements} within the current {@link WebElement} by the given
      * {@link WebElementSelectionCriterion selection criterion} and the corresponding value.
      *
+     * @param selectionCriterion
+     *        - a {@link WebElementSelectionCriterion selection criterion}
+     * @param criterionValue
+     *        - a {@link WebElementSelectionCriterion selection criterion value}
      * @return the wanted element
      * @throws InvalidCssQueryException
      *         if {@link WebElementSelectionCriterion selection criterion} is set to CSS_SELECTOR and the query is
@@ -59,7 +67,7 @@ public abstract class WebElement {
      */
     @SuppressWarnings("unchecked")
     public List<UiWebElement> findElements(WebElementSelectionCriterion selectionCriterion, String criterionValue) {
-        List<UiWebElement> webElements = new ArrayList<UiWebElement>();
+        List<UiWebElement> webElements = new ArrayList<>();
         String xpathCriterionValue = WebElementSelectionCriterionConverter.convertToXpathQuery(selectionCriterion,
                                                                                                criterionValue);
         String findElementQuery = this.xpathQuery + xpathCriterionValue;

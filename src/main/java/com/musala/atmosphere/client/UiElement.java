@@ -96,7 +96,7 @@ public abstract class UiElement {
      * <p>
      * <b>Note:</b> Two-word attributes should be written in camelCase. For example content-desc should be contentDesc.
      * </p>
-     * 
+     *
      * @param xpathQuery
      *        - a string representing an XPath query
      * @return list with all UI element's children present on the screen and matching the given xpath query
@@ -108,7 +108,7 @@ public abstract class UiElement {
     /**
      * Gets all direct children of a {@link UiElement}, represented by XPath node.
      *
-     * @return list, containing all {@link UiElements} that directly ascend the current {@link UiElement}
+     * @return list, containing all {@link UiElement} that directly ascend the current {@link UiElement}
      * @throws UiElementFetchingException
      *         if no direct children are found
      */
@@ -117,6 +117,8 @@ public abstract class UiElement {
     /**
      * Gets all direct children of a {@link UiElement} that match the given {@link UiElementSelector}.
      *
+     * @param selector
+     *        - an UI element selector
      * @return list, containing all {@link UiElement UI elements} matching the {@link UiElementSelector selector} and
      *         directly ascend the current {@link UiElement}
      * @throws UiElementFetchingException
@@ -334,6 +336,12 @@ public abstract class UiElement {
      * @param destinationElementText
      *        - the text of the destination element
      * @return <code>true</code> if the dragging is successful, <code>false</code> if it fails
+     * @throws XPathExpressionException
+     *         when an invalid XPath expression
+     * @throws UiElementFetchingException
+     *         when cannot fetch UiElement
+     * @throws MultipleElementsFoundException
+     *         when multiple elements are found
      * @throws InvalidCssQueryException
      *         when an invalid CSS query is used
      */
@@ -393,8 +401,6 @@ public abstract class UiElement {
      *         when an invalid CSS query is used
      * @throws UiElementFetchingException
      *         when trying to fetch UiElement but it does not exist on the screen
-     * @throws XPathExpressionException
-     *         when there is error in the Xpath expression
      */
     public boolean drag(UiElement destinationElement)
         throws UiElementFetchingException,
@@ -534,8 +540,6 @@ public abstract class UiElement {
      *        - text to be input
      * @param intervalInMs
      *        - interval in milliseconds between the input of each letter
-     * @param revalidateElement
-     *        - boolean indicating if the element should be revalidated prior to text inputting
      * @return <code>true</code> if the text input is successful, <code>false</code> if it fails
      * @throws StaleElementReferenceException
      *         if the element has become stale before executing this method
@@ -718,11 +722,12 @@ public abstract class UiElement {
 
     /**
      * Gets all child UiElements that match the given CSS query.
-     * 
+     *
      * @param cssQuery
      *        - a string representing a CSS Query
      * @return Returns all children of the UiElement that match the given CSS query
      * @throws UiElementFetchingException
+     *         - if failed to fetch an element
      */
     public abstract List<UiElement> getChildrenByCssQuery(String cssQuery) throws UiElementFetchingException;
 }

@@ -135,7 +135,9 @@ public class Image {
      *        - resolution of the screen
      * @return <code>Image</code> of the element
      */
-    public Image getSubimage(Bounds elementBounds, ScreenOrientation screenOrientaion, Pair<Integer, Integer> resolution) {
+    public Image getSubimage(Bounds elementBounds,
+                             ScreenOrientation screenOrientaion,
+                             Pair<Integer, Integer> resolution) {
 
         Point upperLeftCorner = elementBounds.getUpperLeftCorner();
         Point upperRightCorner = elementBounds.getUpperRightCorner();
@@ -171,8 +173,10 @@ public class Image {
                 elementWidth = elementBounds.getHeight();
                 elementHeight = elementBounds.getWidth();
 
-                croppedBufferedImage = this.image.getSubimage(upperLeftCornerPointY, resolutionX
-                        - upperLeftCornerPointX, elementWidth, elementHeight);
+                croppedBufferedImage = this.image.getSubimage(upperLeftCornerPointY,
+                                                              resolutionX - upperLeftCornerPointX,
+                                                              elementWidth,
+                                                              elementHeight);
                 croppedImage = new Image(croppedBufferedImage);
                 return croppedImage.rotate(90);
             case PORTRAIT:
@@ -193,8 +197,10 @@ public class Image {
                 elementWidth = elementBounds.getWidth();
                 elementHeight = elementBounds.getHeight();
 
-                croppedBufferedImage = this.image.getSubimage(resolutionX - upperLeftCornerPointX, resolutionY
-                        - upperLeftCornerPointY, elementWidth, elementHeight);
+                croppedBufferedImage = this.image.getSubimage(resolutionX - upperLeftCornerPointX,
+                                                              resolutionY - upperLeftCornerPointY,
+                                                              elementWidth,
+                                                              elementHeight);
 
                 croppedImage = new Image(croppedBufferedImage);
                 return croppedImage.rotate(180);
@@ -253,9 +259,8 @@ public class Image {
      * @param object
      *        - the {@link Image} for comparison
      *
-     * @return <code>true</code>, if this Image has the same properties as the passed <code>object</
-    code> and <code>false</code> if
-     *         the passed object is not an {@link Image} or differs from this {@link Image}
+     * @return <code>true</code>, if this Image has the same properties as the passed <code>object</code> and
+     *         <code>false</code> if the passed object is not an {@link Image} or differs from this {@link Image}
      */
     @Override
     public boolean equals(Object object) {
@@ -267,7 +272,8 @@ public class Image {
         }
 
         Image image = (Image) object;
-        return (image.getHeight() == this.getHeight() && image.getWidth() == this.getWidth() && this.containsImage(image));
+        return (image.getHeight() == this.getHeight() && image.getWidth() == this.getWidth()
+                && this.containsImage(image));
     }
 
     /**

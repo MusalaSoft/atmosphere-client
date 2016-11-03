@@ -15,9 +15,9 @@ import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 
 /**
  * Manages DatePicker functionality for getting and setting values and getting individual elements of the picker.
- * 
+ *
  * @author denis.bialev
- * 
+ *
  */
 public class DatePicker extends PickerView {
     private static final Logger LOGGER = Logger.getLogger(DatePicker.class);
@@ -46,8 +46,8 @@ public class DatePicker extends PickerView {
          * Initializes the hash maps that keep the 'integer value - string representation' relationships.
          */
         private static void constructMaps() {
-            monthsStringToIntegerMap = new HashMap<String, Integer>();
-            monthsIntegerToStringMap = new HashMap<Integer, String>();
+            monthsStringToIntegerMap = new HashMap<>();
+            monthsIntegerToStringMap = new HashMap<>();
 
             for (Month month : Month.values()) {
                 monthsStringToIntegerMap.put(month.toString(), month.getIntegerRepresentation());
@@ -61,7 +61,7 @@ public class DatePicker extends PickerView {
 
         /**
          * Gets the integer value of the month.
-         * 
+         *
          * @return the integer value of the month.
          */
         public int getIntegerRepresentation() {
@@ -70,8 +70,8 @@ public class DatePicker extends PickerView {
 
         /**
          * Gets the String value of the given month.
-         * 
-         * @param monthNumber
+         *
+         * @param monthIntegerValue
          *        - an integer value of the month.
          * @return String containing a 3 letter abbreviation of the month.
          */
@@ -84,7 +84,7 @@ public class DatePicker extends PickerView {
 
         /**
          * Gets the integer value of the month by given 3 letter abbreviation for a month.
-         * 
+         *
          * @param month
          *        - a string representation 3 letter abbreviation for a month.
          * @return the integer value of the given month.
@@ -135,7 +135,7 @@ public class DatePicker extends PickerView {
 
     /**
      * Gets the year in DatePicker.
-     * 
+     *
      * @return - int instance of DatePicker's year field
      * @throws UiElementFetchingException
      *         if the NumberPicker or EditText elements are not present
@@ -150,7 +150,7 @@ public class DatePicker extends PickerView {
 
     /**
      * Gets the day in DatePicker.
-     * 
+     *
      * @return - int instance of DatePicker's day field.
      * @throws UiElementFetchingException
      *         if the NumberPicker or EditText elements are not present.
@@ -165,7 +165,7 @@ public class DatePicker extends PickerView {
 
     /**
      * Gets the month in DatePicker.
-     * 
+     *
      * @return - int instance of DatePicker's month field.
      * @throws UiElementFetchingException
      *         if the NumberPicker or EditText elements are not present.
@@ -223,7 +223,7 @@ public class DatePicker extends PickerView {
 
     /**
      * Finds the index of all DatePicker fields.
-     * 
+     *
      * @throws UiElementFetchingException
      *         if the NumberPicker or EditText elements are not present.
      * @throws MultipleElementsFoundException
@@ -251,7 +251,7 @@ public class DatePicker extends PickerView {
 
     /**
      * Parses the string from getDatePicker in Date format
-     * 
+     *
      * @param date
      *        - string containing the date we want to parse.
      * @param format
@@ -268,7 +268,7 @@ public class DatePicker extends PickerView {
 
     /**
      * Sets the text of a NumberPicker EditText field
-     * 
+     *
      * @param value
      *        - the text that should be set in the EditText field
      * @param pickerInstance

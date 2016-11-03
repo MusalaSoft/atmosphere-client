@@ -8,9 +8,9 @@ import com.musala.atmosphere.commons.RoutingAction;
 
 /**
  * Provides better interface for getting and inserting all kinds of Android device settings.
- * 
+ *
  * @author nikola.taushanov
- * 
+ *
  */
 public class DeviceSettingsManager {
     private DeviceCommunicator communicator;
@@ -21,7 +21,7 @@ public class DeviceSettingsManager {
 
     /**
      * Retrieves a single setting value as floating point number or returns default value if it is not found.
-     * 
+     *
      * @param setting
      *        - android setting.
      * @param defaultValue
@@ -40,7 +40,7 @@ public class DeviceSettingsManager {
 
     /**
      * Retrieves a single setting value as floating point number.
-     * 
+     *
      * @param setting
      *        - android setting..
      * @return Floating point number if the retrieving succeed.
@@ -59,7 +59,7 @@ public class DeviceSettingsManager {
 
     /**
      * Retrieves a single setting value as integer or returns default value if it is not found.
-     * 
+     *
      * @param setting
      *        - android setting.
      * @param defaultValue
@@ -77,7 +77,7 @@ public class DeviceSettingsManager {
 
     /**
      * Retrieves a single setting value as integer.
-     * 
+     *
      * @param setting
      *        - android setting.
      * @return The single setting value as integer if the retrieving succeed.
@@ -96,7 +96,7 @@ public class DeviceSettingsManager {
 
     /**
      * Retrieves a single setting value as long or returns default value if it is not found.
-     * 
+     *
      * @param setting
      *        - android setting.
      * @param defaultValue
@@ -114,7 +114,7 @@ public class DeviceSettingsManager {
 
     /**
      * Retrieves a single setting value as long.
-     * 
+     *
      * @param setting
      *        - android setting.
      * @return The single setting value as long if the retrieving succeed.
@@ -133,7 +133,7 @@ public class DeviceSettingsManager {
 
     /**
      * Retrieves a single setting value as String or returns default value if it is not found.
-     * 
+     *
      * @param setting
      *        - android setting.
      * @param defaultValue
@@ -152,7 +152,7 @@ public class DeviceSettingsManager {
 
     /**
      * Retrieves a single setting value as String.
-     * 
+     *
      * @param setting
      *        - android setting.
      * @return The string value of the setting or <code>null</code> if the fetching was not successful.
@@ -164,12 +164,12 @@ public class DeviceSettingsManager {
 
     /**
      * Updates a single settings value as a floating point number.
-     * 
+     *
      * @param setting
      *        - android setting.
      * @param value
      *        - value to be set.
-     * @result boolean indicating whether the updating was successful.
+     * @return boolean indicating whether the updating was successful.
      */
     public boolean putFloat(IAndroidSettings setting, float value) {
         return putSetting(setting, "f", Float.toString(value));
@@ -177,12 +177,12 @@ public class DeviceSettingsManager {
 
     /**
      * Updates a single settings value as integer.
-     * 
+     *
      * @param setting
      *        - android setting.
      * @param value
      *        - value to be set.
-     * @result boolean indicating whether the updating was successful.
+     * @return boolean indicating whether the updating was successful.
      */
     public boolean putInt(IAndroidSettings setting, int value) {
         return putSetting(setting, "i", Integer.toString(value));
@@ -190,12 +190,12 @@ public class DeviceSettingsManager {
 
     /**
      * Updates a single settings value as long.
-     * 
+     *
      * @param setting
      *        - android setting.
      * @param value
      *        - value to be set.
-     * @result boolean indicating whether the updating was successful.
+     * @return boolean indicating whether the updating was successful.
      */
     public boolean putLong(IAndroidSettings setting, long value) {
         return putSetting(setting, "l", Long.toString(value));
@@ -203,12 +203,12 @@ public class DeviceSettingsManager {
 
     /**
      * Updates a single settings value as String.
-     * 
+     *
      * @param setting
      *        - android setting.
      * @param value
      *        - value to be set.
-     * @result boolean indicating whether the updating was successful.
+     * @return boolean indicating whether the updating was successful.
      */
     public boolean putString(IAndroidSettings setting, String value) {
         return putSetting(setting, "s", value);

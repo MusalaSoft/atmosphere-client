@@ -19,7 +19,7 @@ import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 
 /**
  * Entity responsible for operations related with {@link AccessibilityUiElement}.
- * 
+ *
  * @author yavor.stankov
  *
  */
@@ -101,6 +101,8 @@ public class AccessibilityElementEntity {
      * Checks if the current element is still valid (on the screen) and updates it's attributes container. This is
      * executed before each operation that requires the element to be still present on the screen.
      *
+     * @param propertiesContainer
+     *        - a container of properties
      * @return true if the current element is still valid, false otherwise
      */
     public boolean revalidate(UiElementPropertiesContainer propertiesContainer) {
@@ -116,7 +118,7 @@ public class AccessibilityElementEntity {
      *        - an object of type {@link UiElementSelector} that needs to match child UI elements
      * @param directChildrenOnly
      *        - <code>true</code> to search for direct children only and <code>false</code> to search all child elements
-     * @param visibleOnly
+     * @param visibleNodesOnly
      *        - <code>true</code> to search for visible elements only and <code>false</code> to search all elements
      * @return a list of {@link UiElement} children that match the given selector
      * @throws UiElementFetchingException
@@ -126,7 +128,8 @@ public class AccessibilityElementEntity {
     public List<AccessibilityElement> getChildren(AccessibilityElement accessibilityElement,
                                                   UiElementSelector selector,
                                                   boolean directChildrenOnly,
-                                                  boolean visibleNodesOnly) throws UiElementFetchingException {
+                                                  boolean visibleNodesOnly)
+        throws UiElementFetchingException {
         List<AccessibilityElement> children = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_CHILDREN,
                                                                                                    accessibilityElement,
                                                                                                    selector,
@@ -147,6 +150,8 @@ public class AccessibilityElementEntity {
      *        - contains the matching criteria
      * @param visibleOnly
      *        - <code>true</code> to search for visible elements only and <code>false</code> to search all elements
+     * @param propertiesContainer
+     *        - a container of properties
      * @return list with all UI element's children present on the screen and matching the given xpath query
      * @throws UiElementFetchingException
      *         if no children matching the given xpath query are found
@@ -155,7 +160,7 @@ public class AccessibilityElementEntity {
     public List<UiElement> getChildrenByXPath(String xpathQuery,
                                               boolean visibleOnly,
                                               UiElementPropertiesContainer propertiesContainer)
-                                                  throws UiElementFetchingException {
+        throws UiElementFetchingException {
         AccessibilityElement accessibilityElement = (AccessibilityElement) propertiesContainer;
 
         List<AccessibilityElement> children = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.EXECUTE_XPATH_QUERY_ON_LOCAL_ROOT,
@@ -171,13 +176,13 @@ public class AccessibilityElementEntity {
 
     /**
      * Wraps all {@link AccessibilityElement accessibility elements} of the given list in {@link UiElement UI elements}.
-     * 
+     *
      * @param accessibilityElements
      *        - the list of elements to be wrapped
      * @return list of {@link UiElement}
      */
     public List<UiElement> wrapAccessibilityElements(List<AccessibilityElement> accessibilityElements) {
-        List<UiElement> wrappedElements = new ArrayList<UiElement>();
+        List<UiElement> wrappedElements = new ArrayList<>();
 
         for (AccessibilityElement element : accessibilityElements) {
             // TODO : After removing the screen move the entities in one package with the AccessibilityUiElement and use
@@ -235,7 +240,8 @@ public class AccessibilityElementEntity {
 
     /**
      * Waits for a window content update event to occur. If a package name for the window is specified, but the current
-     * window does not have the same package name, the function returns immediately.
+     * window does not have the same package name, the function returns immediately. The behavior of this method depends
+     * on the application that it is used on.
      *
      * @param packageName
      *        - the specified window package name (can be null). If null, a window update from any front-end window will
@@ -244,7 +250,6 @@ public class AccessibilityElementEntity {
      *        - the timeout of the operation
      * @return <code>true</code> if a window update occurred, <code>false</code> if timeout has elapsed or if the
      *         current window does not have the specified package name
-     * @Note The behavior of this method depends on the application that it is used on.
      */
     public boolean waitForWindowUpdate(String packageName, int timeout) {
         boolean response = (boolean) communicator.sendAction(RoutingAction.WAIT_FOR_WINDOW_UPDATE,

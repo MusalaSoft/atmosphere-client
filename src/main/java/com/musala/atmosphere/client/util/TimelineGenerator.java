@@ -6,9 +6,9 @@ import com.musala.atmosphere.commons.gesture.Timeline;
 
 /**
  * Houses static methods that generate commonly needed shapes represented by {@link Timeline} instances.
- * 
+ *
  * @author georgi.gaydarov
- * 
+ *
  */
 public class TimelineGenerator {
     private static final float ARC_MAX_ANGLE = 355;
@@ -16,9 +16,9 @@ public class TimelineGenerator {
     private static final float ARC_MIN_ANGLE = 2;
 
     /**
-     * Constructs a {@link Gesture} that, when drawn, results in a circular trajectory. Simplified version of
+     * Constructs a Gesture that, when drawn, results in a circular trajectory. Simplified version of
      * {@link #createCircle(Point, float, int, int, int)} that should be sufficient in most cases.
-     * 
+     *
      * @param center
      *        - the coordinates of the circle origin (as a {@link Point})
      * @param radius
@@ -34,7 +34,7 @@ public class TimelineGenerator {
 
     /**
      * Constructs a {@link Timeline} that, when drawn, results in a circular trajectory.
-     * 
+     *
      * @param center
      *        - the coordinates of the circle origin (as a {@link Point})
      * @param radius
@@ -67,7 +67,7 @@ public class TimelineGenerator {
 
     /**
      * Generates a curve (arc shape) between two points.
-     * 
+     *
      * @param start
      *        - the starting point
      * @param end
@@ -109,7 +109,12 @@ public class TimelineGenerator {
 
         Anchor middle = getArcMiddle(start, end, angularDeg, positive);
 
-        result.addAll(createCurve(start, middle, angularDeg / 2.0f, positive, recursionLevel + 1, recursionMaximumLevel));
+        result.addAll(createCurve(start,
+                                  middle,
+                                  angularDeg / 2.0f,
+                                  positive,
+                                  recursionLevel + 1,
+                                  recursionMaximumLevel));
         result.addAll(createCurve(middle, end, angularDeg / 2.0f, positive, recursionLevel + 1, recursionMaximumLevel));
 
         return result;

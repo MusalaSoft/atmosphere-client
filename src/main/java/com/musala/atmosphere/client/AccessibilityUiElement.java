@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
-import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
@@ -17,7 +17,7 @@ import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 
 /**
  * {@link UiElement} represented as {@link AccessibilityElement} structure. Containing methods operating with
- * {@link AccessibilityNodeInfo}.
+ * {@link android.view.accessibility.AccessibilityNodeInfo}.
  *
  * @author denis.bialev
  *

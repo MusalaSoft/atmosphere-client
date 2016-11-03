@@ -10,7 +10,7 @@ import com.musala.atmosphere.commons.webelement.action.WebElementAction;
 
 /**
  * Represents element in the {@link WebView} containing all possible interaction functionality we can execute on it.
- * 
+ *
  * @author denis.bialev
  *
  */
@@ -42,6 +42,8 @@ public class UiWebElement extends WebElement {
      * particular, we don't fire any keyboard or mouse events. If you want to ensure keyboard events are fired, consider
      * using something like inputText(String) with the backspace key. To ensure you get a change event, consider
      * following with a call to inputText(String) with the tab key.
+     *
+     * @return boolean
      */
     public boolean clearText() {
         revalidate();
@@ -52,7 +54,7 @@ public class UiWebElement extends WebElement {
 
     /**
      * Gets the upper left corner location of the element relative to the {@link WebView} that contains the element.
-     * 
+     *
      * @return {@link Point} representing the relative position of the element
      */
     public Point getRelativePosition() {
@@ -63,7 +65,7 @@ public class UiWebElement extends WebElement {
 
     /**
      * Gets width and height of the element.
-     * 
+     *
      * @return {@link Pair} containing the size of the element
      */
     @SuppressWarnings("unchecked")
@@ -113,7 +115,7 @@ public class UiWebElement extends WebElement {
      * noresize, noshade, novalidate, nowrap, open, paused, pubdate, readonly, required, reversed, scoped, seamless,
      * seeking, selected, spellcheck, truespeed, willvalidate Finally, the following commonly mis-capitalized
      * attribute/property names are evaluated as expected: "class" "readonly"
-     * 
+     *
      * @param attributeKey
      *        - the name of the attribute
      * @return the attribute/property's current value or <code>null</code> if the value is not set or the key is not
@@ -126,7 +128,7 @@ public class UiWebElement extends WebElement {
 
     /**
      * Get the values of all attributes of the element.
-     * 
+     *
      * @return Map containing the element attributes and their values
      */
     public Map<String, Object> getAttributes() {
@@ -137,7 +139,7 @@ public class UiWebElement extends WebElement {
     /**
      * Is the element currently enabled or not? This will generally return true for everything but disabled input
      * elements.
-     * 
+     *
      * @return <code>true</code> if the element is enabled, <code>false</code> otherwise
      */
     public boolean isEnabled() {
@@ -148,7 +150,7 @@ public class UiWebElement extends WebElement {
     /**
      * Determines whether or not this element is selected or not. This operation only applies to input elements such as
      * check boxes, options in a select and radio buttons.
-     * 
+     *
      * @return <code>true</code> if the element is selected, <code>false</code> otherwise
      */
     public boolean isSelected() {
@@ -159,7 +161,7 @@ public class UiWebElement extends WebElement {
 
     /**
      * Checks if the element is disabled.
-     * 
+     *
      * @return <code>true</code> if the element is disabled, <code>false</code> otherwise
      */
     public boolean isDisplayed() {
@@ -174,7 +176,7 @@ public class UiWebElement extends WebElement {
      * . Note that shorthand CSS properties (e.g. background, font, border, border-top, margin, margin-top, padding,
      * padding-top, list-style, outline, pause, cue) are not returned, in accordance with the DOM CSS2 specification -
      * you should directly access the longhand properties (e.g. background-color) to access the desired values.
-     * 
+     *
      * @param cssProperty
      *        - the given CSS property
      * @return String representing the value of the wanted property
@@ -184,9 +186,8 @@ public class UiWebElement extends WebElement {
     }
 
     /**
-     * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element
-     * <input name="foo" />.
-     * 
+     * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element.
+     *
      * @return the tag name of the element
      */
     public String getTagName() {
@@ -198,7 +199,7 @@ public class UiWebElement extends WebElement {
     /**
      * Get the visible (i.e. not hidden by CSS) innerText of this element, including sub-elements, without any leading
      * or trailing whitespace.
-     * 
+     *
      * @return the innerText of this element
      */
     public String getText() {

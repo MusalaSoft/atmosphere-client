@@ -112,7 +112,9 @@ public class GestureCreator {
      *        - this is a pair which present the resolution of the screen
      * @return a {@link Gesture} that represents swipe on a device.
      */
-    public static Gesture createSwipe(Point startPoint, SwipeDirection swipeDirection, Pair<Integer, Integer> resolution) {
+    public static Gesture createSwipe(Point startPoint,
+                                      SwipeDirection swipeDirection,
+                                      Pair<Integer, Integer> resolution) {
         int endX = startPoint.getX();
         int endY = startPoint.getY();
 
@@ -187,7 +189,7 @@ public class GestureCreator {
     }
 
     /**
-     * Defines a {@link Timeline) for a drag and drop gesture. A {@link Timeline} represents a single finger gesture
+     * Defines a {@link Timeline} for a drag and drop gesture. A {@link Timeline} represents a single finger gesture
      * which contains the {$link Anchor Anchor} points that the current pointer will traverse and represent drag and
      * drop on a Device.
      *

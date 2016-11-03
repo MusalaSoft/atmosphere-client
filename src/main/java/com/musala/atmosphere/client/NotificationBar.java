@@ -2,8 +2,6 @@ package com.musala.atmosphere.client;
 
 import java.util.List;
 
-import javax.xml.xpath.XPathExpressionException;
-
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.device.HardwareButton;
@@ -16,7 +14,7 @@ import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 
 /**
  * A class representing a notification bar used to find and interact with notifications.
- * 
+ *
  * @author simeon.ivanov
  */
 public class NotificationBar {
@@ -48,7 +46,7 @@ public class NotificationBar {
     /**
      * Opens the notification bar represented by the {@link NotificationBar} class. This function can only be used on a
      * device with API 18 or higher.
-     * 
+     *
      * @return true if the opening of the notification bar was successful, false otherwise
      */
     public boolean open() {
@@ -60,7 +58,7 @@ public class NotificationBar {
     /**
      * Closes the notification bar represented by the {@link NotificationBar} class. This is the only function that can
      * be used on a device with API lower than 18.
-     * 
+     *
      * @return true if the notification bar was closed successfully, false otherwise
      */
     public boolean close() {
@@ -70,12 +68,10 @@ public class NotificationBar {
     /**
      * Clears all notifications in the notification bar represented by the {@link NotificationBar} class. This function
      * can only be used on a device with API 18 or higher.
-     * 
+     *
      * @return true if the clearing of the notifications was successful, false otherwise
      * @throws UiElementFetchingException
      *         if element could not be found
-     * @throws XPathExpressionException
-     *         if element is searched by invalid XPath query
      */
     public boolean clearAllNotifications() throws UiElementFetchingException {
         open();
@@ -95,7 +91,7 @@ public class NotificationBar {
     /**
      * Finds a notification in the notification bar that matches the given XPath query. This function can only be used
      * on a device with API 18 or higher.
-     * 
+     *
      * @param xPathQuery
      *        - the given XPath query that needs to match a notification
      * @return UiElement that matches the found notification
@@ -144,7 +140,7 @@ public class NotificationBar {
     /**
      * Finds a notification in the notification bar that matches the given CSS query. This function can only be used on
      * a device with API 18 or higher.
-     * 
+     *
      * @param cssQuery
      *        - the given CSS query that needs to match a notification
      * @return UiElement that matches the found notification
@@ -167,7 +163,7 @@ public class NotificationBar {
     /**
      * Finds a notification in the notification bar that matches the given selector. This function can only be used on a
      * device with API 18 or higher.
-     * 
+     *
      * @param selector
      *        - an object of type {@link UiElementSelector}
      * @return UiElement that matches the found notification
@@ -187,7 +183,7 @@ public class NotificationBar {
     /**
      * Finds the notifications in the notification bar that are matching the given selector. This function can only be
      * used on a device with API 18 or higher.
-     * 
+     *
      * @param selector
      *        - an object of type {@link UiElementSelector}
      * @return UiElements that are matching the found notifications
@@ -203,7 +199,7 @@ public class NotificationBar {
     /**
      * Finds a notification in the notification bar that matches the given text. This function can only be used on a
      * device with API 18 or higher.
-     * 
+     *
      * @param text
      *        - the given text that needs to match a notification
      * @return UiElement that matches the found notification

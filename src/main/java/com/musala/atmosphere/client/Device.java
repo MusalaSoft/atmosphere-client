@@ -1004,6 +1004,8 @@ public class Device {
      *
      * @param point
      *        - the starting point.
+     * @param swipeDirection
+     *        - a direction of the swipe action.
      * @return <code>true</code> if the swipe is successful, <code>false</code> if it fails.
      */
     public boolean swipe(Point point, SwipeDirection swipeDirection) {
@@ -1073,13 +1075,12 @@ public class Device {
     }
 
     /**
-     * ForceStops all the processes containing the given package.
+     * ForceStops all the processes containing the given package. Doesn't work for system processes in the Android OS
+     * such as phone, sms, etc.
      *
      * @param packageName
      *        - package of the processes that we want to stop.
      * @return - true, if execution of the command is successful, and false otherwise.
-     *
-     * @note - doesn't work for system processes in the Android OS such as phone, sms, etc.
      */
     public boolean forceStopProcess(String packageName) {
         Object response = communicator.sendAction(RoutingAction.FORCE_STOP_PROCESS, packageName);
@@ -1088,14 +1089,12 @@ public class Device {
     }
 
     /**
-     * Stops a background process by given package.
+     * Stops a background process by given package. Can not be used on system processes. This method kills only
+     * processes that are safe to kill and that will not impact the user experience. Usage of this method on a process
+     * that contains service will result in process restart.
      *
      * @param packageName
      *        - contains the package of the process.
-     *
-     * @Note Can not be used on system processes.
-     * @Note This method kills only processes that are safe to kill and that will not impact the user experience.
-     * @Note Usage of this method on a process that contains service will result in process restart.
      */
     public void stopBackgroundProcess(String packageName) {
         communicator.sendAction(RoutingAction.STOP_BACKGROUND_PROCESS, packageName);
@@ -1120,12 +1119,12 @@ public class Device {
     }
 
     /**
-     * Sets the timeout in the system settings, after which the screen is turned off.
+     * Sets the timeout in the system settings, after which the screen is turned off. On emulators the screen is only
+     * dimmed
      *
      * @param screenOffTimeout
      *        - timeout in milliseconds, after which the screen is turned off.
      * @return true if the given screen off timeout is successfully set.
-     * @Note On emulators the screen is only dimmed.
      */
     public boolean setScreenOffTimeout(long screenOffTimeout) {
         return settingsEntity.setScreenOffTimeout(screenOffTimeout);
@@ -1143,6 +1142,8 @@ public class Device {
     /**
      * Sets a default keyboard by given ID.
      *
+     * @param keyboardID
+     *        - a keyboard ID
      * @return true if setting the IME is successful and false otherwise.
      */
     public boolean setDefaultIME(String keyboardID) {
@@ -1192,12 +1193,11 @@ public class Device {
     }
 
     /**
-     * Dismisses and re-enables the keyguard of the device in order to Lock and Unlock it.
+     * Dismisses and re-enables the keyguard of the device in order to Lock and Unlock it. The keyguard should be
+     * re-enabled for the device's lock to work properly again.
      *
      * @param keyguardStatus
      *        - <code>true</code> if the keyguard should be re-enabled and <code>false</code> to dismiss it.
-     *
-     * @Note The keyguard should be re-enabled for the device's lock to work properly again.
      */
     public void setKeyguard(boolean keyguardStatus) {
         communicator.sendAction(RoutingAction.SET_KEYGUARD, keyguardStatus);
@@ -1323,7 +1323,7 @@ public class Device {
      * <p>
      * <b>Note:</b> If the recording process exceeds the time limit, the recorded files will be lost.
      * </p>
-     * 
+     *
      * @param timeLimit
      *        - the maximum recording duration in minutes
      */
@@ -1412,7 +1412,8 @@ public class Device {
      * Sets WiFi connection properties for this device.
      *
      * @param connectionProperties
-     *        - {@link properties WifiConnectionProperties} of the WiFi connection to be set
+     *        - {@link com.musala.atmosphere.commons.connectivity.WifiConnectionProperties properties} of the WiFi
+     *        connection to be set
      * @return <code>true</code> if WiFi properties are set, <code>false</code> otherwise
      */
     public Boolean setWifiConnectionProperties(WifiConnectionProperties connectionProperties) {

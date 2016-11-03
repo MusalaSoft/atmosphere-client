@@ -202,6 +202,7 @@ public class Builder {
      * @param device
      *        - device to be released.
      * @throws DeviceNotFoundException
+     *         if failed to find the device
      */
     public void releaseDevice(Device device) throws DeviceNotFoundException {
         DeviceAllocationInformation deviceDescriptor = deviceToDescriptor.get(device);
@@ -227,6 +228,7 @@ public class Builder {
      * Releases all allocated devices.
      *
      * @throws DeviceNotFoundException
+     *         if failed to find the device
      */
     public void releaseAllDevices() throws DeviceNotFoundException {
         Set<Device> devicesToRelease = new HashSet<>(deviceToDescriptor.keySet());

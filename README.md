@@ -1,3 +1,5 @@
+See our site for better context of this readme. [Click here](http://atmosphereframework.com/)
+
 # atmosphere-client
 The client library of the ATMOSPHERE mobile testing framework. This library must be included as a dependency in your project to run ATMOSPHERE tests successfully. More information can be found [here](https://github.com/MusalaSoft/atmosphere-docs).
 

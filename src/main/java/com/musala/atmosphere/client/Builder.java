@@ -20,6 +20,7 @@ import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
 import com.musala.atmosphere.commons.cs.exception.DeviceNotFoundException;
 import com.musala.atmosphere.commons.cs.exception.InvalidPasskeyException;
+import com.musala.atmosphere.commons.cs.exception.NoDeviceMatchingTheGivenSelectorException;
 import com.musala.atmosphere.commons.exceptions.NoAvailableDeviceFoundException;
 import com.musala.atmosphere.commons.util.Pair;
 
@@ -142,6 +143,8 @@ public class Builder {
                     // Nothing to do here.
                 }
                 this.allocateDeviceRetryCount--;
+            } catch (NoDeviceMatchingTheGivenSelectorException e) {
+                break;
             }
         }
 

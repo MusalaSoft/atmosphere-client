@@ -11,13 +11,13 @@ import com.musala.atmosphere.commons.ui.selector.UiElementSelector;
 /**
  * {@link GpsLocationEntity} responsible for all devices that are using switch widgets for setting the GPS location
  * state.
- * 
+ *
  * @author yavor.stankov
  *
  */
 @Default
 public class GpsLocationSwitchViewEntity extends GpsLocationEntity {
-    private static final String ANDROID_WIDGET_SWITCH_CLASS_NAME = "android.widget.Switch";
+    private static final String ANDROID_WIDGET_SWITCH_RESOURCE_ID = "com.android.settings:id/switch_widget";
 
     GpsLocationSwitchViewEntity(DeviceCommunicator communicator,
             AccessibilityElementEntity elementEntity,
@@ -28,7 +28,7 @@ public class GpsLocationSwitchViewEntity extends GpsLocationEntity {
     @Override
     protected UiElement getChangeStateWidget() throws MultipleElementsFoundException, UiElementFetchingException {
         UiElementSelector switchWidgetSelector = new UiElementSelector();
-        switchWidgetSelector.addSelectionAttribute(CssAttribute.CLASS_NAME, ANDROID_WIDGET_SWITCH_CLASS_NAME);
+        switchWidgetSelector.addSelectionAttribute(CssAttribute.RESOURCE_ID, ANDROID_WIDGET_SWITCH_RESOURCE_ID);
 
         elementEntity.waitForElementExists(switchWidgetSelector, CHANGE_STATE_WIDGET_TIMEOUT);
 

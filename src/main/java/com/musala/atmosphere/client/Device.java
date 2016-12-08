@@ -26,6 +26,7 @@ import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
+import com.musala.atmosphere.client.util.ClientConstants;
 import com.musala.atmosphere.client.util.settings.DeviceSettingsManager;
 import com.musala.atmosphere.commons.ConnectionType;
 import com.musala.atmosphere.commons.DeviceInformation;
@@ -71,8 +72,6 @@ public class Device {
      * timeout which varies from device to device, but is usually around 1 second.
      */
     public static final int LONG_PRESS_DEFAULT_TIMEOUT = 1500; // ms
-
-    public static final int DEFAULT_SCREEN_RECORD_TIME_LIMIT = 30; // minutes
 
     private final DeviceCommunicator communicator;
 
@@ -1312,7 +1311,7 @@ public class Device {
      * </p>
      */
     public void startScreenRecording() {
-        startScreenRecording(DEFAULT_SCREEN_RECORD_TIME_LIMIT);
+        startScreenRecording(ClientConstants.DEFAULT_SCREEN_RECORD_TIME_LIMIT);
     }
 
     /**

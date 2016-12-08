@@ -12,6 +12,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
+import com.musala.atmosphere.client.util.ScreenRecordingAnnotationProperties;
 import com.musala.atmosphere.client.util.ServerAnnotationProperties;
 import com.musala.atmosphere.client.util.ServerConnectionProperties;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformation;
@@ -48,6 +49,8 @@ public class Builder {
     // the count of the attempts to get a device
     private int allocateDeviceRetryCount = 300;
 
+    private ScreenRecordingAnnotationProperties screenRecordingproperties;
+
     /**
      * Initializes {@link Builder} and connects to Server through given {@link ServerConnectionHandler}.
      *
@@ -61,6 +64,8 @@ public class Builder {
 
         clientBuilder = builderRegistryPair.getKey();
         serverRmiRegistry = builderRegistryPair.getValue();
+
+        this.screenRecordingproperties = new ScreenRecordingAnnotationProperties();
     }
 
     /**
@@ -172,6 +177,11 @@ public class Builder {
             Device device = new DeviceBuilder(iClientDevice, passkey).build();
             deviceToDescriptor.put(device, deviceDescriptor);
 
+            if(this.screenRecordingproperties.isEnabled()) {
+                int duration = this.screenRecordingproperties.getDuration();
+                device.startScreenRecording(duration);
+            }
+
             return device;
         } catch (NoAvailableDeviceFoundException e) {
             String message = "No devices matching the requested parameters were found";
@@ -213,6 +223,9 @@ public class Builder {
 
         deviceToDescriptor.remove(device);
         try {
+            if(this.screenRecordingproperties.isEnabled()) {
+                device.stopScreenRecording();
+            }
             device.release();
             clientBuilder.releaseDevice(deviceDescriptor);
         } catch (RemoteException e) {

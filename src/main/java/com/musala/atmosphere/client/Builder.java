@@ -6,6 +6,7 @@ import java.rmi.registry.Registry;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -207,6 +208,21 @@ public class Builder {
     public Device getDevice(DeviceSelector deviceSelector, int maxWaitTime) {
         this.allocateDeviceRetryCount = maxWaitTime / RETRY_SLEEP_TIMEOUT;
         return getDevice(deviceSelector);
+    }
+
+    /**
+     * Gets list with serial numbers and models of all available devices.
+     * 
+     * @return list with serial numbers and models of all available devices
+     */
+    public List<Pair<String, String>> getAllAvailableDevices() {
+        try {
+            return clientBuilder.getAllAvailableDevices();
+        } catch (RemoteException e) {
+            String message = "Failed to get the list with available devices (server connection failure).";
+            LOGGER.error(message, e);
+            throw new ServerConnectionFailedException(message, e);
+        }
     }
 
     /**

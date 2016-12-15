@@ -1,12 +1,15 @@
 package com.musala.atmosphere.client;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -72,6 +75,8 @@ public class Device {
      * timeout which varies from device to device, but is usually around 1 second.
      */
     public static final int LONG_PRESS_DEFAULT_TIMEOUT = 1500; // ms
+
+    private static final String UI_XML_LOCAL_DIR = System.getProperty("user.dir");
 
     private final DeviceCommunicator communicator;
 
@@ -1479,6 +1484,28 @@ public class Device {
      */
     public boolean getDeviceLog(String logFilePath, String tag) {
         return sendLogCatCommand(logFilePath, " -s " + tag);
+    }
+
+    /**
+     * Gets the UIAutomator UI XML dump and saves it in a file.
+     * 
+     * @param pathToXmlFile
+     *        - full path to the location at which the XML file should be saved
+     * @return <code>true</code> if getting XML operation is successful, <code>false</code> if it fails
+     */
+    public boolean getUiXml(String pathToXmlFile) {
+        String uiHierarchy = (String) communicator.sendAction(RoutingAction.GET_UI_XML_DUMP);
+
+        try (Writer bWritter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(pathToXmlFile),
+                                                                         "UTF-8"))) {
+            bWritter.write(uiHierarchy);
+        } catch (IOException e) {
+            String message = "Saving the xml file failed.";
+            LOGGER.error(message, e);
+            return false;
+        }
+
+        return true;
     }
 
     /**

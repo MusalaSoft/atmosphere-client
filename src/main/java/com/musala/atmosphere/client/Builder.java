@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.musala.atmosphere.client.device.log.LogCatLevel;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
 import com.musala.atmosphere.client.util.LogcatAnnotationProperties;
 import com.musala.atmosphere.client.util.ScreenRecordingAnnotationProperties;
@@ -182,11 +183,11 @@ public class Builder {
             Device device = new DeviceBuilder(iClientDevice, passkey).build();
             deviceToDescriptor.put(device, deviceDescriptor);
 
-            if(this.screenRecordingproperties.isEnabled()) {
+            if (this.screenRecordingproperties.isEnabled()) {
                 int duration = this.screenRecordingproperties.getDuration();
                 device.startScreenRecording(duration);
             }
-            if(this.screenRecordingproperties.isEnabled()) {
+            if (this.logcatAnnotationProperties.isEnabled()) {
                 device.clearLogcat();
             }
 
@@ -219,7 +220,7 @@ public class Builder {
 
     /**
      * Gets list with serial numbers and models of all available devices.
-     * 
+     *
      * @return list with serial numbers and models of all available devices
      */
     public List<Pair<String, String>> getAllAvailableDevices() {
@@ -246,11 +247,11 @@ public class Builder {
 
         deviceToDescriptor.remove(device);
         try {
-            if(this.screenRecordingproperties.isEnabled()) {
+            if (this.screenRecordingproperties.isEnabled()) {
                 device.stopScreenRecording();
             }
-            if(this.logcatAnnotationProperties.isEnabled()) {
-                device.getDeviceLog(logcatAnnotationProperties.getLocalOuputPath(), logcatAnnotationProperties.getFilter());
+            if (this.logcatAnnotationProperties.isEnabled()) {
+                device.getDeviceLog(logcatAnnotationProperties);
             }
             device.release();
             clientBuilder.releaseDevice(deviceDescriptor);

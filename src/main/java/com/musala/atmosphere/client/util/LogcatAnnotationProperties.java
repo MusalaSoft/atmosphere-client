@@ -3,7 +3,7 @@ package com.musala.atmosphere.client.util;
 import com.musala.atmosphere.client.device.log.LogCatLevel;
 
 /**
- * TODO: Add a documentation.
+ * Container holding the properties of the first {@link Logcat} annotation found up in the stack trace.
  *
  * @author dimcho.nedev
  *
@@ -21,10 +21,6 @@ public class LogcatAnnotationProperties {
 
     private String tag;
 
-    // private static final String DEFAULT_PATH = System.getProperty("user.dir") + System.getProperty("file.separator") + ClientConstants.DEAFAULT_LOG_FILENAME;
-
-    // System.getProperty("file.separator")
-
     public LogcatAnnotationProperties() {
         ClassLocator annotationLocator = new ClassLocator(Logcat.class);
         annotatedClass = annotationLocator.getFirstAnnotatedClass();
@@ -39,32 +35,37 @@ public class LogcatAnnotationProperties {
     }
 
     /**
-     * TODO: Add a documentation
+     * If LogCat is enabled
      *
-     * @return
+     * @return <code>true</code> if a LogCat annotation is found, otherwise returns <code>false</code>.
      */
     public boolean isEnabled() {
         return this.enabled;
     }
 
     /**
-     * TODO: Add a documentation
+     * Gets the path to the output folder.
      *
-     * @return
+     * @return String path
      */
     public String getLocalOuputPath() {
         return this.localOuputPath;
     }
 
     /**
-     * TODO: Add a documentation.
+     * Gets the log level filters.
      *
-     * @return
+     * @return an array of log level filters
      */
-    public LogCatLevel[] getFilter() {
+    public LogCatLevel[] getLogCatLevel() {
         return this.filter;
     }
 
+    /**
+     * Gets the tag filter.
+     *
+     * @return String, tag filter
+     */
     public String getTag() {
         return this.tag;
     }

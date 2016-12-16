@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 import com.musala.atmosphere.client.device.log.LogCatLevel;
 
 /**
- * TODO: Add a documentation
+ * <i>@Logcat</i> annotation. It is used to annotate the user's test class with LogCat enabled.
  *
  * @author dimcho.nedev
  *
@@ -16,21 +16,21 @@ import com.musala.atmosphere.client.device.log.LogCatLevel;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Logcat {
-    public static final String DEFAULT_LOGCAT_PATH = "./device.log";
+    public static final String DEFAULT_LOGCAT_PATH = ".";
 
     public static final String DEFAULT_TAG = "";
     /*
-     * TODO: add a documentation
+     * A path to the local output folder.
      */
     String localOuputPath() default DEFAULT_LOGCAT_PATH;
 
     /*
-     * TODO: Add a documentation
+     * An array from log level filters.
      */
     LogCatLevel[] filter() default LogCatLevel.VERBOSE;
 
     /*
-     * TODO: Add a documentation
+     * A tag filter.
      */
     String tag() default DEFAULT_TAG;
 }

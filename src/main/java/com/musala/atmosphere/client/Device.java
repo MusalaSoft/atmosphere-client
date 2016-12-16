@@ -13,6 +13,7 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -30,6 +31,7 @@ import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
 import com.musala.atmosphere.client.util.ClientConstants;
+import com.musala.atmosphere.client.util.LogcatAnnotationProperties;
 import com.musala.atmosphere.client.util.settings.DeviceSettingsManager;
 import com.musala.atmosphere.commons.ConnectionType;
 import com.musala.atmosphere.commons.DeviceInformation;
@@ -52,6 +54,7 @@ import com.musala.atmosphere.commons.gesture.Gesture;
 import com.musala.atmosphere.commons.util.GeoLocation;
 import com.musala.atmosphere.commons.util.IntentBuilder;
 import com.musala.atmosphere.commons.util.IntentBuilder.IntentAction;
+import com.musala.atmosphere.commons.util.Pair;
 
 /**
  * Android device representing class.
@@ -76,7 +79,7 @@ public class Device {
      */
     public static final int LONG_PRESS_DEFAULT_TIMEOUT = 1500; // ms
 
-    private static final String UI_XML_LOCAL_DIR = System.getProperty("user.dir");
+    private static final String LOCAL_DIR = System.getProperty("user.dir");
 
     private final DeviceCommunicator communicator;
 
@@ -93,6 +96,8 @@ public class Device {
     private AccessibilityElementEntity elementEntity;
 
     private GpsLocationEntity gpsLocationEntity;
+
+    private boolean isLogcatEnabled = true;
 
     /**
      * Constructor that creates a usable Device object by a given {@link DeviceCommunicator device communicator}.
@@ -1434,10 +1439,205 @@ public class Device {
     }
 
     /**
-     * Clears the logacat from the device.
+     * Starts local LogCat logging with VERBOSE log level. The LogCat file will be saved in "/logcat" folder in the
+     * current project directory.
      */
-    public synchronized void clearLogcat() {
+    public void startLogcat() {
+        startLogcat(LOCAL_DIR, LogCatLevel.VERBOSE);
+    }
+
+    /**
+     * Starts local LogCat logging by log file path and {@link LogCatLevel} levels.
+     *
+     * @param logFilePath
+     *        - path to the log file where device log will be stored
+     * @param logLevels
+     *        - log levels to be set for filtering
+     */
+    public void startLogcat(String logFilePath, LogCatLevel... logLevels) {
+        String logcatParams = calculateLogLevels(logLevels);
+        startLogcat(logFilePath, logcatParams);
+    }
+
+    /**
+     * Starts local LogCat logging by log file path, {@link LogCatLevel} levels and tag.
+     *
+     * @param logFilePath
+     *        - path to the log file where device log will be stored
+     * @param logLevel
+     *        - log level to be set for filtering
+     * @param tag
+     *        - tag for filtering used in combination with the given logLevel
+     */
+    public void startLogcat(String logFilePath, LogCatLevel logLevel, String tag) {
+        String logcatParams = logLevel.getLevelTagFilter(tag) + LogCatLevel.SILENT.getFilterValue();
+        startLogcat(logFilePath, " -s " + logcatParams);
+    }
+
+    /**
+     * Starts local LogCat logging by log file {@link LogCatLevel} level and tag. The LogCat file will be saved in
+     * "/logcat" folder in the current project directory.
+     *
+     * @param logLevel
+     *        - log level to be set for filtering
+     * @param tag
+     *        - tag for filtering used in combination with the given logLevel
+     */
+    public void startLogcat(LogCatLevel logLevel, String tag) {
+        startLogcat(LOCAL_DIR, logLevel, tag);
+    }
+
+    /**
+     * Starts local LogCat logging by log file {@link LogCatLevel} levels. The LogCat file will be saved in "/logcat"
+     * folder in the current project directory.
+     *
+     * @param logLevels
+     *        - log levels to be set for filtering
+     */
+    public void startLogcat(LogCatLevel... logLevels) {
+        startLogcat(LOCAL_DIR, logLevels);
+    }
+
+    /**
+     * Starts the LogCat buffering and creates a log file that contains test class name and caller test method name.
+     *
+     * @param logcatFolderPath
+     *        - LogCat file path
+     * @param logcatParams
+     *        - LogCat command parameters
+     */
+    private void startLogcat(String logcatFolderPath, String logcatParams) {
+        if (logcatFolderPath.equals(LOCAL_DIR)) {
+            logcatFolderPath = createLogcatOutputFolder(logcatFolderPath);
+        }
+        logcatFolderPath = addFileSeparatorIfNotExists(logcatFolderPath);
+        final String deviceSerialNumber = this.getInformation().getSerialNumber();
+        final String command = String.format("adb -s %s logcat %s", deviceSerialNumber, logcatParams);
+
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+
+        int testMethodTraceLevel = 3;
+        String callerMethodName = stackTraceElements[testMethodTraceLevel].getMethodName();
+        String callerClassName = stackTraceElements[testMethodTraceLevel].getClassName();
+        String filename = logcatFolderPath + callerClassName + "." + callerMethodName;
+
+        filename = composeBaseLogcatFileName(filename + "_");
+
+        Runnable startDeviceLogcatStream = new Runnable() {
+            @Override
+            public void run() {
+                communicator.sendAction(RoutingAction.START_DEVICE_LOGCAT, deviceSerialNumber, command);
+            }
+        };
+        Thread startDeviceLogcatStreamThread = new Thread(startDeviceLogcatStream);
+        startDeviceLogcatStreamThread.start();
+
+        getLogcatBuffer(filename);
+    }
+
+    /**
+     * Prints/Write data from the LogCat buffer and returns the total number of the lines.
+     *
+     * @param bufferedWriter
+     *        - a {@link BufferedWriter}
+     * @param buffer
+     *        - {@link Pair} of control number and log data
+     * @param expectedLineId
+     *        - a control ID that verifies that the log data is received in consistent order
+     * @return the ID of the next expected line from the buffer.
+     * @throws IOException
+     *         throw when fails to write the data from the buffer
+     */
+    private int printBuffer(BufferedWriter bufferedWriter, List<Pair<Integer, String>> buffer, int expectedLineId)
+        throws IOException {
+        if (buffer.size() > 0) {
+            for (Pair<Integer, String> idToLogLine : buffer) {
+                if (expectedLineId != idToLogLine.getKey()) {
+                    LOGGER.error("Some logcat output is missing.");
+                }
+                System.out.println(idToLogLine.getValue());
+                bufferedWriter.write(idToLogLine.getValue() + System.getProperty("line.separator"));
+                expectedLineId++;
+            }
+        }
+
+        return expectedLineId;
+    }
+
+    /**
+     * Gets dynamically the new data from the LogCat buffer and prints on the console.
+     *
+     * @param filename
+     *        - the name of the log file
+     */
+    private void getLogcatBuffer(final String filename) {
+        final String serialNumber = this.getInformation().getSerialNumber();
+
+        Runnable getLogcatBuffer = new Runnable() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public void run() {
+                int expectedLineId = 0;
+                try (BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename),
+                                                                                               "UTF-8"))) {
+                    while (isLogcatEnabled) {
+                        List<Pair<Integer, String>> buffer = (List<Pair<Integer, String>>) communicator.sendAction(RoutingAction.GET_LOGCAT_BUFFER,
+                                                                                                                   serialNumber);
+                        expectedLineId = printBuffer(bufferedWriter, buffer, expectedLineId);
+                    }
+                } catch (IOException e) {
+                    LOGGER.error(String.format("Storing file for device with serial number %s failed.", serialNumber),
+                                 e);
+                }
+            }
+        };
+
+        Thread getLogcatBufferThread = new Thread(getLogcatBuffer);
+        getLogcatBufferThread.start();
+    }
+
+    /**
+     * Stops the LogCat buffering and the ADB process on the agent.
+     */
+    public void stopLogcat() {
+        isLogcatEnabled = false;
+        String deviceSerialNumber = this.getInformation().getSerialNumber();
+        communicator.sendAction(RoutingAction.STOP_LOGCAT, deviceSerialNumber);
+    }
+
+    /**
+     * Clears the LogCat log from the device.
+     */
+    public void clearLogcat() {
         communicator.sendAction(RoutingAction.CLEAR_LOGCAT);
+    }
+
+    /**
+     * Resolves getting the device LogCat for various sets of parameters.
+     *
+     * @param properies
+     *        - {@link LogcatAnnotationProperties} properties for the annotation
+     * @return <code>true</code> if device log is stored successfully, <code>false</code> otherwise
+     */
+    public boolean getDeviceLog(LogcatAnnotationProperties properies) {
+        boolean result = false;
+        String logcatFolderPath = properies.getLocalOuputPath();
+        LogCatLevel[] logcatLevels = properies.getLogCatLevel();
+        String tag = properies.getTag();
+
+        if (logcatFolderPath.equals(".")) {
+            logcatFolderPath = createLogcatOutputFolder(logcatFolderPath);
+        }
+
+        if (tag.isEmpty()) {
+            result = this.getDeviceLog(logcatFolderPath, logcatLevels);
+        } else if (logcatLevels.length == 1) {
+            result = this.getDeviceLog(logcatFolderPath, logcatLevels[0], tag);
+        } else {
+            LOGGER.error("Failed to get the logcat due incorrect set of annotation parameters.");
+        }
+
+        return result;
     }
 
     /**
@@ -1451,17 +1651,9 @@ public class Device {
      * @return <code>true</code> if device log is stored successfully, <code>false</code> otherwise
      */
     public boolean getDeviceLog(String logFilePath, LogCatLevel... logLevels) {
-        StringBuilder logFilters = new StringBuilder();
+        String logcatParams = calculateLogLevels(logLevels);
 
-        if (logLevels.length == 0) {
-            logFilters.append(LogCatLevel.VERBOSE.getFilterValue());
-        }
-
-        for (int i = 0; i < logLevels.length; i++) {
-            logFilters.append(logLevels[i].getFilterValue());
-        }
-
-        return sendLogCatCommand(logFilePath, logFilters.toString());
+        return getDeviceLogcat(logFilePath, logcatParams);
     }
 
     /**
@@ -1477,7 +1669,7 @@ public class Device {
      * @return <code>true</code> if device log is stored successfully, <code>false</code> otherwise
      */
     public boolean getDeviceLog(String logFilePath, LogCatLevel logLevel, String tag) {
-        return sendLogCatCommand(logFilePath, logLevel.getLevelTagFilter(tag) + LogCatLevel.SILENT.getFilterValue());
+        return getDeviceLogcat(logFilePath, logLevel.getLevelTagFilter(tag) + LogCatLevel.SILENT.getFilterValue());
     }
 
     /**
@@ -1490,29 +1682,7 @@ public class Device {
      * @return <code>true</code> if device log is stored successfully, <code>false</code> otherwise
      */
     public boolean getDeviceLog(String logFilePath, String tag) {
-        return sendLogCatCommand(logFilePath, " -s " + tag);
-    }
-
-    /**
-     * Gets the UIAutomator UI XML dump and saves it in a file.
-     * 
-     * @param pathToXmlFile
-     *        - full path to the location at which the XML file should be saved
-     * @return <code>true</code> if getting XML operation is successful, <code>false</code> if it fails
-     */
-    public boolean getUiXml(String pathToXmlFile) {
-        String uiHierarchy = (String) communicator.sendAction(RoutingAction.GET_UI_XML_DUMP);
-
-        try (Writer bWritter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(pathToXmlFile),
-                                                                         "UTF-8"))) {
-            bWritter.write(uiHierarchy);
-        } catch (IOException e) {
-            String message = "Saving the xml file failed.";
-            LOGGER.error(message, e);
-            return false;
-        }
-
-        return true;
+        return getDeviceLogcat(logFilePath, " -s " + tag);
     }
 
     /**
@@ -1524,7 +1694,7 @@ public class Device {
      *        - all the filters that must applied with the command
      * @return <code>true</code> if device log is stored successfully, <code>false</code> otherwise
      */
-    private boolean sendLogCatCommand(String logFilePath, String logFilters) {
+    private boolean getDeviceLogcat(String logFilePath, String logFilters) {
         byte[] data = (byte[]) communicator.sendAction(RoutingAction.GET_DEVICE_LOGCAT, logFilters);
 
         return writeLogFile(logFilePath, data);
@@ -1540,6 +1710,8 @@ public class Device {
      * @return <code>true</code> if data is stored in the file, <code>false</code> otherwise
      */
     private boolean writeLogFile(String filePath, byte[] data) {
+        filePath = addFileSeparatorIfNotExists(filePath);
+        filePath = composeBaseLogcatFileName(filePath);
         File localFile = new File(filePath);
 
         try {
@@ -1549,6 +1721,90 @@ public class Device {
         } catch (IOException e) {
             String serialNumber = getInformation().getSerialNumber();
             LOGGER.error(String.format("Storing file for device with serial number %s failed.", serialNumber), e);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Adds a file separator at the end of the file path if a separator not exists.
+     *
+     * @param filePath
+     *        - file path
+     * @return file path
+     */
+    private String addFileSeparatorIfNotExists(String filePath) {
+        if (!filePath.endsWith("\\") && !filePath.endsWith("/")) {
+            filePath += File.separator;
+        }
+
+        return filePath;
+    }
+
+    /**
+     * Composes an unique name for the device LogCat file.
+     *
+     * @param basename
+     *        - a base file name
+     * @return an unique filename for device LogCat
+     */
+    private String composeBaseLogcatFileName(String basename) {
+        String serialNumber = getInformation().getSerialNumber();
+        String model = getInformation().getModel();
+        basename += "device_" + model + "_" + serialNumber + ".log";
+        basename = basename.replaceAll("\\s+", "_");
+
+        return basename;
+    }
+
+    /**
+     * Concatenates all log levels
+     *
+     * @param logLevels
+     *        - log levels to be set for filtering
+     * @return concatenated log levels
+     */
+    private String calculateLogLevels(LogCatLevel... logLevels) {
+        StringBuilder logFilters = new StringBuilder();
+
+        if (logLevels.length == 0) {
+            logFilters.append(LogCatLevel.VERBOSE.getFilterValue());
+        }
+
+        for (int i = 0; i < logLevels.length; i++) {
+            logFilters.append(logLevels[i].getFilterValue());
+        }
+
+        return logFilters.toString();
+    }
+
+    private String createLogcatOutputFolder(String logcatFolderPath) {
+        logcatFolderPath += File.separator + "logcat";
+        File logcatOutputFolder = new File(logcatFolderPath);
+        if (!logcatOutputFolder.exists()) {
+            logcatOutputFolder.mkdir();
+        }
+
+        return logcatFolderPath;
+    }
+
+    /**
+     * Gets the UIAutomator UI XML dump and saves it in a file.
+     *
+     * @param pathToXmlFile
+     *        - full path to the location at which the XML file should be saved
+     * @return <code>true</code> if getting XML operation is successful, <code>false</code> if it fails
+     */
+    public boolean getUiXml(String pathToXmlFile) {
+        String uiHierarchy = (String) communicator.sendAction(RoutingAction.GET_UI_XML_DUMP);
+
+        try (Writer bWritter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(pathToXmlFile),
+                                                                         "UTF-8"))) {
+            bWritter.write(uiHierarchy);
+        } catch (IOException e) {
+            String message = "Saving the xml file failed.";
+            LOGGER.error(message, e);
             return false;
         }
 

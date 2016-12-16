@@ -13,6 +13,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
+import com.musala.atmosphere.client.util.LogcatAnnotationProperties;
 import com.musala.atmosphere.client.util.ScreenRecordingAnnotationProperties;
 import com.musala.atmosphere.client.util.ServerAnnotationProperties;
 import com.musala.atmosphere.client.util.ServerConnectionProperties;
@@ -52,6 +53,8 @@ public class Builder {
 
     private ScreenRecordingAnnotationProperties screenRecordingproperties;
 
+    private LogcatAnnotationProperties logcatAnnotationProperties;
+
     /**
      * Initializes {@link Builder} and connects to Server through given {@link ServerConnectionHandler}.
      *
@@ -67,6 +70,7 @@ public class Builder {
         serverRmiRegistry = builderRegistryPair.getValue();
 
         this.screenRecordingproperties = new ScreenRecordingAnnotationProperties();
+        this.logcatAnnotationProperties = new LogcatAnnotationProperties();
     }
 
     /**
@@ -182,6 +186,9 @@ public class Builder {
                 int duration = this.screenRecordingproperties.getDuration();
                 device.startScreenRecording(duration);
             }
+            if(this.screenRecordingproperties.isEnabled()) {
+                device.clearLogcat();
+            }
 
             return device;
         } catch (NoAvailableDeviceFoundException e) {
@@ -241,6 +248,9 @@ public class Builder {
         try {
             if(this.screenRecordingproperties.isEnabled()) {
                 device.stopScreenRecording();
+            }
+            if(this.logcatAnnotationProperties.isEnabled()) {
+                device.getDeviceLog(logcatAnnotationProperties.getLocalOuputPath(), logcatAnnotationProperties.getFilter());
             }
             device.release();
             clientBuilder.releaseDevice(deviceDescriptor);

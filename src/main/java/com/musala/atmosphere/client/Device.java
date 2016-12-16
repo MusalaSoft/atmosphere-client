@@ -1434,6 +1434,13 @@ public class Device {
     }
 
     /**
+     * Clears the logacat from the device.
+     */
+    public synchronized void clearLogcat() {
+        communicator.sendAction(RoutingAction.CLEAR_LOGCAT);
+    }
+
+    /**
      * Stores currently available logs from the device LogCat into a file with the given path. {@link LogCatLevel LogCat
      * levels} are applied as filters, if present. Multiple levels can be used at once for filtering.
      *

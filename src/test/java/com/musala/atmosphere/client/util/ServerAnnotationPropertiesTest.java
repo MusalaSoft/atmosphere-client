@@ -5,12 +5,12 @@ import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.musala.atmosphere.client.exceptions.MissingServerAnnotationException;
+import com.musala.atmosphere.client.exceptions.MissingServerConnectionProperiesException;;
 
 /**
- * 
+ *
  * @author yordan.petrov
- * 
+ *
  */
 public class ServerAnnotationPropertiesTest {
     private static AnnotatedClass annotatedClass;
@@ -82,8 +82,8 @@ public class ServerAnnotationPropertiesTest {
                      connectionRetryLimit);
     }
 
-    @Test(expected = MissingServerAnnotationException.class)
-    public void testThrowExceptionWhenNoAnnotationPresent() {
+    @Test(expected = MissingServerConnectionProperiesException.class)
+    public void testThrowExceptionWhenNoServerConnectionPropertiesPresent() {
         UnannotatedClass unannotatedClass = new UnannotatedClass();
         unannotatedClass.getServerAnnotationProperties();
     }

@@ -31,6 +31,7 @@ import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
 import com.musala.atmosphere.client.util.ClientConstants;
+import com.musala.atmosphere.client.util.ConfigurationPropertiesLoader;
 import com.musala.atmosphere.client.util.LogcatAnnotationProperties;
 import com.musala.atmosphere.client.util.settings.DeviceSettingsManager;
 import com.musala.atmosphere.commons.ConnectionType;
@@ -99,11 +100,12 @@ public class Device {
 
     private boolean isLogcatEnabled = true;
 
+    private String screenRecordUploadDiectoryName;
+
     /**
      * Constructor that creates a usable Device object by a given {@link DeviceCommunicator device communicator}.
      *
      * @param deviceCommunicator
-     * @param hardwareButtonEntity
      */
     Device(DeviceCommunicator deviceCommunicator) {
         this.communicator = deviceCommunicator;
@@ -1337,14 +1339,19 @@ public class Device {
      *        - the maximum recording duration in minutes
      */
     public void startScreenRecording(int timeLimit) {
+        screenRecordUploadDiectoryName = ConfigurationPropertiesLoader.isConfigExists()
+                && ConfigurationPropertiesLoader.hasFtpServer()
+                        ? ConfigurationPropertiesLoader.getFtpRemoteUplaodDirectory() : "";
+
         communicator.sendAction(RoutingAction.START_RECORDING, timeLimit);
     }
 
     /**
-     * Stops screen recording.
+     * Stops screen recording. If the Agent is connected to an FTP server the video record will be uploaded to a folder
+     * with name specified by the client (properties file in the test project working directory).
      */
     public void stopScreenRecording() {
-        communicator.sendAction(RoutingAction.STOP_RECORDING);
+        communicator.sendAction(RoutingAction.STOP_RECORDING, screenRecordUploadDiectoryName);
     }
 
     /**

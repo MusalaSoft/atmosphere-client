@@ -12,8 +12,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.musala.atmosphere.client.device.log.LogCatLevel;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
+import com.musala.atmosphere.client.util.ConfigurationPropertiesLoader;
 import com.musala.atmosphere.client.util.LogcatAnnotationProperties;
 import com.musala.atmosphere.client.util.ScreenRecordingAnnotationProperties;
 import com.musala.atmosphere.client.util.ServerAnnotationProperties;
@@ -81,25 +81,20 @@ public class Builder {
      */
     public static Builder getInstance() {
         ServerAnnotationProperties serverAnnotationProperties = new ServerAnnotationProperties();
-        Builder builder = builders.get(serverAnnotationProperties);
 
-        if (builder == null) {
-            synchronized (Builder.class) {
-                builder = builders.get(serverAnnotationProperties);
-
-                if (builder == null) {
-                    ServerConnectionHandler serverConnectionHandler = new ServerConnectionHandler(serverAnnotationProperties);
-
-                    builder = new Builder(serverConnectionHandler);
-                    String message = "Builder instance has been created.";
-                    LOGGER.info(message);
-                    builders.put(serverAnnotationProperties, builder);
-                }
-
-            }
+        if(serverAnnotationProperties.isServerAnnotationExists()) {
+            return getInstance(serverAnnotationProperties);
         }
 
-        return builder;
+        String serverIp = ConfigurationPropertiesLoader.getServerIp();
+        int serverPort = ConfigurationPropertiesLoader.getServerPort();
+        int connectionRetryLimit = ConfigurationPropertiesLoader.getConnectionRetries();
+
+        ServerConnectionProperties serverConnectionProperties = new ServerConnectionProperties(serverIp,
+                                                                                               serverPort,
+                                                                                               connectionRetryLimit);
+
+        return getInstance(serverConnectionProperties);
     }
 
     /**

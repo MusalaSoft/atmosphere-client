@@ -180,7 +180,7 @@ public class Builder {
 
             if (this.screenRecordingproperties.isEnabled()) {
                 int duration = this.screenRecordingproperties.getDuration();
-                device.startScreenRecording(duration);
+                device.startScreenRecording(duration, false);
             }
             if (this.logcatAnnotationProperties.isEnabled()) {
                 device.clearLogcat();

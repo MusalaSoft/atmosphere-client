@@ -1313,7 +1313,7 @@ public class Device {
     }
 
     /**
-     * Starts screen recording.
+     * Starts screen recording with a default orientation(portrait).
      * <p>
      * <b>Note:</b> This method works only for Android 4.4 and above.
      * </p>
@@ -1323,11 +1323,21 @@ public class Device {
      * </p>
      */
     public void startScreenRecording() {
-        startScreenRecording(ClientConstants.DEFAULT_SCREEN_RECORD_TIME_LIMIT);
+        startScreenRecording(ClientConstants.DEFAULT_SCREEN_RECORD_TIME_LIMIT, false);
     }
 
     /**
-     * Starts screen recording with given maximum duration. *
+     * Start screen recording with a certain orientation.
+     *
+     * @param forceLandscape
+     *        - <code>true</code> for portrait, <code>false</code> for landscape screen record orientation
+     */
+    public void startScreenRecording(boolean forceLandscape) {
+        startScreenRecording(ClientConstants.DEFAULT_SCREEN_RECORD_TIME_LIMIT, forceLandscape);
+    }
+
+    /**
+     * Starts screen recording with given maximum duration. The default screen record orientation is portrait.
      * <p>
      * <b>Note:</b> This method works only for Android 4.4 and above.
      * </p>
@@ -1339,11 +1349,29 @@ public class Device {
      *        - the maximum recording duration in minutes
      */
     public void startScreenRecording(int timeLimit) {
+        startScreenRecording(timeLimit, false);
+    }
+
+    /**
+     * Starts screen recording with given maximum duration and orientation flag.
+     * <p>
+     * <b>Note:</b> This method works only for Android 4.4 and above.
+     * </p>
+     * <p>
+     * <b>Note:</b> If the recording process exceeds the time limit, the recorded files will be lost.
+     * </p>
+     *
+     * @param timeLimit
+     *        - the maximum recording duration in minutes
+     * @param forceLandscape
+     *        - <code>true</code> for portrait, <code>false</code> for landscape screen record orientation
+     */
+    public void startScreenRecording(int timeLimit, boolean forceLandscape) {
         screenRecordUploadDiectoryName = ConfigurationPropertiesLoader.isConfigExists()
                 && ConfigurationPropertiesLoader.hasFtpServer()
                         ? ConfigurationPropertiesLoader.getFtpRemoteUplaodDirectory() : "";
 
-        communicator.sendAction(RoutingAction.START_RECORDING, timeLimit);
+        communicator.sendAction(RoutingAction.START_RECORDING, timeLimit, forceLandscape);
     }
 
     /**

@@ -102,6 +102,8 @@ public class Device {
 
     private String screenRecordUploadDiectoryName;
 
+    private boolean isScreenRecordingStarted = false;
+
     /**
      * Constructor that creates a usable Device object by a given {@link DeviceCommunicator device communicator}.
      *
@@ -676,7 +678,14 @@ public class Device {
     }
 
     void release() {
-        stopScreenRecording();
+        if(isScreenRecordingStarted) {
+            stopScreenRecording();
+        }
+
+        if(isLogcatEnabled) {
+            stopLogcat();
+        }
+
         closeChromeDriver();
         communicator.release();
     }
@@ -1372,6 +1381,7 @@ public class Device {
                         ? ConfigurationPropertiesLoader.getFtpRemoteUplaodDirectory() : "";
 
         communicator.sendAction(RoutingAction.START_RECORDING, timeLimit, forceLandscape);
+        isScreenRecordingStarted = true;
     }
 
     /**
@@ -1380,6 +1390,7 @@ public class Device {
      */
     public void stopScreenRecording() {
         communicator.sendAction(RoutingAction.STOP_RECORDING, screenRecordUploadDiectoryName);
+        isScreenRecordingStarted = false;
     }
 
     /**

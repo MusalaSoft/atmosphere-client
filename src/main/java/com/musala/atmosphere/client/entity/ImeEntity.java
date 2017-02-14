@@ -49,6 +49,8 @@ public class ImeEntity {
 
         communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
 
+        waitForTaskCompletion(text.length() * interval);
+
         return communicator.getLastException() == null;
     }
 
@@ -110,5 +112,13 @@ public class ImeEntity {
         communicator.sendAction(RoutingAction.SEND_BROADCAST, intent);
 
         return communicator.getLastException() == null;
+    }
+
+    private void waitForTaskCompletion(long timeoutInMs) {
+        try {
+            Thread.sleep(timeoutInMs);
+        } catch (InterruptedException e) {
+            // Nothing to do here
+        }
     }
 }

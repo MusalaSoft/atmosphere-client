@@ -19,7 +19,7 @@ import com.musala.atmosphere.commons.util.Pair;
  * @author yordan.petrov
  * 
  */
-class ServerConnectionHandler {
+public class ServerConnectionHandler {
     private static final Logger LOGGER = Logger.getLogger(ServerConnectionHandler.class.getCanonicalName());
 
     private ServerConnectionProperties serverConnectionProperties;
@@ -37,7 +37,7 @@ class ServerConnectionHandler {
      * @param connectionRetryLimit
      *        - the connection retry limit, that will be used when trying to reconnect.
      */
-    ServerConnectionHandler(ServerConnectionProperties serverConnectionProperties) {
+    public ServerConnectionHandler(ServerConnectionProperties serverConnectionProperties) {
         this.serverConnectionProperties = serverConnectionProperties;
     }
 

@@ -15,9 +15,9 @@ import com.musala.atmosphere.commons.util.Pair;
 
 /**
  * Handles basic commands related to connection to server.
- * 
+ *
  * @author yordan.petrov
- * 
+ *
  */
 public class ServerConnectionHandler {
     private static final Logger LOGGER = Logger.getLogger(ServerConnectionHandler.class.getCanonicalName());
@@ -27,15 +27,10 @@ public class ServerConnectionHandler {
     private Registry serverRmiRegistry;
 
     /**
-     * Creates a new {@link ServerConnectionHandler} instance by given server IP address, port and a connection retry
-     * limit.
-     * 
-     * @param serverIp
-     *        - the IP address of the server.
-     * @param serverPort
-     *        - the port of the server.
-     * @param connectionRetryLimit
-     *        - the connection retry limit, that will be used when trying to reconnect.
+     * Creates a new {@link ServerConnectionHandler} instance by given {@link ServerConnectionProperties}.
+     *
+     * @param serverConnectionProperties
+     *        - the {@link ServerConnectionProperties} instance which contains the connection properties to the server
      */
     public ServerConnectionHandler(ServerConnectionProperties serverConnectionProperties) {
         this.serverConnectionProperties = serverConnectionProperties;
@@ -43,7 +38,7 @@ public class ServerConnectionHandler {
 
     /**
      * Connects to server and returns a pair of client builder and server RMI registry.
-     * 
+     *
      * @return pair of client builder and server RMI registry.
      */
     public Pair<IClientBuilder, Registry> connect() {
@@ -101,7 +96,7 @@ public class ServerConnectionHandler {
 
     /**
      * Returns the server {@link ServerConnectionProperties} that is being used.
-     * 
+     *
      * @return the server {@link ServerConnectionProperties} that is being used.
      */
     public ServerConnectionProperties getServerConnectionProperties() {

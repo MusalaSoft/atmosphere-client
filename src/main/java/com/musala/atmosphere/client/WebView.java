@@ -51,7 +51,7 @@ public class WebView extends WebElement {
     /**
      * Gets a set all web view window handlers.
      *
-     * return a set of window handlers
+     * @return a set of window handlers
      */
     @SuppressWarnings("unchecked")
     public Set<String> getWindowHandlers() {
@@ -78,19 +78,19 @@ public class WebView extends WebElement {
     /**
      * Switches the WebDriver to another web view window by WebView selection criterion and value.
      *
-     * @param criterion
+     * @param selectionCriterion
      *        - a criterion used for the web view selection
-     * @param value
+     * @param criterionValue
      *        - the value of the criterion
      */
-    public void switchToAnotherWebView(WebViewSelectionCriterion slectionCriterion, String criterionValue) {
-        deviceCommunicator.sendAction(RoutingAction.SWITCH_TO_WEBVIEW, slectionCriterion, criterionValue);
+    public void switchToAnotherWebView(WebViewSelectionCriterion selectionCriterion, String criterionValue) {
+        deviceCommunicator.sendAction(RoutingAction.SWITCH_TO_WEBVIEW, selectionCriterion, criterionValue);
     }
 
     /**
      * Gets the URL of the current web view.
      *
-     * @return a URl
+     * @return the URL of the current web view
      */
     public String getUrl() {
         String webViewUrl = (String) deviceCommunicator.sendAction(RoutingAction.GET_WEBVIEW_URL);

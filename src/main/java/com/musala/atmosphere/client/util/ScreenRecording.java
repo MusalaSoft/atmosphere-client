@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 
 /**
  * <i>@ScreenRecording</i> annotation. It is used to annotate the user's test class with screen recording enabled. If
- * the duration is not specified a recording will start when the {@link Device device} is created an stop when the
- * device is released.
+ * the duration is not specified, a recording will start when the {@link com.musala.atmosphere.client.Device device} is
+ * created and stop when the device is released.
  *
  * @author dimcho.nedev
  *

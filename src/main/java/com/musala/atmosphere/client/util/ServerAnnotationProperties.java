@@ -22,8 +22,8 @@ public class ServerAnnotationProperties extends ServerConnectionProperties {
     /**
      * Finds the first {@link Server} annotation up in the stack trace and wraps it's properties.
      *
-     * @throws MissingServerAnnotationException
-     *         when an annotated class can not be found.
+     * @throws MissingServerConnectionProperiesException
+     *         when an annotated class can not be found and a config.properties file does not exist
      */
     public ServerAnnotationProperties() {
         ClassLocator annotationLocator = new ClassLocator(Server.class);

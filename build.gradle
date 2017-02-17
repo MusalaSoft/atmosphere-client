@@ -1,7 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'maven-publish'
 
-version = '0.0.1'
+version = '0.0.2'
 jar {
     manifest {
         attributes 'Implementation-Title': 'Atmosphere Client',
@@ -19,8 +19,8 @@ apply plugin: 'java'
 apply plugin: 'maven-publish'
 
 dependencies {
-    compile 'com.musala.atmosphere:atmosphere-client-server-lib:0.0.1'
-    compile 'com.musala.atmosphere:atmosphere-bitmap-comparison:0.0.1'
+    compile 'com.musala.atmosphere:atmosphere-client-server-lib:0.+'
+    compile 'com.musala.atmosphere:atmosphere-bitmap-comparison:0.+'
     compile 'com.google.guava:guava:18.0'
     compile 'org.javassist:javassist:3.18.2-GA'
     compile 'org.jsoup:jsoup:1.7.2'
@@ -39,6 +39,25 @@ publishing {
             version version
 
             from components.java
+
+            // Credit: http://stackoverflow.com/a/32353697/3370842
+            pom.withXml {
+                // Generate map of resolved versions
+                Map resolvedVersionMap = [:]
+                Set<ResolvedArtifact> resolvedArtifacts = configurations.compile.getResolvedConfiguration().getResolvedArtifacts()
+                resolvedArtifacts.addAll(configurations.testCompile.getResolvedConfiguration().getResolvedArtifacts())
+                resolvedArtifacts.each {
+                    ModuleVersionIdentifier mvi = it.getModuleVersion().getId();
+                    resolvedVersionMap.put("${mvi.getGroup()}:${mvi.getName()}", mvi.getVersion())
+                }
+
+                // Update dependencies with resolved versions
+                asNode().dependencies.first().each {
+                    def groupId = it.get("groupId").first().value().first()
+                    def artifactId = it.get("artifactId").first().value().first()
+                    it.get("version").first().value = resolvedVersionMap.get("${groupId}:${artifactId}")
+                }
+            }
         }
     }
 
@@ -54,4 +73,14 @@ task wrapper(type: Wrapper) {
 tasks.withType(Test) {
     scanForTestClasses = false
     include "**/*Test.class"
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
 }

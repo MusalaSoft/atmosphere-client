@@ -1020,6 +1020,39 @@ public class Device {
     }
 
     /**
+     * Grants a permission to the application with the specified package name.
+     * <p>
+     * <b>Note: This method works only for Android 6.0 and above.</b>
+     * <p>
+     * <b>Note:</b> You can use the <b>android.Manifest.permission</b> enumeration to supply the permission parameter.
+     *
+     * @param packageName
+     *        - the package name of the application
+     * @param permission
+     *        - the permission to be granted
+     * @return <code>true</code> if the permission is granted, <code>false</code> if such permission is not available
+     */
+    public boolean grantApplicationPermission(String packageName, String permission) {
+        return (boolean) communicator.sendAction(RoutingAction.GRANT_APP_PERMISSION, packageName, permission);
+    }
+
+    /**
+     * Revokes a permission from the application with the specified package name.
+     * <p>
+     * <b>Note: This method works only for Android 6.0 and above.</b>
+     * <p>
+     * <b>Note:</b> You can use the <b>android.Manifest.permission</b> enumeration to supply the permission parameter.
+     *
+     * @param packageName
+     *        - the package name of the application
+     * @param permission
+     *        - the permission to be revoked
+     * @return <code>true</code> if the permission is revoked, <code>false</code> if such permission is not available
+     */
+    public boolean revokeApplicationPermission(String packageName, String permission) {
+        return (boolean) communicator.sendAction(RoutingAction.REVOKE_APP_PERMISSION, packageName, permission);
+    }
+    /**
      * Simulates a swipe from a point to another unknown point.
      *
      * @param point

@@ -4,16 +4,18 @@ import static com.musala.atmosphere.client.uiutils.XPathAttribute.isAttributeStr
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.collect.ImmutableMap;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 
 /**
  * A class for converting a CSS query to XPath query
- * 
+ *
  * @author simeon.ivanov
- * 
+ *
  */
 public class CssToXPathConverter {
 
@@ -40,9 +42,14 @@ public class CssToXPathConverter {
 
     private static final Logger LOGGER = Logger.getLogger(CssToXPathConverter.class);
 
+    private static final Map<String, String> cssToXPathAttributeConversionMap = ImmutableMap.of("class", "className",
+                                                                                                "content-desc", "contentDesc",
+                                                                                                "long-clickable", "longClickable",
+                                                                                                "resource-id", "resourceId");
+
     /**
      * Divides the CSS Query to property selectors
-     * 
+     *
      * @param cssQuery
      *        - a CSS query to be divided.
      * @return A list consisting of the divided CSS Query
@@ -70,7 +77,7 @@ public class CssToXPathConverter {
 
     /**
      * Check if the given CSS Query is valid
-     * 
+     *
      * @param cssQuery
      *        - a CssQuery which will be checked if it is valid.
      * @return true if the CSS query is valid, false if it is not
@@ -91,8 +98,29 @@ public class CssToXPathConverter {
     }
 
     /**
+     * Validates the provided attribute name and returns the correct value.
+     *
+     * @param attributeName
+     *        - the attribute name which will be validated
+     * @return the validated attribute name
+     * @throws InvalidCssQueryException
+     *         if the given attribute name is invalid
+     */
+    private static String validateXPathAttributeName(String attributeName) {
+        if (isAttributeStringOfTheEnumeration(attributeName)) {
+            return attributeName;
+        }
+
+        if (!cssToXPathAttributeConversionMap.containsKey(attributeName)) {
+            throw new InvalidCssQueryException("The provided attribute name is not valid.");
+        }
+
+        return cssToXPathAttributeConversionMap.get(attributeName);
+    }
+
+    /**
      * Converts the initial node query of a CSS query to that of an XPath query
-     * 
+     *
      * @param separatedInitialNode
      *        - the separated initial node that needs to be converted
      * @return the converted XPath initial node
@@ -111,8 +139,32 @@ public class CssToXPathConverter {
     }
 
     /**
+     * Converts the provided CSS selector to XPath and returns the XPath query with the new selector added.
+     *
+     * @param attributeNameAndSelectionExpression
+     *        - an array of the selector's attribute name and selection expression
+     * @param formatter
+     *        - the formatter to be used with the new selector
+     * @param xpathQuery
+     *        - the XPath query to which the new selector should be added to
+     * @return the XPath query with the new selector added if the selector's attribute name was valid, or the provided XPath query
+     *         without modification otherwise
+     */
+    private static String addSelector(String[] attributeNameAndSelectionExpression, String formatter, String xpathQuery) {
+        try {
+            String attributeName = validateXPathAttributeName(attributeNameAndSelectionExpression[0]);
+            String selectionExpression = attributeNameAndSelectionExpression[1];
+            xpathQuery = String.format(formatter, xpathQuery, attributeName, selectionExpression);
+        } catch (InvalidCssQueryException e) {
+            // Skip this attribute
+        }
+
+        return xpathQuery;
+    }
+
+    /**
      * The method converts a given CSS query to an equivalent XPath query
-     * 
+     *
      * @param cssQuery
      *        - a CSS Query which will be converted into XPath query.
      * @return An XPath query resulted from the conversion of the CSS query
@@ -138,40 +190,17 @@ public class CssToXPathConverter {
         String xpathQuery = convertInitialNode(separatedInitialNode);
         List<String> dividedCssQuery = divideCssQuery(cssQuery);
         String[] attributeNameAndSelectionExpression = new String[2];
-        String attributeName = null;
-        String selectionExpression = null;
 
         for (String partOfCssQuery : dividedCssQuery) {
             if (partOfCssQuery.matches(REGEX_FOR_CSS_QUERY_WITH_CONTAINS)) {
                 attributeNameAndSelectionExpression = partOfCssQuery.split("\\*=");
-
-                attributeName = attributeNameAndSelectionExpression[0];
-                selectionExpression = attributeNameAndSelectionExpression[1];
-
-                if (isAttributeStringOfTheEnumeration(attributeName)) {
-                    xpathQuery = String.format(CONTAINS_FORMATTER, xpathQuery, attributeName, selectionExpression);
-                }
-
+                xpathQuery = addSelector(attributeNameAndSelectionExpression, CONTAINS_FORMATTER, xpathQuery);
             } else if (partOfCssQuery.matches(REGEX_FOR_CSS_QUERY_WITH_WORD_MATCH)) {
                 attributeNameAndSelectionExpression = partOfCssQuery.split("~=");
-
-                attributeName = attributeNameAndSelectionExpression[0];
-                selectionExpression = attributeNameAndSelectionExpression[1];
-
-                if (isAttributeStringOfTheEnumeration(attributeName)) {
-                    xpathQuery = String.format(WORD_MATCH_FORMATTER, xpathQuery, attributeName, selectionExpression);
-                }
-
+                xpathQuery = addSelector(attributeNameAndSelectionExpression, WORD_MATCH_FORMATTER, xpathQuery);
             } else if (partOfCssQuery.matches(REGEX_FOR_CSS_QUERY_WITH_EQUAL)) {
                 attributeNameAndSelectionExpression = partOfCssQuery.split("=");
-
-                attributeName = attributeNameAndSelectionExpression[0];
-                selectionExpression = attributeNameAndSelectionExpression[1];
-
-                if (isAttributeStringOfTheEnumeration(attributeName)) {
-                    xpathQuery = String.format(EQUAL_FORMATTER, xpathQuery, attributeName, selectionExpression);
-                }
-
+                xpathQuery = addSelector(attributeNameAndSelectionExpression, EQUAL_FORMATTER, xpathQuery);
             } else {
                 String message = "Converting Css to xPath query failed.";
                 LOGGER.error(message);
@@ -179,7 +208,7 @@ public class CssToXPathConverter {
             }
         }
 
-        if (xpathQuery.charAt(0) == '[')
+        if (!xpathQuery.isEmpty() && xpathQuery.charAt(0) == '[')
             xpathQuery = String.format(XPATH_QUERY_FORMATTER, xpathQuery);
 
         return xpathQuery.toString();

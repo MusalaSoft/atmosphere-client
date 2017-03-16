@@ -601,4 +601,15 @@ public class Screen {
         communicator.sendAction(RoutingAction.GET_WEB_VIEW, packageName);
         return new WebView(communicator, imeEntity);
     }
+
+    /**
+     * Waits for a certain amount of time when trying to find an element/s if they are not immediately available. Sets
+     * an implicit wait timeout value to {@link AccessibilityElementEntity} elementEntity. The default value is 0.
+     *
+     * @param implicitWaitTimeout
+     *        - an implicit wait timeout in milliseconds
+     */
+    public void setImplicitWaitTimeout(int implicitWaitTimeout) {
+        elementEntity.setImplicitWaitTimeout(implicitWaitTimeout);
+    }
 }

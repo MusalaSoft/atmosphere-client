@@ -36,6 +36,8 @@ public class AccessibilityElementEntity {
 
     private ImageEntity imageEntity;
 
+    private int implicitWaitTimeout = 0;
+
     AccessibilityElementEntity(DeviceCommunicator communicator,
             GestureEntity gestureEntity,
             ImeEntity imeEntity,
@@ -62,6 +64,11 @@ public class AccessibilityElementEntity {
     @SuppressWarnings("unchecked")
     public List<UiElement> getElements(UiElementSelector selector, Boolean visibleOnly)
         throws UiElementFetchingException {
+
+        if (implicitWaitTimeout > 0) {
+            waitForElementExists(selector, implicitWaitTimeout);
+        }
+
         List<AccessibilityElement> foundElements = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_UI_ELEMENTS,
                                                                                                         selector,
                                                                                                         visibleOnly);
@@ -257,5 +264,15 @@ public class AccessibilityElementEntity {
                                                              timeout);
 
         return response;
+    }
+
+    /**
+     * Sets an implicit wait timeout
+     *
+     * @param implicitWaitTimeout
+     *        - implicit wait timeout in milliseconds
+     */
+    public void setImplicitWaitTimeout(int implicitWaitTimeout) {
+        this.implicitWaitTimeout = implicitWaitTimeout;
     }
 }

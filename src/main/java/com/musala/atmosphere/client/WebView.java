@@ -2,10 +2,10 @@ package com.musala.atmosphere.client;
 
 import java.util.Set;
 
+import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.util.webview.WebElementSelectionCriterionConverter;
 import com.musala.atmosphere.commons.RoutingAction;
-import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.webelement.action.WebElementWaitCondition;
 import com.musala.atmosphere.commons.webelement.selection.WebElementSelectionCriterion;
 import com.musala.atmosphere.commons.webview.selection.WebViewSelectionCriterion;
@@ -107,6 +107,17 @@ public class WebView extends WebElement {
         String webViewTitle = (String) deviceCommunicator.sendAction(RoutingAction.GET_WEBVIEW_TITLE);
 
         return webViewTitle;
+    }
+
+    /**
+     * Waits for a certain amount of time when trying to find an element/s if they are not immediately available. Sets
+     * an implicit wait timeout value to the web driver. The default value is 0.
+     *
+     * @param implicitWaitTimeout
+     *        - an implicit wait timeout in milliseconds
+     */
+    public void setImplicitWaitTimeout(int implicitWaitTimeout) {
+        deviceCommunicator.sendAction(RoutingAction.SET_WEB_VIEW_IMPLICIT_WAIT, implicitWaitTimeout);
     }
 
 }

@@ -533,24 +533,28 @@ public class Device {
     }
 
     /**
-     * Installs a specified Android application file on this device.<br>
+     * Installs a specified Android application file on this device.
+     * If the application is already installed, it <b>will NOT be reinstalled</b>.
      *
      * @param path
-     *        - location of the file to be installed.
-     * @return <code>true</code> if the APK installation is successful, <code>false</code> if it fails.
+     *        - location of the file to be installed
+     * @return <code>true</code> if the APK installation is successful, <code>false</code> if it fails
      */
     public boolean installAPK(String path) {
         return doApkInstallation(path, false);
     }
 
     /**
-     * Installs a specified Android application file on this device.<br>
+     * Installs a specified Android application file on this device.
+     * <p>
+     * If the application is already installed and <code>shouldForceInstall</code> is true,
+     * the application will be reinstalled but its data will be kept.
      *
      * @param path
-     *        - location of the file to be installed.
+     *        - location of the file to be installed
      * @param shouldForceInstall
-     *        - Indicates whether a force install should be performed
-     * @return <code>true</code> if the APK installation is successful, <code>false</code> if it fails.
+     *        - if the application should be reinstalled if present (keeping its data)
+     * @return <code>true</code> if the APK installation is successful, <code>false</code> if it fails
      */
     public boolean installAPK(String path, boolean shouldForceInstall) {
         return doApkInstallation(path, shouldForceInstall);

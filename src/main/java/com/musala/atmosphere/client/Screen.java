@@ -22,6 +22,7 @@ import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
+import com.musala.atmosphere.client.exceptions.ActionFailedException;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
@@ -346,6 +347,15 @@ public class Screen {
     public ScrollableView getScrollableView(UiElementSelector selector)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
+
+        // There is a problem with the ScrollableViews created from ListView elements. They can scroll but
+        // cannot find inner elements. Make sure we throw an exception if such ScrollableView is created.
+        String className = getElement(selector).getProperties().getClassName();
+        if (className.endsWith("ListView")) {
+            String message = "Creating a ScrollableView from a ListView element is not supported. "
+                    + "Instead, please select the first parent element of the ListView, which has a resource id.";
+            throw new ActionFailedException(message);
+        }
         return new ScrollableView(getElement(selector), communicator);
     }
 

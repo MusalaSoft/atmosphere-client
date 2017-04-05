@@ -24,7 +24,6 @@ import com.musala.atmosphere.commons.cs.clientbuilder.IClientBuilder;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
 import com.musala.atmosphere.commons.cs.exception.DeviceNotFoundException;
-import com.musala.atmosphere.commons.cs.exception.InvalidPasskeyException;
 import com.musala.atmosphere.commons.exceptions.NoAvailableDeviceFoundException;
 import com.musala.atmosphere.commons.util.Pair;
 
@@ -227,24 +226,16 @@ public class Builder {
         String deviceRmiId = deviceDescriptor.getProxyRmiId();
 
         deviceToDescriptor.remove(device);
-        try {
-            if (this.screenRecordingproperties.isEnabled()) {
-                device.stopScreenRecording();
-            }
-            if (this.logcatAnnotationProperties.isEnabled()) {
-                device.getDeviceLog(logcatAnnotationProperties);
-            }
-            device.release();
-            clientBuilder.releaseDevice(deviceDescriptor);
-        } catch (RemoteException e) {
-            String message = "Could not release Device (connection failure).";
-            LOGGER.error(message, e);
-            throw new ServerConnectionFailedException(message, e);
-        } catch (InvalidPasskeyException e) {
-            // We did not have the correct passkey. The device most likely timed out and got freed to be used by someone
-            // else. So nothing to do here.
+        if (this.screenRecordingproperties.isEnabled()) {
+            device.stopScreenRecording();
         }
-        String messageReleasedDevice = String.format("Released device with proxy RMI ID: %s .", deviceRmiId);
+        if (this.logcatAnnotationProperties.isEnabled()) {
+            device.getDeviceLog(logcatAnnotationProperties);
+        }
+
+        device.release();
+        websocketCommunicator.releaseDevice(deviceDescriptor);
+        String messageReleasedDevice = String.format("Released device with proxy ID: %s .", deviceRmiId);
         LOGGER.info(messageReleasedDevice);
     }
 

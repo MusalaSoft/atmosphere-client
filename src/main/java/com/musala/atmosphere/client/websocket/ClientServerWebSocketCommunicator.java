@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.glassfish.tyrus.client.ClientManager;
 
 import com.google.gson.Gson;
+import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformation;
 import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
 import com.musala.atmosphere.commons.cs.exception.NoDeviceMatchingTheGivenSelectorException;
@@ -30,6 +31,8 @@ public class ClientServerWebSocketCommunicator {
     private WebSocketCommunicatorManager communicationManager = WebSocketCommunicatorManager.getInstance();
 
     private Session session;
+
+    private Gson gson = new Gson();
 
     /**
      * Creates a new instance of the ClientServerWebSocketCommunicator class and establishes a new connection
@@ -66,32 +69,12 @@ public class ClientServerWebSocketCommunicator {
         int maxWaitCountInSeconds = maxWaitCount / ALLOCATE_DEVICE_RETRY_TIMEOUT;
         while (maxWaitCountInSeconds > 0) {
             try {
-                Gson gson = new Gson();
                 String sessionId = session.getId();
                 MessageType messageType = MessageType.DEVICE_ALLOCATION_INFORMATION;
                 String data = gson.toJson(deviceSelector, DeviceSelector.class);
                 ClientServerRequest request = new ClientServerRequest(sessionId, messageType, data);
 
-                String requestJSON = gson.toJson(request, ClientServerRequest.class);
-                session.getBasicRemote().sendText(requestJSON);
-                LOGGER.info("Device Descriptor request sent to server.");
-
-                Object lockObject = communicationManager.getSynchronizationObject(sessionId);
-                LOGGER.info("Waiting for response.");
-                synchronized(lockObject) {
-                    try {
-                        lockObject.wait(CONNECTION_TIMEOUT);
-                    } catch (InterruptedException e) {
-                        LOGGER.info("Waiting interrupted.");
-                    }
-                }
-
-                LOGGER.info("Getting the response...");
-                ClientServerResponse response = communicationManager.getServerResponse(sessionId);
-                if (response == null) {
-                    LOGGER.error("Response is null.");
-                    return null;
-                }
+                ClientServerResponse response = sendRequestForResponse(request);
 
                 if (response.getResponseType() == MessageType.ERROR) {
                     throw new NoDeviceMatchingTheGivenSelectorException();
@@ -118,5 +101,46 @@ public class ClientServerWebSocketCommunicator {
             }
         }
         throw new NoAvailableDeviceFoundException();
+    }
+
+    /**
+     * Sends a release device request to the server.
+     *
+     * @param deviceDescriptor
+     *        - the {@link DeviceAllocationInformation} which describes the device to be released
+     */
+    public void releaseDevice(DeviceAllocationInformation deviceDescriptor) {
+        String sessionId = session.getId();
+        MessageType messageType = MessageType.RELEASE_REQUEST;
+        String data = gson.toJson(deviceDescriptor, DeviceAllocationInformation.class);
+        ClientServerRequest request = new ClientServerRequest(sessionId, messageType, data);
+
+        try {
+            sendRequestForResponse(request);
+        } catch (IOException e) {
+            String message = "Could not release Device (connection failure).";
+            LOGGER.error(message, e);
+            throw new ServerConnectionFailedException(message, e);
+        }
+    }
+
+    private ClientServerResponse sendRequestForResponse(ClientServerRequest request) throws IOException {
+        String sessionId = request.getSessionId();
+        String requestJSON = gson.toJson(request, ClientServerRequest.class);
+        session.getBasicRemote().sendText(requestJSON);
+        LOGGER.info("Device Descriptor request sent to server.");
+
+        Object lockObject = communicationManager.getSynchronizationObject(sessionId);
+        LOGGER.info("Waiting for response.");
+        synchronized(lockObject) {
+            try {
+                lockObject.wait(CONNECTION_TIMEOUT);
+            } catch (InterruptedException e) {
+                LOGGER.info("Waiting interrupted.");
+            }
+        }
+
+        LOGGER.info("Getting the response...");
+        return communicationManager.getServerResponse(sessionId);
     }
 }

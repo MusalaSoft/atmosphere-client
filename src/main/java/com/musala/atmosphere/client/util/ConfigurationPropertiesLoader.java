@@ -120,8 +120,33 @@ public class ConfigurationPropertiesLoader {
         return exists;
     }
 
-    private static void validatePropertyValue(String connectionRetriesValue, ConfigurationProperties propertyType) {
-        if (connectionRetriesValue.isEmpty()) {
+    /**
+     * Gets the implicit wait timeout from the configuration file.
+     *
+     * @return int, implicit wait timeout in milliseconds
+     */
+    public static int getImplicitWaitTimeout() {
+        if (!isConfigExists()) {
+            return 0;
+        }
+
+        String implicitWaitValue = getPropertyString(ConfigurationProperties.IMPLICIT_WAIT_TIMEOUT);
+        int implicitWaitTimeout = 0;
+
+        if (!implicitWaitValue.isEmpty()) {
+            implicitWaitTimeout = Integer.parseInt(implicitWaitValue);
+
+            if (implicitWaitTimeout < 0) {
+                throw new InvalidPropertyValueExceptipon("the implicit wait value should be a nonnegative integer number.");
+            }
+        }
+
+        return implicitWaitTimeout;
+    }
+
+
+    private static void validatePropertyValue(String propertyValue, ConfigurationProperties propertyType) {
+        if (propertyValue.isEmpty()) {
             String errorMessage = String.format("%s value cannot be empty.", propertyType);
             LOGGER.error(errorMessage);
             throw new InvalidPropertyValueExceptipon(errorMessage);

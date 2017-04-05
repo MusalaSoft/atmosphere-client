@@ -104,6 +104,10 @@ public class Device {
 
     private boolean isScreenRecordingStarted = false;
 
+    private Integer implicitWaitTimeout;
+
+    private Screen activeScreen;
+
     /**
      * Constructor that creates a usable Device object by a given {@link DeviceCommunicator device communicator}.
      *
@@ -284,7 +288,14 @@ public class Device {
      *         active screen fails.
      */
     public Screen getActiveScreen() {
-        return new Screen(gestureEntity, imeEntity, settingsEntity, imageEntity, elementEntity, communicator);
+        activeScreen = new Screen(gestureEntity, imeEntity, settingsEntity, imageEntity, elementEntity, communicator);
+
+        // sets the implicit wait timeout from if is specified
+        if (implicitWaitTimeout != null) {
+            activeScreen.setImplicitWaitTimeout(implicitWaitTimeout);
+        }
+
+        return activeScreen;
     }
 
     /**
@@ -682,11 +693,11 @@ public class Device {
     }
 
     void release() {
-        if(isScreenRecordingStarted) {
+        if (isScreenRecordingStarted) {
             stopScreenRecording();
         }
 
-        if(isLogcatEnabled) {
+        if (isLogcatEnabled) {
             stopLogcat();
         }
 
@@ -1056,6 +1067,7 @@ public class Device {
     public boolean revokeApplicationPermission(String packageName, String permission) {
         return (boolean) communicator.sendAction(RoutingAction.REVOKE_APP_PERMISSION, packageName, permission);
     }
+
     /**
      * Simulates a swipe from a point to another unknown point.
      *
@@ -1973,4 +1985,26 @@ public class Device {
     void setAccessibilityElementEntity(AccessibilityElementEntity elementEntity) {
         this.elementEntity = elementEntity;
     }
+
+    /**
+     * Sets an implicit wait timeout value to {@link AccessibilityElementEntity} elementEntity. Waits for a certain
+     * amount of time when trying to find an element/s if they are not immediately available. The default value is 0.
+     *
+     * @param implicitWaitTimeout
+     *        - an implicit wait timeout in milliseconds
+     */
+    public void setImplicitWaitTimeout(int implicitWaitTimeout) {
+        if (implicitWaitTimeout >= 0) {
+            this.implicitWaitTimeout = implicitWaitTimeout;
+
+            if(activeScreen != null) {
+                activeScreen.setImplicitWaitTimeout(implicitWaitTimeout);
+            }
+
+            elementEntity.setImplicitWaitTimeout(implicitWaitTimeout);
+        } else if (implicitWaitTimeout < 0) {
+            LOGGER.error("Failed to set an implicit wait timeout. The value should be a nonnegative integer number.");
+        }
+    }
+
 }

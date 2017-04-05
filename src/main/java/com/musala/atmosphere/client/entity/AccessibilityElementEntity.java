@@ -36,7 +36,7 @@ public class AccessibilityElementEntity {
 
     private ImageEntity imageEntity;
 
-    private int implicitWaitTimeout = 0;
+    private Integer implicitWaitTimeout;
 
     AccessibilityElementEntity(DeviceCommunicator communicator,
             GestureEntity gestureEntity,
@@ -65,8 +65,8 @@ public class AccessibilityElementEntity {
     public List<UiElement> getElements(UiElementSelector selector, Boolean visibleOnly)
         throws UiElementFetchingException {
 
-        if (implicitWaitTimeout > 0) {
-            waitForElementExists(selector, implicitWaitTimeout);
+        if (implicitWaitTimeout != null) {
+            waitForElementExists(selector, implicitWaitTimeout.intValue());
         }
 
         List<AccessibilityElement> foundElements = (List<AccessibilityElement>) communicator.sendAction(RoutingAction.GET_UI_ELEMENTS,

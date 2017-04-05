@@ -18,13 +18,13 @@ import com.musala.atmosphere.client.util.LogcatAnnotationProperties;
 import com.musala.atmosphere.client.util.ScreenRecordingAnnotationProperties;
 import com.musala.atmosphere.client.util.ServerAnnotationProperties;
 import com.musala.atmosphere.client.util.ServerConnectionProperties;
+import com.musala.atmosphere.client.websocket.ClientServerWebSocketCommunicator;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformation;
 import com.musala.atmosphere.commons.cs.clientbuilder.IClientBuilder;
 import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
 import com.musala.atmosphere.commons.cs.exception.DeviceNotFoundException;
 import com.musala.atmosphere.commons.cs.exception.InvalidPasskeyException;
-import com.musala.atmosphere.commons.cs.exception.NoDeviceMatchingTheGivenSelectorException;
 import com.musala.atmosphere.commons.exceptions.NoAvailableDeviceFoundException;
 import com.musala.atmosphere.commons.util.Pair;
 
@@ -36,21 +36,19 @@ import com.musala.atmosphere.commons.util.Pair;
 public class Builder {
     private static final Logger LOGGER = Logger.getLogger(Builder.class.getCanonicalName());
 
-    // timeout between attempts to get a device
-    private static final int RETRY_SLEEP_TIMEOUT = 1000;
-
     private static Map<ServerConnectionProperties, Builder> builders = new HashMap<>();
+
+    private static final int ALLOCATE_DEVICE_RETRY_TIMEOUT = 300_000; // 5 minutes
 
     private IClientBuilder clientBuilder;
 
     private Registry serverRmiRegistry;
 
+    private ClientServerWebSocketCommunicator websocketCommunicator;
+
     private Map<Device, DeviceAllocationInformation> deviceToDescriptor = Collections.synchronizedMap(new HashMap<Device, DeviceAllocationInformation>());
 
     private ServerConnectionHandler serverConnectionHandler;
-
-    // the count of the attempts to get a device
-    private int allocateDeviceRetryCount = 300;
 
     private ScreenRecordingAnnotationProperties screenRecordingproperties;
 
@@ -66,6 +64,8 @@ public class Builder {
 
         this.serverConnectionHandler = serverConnectionHandler;
         Pair<IClientBuilder, Registry> builderRegistryPair = serverConnectionHandler.connect();
+
+        websocketCommunicator = new ClientServerWebSocketCommunicator();
 
         clientBuilder = builderRegistryPair.getKey();
         serverRmiRegistry = builderRegistryPair.getValue();
@@ -131,30 +131,16 @@ public class Builder {
      *
      * @param deviceSelector
      *        - required {@link DeviceSelector parameters} needed to construct new {@link DeviceAllocationInformation}
-     *        instance.
-     * @return a {@link DeviceAllocationInformation} instance with the given device selector.
+     *        instance
+     * @param maxWaitTime
+     *        - the time in milliseconds the builder should wait if a requested device is present on the server, but
+     *        currently not available (allocated by another client)
+     * @return a {@link DeviceAllocationInformation} instance with the given device selector
      * @throws NoAvailableDeviceFoundException
-     * @throws RemoteException
      */
-    private DeviceAllocationInformation getDeviceDescriptor(DeviceSelector deviceSelector)
-        throws NoAvailableDeviceFoundException,
-            RemoteException {
-        while (this.allocateDeviceRetryCount > 0) {
-            try {
-                return clientBuilder.allocateDevice(deviceSelector);
-            } catch (NoAvailableDeviceFoundException e) {
-                try {
-                    Thread.sleep(RETRY_SLEEP_TIMEOUT);
-                } catch (InterruptedException e1) {
-                    // Nothing to do here.
-                }
-                this.allocateDeviceRetryCount--;
-            } catch (NoDeviceMatchingTheGivenSelectorException e) {
-                break;
-            }
-        }
-
-        throw new NoAvailableDeviceFoundException();
+    private DeviceAllocationInformation getDeviceDescriptor(DeviceSelector deviceSelector, int maxWaitTime) {
+        DeviceAllocationInformation deviceInformation = websocketCommunicator.getDeviceDescriptor(deviceSelector, maxWaitTime);
+        return deviceInformation;
     }
 
     /**
@@ -165,8 +151,23 @@ public class Builder {
      * @return a {@link Device Device} instance with the given device parameters.
      */
     public Device getDevice(DeviceSelector deviceSelector) {
+        return getDevice(deviceSelector, ALLOCATE_DEVICE_RETRY_TIMEOUT);
+    }
+
+    /**
+     * Gets a {@link Device Device} instance with the given {@link DeviceSelector device characteristics} and maximum
+     * wait time for available device
+     *
+     * @param deviceSelector
+     *        - required {@link DeviceSelector parameters} needed to construct new {@link Device Device} instance.
+     * @param maxWaitTime
+     *        - the time in seconds the builder should wait if a requested device is present on the server, but
+     *        currently not available (allocated by another client)
+     * @return a {@link Device Device} instance with the given device parameters.
+     */
+    public Device getDevice(DeviceSelector deviceSelector, int maxWaitTime) {
         try {
-            DeviceAllocationInformation deviceDescriptor = getDeviceDescriptor(deviceSelector);
+            DeviceAllocationInformation deviceDescriptor = getDeviceDescriptor(deviceSelector, maxWaitTime);
 
             String deviceProxyRmiId = deviceDescriptor.getProxyRmiId();
             String messageReleasedDevice = String.format("Fetched device with proxy RMI ID: %s .", deviceProxyRmiId);
@@ -188,7 +189,7 @@ public class Builder {
 
             return device;
         } catch (NoAvailableDeviceFoundException e) {
-            String message = "No devices matching the requested parameters were found";
+            String message = "No devices matching the requested parameters were found.";
             LOGGER.error(message, e);
             throw new NoAvailableDeviceFoundException(message, e);
         } catch (RemoteException | NotBoundException e) {
@@ -196,21 +197,6 @@ public class Builder {
             LOGGER.error(message, e);
             throw new ServerConnectionFailedException(message, e);
         }
-    }
-
-    /**
-     * Gets a {@link Device Device} instance with the given {@link DeviceSelector device characteristics} and maximum
-     * wait time for available device
-     *
-     * @param deviceSelector
-     *        - required {@link DeviceSelector parameters} needed to construct new {@link Device Device} instance.
-     * @param maxWaitTime
-     *        - maximum wait time for available device
-     * @return a {@link Device Device} instance with the given device parameters.
-     */
-    public Device getDevice(DeviceSelector deviceSelector, int maxWaitTime) {
-        this.allocateDeviceRetryCount = maxWaitTime / RETRY_SLEEP_TIMEOUT;
-        return getDevice(deviceSelector);
     }
 
     /**

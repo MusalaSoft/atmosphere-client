@@ -1,7 +1,5 @@
 package com.musala.atmosphere.client;
 
-import java.rmi.RemoteException;
-import java.rmi.registry.Registry;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,7 +9,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
+import com.musala.atmosphere.client.exceptions.ActionFailedException;
 import com.musala.atmosphere.client.util.ConfigurationPropertiesLoader;
 import com.musala.atmosphere.client.util.LogcatAnnotationProperties;
 import com.musala.atmosphere.client.util.ScreenRecordingAnnotationProperties;
@@ -19,9 +17,9 @@ import com.musala.atmosphere.client.util.ServerAnnotationProperties;
 import com.musala.atmosphere.client.util.ServerConnectionProperties;
 import com.musala.atmosphere.client.websocket.ClientServerWebSocketCommunicator;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformation;
-import com.musala.atmosphere.commons.cs.clientbuilder.IClientBuilder;
 import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
 import com.musala.atmosphere.commons.cs.exception.DeviceNotFoundException;
+import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.exceptions.NoAvailableDeviceFoundException;
 import com.musala.atmosphere.commons.util.Pair;
 
@@ -36,8 +34,6 @@ public class Builder {
     private static Map<ServerConnectionProperties, Builder> builders = new HashMap<>();
 
     private static final int ALLOCATE_DEVICE_RETRY_TIMEOUT = 300_000; // 5 minutes
-
-    private IClientBuilder clientBuilder;
 
     private ClientServerWebSocketCommunicator websocketCommunicator;
 
@@ -56,13 +52,8 @@ public class Builder {
      *        - the given {@link ServerConnectionHandler}.
      */
     private Builder(ServerConnectionHandler serverConnectionHandler) {
-
         this.serverConnectionHandler = serverConnectionHandler;
-        Pair<IClientBuilder, Registry> builderRegistryPair = serverConnectionHandler.connect();
-
         websocketCommunicator = new ClientServerWebSocketCommunicator();
-
-        clientBuilder = builderRegistryPair.getKey();
 
         this.screenRecordingproperties = new ScreenRecordingAnnotationProperties();
         this.logcatAnnotationProperties = new LogcatAnnotationProperties();
@@ -193,11 +184,11 @@ public class Builder {
      */
     public List<Pair<String, String>> getAllAvailableDevices() {
         try {
-            return clientBuilder.getAllAvailableDevices();
-        } catch (RemoteException e) {
-            String message = "Failed to get the list with available devices (server connection failure).";
-            LOGGER.error(message, e);
-            throw new ServerConnectionFailedException(message, e);
+            return websocketCommunicator.getAllAvailableDevices();
+        } catch (CommandFailedException e) {
+            String message = e.getMessage();
+            LOGGER.error(message);
+            throw new ActionFailedException(message);
         }
     }
 

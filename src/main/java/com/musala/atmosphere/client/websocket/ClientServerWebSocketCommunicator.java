@@ -3,6 +3,7 @@ package com.musala.atmosphere.client.websocket;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import javax.websocket.DeploymentException;
 import javax.websocket.Session;
@@ -15,6 +16,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformation;
@@ -22,6 +24,7 @@ import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
 import com.musala.atmosphere.commons.cs.exception.NoDeviceMatchingTheGivenSelectorException;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.exceptions.NoAvailableDeviceFoundException;
+import com.musala.atmosphere.commons.util.Pair;
 import com.musala.atmosphere.commons.websocket.WebSocketCommunicatorManager;
 import com.musala.atmosphere.commons.websocket.message.ClientServerRequest;
 import com.musala.atmosphere.commons.websocket.message.ClientServerResponse;
@@ -112,6 +115,34 @@ public class ClientServerWebSocketCommunicator {
             }
         }
         throw new NoAvailableDeviceFoundException();
+    }
+
+    /**
+     * Returns a list with serial numbers and models of all available devices.
+     *
+     * @return a list with serial numbers and models of all available devices
+     * @throws CommandFailedException
+     *         - if the operation failed server-side
+     */
+    public List<Pair<String, String>> getAllAvailableDevices() throws CommandFailedException {
+        String sessionId = session.getId();
+        MessageType messageType = MessageType.GET_ALL_DEVICES_REQUEST;
+        ClientServerRequest request = new ClientServerRequest(sessionId, messageType, null);
+
+        try {
+            ClientServerResponse response = sendRequestForResponse(request);
+            if (response.getResponseType() == MessageType.ERROR) {
+                String message = "Could not retrieve the list of available devices (server error)";
+                throw new CommandFailedException(message);
+            }
+
+            TypeToken<List<Pair<String, String>>> listTypeToken = new TypeToken<List<Pair<String, String>>>() {};
+            return gson.fromJson(response.getResponseData(), listTypeToken.getType());
+        } catch (IOException e) {
+            String message = "Could not get the available devices (connection failure).";
+            LOGGER.fatal(message, e);
+            throw new ServerConnectionFailedException(message, e);
+        }
     }
 
     /**

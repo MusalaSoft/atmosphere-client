@@ -12,9 +12,9 @@ import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.UnresolvedEntityTypeException;
+import com.musala.atmosphere.client.websocket.ClientServerWebSocketCommunicator;
 import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.RoutingAction;
-import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 
 /**
  * Class responsible for creating {@link Device} instance with the suitable implementations for device specific
@@ -35,8 +35,8 @@ public class DeviceBuilder {
     public DeviceBuilder() {
     }
 
-    public DeviceBuilder(IClientDevice clientDevice, long devicePasskey) {
-        deviceCommunicator = new DeviceCommunicator(clientDevice, devicePasskey);
+    public DeviceBuilder(ClientServerWebSocketCommunicator websocketCommunicator) {
+        deviceCommunicator = new DeviceCommunicator(websocketCommunicator);
     }
 
     /**

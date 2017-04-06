@@ -1,16 +1,11 @@
 package com.musala.atmosphere.client;
 
-import java.rmi.RemoteException;
-
 import org.apache.log4j.Logger;
 
-import com.musala.atmosphere.client.exceptions.DeviceInvocationRejectedException;
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
+import com.musala.atmosphere.client.websocket.ClientServerWebSocketCommunicator;
 import com.musala.atmosphere.commons.RoutingAction;
-import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
-import com.musala.atmosphere.commons.cs.exception.DeviceNotFoundException;
-import com.musala.atmosphere.commons.cs.exception.InvalidPasskeyException;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 
 /**
@@ -20,9 +15,7 @@ import com.musala.atmosphere.commons.exceptions.CommandFailedException;
  *
  */
 public class DeviceCommunicator {
-    private long invocationPasskey;
-
-    private IClientDevice wrappedClientDevice;
+    private ClientServerWebSocketCommunicator webSocketCommunicator;
 
     private static final Logger LOGGER = Logger.getLogger(DeviceCommunicator.class.getCanonicalName());
 
@@ -33,21 +26,13 @@ public class DeviceCommunicator {
     /**
      * Creates an instance for specified client device.
      *
-     * @param wrappedDevice
-     *        - the {@link IClientDevice} instance which this instance will communicate with.
+     * @param communicator
+     *        - the {@link ClientServerWebSocketCommunicator} which this instance will use to communicate with the server
      * @param passkey
-     *        - the invocation passkey for the client device instance.
+     *        - the invocation passkey for the client device instance
      */
-    DeviceCommunicator(IClientDevice wrappedDevice, long passkey) {
-        wrappedClientDevice = wrappedDevice;
-        invocationPasskey = passkey;
-    }
-
-    /**
-     * Release the underlying client device so no further invocation can be possible.
-     */
-    public void release() {
-        wrappedClientDevice = new ReleasedClientDevice();
+    DeviceCommunicator(ClientServerWebSocketCommunicator communicator) {
+        this.webSocketCommunicator = communicator;
     }
 
     /**
@@ -71,23 +56,17 @@ public class DeviceCommunicator {
      */
     public Object sendAction(RoutingAction action, Object... args) {
         lastSentActionException = null;
+
         try {
-            Object response = wrappedClientDevice.route(invocationPasskey, action, args);
+            Object response = webSocketCommunicator.sendAction(action, args);
             if (response == null) {
                 response = VOID_SUCCESS;
             }
             return response;
-        } catch (RemoteException e) {
-            LOGGER.error("Executing action failed.", e);
-            handleLostConnection();
         } catch (CommandFailedException e) {
             LOGGER.error("Executing action failed.", e);
             lastSentActionException = e;
-        } catch (InvalidPasskeyException | DeviceNotFoundException e) {
-            LOGGER.error("Executing action was rejected by the server.", e);
-            throw new DeviceInvocationRejectedException(e);
         }
-
         return null;
     }
 

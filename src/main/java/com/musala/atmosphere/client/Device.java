@@ -691,7 +691,6 @@ public class Device {
         }
 
         closeChromeDriver();
-        communicator.release();
     }
 
     /**

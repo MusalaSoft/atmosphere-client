@@ -11,10 +11,16 @@ import org.apache.log4j.Logger;
 import org.glassfish.tyrus.client.ClientManager;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
+import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformation;
 import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
 import com.musala.atmosphere.commons.cs.exception.NoDeviceMatchingTheGivenSelectorException;
+import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.exceptions.NoAvailableDeviceFoundException;
 import com.musala.atmosphere.commons.websocket.WebSocketCommunicatorManager;
 import com.musala.atmosphere.commons.websocket.message.ClientServerRequest;
@@ -32,6 +38,8 @@ public class ClientServerWebSocketCommunicator {
 
     private Session session;
 
+    private DeviceAllocationInformation deviceInformation;
+
     private Gson gson = new Gson();
 
     /**
@@ -46,7 +54,7 @@ public class ClientServerWebSocketCommunicator {
             this.session = client.connectToServer(ClientWebSocketEndpoint.class, new URI(uriAddress));
             LOGGER.info("Connected to server: " + uriAddress);
         } catch (DeploymentException | IOException | URISyntaxException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.fatal(e.getMessage());
         }
     }
 
@@ -85,6 +93,7 @@ public class ClientServerWebSocketCommunicator {
                 }
 
                 DeviceAllocationInformation deviceAllocationInformation = gson.fromJson(response.getResponseData(), DeviceAllocationInformation.class);
+                this.deviceInformation = deviceAllocationInformation;
                 return deviceAllocationInformation;
             } catch (NoAvailableDeviceFoundException e) {
                 LOGGER.info("Device not available. Will retry shortly...");
@@ -97,7 +106,9 @@ public class ClientServerWebSocketCommunicator {
             } catch (NoDeviceMatchingTheGivenSelectorException e) {
                 break;
             } catch (IOException e) {
-                LOGGER.error("WebSockets: Could not send the device allocation request.");
+                String message = "Could not send the device allocation request (connection failure).";
+                LOGGER.fatal(message, e);
+                throw new ServerConnectionFailedException(message, e);
             }
         }
         throw new NoAvailableDeviceFoundException();
@@ -119,8 +130,72 @@ public class ClientServerWebSocketCommunicator {
             sendRequestForResponse(request);
         } catch (IOException e) {
             String message = "Could not release Device (connection failure).";
-            LOGGER.error(message, e);
+            LOGGER.fatal(message, e);
             throw new ServerConnectionFailedException(message, e);
+        }
+    }
+
+    /**
+     * Sends a {@link RoutingAction} to the server and returns the result.
+     *
+     * @param action
+     *        - the {@link RoutingAction} which should be sent
+     * @param args
+     *        - the arguments of the routing action
+     * @return the result of the action as an Object
+     * @throws CommandFailedException
+     *         - if the connection to the server failed
+     */
+    public Object sendAction(RoutingAction action, Object... args) throws CommandFailedException {
+        String sessionId = session.getId();
+        MessageType messageType = MessageType.ROUTING_ACTION;
+        String data = parseRoutingActionArguments(action, args);
+
+        ClientServerRequest request = new ClientServerRequest(sessionId, messageType, data);
+
+        try {
+            ClientServerResponse response = sendRequestForResponse(request);
+            if (response.getResponseType() == MessageType.ERROR) {
+                String errorMessage = response.getResponseData();
+                throw new CommandFailedException(errorMessage);
+            }
+
+            // The action ran successfully, but it did not return a result
+            if (response.getResponseType() == messageType && response.getResponseData() == null) {
+                return null;
+            }
+
+            return parseResult(response.getResponseData());
+        } catch (IOException e) {
+            String message = "Could not send routing action (connection failure).";
+            LOGGER.fatal(message, e);
+            throw new ServerConnectionFailedException(message, e);
+        }
+    }
+
+    private String parseRoutingActionArguments(RoutingAction action, Object... args) {
+        JsonObject json = new JsonObject();
+
+        json.addProperty("rmiId", deviceInformation.getProxyRmiId());
+        json.addProperty("passkey", deviceInformation.getProxyPasskey());
+        json.addProperty("action", gson.toJson(action, RoutingAction.class));
+
+        // Add the arguments as json array
+        JsonArray jsonArgsArray = new JsonArray();
+        for (Object arg : args) {
+            jsonArgsArray.add(gson.toJson(arg));
+        }
+        json.add("args", jsonArgsArray);
+        return json.toString();
+    }
+
+    private Object parseResult(String responseData) throws CommandFailedException {
+        JsonObject jsonResponse = new JsonParser().parse(responseData).getAsJsonObject();
+        String className = jsonResponse.get("class").getAsString();
+        try {
+            return gson.fromJson(jsonResponse.get("value").getAsString(), Class.forName(className));
+        } catch (JsonSyntaxException | ClassNotFoundException e) {
+            throw new CommandFailedException(e.getMessage());
         }
     }
 
@@ -128,7 +203,8 @@ public class ClientServerWebSocketCommunicator {
         String sessionId = request.getSessionId();
         String requestJSON = gson.toJson(request, ClientServerRequest.class);
         session.getBasicRemote().sendText(requestJSON);
-        LOGGER.info("Device Descriptor request sent to server.");
+        LOGGER.info("Sending request:");
+        LOGGER.info(requestJSON);
 
         Object lockObject = communicationManager.getSynchronizationObject(sessionId);
         LOGGER.info("Waiting for response.");
@@ -142,5 +218,16 @@ public class ClientServerWebSocketCommunicator {
 
         LOGGER.info("Getting the response...");
         return communicationManager.getServerResponse(sessionId);
+    }
+
+    /**
+     * Disconnects the communicator from the server.
+     */
+    public void close() {
+        try {
+            session.close();
+        } catch (IOException e) {
+            // Already disconnected, nothing to do here.
+        }
     }
 }

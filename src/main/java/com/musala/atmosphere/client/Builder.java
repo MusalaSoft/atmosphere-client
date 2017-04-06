@@ -1,6 +1,5 @@
 package com.musala.atmosphere.client;
 
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.util.Collections;
@@ -21,7 +20,6 @@ import com.musala.atmosphere.client.util.ServerConnectionProperties;
 import com.musala.atmosphere.client.websocket.ClientServerWebSocketCommunicator;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformation;
 import com.musala.atmosphere.commons.cs.clientbuilder.IClientBuilder;
-import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
 import com.musala.atmosphere.commons.cs.exception.DeviceNotFoundException;
 import com.musala.atmosphere.commons.exceptions.NoAvailableDeviceFoundException;
@@ -40,8 +38,6 @@ public class Builder {
     private static final int ALLOCATE_DEVICE_RETRY_TIMEOUT = 300_000; // 5 minutes
 
     private IClientBuilder clientBuilder;
-
-    private Registry serverRmiRegistry;
 
     private ClientServerWebSocketCommunicator websocketCommunicator;
 
@@ -67,7 +63,6 @@ public class Builder {
         websocketCommunicator = new ClientServerWebSocketCommunicator();
 
         clientBuilder = builderRegistryPair.getKey();
-        serverRmiRegistry = builderRegistryPair.getValue();
 
         this.screenRecordingproperties = new ScreenRecordingAnnotationProperties();
         this.logcatAnnotationProperties = new LogcatAnnotationProperties();
@@ -172,10 +167,7 @@ public class Builder {
             String messageReleasedDevice = String.format("Fetched device with proxy RMI ID: %s .", deviceProxyRmiId);
             LOGGER.info(messageReleasedDevice);
 
-            IClientDevice iClientDevice = (IClientDevice) serverRmiRegistry.lookup(deviceProxyRmiId);
-            long passkey = deviceDescriptor.getProxyPasskey();
-
-            Device device = new DeviceBuilder(iClientDevice, passkey).build();
+            Device device = new DeviceBuilder(websocketCommunicator).build();
             deviceToDescriptor.put(device, deviceDescriptor);
 
             if (this.screenRecordingproperties.isEnabled()) {
@@ -191,10 +183,6 @@ public class Builder {
             String message = "No devices matching the requested parameters were found.";
             LOGGER.error(message, e);
             throw new NoAvailableDeviceFoundException(message, e);
-        } catch (RemoteException | NotBoundException e) {
-            String message = "Fetching device failed (server connection failure).";
-            LOGGER.error(message, e);
-            throw new ServerConnectionFailedException(message, e);
         }
     }
 

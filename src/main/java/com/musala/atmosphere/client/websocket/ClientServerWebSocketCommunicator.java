@@ -1,9 +1,12 @@
 package com.musala.atmosphere.client.websocket;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.websocket.DeploymentException;
 import javax.websocket.Session;
@@ -24,7 +27,9 @@ import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
 import com.musala.atmosphere.commons.cs.exception.NoDeviceMatchingTheGivenSelectorException;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.exceptions.NoAvailableDeviceFoundException;
+import com.musala.atmosphere.commons.ui.tree.AccessibilityElement;
 import com.musala.atmosphere.commons.util.Pair;
+import com.musala.atmosphere.commons.util.structure.tree.Tree;
 import com.musala.atmosphere.commons.websocket.WebSocketCommunicatorManager;
 import com.musala.atmosphere.commons.websocket.message.ClientServerRequest;
 import com.musala.atmosphere.commons.websocket.message.ClientServerResponse;
@@ -35,7 +40,7 @@ public class ClientServerWebSocketCommunicator {
 
     private static final int ALLOCATE_DEVICE_RETRY_TIMEOUT = 1000;
 
-    private static final int CONNECTION_TIMEOUT = 10000;
+    private static final int CONNECTION_TIMEOUT = 30000;
 
     private WebSocketCommunicatorManager communicationManager = WebSocketCommunicatorManager.getInstance();
 
@@ -196,7 +201,7 @@ public class ClientServerWebSocketCommunicator {
                 return null;
             }
 
-            return parseResult(response.getResponseData());
+            return parseResult(action, response.getResponseData());
         } catch (IOException e) {
             String message = "Could not send routing action (connection failure).";
             LOGGER.fatal(message, e);
@@ -214,20 +219,48 @@ public class ClientServerWebSocketCommunicator {
         // Add the arguments as json array
         JsonArray jsonArgsArray = new JsonArray();
         for (Object arg : args) {
-            jsonArgsArray.add(gson.toJson(arg));
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("class", arg.getClass().getName());
+            jsonObject.addProperty("value", gson.toJson(arg, arg.getClass()));
+            jsonArgsArray.add(jsonObject);
         }
         json.add("args", jsonArgsArray);
         return json.toString();
     }
 
-    private Object parseResult(String responseData) throws CommandFailedException {
+    private Object parseResult(RoutingAction action, String responseData) throws CommandFailedException {
         JsonObject jsonResponse = new JsonParser().parse(responseData).getAsJsonObject();
         String className = jsonResponse.get("class").getAsString();
         try {
-            return gson.fromJson(jsonResponse.get("value").getAsString(), Class.forName(className));
+            return gson.fromJson(jsonResponse.get("value").getAsString(), deserializeCorrectlyIfCollection(action, Class.forName(className)));
         } catch (JsonSyntaxException | ClassNotFoundException e) {
             throw new CommandFailedException(e.getMessage());
         }
+    }
+
+    private Type deserializeCorrectlyIfCollection(RoutingAction action, Type defaultType) {
+        Type objectType = null;
+        if (action == RoutingAction.EXECUTE_SHELL_COMMAND_SEQUENCE) {
+            objectType = new TypeToken<List<String>>(){}.getType();
+        } else if (action == RoutingAction.GET_UI_TREE) {
+            objectType = new TypeToken<Tree<AccessibilityElement>>(){}.getType();
+        } else if (action == RoutingAction.GET_UI_ELEMENTS ||
+                action == RoutingAction.GET_CHILDREN ||
+                action == RoutingAction.EXECUTE_XPATH_QUERY_ON_LOCAL_ROOT ||
+                action == RoutingAction.EXECUTE_XPATH_QUERY) {
+            objectType = new TypeToken<List<AccessibilityElement>>(){}.getType();
+        } else if (action == RoutingAction.GET_LOGCAT_BUFFER) {
+            objectType = new TypeToken<List<Pair<Integer, String>>>(){}.getType();
+        } else if (action == RoutingAction.GET_WEB_VIEWS) {
+            objectType = new TypeToken<Set<String>>(){}.getType();
+        } else if (action == RoutingAction.FIND_WEB_ELEMENT) {
+            objectType = new TypeToken<Map<String, Object>>(){}.getType();
+        } else if (action == RoutingAction.FIND_WEB_ELEMENTS) {
+            objectType = new TypeToken<List<Map<String, Object>>>(){}.getType();
+        } else {
+            return defaultType;
+        }
+        return objectType;
     }
 
     private ClientServerResponse sendRequestForResponse(ClientServerRequest request) throws IOException {

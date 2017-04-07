@@ -15,12 +15,14 @@ import org.apache.log4j.Logger;
 import org.glassfish.tyrus.client.ClientManager;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
+import com.musala.atmosphere.client.websocket.serializer.DeviceSelectorSerializer;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformation;
 import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
@@ -48,7 +50,7 @@ public class ClientServerWebSocketCommunicator {
 
     private DeviceAllocationInformation deviceInformation;
 
-    private Gson gson = new Gson();
+    private Gson gson = new GsonBuilder().registerTypeAdapter(DeviceSelector.class, new DeviceSelectorSerializer()).create();
 
     /**
      * Creates a new instance of the ClientServerWebSocketCommunicator class and establishes a new connection

@@ -186,6 +186,10 @@ public class Builder {
                 device.clearLogcat();
             }
 
+            if(ConfigurationPropertiesLoader.isConfigExists()) {
+                device.setImplicitWaitTimeout(ConfigurationPropertiesLoader.getImplicitWaitTimeout());
+            }
+
             return device;
         } catch (NoAvailableDeviceFoundException e) {
             String message = "No devices matching the requested parameters were found";

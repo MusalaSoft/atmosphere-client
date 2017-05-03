@@ -71,8 +71,11 @@ public class Screen {
 
     private final DeviceCommunicator communicator;
 
-    @Deprecated
+    private Integer implicitWaitTimeout;
 
+    private WebView webview;
+
+    @Deprecated
     Screen(GestureEntity gestureEntity,
             ImeEntity imeEntity,
             DeviceSettingsEntity settingsEntity,
@@ -609,17 +612,29 @@ public class Screen {
      */
     public WebView getWebView(String packageName) {
         communicator.sendAction(RoutingAction.GET_WEB_VIEW, packageName);
-        return new WebView(communicator, imeEntity);
+
+        if (implicitWaitTimeout != null) {
+            communicator.sendAction(RoutingAction.SET_WEB_VIEW_IMPLICIT_WAIT, implicitWaitTimeout.intValue());
+        }
+
+        webview = new WebView(communicator, imeEntity);
+
+        return webview;
     }
 
     /**
-     * Waits for a certain amount of time when trying to find an element/s if they are not immediately available. Sets
-     * an implicit wait timeout value to {@link AccessibilityElementEntity} elementEntity. The default value is 0.
+     * Sets an implicit wait timeout to the {@link AccessibilityElementEntity} elementEntity and to the {@link WebView}
+     * webview.
      *
      * @param implicitWaitTimeout
      *        - an implicit wait timeout in milliseconds
      */
-    public void setImplicitWaitTimeout(int implicitWaitTimeout) {
-        elementEntity.setImplicitWaitTimeout(implicitWaitTimeout);
+    void setImplicitWaitTimeout(int implicitWaitTimeout) {
+        this.implicitWaitTimeout = implicitWaitTimeout;
+
+        if (webview != null) {
+            communicator.sendAction(RoutingAction.SET_WEB_VIEW_IMPLICIT_WAIT, implicitWaitTimeout);
+        }
     }
+
 }

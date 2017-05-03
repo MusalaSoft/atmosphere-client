@@ -8,6 +8,7 @@ import com.musala.atmosphere.client.Device;
 import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
 import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelectorBuilder;
 import com.musala.atmosphere.commons.cs.exception.DeviceNotFoundException;
+import com.musala.atmosphere.commons.geometry.Point;
 import com.musala.atmosphere.commons.util.Pair;
 
 /**
@@ -72,6 +73,15 @@ public class ViewerCommunicator {
         releaseDevice();
 
         return screenshotFilePath;
+    }
+
+    public void tapScreen(String deviceSerialNumber, int x, int y) {
+        getDevice(deviceSerialNumber);
+
+        Point tapPoint = new Point(x, y);
+        device.tapScreenLocation(tapPoint);
+
+        releaseDevice();
     }
 
     /**

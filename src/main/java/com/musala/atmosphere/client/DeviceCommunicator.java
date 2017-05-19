@@ -1,14 +1,12 @@
 package com.musala.atmosphere.client;
 
-import java.rmi.RemoteException;
-
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.exceptions.DeviceInvocationRejectedException;
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
+import com.musala.atmosphere.client.websocket.ClientDispatcher;
 import com.musala.atmosphere.commons.RoutingAction;
-import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.cs.exception.DeviceNotFoundException;
 import com.musala.atmosphere.commons.cs.exception.InvalidPasskeyException;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
@@ -22,13 +20,17 @@ import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 public class DeviceCommunicator {
     private long invocationPasskey;
 
-    private IClientDevice wrappedClientDevice;
-
     private static final Logger LOGGER = Logger.getLogger(DeviceCommunicator.class.getCanonicalName());
 
     public static final Object VOID_SUCCESS = new Object();
 
     private CommandFailedException lastSentActionException;
+
+    private ClientDispatcher dispatcher = ClientDispatcher.getInstance();
+
+    private String deviceId;
+
+    private boolean releasedDevice;
 
     /**
      * Creates an instance for specified client device.
@@ -38,16 +40,17 @@ public class DeviceCommunicator {
      * @param passkey
      *        - the invocation passkey for the client device instance.
      */
-    DeviceCommunicator(IClientDevice wrappedDevice, long passkey) {
-        wrappedClientDevice = wrappedDevice;
+    DeviceCommunicator(long passkey, String deviceId) {
         invocationPasskey = passkey;
+        this.deviceId = deviceId;
     }
 
     /**
      * Release the underlying client device so no further invocation can be possible.
      */
     public void release() {
-        wrappedClientDevice = new ReleasedClientDevice();
+        // TODO: could be more optimal
+        releasedDevice = true;
     }
 
     /**
@@ -67,28 +70,52 @@ public class DeviceCommunicator {
      *        - a {@link RoutingAction} instance that specifies the action to be invoked
      * @param args
      *        - the action parameters (if required)
-     * @return the result from the action invocation
+     * @return the result from the {@link RoutingAction action} invocation
      */
-    public Object sendAction(RoutingAction action, Object... args) {
+    public Object sendAction(boolean isAsync, RoutingAction action, Object... args) {
+        if (releasedDevice) {
+            throw new DeviceReleasedException("The device you are trying to use is released.");
+        }
+
         lastSentActionException = null;
+        Object response = null;
+
         try {
-            Object response = wrappedClientDevice.route(invocationPasskey, action, args);
+            if (!isAsync) {
+                response = dispatcher.route(deviceId, invocationPasskey, action, args);
+            } else {
+                dispatcher.routeAsync(deviceId, invocationPasskey, action, args);
+            }
+
             if (response == null) {
                 response = VOID_SUCCESS;
             }
-            return response;
-        } catch (RemoteException e) {
-            LOGGER.error("Executing action failed.", e);
-            handleLostConnection();
-        } catch (CommandFailedException e) {
-            LOGGER.error("Executing action failed.", e);
-            lastSentActionException = e;
-        } catch (InvalidPasskeyException | DeviceNotFoundException e) {
-            LOGGER.error("Executing action was rejected by the server.", e);
-            throw new DeviceInvocationRejectedException(e);
+        } catch (Exception e) {
+            if (e instanceof CommandFailedException) {
+                LOGGER.error("Executing action failed.", e);
+                lastSentActionException = (CommandFailedException) e;
+            } else if (e instanceof InvalidPasskeyException || e instanceof DeviceNotFoundException) {
+                LOGGER.error("Executing action was rejected by the server.", e);
+                throw new DeviceInvocationRejectedException(e);
+            } else if (e instanceof ServerConnectionFailedException) {
+                throw new ServerConnectionFailedException("Could not send the routing action (connection failure).");
+            }
         }
 
-        return null;
+        return response;
+    }
+
+    /**
+     * Requests an routing action to a device and expects a result.
+     * 
+     * @param action
+     *        - {@link RoutingAction routing action}
+     * @param args
+     *        - arguments of the action
+     * @return the result from the {@link RoutingAction action} invocation
+     */
+    public Object sendAction(RoutingAction action, Object... args) {
+        return this.sendAction(false, action, args);
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.musala.atmosphere.client;
+/*package com.musala.atmosphere.client;
 
 import java.rmi.RemoteException;
 
@@ -10,14 +10,14 @@ import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.cs.exception.InvalidPasskeyException;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 
-/**
+*//**
  * An instance of this class is used when a deivce allocated to a Client is released. The methods in this class throw
  * {@link DeviceReleasedException DeviceReleasedException} whenever some of them are called and thus notify the user
  * that he or she is trying to use a device that has been released (and can not be used anymore).
- * 
+ *
  * @author valyo.yolovski
- * 
- */
+ *
+ *//*
 class ReleasedClientDevice implements IClientDevice {
     private static final Logger LOGGER = Logger.getLogger(ReleasedClientDevice.class);
 
@@ -31,3 +31,4 @@ class ReleasedClientDevice implements IClientDevice {
         throw new DeviceReleasedException(message);
     }
 }
+*/

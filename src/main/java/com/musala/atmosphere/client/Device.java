@@ -13,6 +13,7 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -222,7 +223,9 @@ public class Device {
             LOGGER.info(currentInstallationStepDescription);
             int readBytes;
             while ((readBytes = fileReaderFromApk.read(buffer)) >= 0) {
-                response = communicator.sendAction(RoutingAction.APK_APPEND_DATA, buffer, readBytes);
+                String base64Buffer = Base64.getEncoder().encodeToString(buffer);
+                response = communicator.sendAction(RoutingAction.APK_APPEND_DATA, base64Buffer, readBytes);
+
                 if (response != DeviceCommunicator.VOID_SUCCESS) {
                     throw communicator.getLastException();
                 }
@@ -1605,15 +1608,8 @@ public class Device {
         String filename = logcatFolderPath + callerClassName + "." + callerMethodName;
 
         filename = composeBaseLogcatFileName(filename + "_");
-
-        Runnable startDeviceLogcatStream = new Runnable() {
-            @Override
-            public void run() {
-                communicator.sendAction(RoutingAction.START_DEVICE_LOGCAT, deviceSerialNumber, command);
-            }
-        };
-        Thread startDeviceLogcatStreamThread = new Thread(startDeviceLogcatStream);
-        startDeviceLogcatStreamThread.start();
+        
+        communicator.sendAction(true, RoutingAction.START_DEVICE_LOGCAT, deviceSerialNumber, command);
 
         getLogcatBuffer(filename);
     }
@@ -1778,7 +1774,8 @@ public class Device {
      * @return <code>true</code> if device log is stored successfully, <code>false</code> otherwise
      */
     private boolean getDeviceLogcat(String logFilePath, String logFilters) {
-        byte[] data = (byte[]) communicator.sendAction(RoutingAction.GET_DEVICE_LOGCAT, logFilters);
+        String base64Logcat = (String) communicator.sendAction(RoutingAction.GET_DEVICE_LOGCAT, logFilters);
+        byte[] data = Base64.getDecoder().decode(base64Logcat);
 
         return writeLogFile(logFilePath, data);
     }

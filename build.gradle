@@ -26,7 +26,10 @@ dependencies {
     compile 'org.jsoup:jsoup:1.7.2'
     compile 'org.reflections:reflections:0.9.9-RC1'
     compile 'org.testng:testng:6.9.13.8'
-    
+
+    compile 'org.glassfish.tyrus:tyrus-client:1.13.1'
+    compile 'org.glassfish.tyrus:tyrus-container-grizzly-client:1.13.1'
+
     testCompile 'org.mockito:mockito-all:1.9.5'
     testCompile 'junit:junit:4.12'
 }

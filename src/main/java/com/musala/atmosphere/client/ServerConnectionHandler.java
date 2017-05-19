@@ -1,4 +1,4 @@
-package com.musala.atmosphere.client;
+/*package com.musala.atmosphere.client;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -13,12 +13,12 @@ import com.musala.atmosphere.commons.cs.RmiStringConstants;
 import com.musala.atmosphere.commons.cs.clientbuilder.IClientBuilder;
 import com.musala.atmosphere.commons.util.Pair;
 
-/**
+*//**
  * Handles basic commands related to connection to server.
  *
  * @author yordan.petrov
  *
- */
+ *//*
 public class ServerConnectionHandler {
     private static final Logger LOGGER = Logger.getLogger(ServerConnectionHandler.class.getCanonicalName());
 
@@ -26,21 +26,21 @@ public class ServerConnectionHandler {
 
     private Registry serverRmiRegistry;
 
-    /**
+    *//**
      * Creates a new {@link ServerConnectionHandler} instance by given {@link ServerConnectionProperties}.
      *
      * @param serverConnectionProperties
      *        - the {@link ServerConnectionProperties} instance which contains the connection properties to the server
-     */
+     *//*
     public ServerConnectionHandler(ServerConnectionProperties serverConnectionProperties) {
         this.serverConnectionProperties = serverConnectionProperties;
     }
 
-    /**
+    *//**
      * Connects to server and returns a pair of client builder and server RMI registry.
      *
      * @return pair of client builder and server RMI registry.
-     */
+     *//*
     public Pair<IClientBuilder, Registry> connect() {
         LOGGER.info("Connecting to server...");
 
@@ -94,13 +94,14 @@ public class ServerConnectionHandler {
         }
     }
 
-    /**
+    *//**
      * Returns the server {@link ServerConnectionProperties} that is being used.
      *
      * @return the server {@link ServerConnectionProperties} that is being used.
-     */
+     *//*
     public ServerConnectionProperties getServerConnectionProperties() {
         return serverConnectionProperties;
     }
 
 }
+*/

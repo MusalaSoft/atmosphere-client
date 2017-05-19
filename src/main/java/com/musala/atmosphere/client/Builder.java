@@ -1,8 +1,5 @@
 package com.musala.atmosphere.client;
 
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.Registry;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,13 +15,11 @@ import com.musala.atmosphere.client.util.LogcatAnnotationProperties;
 import com.musala.atmosphere.client.util.ScreenRecordingAnnotationProperties;
 import com.musala.atmosphere.client.util.ServerAnnotationProperties;
 import com.musala.atmosphere.client.util.ServerConnectionProperties;
+import com.musala.atmosphere.client.websocket.ClientDispatcher;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformation;
-import com.musala.atmosphere.commons.cs.clientbuilder.IClientBuilder;
-import com.musala.atmosphere.commons.cs.clientdevice.IClientDevice;
 import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
 import com.musala.atmosphere.commons.cs.exception.DeviceNotFoundException;
 import com.musala.atmosphere.commons.cs.exception.InvalidPasskeyException;
-import com.musala.atmosphere.commons.cs.exception.NoDeviceMatchingTheGivenSelectorException;
 import com.musala.atmosphere.commons.exceptions.NoAvailableDeviceFoundException;
 import com.musala.atmosphere.commons.util.Pair;
 
@@ -41,13 +36,9 @@ public class Builder {
 
     private static Map<ServerConnectionProperties, Builder> builders = new HashMap<>();
 
-    private IClientBuilder clientBuilder;
-
-    private Registry serverRmiRegistry;
-
     private Map<Device, DeviceAllocationInformation> deviceToDescriptor = Collections.synchronizedMap(new HashMap<Device, DeviceAllocationInformation>());
 
-    private ServerConnectionHandler serverConnectionHandler;
+    private ServerConnectionProperties serverConnectionProperties;
 
     // the count of the attempts to get a device
     private int allocateDeviceRetryCount = 300;
@@ -56,20 +47,19 @@ public class Builder {
 
     private LogcatAnnotationProperties logcatAnnotationProperties;
 
+    private ClientDispatcher dispatcher = ClientDispatcher.getInstance();
+
     /**
      * Initializes {@link Builder} and connects to Server through given {@link ServerConnectionHandler}.
      *
      * @param serverConnectionHandler
      *        - the given {@link ServerConnectionHandler}.
      */
-    private Builder(ServerConnectionHandler serverConnectionHandler) {
+    private Builder(ServerConnectionProperties serverConnectionProperties) {
+        // establish an WebSocket connection
+        dispatcher.connectToServer(serverConnectionProperties);
 
-        this.serverConnectionHandler = serverConnectionHandler;
-        Pair<IClientBuilder, Registry> builderRegistryPair = serverConnectionHandler.connect();
-
-        clientBuilder = builderRegistryPair.getKey();
-        serverRmiRegistry = builderRegistryPair.getValue();
-
+        this.serverConnectionProperties = serverConnectionProperties;
         this.screenRecordingproperties = new ScreenRecordingAnnotationProperties();
         this.logcatAnnotationProperties = new LogcatAnnotationProperties();
     }
@@ -82,7 +72,7 @@ public class Builder {
     public static Builder getInstance() {
         ServerAnnotationProperties serverAnnotationProperties = new ServerAnnotationProperties();
 
-        if(serverAnnotationProperties.isServerAnnotationExists()) {
+        if (serverAnnotationProperties.isServerAnnotationExists()) {
             return getInstance(serverAnnotationProperties);
         }
 
@@ -113,9 +103,7 @@ public class Builder {
                 builder = builders.get(serverConnectionProperties);
 
                 if (builder == null) {
-                    ServerConnectionHandler serverConnectionHandler = new ServerConnectionHandler(serverConnectionProperties);
-
-                    builder = new Builder(serverConnectionHandler);
+                    builder = new Builder(serverConnectionProperties);
                     String message = "Builder instance has been created.";
                     LOGGER.info(message);
                     builders.put(serverConnectionProperties, builder);
@@ -127,37 +115,6 @@ public class Builder {
     }
 
     /**
-     * Gets a {@link DeviceAllocationInformation} instance with the given {@link DeviceSelector device characteristics}.
-     *
-     * @param deviceSelector
-     *        - required {@link DeviceSelector parameters} needed to construct new {@link DeviceAllocationInformation}
-     *        instance.
-     * @return a {@link DeviceAllocationInformation} instance with the given device selector.
-     * @throws NoAvailableDeviceFoundException
-     * @throws RemoteException
-     */
-    private DeviceAllocationInformation getDeviceDescriptor(DeviceSelector deviceSelector)
-        throws NoAvailableDeviceFoundException,
-            RemoteException {
-        while (this.allocateDeviceRetryCount > 0) {
-            try {
-                return clientBuilder.allocateDevice(deviceSelector);
-            } catch (NoAvailableDeviceFoundException e) {
-                try {
-                    Thread.sleep(RETRY_SLEEP_TIMEOUT);
-                } catch (InterruptedException e1) {
-                    // Nothing to do here.
-                }
-                this.allocateDeviceRetryCount--;
-            } catch (NoDeviceMatchingTheGivenSelectorException e) {
-                break;
-            }
-        }
-
-        throw new NoAvailableDeviceFoundException();
-    }
-
-    /**
      * Gets a {@link Device Device} instance with the given {@link DeviceSelector device characteristics}.
      *
      * @param deviceSelector
@@ -166,16 +123,15 @@ public class Builder {
      */
     public Device getDevice(DeviceSelector deviceSelector) {
         try {
-            DeviceAllocationInformation deviceDescriptor = getDeviceDescriptor(deviceSelector);
+            DeviceAllocationInformation deviceDescriptor = dispatcher.getDeviceDescriptor(deviceSelector,
+                                                                                          allocateDeviceRetryCount);
 
-            String deviceProxyRmiId = deviceDescriptor.getProxyRmiId();
-            String messageReleasedDevice = String.format("Fetched device with proxy RMI ID: %s .", deviceProxyRmiId);
-            LOGGER.info(messageReleasedDevice);
+            final String deviceId = deviceDescriptor.getDeviceId();
+            LOGGER.info(String.format("Fetched device with ID: %s .", deviceId));
 
-            IClientDevice iClientDevice = (IClientDevice) serverRmiRegistry.lookup(deviceProxyRmiId);
             long passkey = deviceDescriptor.getProxyPasskey();
 
-            Device device = new DeviceBuilder(iClientDevice, passkey).build();
+            Device device = new DeviceBuilder(passkey, deviceId).build();
             deviceToDescriptor.put(device, deviceDescriptor);
 
             if (this.screenRecordingproperties.isEnabled()) {
@@ -191,10 +147,6 @@ public class Builder {
             String message = "No devices matching the requested parameters were found";
             LOGGER.error(message, e);
             throw new NoAvailableDeviceFoundException(message, e);
-        } catch (RemoteException | NotBoundException e) {
-            String message = "Fetching device failed (server connection failure).";
-            LOGGER.error(message, e);
-            throw new ServerConnectionFailedException(message, e);
         }
     }
 
@@ -219,13 +171,15 @@ public class Builder {
      * @return list with serial numbers and models of all available devices
      */
     public List<Pair<String, String>> getAllAvailableDevices() {
+        List<Pair<String, String>> deviceList = null;
         try {
-            return clientBuilder.getAllAvailableDevices();
-        } catch (RemoteException e) {
+            deviceList = dispatcher.getAllAvailableDevices();
+        } catch (Exception e) {
             String message = "Failed to get the list with available devices (server connection failure).";
             LOGGER.error(message, e);
-            throw new ServerConnectionFailedException(message, e);
         }
+
+        return deviceList;
     }
 
     /**
@@ -238,27 +192,33 @@ public class Builder {
      */
     public void releaseDevice(Device device) throws DeviceNotFoundException {
         DeviceAllocationInformation deviceDescriptor = deviceToDescriptor.get(device);
-        String deviceRmiId = deviceDescriptor.getProxyRmiId();
+        String deviceId = deviceDescriptor.getDeviceId();
 
         deviceToDescriptor.remove(device);
-        try {
-            if (this.screenRecordingproperties.isEnabled()) {
-                device.stopScreenRecording();
-            }
-            if (this.logcatAnnotationProperties.isEnabled()) {
-                device.getDeviceLog(logcatAnnotationProperties);
-            }
-            device.release();
-            clientBuilder.releaseDevice(deviceDescriptor);
-        } catch (RemoteException e) {
-            String message = "Could not release Device (connection failure).";
-            LOGGER.error(message, e);
-            throw new ServerConnectionFailedException(message, e);
-        } catch (InvalidPasskeyException e) {
-            // We did not have the correct passkey. The device most likely timed out and got freed to be used by someone
-            // else. So nothing to do here.
+
+        if (this.screenRecordingproperties.isEnabled()) {
+            device.stopScreenRecording();
         }
-        String messageReleasedDevice = String.format("Released device with proxy RMI ID: %s .", deviceRmiId);
+        if (this.logcatAnnotationProperties.isEnabled()) {
+            device.getDeviceLog(logcatAnnotationProperties);
+        }
+        device.release();
+        try {
+            dispatcher.releaseDevice(deviceDescriptor);
+        } catch (Exception e) {
+            if (e instanceof InvalidPasskeyException) {
+                // We did not have the correct passkey. The device most likely timed out and got freed to be used by
+                // someone else. So nothing to do here.
+            } else if (e instanceof DeviceNotFoundException) {
+                throw (DeviceNotFoundException) e;
+            } else if (e instanceof ServerConnectionFailedException) {
+                String message = "Could not release Device (connection failure).";
+                LOGGER.error(message, e);
+                throw new ServerConnectionFailedException(message, e);
+            }
+        }
+
+        String messageReleasedDevice = String.format("Released device with ID: %s .", deviceId);
         LOGGER.info(messageReleasedDevice);
     }
 
@@ -281,7 +241,7 @@ public class Builder {
      * @return the {@link ServerConnectionProperties} that are used for connection.
      */
     public ServerConnectionProperties getServerConnectionProperties() {
-        return serverConnectionHandler.getServerConnectionProperties();
+        return serverConnectionProperties;
     }
 
     @Override

@@ -4,8 +4,7 @@ import com.musala.atmosphere.commons.exceptions.AtmosphereRuntimeException;
 
 /**
  * This exception is thrown when the Client cannot connect to the Server for some reason - wrong server IP or port,
- * Server is not present on the given IP and port, or the Client is trying to connect to something that is not Server (
- * it doesn't have PoolManager in it's RMI registry ).
+ * Server is not present on the given IP and port, or the Client is trying to connect to something that is not Server.
  * 
  * @author vladimir.vladimirov
  * 

@@ -121,6 +121,7 @@ public class ClientDispatcher {
      * @param deviceId
      *        - identifier of a device
      * @param invocationPasskey
+     *        - a passkey for validating the authority for the client device
      * @param action
      *        - {@link MessageAction message action}
      * @param args
@@ -149,6 +150,7 @@ public class ClientDispatcher {
      * @param deviceId
      *        - identifier of a device
      * @param invocationPasskey
+     *        - a passkey for validating the authority for the client device
      * @param action
      *        - {@link MessageAction message action}
      * @param args
@@ -190,42 +192,31 @@ public class ClientDispatcher {
      * @param deviceSelector
      *        - required {@link DeviceSelector parameters} needed to construct new {@link DeviceAllocationInformation}
      *        instance.
+     * @param allocateDeviceRetryCount
+     *        - the number of the attempts to get a device
      * @return a {@link DeviceAllocationInformation} instance with the given device selector.
      * @throws NoAvailableDeviceFoundException
      *         - when there is no available device
      */
     public DeviceAllocationInformation getDeviceDescriptor(DeviceSelector deviceSelector,
                                                            int allocateDeviceRetryCount) {
-        while (allocateDeviceRetryCount > 0) {
-            try {
-                RequestMessage request = new RequestMessage(MessageAction.DEVICE_ALLOCATION_INFORMATION,
-                                                            deviceSelector);
-                request.setSessionId(session.getId());
-
-                DeviceAllocationInformation allocationInfo = null;
-                ResponseMessage response = sendRequest(request, session);
-
-                if (response.getMessageAction() == MessageAction.ERROR) {
-                    if (response.getException() instanceof NoDeviceMatchingTheGivenSelectorException) {
-                        throw (NoDeviceMatchingTheGivenSelectorException) response.getException();
-                    } else if (response.getException() instanceof NoAvailableDeviceFoundException) {
-                        throw (NoAvailableDeviceFoundException) response.getException();
-                    }
-                }
-                allocationInfo = (DeviceAllocationInformation) response.getData();
-
-                return allocationInfo;
-            } catch (NoAvailableDeviceFoundException e) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e1) {
-                    // Nothing to do here.
-                }
-                allocateDeviceRetryCount--;
-            } catch (NoDeviceMatchingTheGivenSelectorException e) {
-                break;
+        do {
+            RequestMessage request = new RequestMessage(MessageAction.DEVICE_ALLOCATION_INFORMATION,
+                                                        deviceSelector);
+            ResponseMessage response = sendRequest(request, session);
+            if (response.getMessageAction() != MessageAction.ERROR) {
+                return (DeviceAllocationInformation) response.getData();
             }
-        }
+
+            if (response.getException() instanceof NoDeviceMatchingTheGivenSelectorException) {
+                throw (NoDeviceMatchingTheGivenSelectorException) response.getException();
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                // Nothing to do here.
+            }
+        } while (--allocateDeviceRetryCount > 0);
 
         throw new NoAvailableDeviceFoundException();
     }
@@ -234,12 +225,12 @@ public class ClientDispatcher {
      * Sends a release device request to the Server and receives a response.
      *
      * @param deviceInformation
+     *         - describes a device that will be released
      * @throws Exception
      *         - when an error occurred when trying to release a device
      */
     public void releaseDevice(DeviceAllocationInformation deviceInformation) throws Exception {
         RequestMessage releaseDeviceRequest = new RequestMessage(MessageAction.RELEASE_DEVICE, deviceInformation);
-        releaseDeviceRequest.setSessionId(session.getId());
 
         ResponseMessage response = sendRequest(releaseDeviceRequest, session);
         if (response != null && response.getException() != null) {
@@ -258,7 +249,7 @@ public class ClientDispatcher {
     @SuppressWarnings("unchecked")
     public List<Pair<String, String>> getAllAvailableDevices() throws Exception {
         RequestMessage getAllAvailableDevicesRequest = new RequestMessage(MessageAction.GET_ALL_AVAILABLE_DEVICES);
-        getAllAvailableDevicesRequest.setSessionId(session.getId());
+
         ResponseMessage response = sendRequest(getAllAvailableDevicesRequest, session);
         if (response.getMessageAction() == MessageAction.ERROR) {
             throw response.getException();
@@ -271,7 +262,9 @@ public class ClientDispatcher {
      * Sends a request and waits for a certain time for a response. If the connection is lost it tries to reconnect.
      */
     private ResponseMessage sendRequest(RequestMessage request, Session session) {
-        String sessionId = request.getSessionId();
+        final String sessionId = session.getId();
+        request.setSessionId(sessionId);
+
         Object lockObject = communicationManager.getSynchronizationObject(sessionId);
 
         String requestJSON = jsonUtil.serialize(request);
@@ -279,14 +272,9 @@ public class ClientDispatcher {
         try {
             session.getBasicRemote().sendText(requestJSON);
         } catch (IOException e1) {
-            try {
-                connectToServer(serverConnectionProperties.getIp(),
-                                serverConnectionProperties.getPort(),
-                                HANDLE_LOST_CONNECTION_RETRIES);
-            } catch (ServerConnectionFailedException e2) {
-                LOGGER.fatal("Faild to send " + request.getMessageAction() + " request.", e2);
-                throw new ServerConnectionFailedException();
-            }
+            connectToServer(serverConnectionProperties.getIp(),
+                            serverConnectionProperties.getPort(),
+                            HANDLE_LOST_CONNECTION_RETRIES);
         }
 
         LOGGER.debug("Sending request:" + requestJSON);

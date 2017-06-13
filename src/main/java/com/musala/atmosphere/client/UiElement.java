@@ -511,7 +511,7 @@ public abstract class UiElement {
             try {
                 Thread.sleep(TIMEOUT_BEFORE_SELECT_ALL);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOGGER.error("A text selection failed.", e);
             }
         }
 

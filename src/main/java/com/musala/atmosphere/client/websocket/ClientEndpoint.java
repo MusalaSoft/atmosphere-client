@@ -22,9 +22,6 @@ import com.musala.atmosphere.commons.websocket.util.JsonConst;
 public class ClientEndpoint {
     private static final Logger LOGGER = Logger.getLogger(ClientEndpoint.class.getCanonicalName());
 
-    public ClientEndpoint() {
-    }
-
     private static WebSocketCommunicatorManager communicationManager = WebSocketCommunicatorManager.getInstance();
 
     private static final IJsonUtil jsonUtil = new ClientServerGsonUtil();

@@ -44,6 +44,8 @@ public class ClientDispatcher {
 
     private static final int WAIT_FOR_RESPONSE_TIME = 30_000;
 
+    private static final int WAIT_FOR_DEVICE_TIME = 300_000;
+
     private static final int HANDLE_LOST_CONNECTION_RETRIES = 5;
 
     private static final String SERVER_URI = "ws://%s:%s/client_server";
@@ -142,7 +144,7 @@ public class ClientDispatcher {
      * The request is also expected to be executed asynchronously on the Agent. Used for the requests that doesn't
      * require an immediate response and when blocking the main thread is undesirable(i. g. printing a logcat on the
      * console during a test execution).
-     * 
+     *
      * @param deviceId
      *        - identifier of a device
      * @param invocationPasskey
@@ -177,7 +179,6 @@ public class ClientDispatcher {
     }
 
     /**
-     * TODO: Consider to migrate this wait logic on the Server.
      *
      * Gets a {@link DeviceAllocationInformation} instance with the given {@link DeviceSelector device characteristics}.
      *
@@ -192,22 +193,15 @@ public class ClientDispatcher {
      */
     public DeviceAllocationInformation getDeviceDescriptor(DeviceSelector deviceSelector,
                                                            int allocateDeviceRetryCount) {
-        do {
-            RequestMessage request = new RequestMessage(MessageAction.DEVICE_ALLOCATION_INFORMATION, deviceSelector);
-            ResponseMessage response = sendRequest(request, session);
-            if (response.getMessageAction() != MessageAction.ERROR) {
-                return (DeviceAllocationInformation) response.getData();
-            }
+        RequestMessage request = new RequestMessage(MessageAction.DEVICE_ALLOCATION_INFORMATION, deviceSelector);
+        ResponseMessage response = sendRequest(request, session, WAIT_FOR_DEVICE_TIME);
+        if (response.getMessageAction() != MessageAction.ERROR) {
+            return (DeviceAllocationInformation) response.getData();
+        }
 
-            if (response.getException() instanceof NoDeviceMatchingTheGivenSelectorException) {
-                throw (NoDeviceMatchingTheGivenSelectorException) response.getException();
-            }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                // Nothing to do here.
-            }
-        } while (--allocateDeviceRetryCount > 0);
+        if (response.getException() instanceof NoDeviceMatchingTheGivenSelectorException) {
+            throw (NoDeviceMatchingTheGivenSelectorException) response.getException();
+        }
 
         throw new NoAvailableDeviceFoundException();
     }
@@ -216,7 +210,7 @@ public class ClientDispatcher {
      * Sends a release device request to the Server and receives a response.
      *
      * @param deviceInformation
-     *         - describes a device that will be released
+     *        - describes a device that will be released
      * @throws Exception
      *         - when an error occurred when trying to release a device
      */
@@ -249,12 +243,17 @@ public class ClientDispatcher {
         return (List<Pair<String, String>>) response.getData();
     }
 
+    private ResponseMessage sendRequest(RequestMessage request, Session session) {
+        return sendRequest(request, session, WAIT_FOR_RESPONSE_TIME);
+    }
+
     /**
      * Sends a request and waits for a certain time for a response. If the connection is lost it tries to reconnect.
      */
-    private ResponseMessage sendRequest(RequestMessage request, Session session) {
-        // The session identifier must be unique not only for WebSocket Session but also for action in case with multiple
-        // threads scenario. Otherwise the WebSocketCommunicationManager can return a response from another action.
+    private ResponseMessage sendRequest(RequestMessage request, Session session, int wait) {
+        // The session identifier must be unique not only for WebSocket Session but also for action in case with
+        // multiple threads scenario. Otherwise the WebSocketCommunicationManager can return a response from another
+        // action.
         final String sessionId = session.getId() + "_" + request.getMessageAction() + "_" + request.getRoutingAction();
         request.setSessionId(sessionId);
 
@@ -275,7 +274,7 @@ public class ClientDispatcher {
 
         synchronized (lockObject) {
             try {
-                lockObject.wait(WAIT_FOR_RESPONSE_TIME);
+                lockObject.wait(wait);
             } catch (InterruptedException e) {
                 LOGGER.error("Waiting for response interrupted.", e);
             }

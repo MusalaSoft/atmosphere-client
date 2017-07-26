@@ -83,10 +83,6 @@ public class ClientDispatcher {
     }
 
     private void connectToServer(String serverAddress, int webSocketPort, int connectionRetryLimit) {
-        if (session != null && session.isOpen()) {
-            return;
-        }
-
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         container.setDefaultMaxTextMessageBufferSize(Integer.MAX_VALUE);
         String uriAddress = String.format(SERVER_URI, serverAddress, webSocketPort);
@@ -110,7 +106,6 @@ public class ClientDispatcher {
             }
         } while (connectionRetryLimit > 0);
 
-        session = null;
         LOGGER.error("Connecting to server failed!", innerException);
         throw new ServerConnectionFailedException("Connecting to server retry limit reached.", innerException);
     }
@@ -130,7 +125,8 @@ public class ClientDispatcher {
      * @throws Exception
      *         - when an exception occurs on the Agent during the action execution
      */
-    public Object route(String deviceId, long invocationPasskey, RoutingAction action, Object... args) throws Exception {
+    public Object route(String deviceId, long invocationPasskey, RoutingAction action, Object... args)
+        throws Exception {
         RequestMessage requestMessage = buildRequest(deviceId, invocationPasskey, action, args);
         ResponseMessage response = sendRequest(requestMessage, session);
 
@@ -175,10 +171,6 @@ public class ClientDispatcher {
     private RequestMessage buildRequest(String deviceId, long invocationPasskey, RoutingAction action, Object[] args) {
         RequestMessage requestMessage = new RequestMessage(MessageAction.ROUTING_ACTION, action, args);
         requestMessage.setDeviceId(deviceId);
-        // The session identifier must be unique not only per WebSocket Session but and per action in case in multiple
-        // threads scenario. Otherwise the WebSocketCommunicationManager can return a response from another action.
-        String sessionIdentifier = this.session.getId() + "_" + action.toString();
-        requestMessage.setSessionId(sessionIdentifier);
         requestMessage.setPasskey(invocationPasskey);
 
         return requestMessage;
@@ -201,8 +193,7 @@ public class ClientDispatcher {
     public DeviceAllocationInformation getDeviceDescriptor(DeviceSelector deviceSelector,
                                                            int allocateDeviceRetryCount) {
         do {
-            RequestMessage request = new RequestMessage(MessageAction.DEVICE_ALLOCATION_INFORMATION,
-                                                        deviceSelector);
+            RequestMessage request = new RequestMessage(MessageAction.DEVICE_ALLOCATION_INFORMATION, deviceSelector);
             ResponseMessage response = sendRequest(request, session);
             if (response.getMessageAction() != MessageAction.ERROR) {
                 return (DeviceAllocationInformation) response.getData();
@@ -262,7 +253,9 @@ public class ClientDispatcher {
      * Sends a request and waits for a certain time for a response. If the connection is lost it tries to reconnect.
      */
     private ResponseMessage sendRequest(RequestMessage request, Session session) {
-        final String sessionId = session.getId();
+        // The session identifier must be unique not only for WebSocket Session but also for action in case with multiple
+        // threads scenario. Otherwise the WebSocketCommunicationManager can return a response from another action.
+        final String sessionId = session.getId() + "_" + request.getMessageAction() + "_" + request.getRoutingAction();
         request.setSessionId(sessionId);
 
         Object lockObject = communicationManager.getSynchronizationObject(sessionId);

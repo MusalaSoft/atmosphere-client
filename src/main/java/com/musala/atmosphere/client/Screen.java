@@ -316,7 +316,6 @@ public class Screen {
     public ScrollableView getScrollableView(UiElementSelector selector)
         throws MultipleElementsFoundException,
             UiElementFetchingException {
-        return new ScrollableView(getElement(selector), elementUtils, communicator);
         // There is a problem with the ScrollableViews created from ListView elements. They can scroll but
         // cannot find inner elements. Make sure we throw an exception if such ScrollableView is created.
         String className = getElement(selector).getProperties().getClassName();
@@ -325,6 +324,8 @@ public class Screen {
                     + "Instead, please select the first parent element of the ListView, which has a resource id.";
             throw new ActionFailedException(message);
         }
+
+        return new ScrollableView(getElement(selector), elementUtils, communicator);
     }
 
     /**

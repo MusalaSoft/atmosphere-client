@@ -184,12 +184,8 @@ public class UiWebElement extends WebElement {
     }
 
     /**
-<<<<<<< HEAD
-     * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element.
-=======
      * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element
      * <input name="foo" />.
->>>>>>> Migrate ImeEntity to agent
      *
      * @return the tag name of the element
      */

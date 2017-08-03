@@ -53,39 +53,41 @@ public class ReconnectDeviceTest {
 
         // deviceCommunicator.release();
 
-        doThrow(new ServerConnectionFailedException()).when(dispatcherMock)
-                                                      .route(any(), anyLong(), eq(RoutingAction.GET_POWER_PROPERTIES));
-        doThrow(new ServerConnectionFailedException()).when(dispatcherMock)
-                                                      .route(any(), anyLong(), eq(RoutingAction.APK_INIT_INSTALL));
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.GET_POWER_PROPERTIES));
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.APK_INIT_INSTALL));
         doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
                                                                                   anyLong(),
                                                                                   eq(RoutingAction.EXECUTE_SHELL_COMMAND),
                                                                                   anyString());
-        doThrow(new ServerConnectionFailedException()).when(dispatcherMock)
-                                                      .route(any(),
-                                                             anyLong(),
-                                                             eq(RoutingAction.GET_UI_TREE),
-                                                             anyBoolean());
-        doThrow(new ServerConnectionFailedException()).when(dispatcherMock)
-                                                      .route(any(), anyLong(), eq(RoutingAction.GET_UI_XML_DUMP));
-        doThrow(new ServerConnectionFailedException()).when(dispatcherMock)
-                                                      .route(any(), anyLong(), eq(RoutingAction.GET_CONNECTION_TYPE));
-        doThrow(new ServerConnectionFailedException()).when(dispatcherMock)
-                                                      .route(any(),
-                                                             anyLong(),
-                                                             eq(RoutingAction.GET_DEVICE_ACCELERATION));
-        doThrow(new ServerConnectionFailedException()).when(dispatcherMock)
-                                                      .route(any(),
-                                                             anyLong(),
-                                                             eq(RoutingAction.GET_DEVICE_ORIENTATION));
-        doThrow(new ServerConnectionFailedException()).when(dispatcherMock)
-                                                      .route(any(),
-                                                             anyLong(),
-                                                             eq(RoutingAction.GET_DEVICE_INFORMATION));
-        doThrow(new ServerConnectionFailedException()).when(dispatcherMock)
-                                                      .route(any(), anyLong(), eq(RoutingAction.GET_MOBILE_DATA_STATE));
-        doThrow(new ServerConnectionFailedException()).when(dispatcherMock)
-                                                      .route(any(), anyLong(), eq(RoutingAction.GET_SCREENSHOT));
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.GET_UI_TREE),
+                                                                                  anyBoolean());
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.GET_UI_XML_DUMP));
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.GET_CONNECTION_TYPE));
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.GET_DEVICE_ACCELERATION));
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.GET_DEVICE_ORIENTATION));
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.GET_DEVICE_INFORMATION));
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.GET_MOBILE_DATA_STATE));
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.GET_SCREENSHOT));
         doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
                                                                                   anyLong(),
                                                                                   eq(RoutingAction.SET_ACCELERATION),
@@ -98,20 +100,22 @@ public class ReconnectDeviceTest {
                                                                                   anyLong(),
                                                                                   eq(RoutingAction.SET_POWER_PROPERTIES),
                                                                                   any(PowerProperties.class));
-        doThrow(new ServerConnectionFailedException()).when(dispatcherMock)
-                                                      .route(any(),
-                                                             anyLong(),
-                                                             eq(RoutingAction.SET_WIFI_STATE),
-                                                             anyBoolean());
-        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
-                                                                      eq(RoutingAction.SET_AIRPLANE_MODE),
-                                                                      anyBoolean());
-        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
-                                                                      eq(RoutingAction.SET_SCREEN_ORIENTATION),
-                                                                      anyBoolean());
-        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
-                                                                      eq(RoutingAction.SET_SCREEN_AUTO_ROTATION),
-                                                                      anyBoolean());
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.SET_WIFI_STATE),
+                                                                                  anyBoolean());
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.SET_AIRPLANE_MODE),
+                                                                                  anyBoolean());
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.SET_SCREEN_ORIENTATION),
+                                                                                  anyBoolean());
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.SET_SCREEN_AUTO_ROTATION),
+                                                                                  anyBoolean());
         doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
                                                                                   anyLong(),
                                                                                   eq(RoutingAction.SMS_RECEIVE),
@@ -127,8 +131,16 @@ public class ReconnectDeviceTest {
         doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
                                                                                   anyLong(),
                                                                                   eq(RoutingAction.CALL_HOLD),
-        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.PRESS_HARDWARE_BUTTON), anyLong());
-        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.IME_INPUT_TEXT), anyString(), anyLong());
+                                                                                  any(PhoneNumber.class));
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.PRESS_HARDWARE_BUTTON),
+                                                                                  anyLong());
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.IME_INPUT_TEXT),
+                                                                                  anyString(),
+                                                                                  anyLong());
         doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
                                                                                   anyLong(),
                                                                                   eq(RoutingAction.CALL_CANCEL),
@@ -137,10 +149,12 @@ public class ReconnectDeviceTest {
                                                                                   anyLong(),
                                                                                   eq(RoutingAction.SEND_BROADCAST),
                                                                                   any(AtmosphereIntent.class));
-        doThrow(new ServerConnectionFailedException()).when(dispatcherMock)
-                                                      .route(any(), anyLong(), eq(RoutingAction.GET_AWAKE_STATUS));
-        doThrow(new ServerConnectionFailedException()).when(dispatcherMock)
-                                                      .route(any(), anyLong(), eq(RoutingAction.IS_LOCKED));
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.GET_AWAKE_STATUS));
+        doThrow(new ServerConnectionFailedException()).when(dispatcherMock).route(any(),
+                                                                                  anyLong(),
+                                                                                  eq(RoutingAction.IS_LOCKED));
 
         testDevice = new Device(deviceCommunicator);
     }

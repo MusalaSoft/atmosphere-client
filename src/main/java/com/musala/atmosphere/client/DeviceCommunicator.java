@@ -94,7 +94,9 @@ public class DeviceCommunicator {
             if (e instanceof CommandFailedException) {
                 LOGGER.error("Executing action failed.", e);
                 lastSentActionException = (CommandFailedException) e;
-            } else if (e instanceof InvalidPasskeyException || e instanceof DeviceNotFoundException) {
+            } else if (e instanceof IllegalArgumentException) {
+                throw new IllegalArgumentException(e.getMessage());
+            } if (e instanceof InvalidPasskeyException || e instanceof DeviceNotFoundException) {
                 LOGGER.error("Executing action was rejected by the server.", e);
                 throw new DeviceInvocationRejectedException(e);
             } else if (e instanceof ServerConnectionFailedException) {

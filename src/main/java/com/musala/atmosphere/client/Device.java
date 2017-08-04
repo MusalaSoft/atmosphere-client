@@ -373,7 +373,10 @@ public class Device {
      *         It can be subsequently dumped to a file and directly opened as a PNG image.
      */
     public byte[] getScreenshot() {
-        return (byte[]) communicator.sendAction(RoutingAction.GET_SCREENSHOT);
+        String base64String = (String) communicator.sendAction(RoutingAction.GET_SCREENSHOT);
+        byte[] screenshotBytes = Base64.getDecoder().decode(base64String);
+
+        return screenshotBytes;
     }
 
     /**

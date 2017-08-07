@@ -1,21 +1,9 @@
 package com.musala.atmosphere.client;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.log4j.Logger;
-import org.jsoup.Jsoup;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import com.musala.atmosphere.client.exceptions.ActionFailedException;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
@@ -49,51 +37,13 @@ public class Screen {
 
     private static final String MULTIPLE_PICKERS_AVAILABLE_MESSAGE = "More than one %s picker is currently available on the screen.";
 
-    private String screenXml;
-
-    private Document xPathDomDocument;
-
-    private org.jsoup.nodes.Document jSoupDocument;
-
     private final DeviceCommunicator communicator;
 
     private final AccessibilityElementUtils elementUtils;
 
-    @Deprecated
-
-    Screen(String uiHierarchyXml,
-            DeviceCommunicator communicator) {
-        this.communicator = communicator;
-        this.elementUtils = new AccessibilityElementUtils(communicator);
-        screenXml = uiHierarchyXml;
-
-        // XPath DOM Document building
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(true);
-        try {
-            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            xPathDomDocument = documentBuilder.parse(new InputSource(new StringReader(screenXml)));
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            String message = "XPath XML to DOM Document parsing failed.";
-            LOGGER.warn(message, e);
-        }
-
-        // JSoup Document building
-        jSoupDocument = Jsoup.parse(screenXml);
-    }
-
     Screen(DeviceCommunicator communicator) {
         this.communicator = communicator;
         this.elementUtils = new AccessibilityElementUtils(communicator);
-    }
-
-    /**
-     * Updates the current {@link Screen} instance to contain the newest possible device screen information. Equivalent
-     * to reinvoking the {@link Device#getActiveScreen()} method.
-     */
-    @Deprecated
-    public void updateScreen() {
-        // This will be removed.
     }
 
     /**
@@ -122,23 +72,6 @@ public class Screen {
      */
     public List<UiElement> getElements(UiElementSelector selector) throws UiElementFetchingException {
         return getElements(selector, true);
-    }
-
-    /**
-     * Saves the underlying device UI XML into a file.
-     *
-     * @param path
-     *        - full path to file in which the UI XML should be saved.
-     * @throws FileNotFoundException
-     *         when the passed argument does not denote already existing and writable file or such can not be created
-     *         for some reason
-     */
-    @Deprecated
-    public void exportToXml(String path) throws FileNotFoundException {
-        // FIXME this implementation is not valid anymore. UiAutomator should be used here.
-        PrintStream export = new PrintStream(path);
-        export.print(screenXml);
-        export.close();
     }
 
     /**
@@ -348,7 +281,6 @@ public class Screen {
         boolean isElementPresent = waitForElementExists(selector, waitTimeout);
 
         if (isElementPresent) {
-            updateScreen();
             UiElement selectedElement = getElement(selector);
             return selectedElement;
         } else {

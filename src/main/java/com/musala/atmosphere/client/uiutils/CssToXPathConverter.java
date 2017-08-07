@@ -3,12 +3,13 @@ package com.musala.atmosphere.client.uiutils;
 import static com.musala.atmosphere.client.uiutils.XPathAttribute.isAttributeStringOfTheEnumeration;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.google.common.collect.ImmutableMap;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 
 /**
@@ -42,10 +43,16 @@ public class CssToXPathConverter {
 
     private static final Logger LOGGER = Logger.getLogger(CssToXPathConverter.class);
 
-    private static final Map<String, String> cssToXPathAttributeConversionMap = ImmutableMap.of("class", "className",
-                                                                                                "content-desc", "contentDesc",
-                                                                                                "long-clickable", "longClickable",
-                                                                                                "resource-id", "resourceId");
+    private static final Map<String, String> cssToXPathAttributeConversionMap;
+
+    static {
+        Map<String, String> aMap = new HashMap<String, String>();
+        aMap.put("class", "className");
+        aMap.put("content-desc", "contentDesc");
+        aMap.put("long-clickable", "longClickable");
+        aMap.put("resource-id", "resourceId");
+        cssToXPathAttributeConversionMap = Collections.unmodifiableMap(aMap);
+    }
 
     /**
      * Divides the CSS Query to property selectors

@@ -131,7 +131,7 @@ public class Builder {
 
             long passkey = deviceDescriptor.getProxyPasskey();
 
-            Device device = new DeviceBuilder(passkey, deviceId).build();
+            Device device = new Device(passkey, deviceId);
             deviceToDescriptor.put(device, deviceDescriptor);
 
             if (this.screenRecordingproperties.isEnabled()) {

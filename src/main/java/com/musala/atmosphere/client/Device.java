@@ -93,6 +93,15 @@ public class Device {
     }
 
     /**
+     * Constructor that creates a usable Device object by a passkey and an identifier.
+     *
+     * @param deviceCommunicator
+     */
+    Device(Long devicePasskey, String deviceId) {
+        this.communicator = new DeviceCommunicator(devicePasskey, deviceId);
+    }
+
+    /**
      * Accepts call to this device.
      *
      * @return <code>true</code> if the accepting call is successful, <code>false</code> if it fails.
@@ -1280,7 +1289,7 @@ public class Device {
      *        - to wait for updating the task.
      * @return <code>true</code> if the task is updated and <code>false</code> otherwise.
      *
-     * @deprecated Since LOLLIPOP, this method is no longer avaible.
+     * @deprecated Since LOLLIPOP, this method is no longer available.
      */
     @Deprecated
     public boolean waitForTasksUpdate(int taskId, int position, int timeout) {

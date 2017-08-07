@@ -42,7 +42,7 @@ public class PickerHelper {
             UiElementFetchingException {
         UiElement numberPickerField = getNumberPickerField(index);
         UiElementPropertiesContainer numberPickerFieldElementProperties = numberPickerField.getProperties();
-        screen.updateScreen();
+
         return numberPickerFieldElementProperties.getText();
     }
 
@@ -67,8 +67,6 @@ public class PickerHelper {
         if (!numberPickerField.inputText(text)) {
             return false;
         }
-
-        screen.updateScreen();
 
         return true;
     }
@@ -122,8 +120,6 @@ public class PickerHelper {
 
         // We click on the picker to make it visible.
         numberPicker.tap();
-
-        screen.updateScreen();
 
         UiElement numberPickerClicked = screen.getElement(numberPickerSelector);
 

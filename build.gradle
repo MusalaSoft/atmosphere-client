@@ -21,12 +21,8 @@ apply plugin: 'maven-publish'
 dependencies {
     compile 'com.musala.atmosphere:atmosphere-client-server-lib:0.+'
     compile 'com.musala.atmosphere:atmosphere-bitmap-comparison:0.+'
-    compile 'com.google.guava:guava:18.0'
-    compile 'org.javassist:javassist:3.18.2-GA'
-    compile 'org.jsoup:jsoup:1.7.2'
-    compile 'org.reflections:reflections:0.9.10'
-    compile 'org.testng:testng:6.9.13.8'
 
+    compile 'org.testng:testng:6.9.13.8'
     compile 'org.glassfish.tyrus:tyrus-client:1.13.1'
     compile 'org.glassfish.tyrus:tyrus-container-grizzly-client:1.13.1'
 

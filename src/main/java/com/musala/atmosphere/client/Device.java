@@ -83,6 +83,8 @@ public class Device {
 
     private boolean isScreenRecordingStarted = false;
 
+    private Screen activeScreen;
+
     /**
      * Constructor that creates a usable Device object by a given {@link DeviceCommunicator device communicator}.
      *
@@ -274,7 +276,9 @@ public class Device {
      *         active screen fails.
      */
     public Screen getActiveScreen() {
-        return new Screen(communicator);
+        activeScreen = new Screen(communicator);
+
+        return activeScreen;
     }
 
     /**
@@ -675,11 +679,11 @@ public class Device {
     }
 
     void release() {
-        if(isScreenRecordingStarted) {
+        if (isScreenRecordingStarted) {
             stopScreenRecording();
         }
 
-        if(isLogcatEnabled) {
+        if (isLogcatEnabled) {
             stopLogcat();
         }
 
@@ -1049,6 +1053,7 @@ public class Device {
     public boolean revokeApplicationPermission(String packageName, String permission) {
         return (boolean) communicator.sendAction(RoutingAction.REVOKE_APP_PERMISSION, packageName, permission);
     }
+
     /**
      * Simulates a swipe from a point to another unknown point.
      *
@@ -1876,5 +1881,19 @@ public class Device {
      */
     private void closeChromeDriver() {
         communicator.sendAction(RoutingAction.CLOSE_CHROME_DRIVER);
+    }
+
+    /**
+     * Sets an implicit wait timeout. Waits for a certain amount of time when trying to find element/s if they are not
+     * immediately available. The default value is 0.
+     *
+     * @param implicitWaitTimeout
+     *        - an implicit wait timeout in milliseconds
+     */
+    public void setImplicitWaitTimeout(int implicitWaitTimeout) {
+        ConfigurationPropertiesLoader.setImplicitWaitTimeout(implicitWaitTimeout);
+        if(activeScreen != null && activeScreen.hasWebView()) {
+            communicator.sendAction(RoutingAction.SET_WEB_VIEW_IMPLICIT_WAIT, implicitWaitTimeout);
+        }
     }
 }

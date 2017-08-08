@@ -142,6 +142,8 @@ public class Builder {
                 device.clearLogcat();
             }
 
+            ConfigurationPropertiesLoader.loadImplicitWait();
+
             return device;
         } catch (NoAvailableDeviceFoundException e) {
             String message = "No devices matching the requested parameters were found";

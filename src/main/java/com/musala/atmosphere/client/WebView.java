@@ -107,15 +107,4 @@ public class WebView extends WebElement {
         return webViewTitle;
     }
 
-    /**
-     * Waits for a certain amount of time when trying to find an element/s if they are not immediately available. Sets
-     * an implicit wait timeout value to the web driver. The default value is 0.
-     *
-     * @param implicitWaitTimeout
-     *        - an implicit wait timeout in milliseconds
-     */
-    public void setImplicitWaitTimeout(int implicitWaitTimeout) {
-        deviceCommunicator.sendAction(RoutingAction.SET_WEB_VIEW_IMPLICIT_WAIT, implicitWaitTimeout);
-    }
-
 }

@@ -10,6 +10,7 @@ import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.uiutils.AccessibilityElementUtils;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
+import com.musala.atmosphere.client.util.ConfigurationPropertiesLoader;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.ui.selector.CssAttribute;
@@ -40,6 +41,8 @@ public class Screen {
     private final DeviceCommunicator communicator;
 
     private final AccessibilityElementUtils elementUtils;
+
+    private WebView webview;
 
     Screen(DeviceCommunicator communicator) {
         this.communicator = communicator;
@@ -510,17 +513,18 @@ public class Screen {
      */
     public WebView getWebView(String packageName) {
         communicator.sendAction(RoutingAction.GET_WEB_VIEW, packageName);
-        return new WebView(communicator);
+
+        int implicitWaitTimeout = ConfigurationPropertiesLoader.getImplicitWaitTimeout();
+        if (implicitWaitTimeout != 0) {
+            communicator.sendAction(RoutingAction.SET_WEB_VIEW_IMPLICIT_WAIT, implicitWaitTimeout);
+        }
+
+        webview = new WebView(communicator);
+
+        return webview;
     }
 
-    /**
-     * Waits for a certain amount of time when trying to find an element/s if they are not immediately available. Sets
-     * an implicit wait timeout value to {@link AccessibilityElementUtils} elementUtils. The default value is 0.
-     *
-     * @param implicitWaitTimeout
-     *        - an implicit wait timeout in milliseconds
-     */
-    public void setImplicitWaitTimeout(int implicitWaitTimeout) {
-        elementUtils.setImplicitWaitTimeout(implicitWaitTimeout);
+    boolean hasWebView() {
+        return webview != null;
     }
 }

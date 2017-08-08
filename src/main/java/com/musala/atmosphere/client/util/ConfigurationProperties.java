@@ -11,7 +11,8 @@ public enum ConfigurationProperties {
     SERVER_PORT("server.port"),
     SERVER_CONNECTION_RETRIES("server.connectionRetries"),
     FTP_SERVER("ftp.server"),
-    FTP_DIR("ftp.dir");
+    FTP_DIR("ftp.dir"),
+    IMPLICIT_WAIT_TIMEOUT("implicit.wait.timeout");
 
     private String value;
 

@@ -20,6 +20,8 @@ public class ConfigurationPropertiesLoader {
 
     private final static Logger LOGGER = Logger.getLogger(ConfigurationPropertiesLoader.class.getCanonicalName());
 
+    private static Integer implicitWaitTimeout;
+
     /**
      * Gets the desired property from the config file in String type.
      *
@@ -120,8 +122,53 @@ public class ConfigurationPropertiesLoader {
         return exists;
     }
 
-    private static void validatePropertyValue(String connectionRetriesValue, ConfigurationProperties propertyType) {
-        if (connectionRetriesValue.isEmpty()) {
+    /**
+     * Loads the implicit wait timeout from the configuration file.
+     *
+     * @return int, implicit wait timeout in milliseconds. If the config file does not exists will return zero
+     */
+    public static void loadImplicitWait() {
+        if (isConfigExists()) {
+            String implicitWaitValue = getPropertyString(ConfigurationProperties.IMPLICIT_WAIT_TIMEOUT);
+
+            if (!implicitWaitValue.isEmpty()) {
+                implicitWaitTimeout = Integer.parseInt(implicitWaitValue);
+                valideteImplicitWait(implicitWaitTimeout);
+            }
+        }
+
+        implicitWaitTimeout = implicitWaitTimeout != null ? implicitWaitTimeout : 0;
+    }
+
+    /**
+     * Gets the implicit wait timeout.
+     *
+     * @return last set implicit wait timeout
+     */
+    public final static int getImplicitWaitTimeout() {
+        return implicitWaitTimeout;
+    }
+
+    /**
+     * Sets an implicit wait timeout.
+     *
+     * @param implicitWait
+     *        the implicit wait timeout
+     */
+    public static void setImplicitWaitTimeout(int implicitWait) {
+        valideteImplicitWait(implicitWait);
+
+        implicitWaitTimeout = implicitWait;
+    }
+
+    private static void valideteImplicitWait(int implicitWait) {
+        if (implicitWaitTimeout < 0) {
+            throw new InvalidPropertyValueExceptipon("The implicit wait value should be a nonnegative integer number.");
+        }
+    }
+
+    private static void validatePropertyValue(String propertyValue, ConfigurationProperties propertyType) {
+        if (propertyValue.isEmpty()) {
             String errorMessage = String.format("%s value cannot be empty.", propertyType);
             LOGGER.error(errorMessage);
             throw new InvalidPropertyValueExceptipon(errorMessage);

@@ -11,6 +11,7 @@ import com.musala.atmosphere.client.AccessibilityUiElement;
 import com.musala.atmosphere.client.DeviceCommunicator;
 import com.musala.atmosphere.client.UiElement;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
+import com.musala.atmosphere.client.util.ConfigurationPropertiesLoader;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.exceptions.UiElementFetchingException;
 import com.musala.atmosphere.commons.ui.UiElementPropertiesContainer;
@@ -27,8 +28,6 @@ public class AccessibilityElementUtils {
     private static final Logger LOGGER = Logger.getLogger(AccessibilityElementUtils.class);
 
     private DeviceCommunicator communicator;
-
-    private int implicitWaitTimeout = 0;
 
     public AccessibilityElementUtils(DeviceCommunicator communicator) {
         this.communicator = communicator;
@@ -49,7 +48,8 @@ public class AccessibilityElementUtils {
     public List<UiElement> getElements(UiElementSelector selector, Boolean visibleOnly)
             throws UiElementFetchingException {
 
-        if (implicitWaitTimeout > 0) {
+        int implicitWaitTimeout = ConfigurationPropertiesLoader.getImplicitWaitTimeout();
+        if (implicitWaitTimeout != 0) {
             waitForElementExists(selector, implicitWaitTimeout);
         }
 
@@ -245,15 +245,5 @@ public class AccessibilityElementUtils {
                                                              timeout);
 
         return response;
-    }
-
-    /**
-     * Sets an implicit wait timeout
-     *
-     * @param implicitWaitTimeout
-     *        - implicit wait timeout in milliseconds
-     */
-    public void setImplicitWaitTimeout(int implicitWaitTimeout) {
-        this.implicitWaitTimeout = implicitWaitTimeout;
     }
 }

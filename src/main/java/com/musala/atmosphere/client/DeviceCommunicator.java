@@ -10,6 +10,7 @@ import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.cs.exception.DeviceNotFoundException;
 import com.musala.atmosphere.commons.cs.exception.InvalidPasskeyException;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
+import com.musala.atmosphere.commons.webelement.exception.WebElementNotPresentException;
 
 /**
  * Class used for handling all requests to the remote devices and the possible exceptions.
@@ -101,6 +102,8 @@ public class DeviceCommunicator {
                 throw new DeviceInvocationRejectedException(e);
             } else if (e instanceof ServerConnectionFailedException) {
                 throw new ServerConnectionFailedException("Could not send the routing action (connection failure).");
+            } else if (e instanceof WebElementNotPresentException) {
+                throw new WebElementNotPresentException(e.getMessage());
             }
         }
 

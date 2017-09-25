@@ -67,6 +67,8 @@ public class DeviceCommunicator {
     /**
      * Requests an action invocation on the device wrapper.
      *
+     * @param isAsync
+     *        - whether the required action is asynchronous
      * @param action
      *        - a {@link RoutingAction} instance that specifies the action to be invoked
      * @param args

@@ -153,9 +153,8 @@ public class ClientDispatcher {
      *        - {@link MessageAction message action}
      * @param args
      *        - the arguments of the request
-     * @return the result of the action sent from the Agent
-     * @throws CommandFailedException
-     *         - when failed to send the request action to the Server
+     * @throws ServerConnectionFailedException
+     *         - when failed to connect to the Server
      */
     public void routeAsync(String deviceId, long invocationPasskey, RoutingAction action, Object[] args)
         throws ServerConnectionFailedException {

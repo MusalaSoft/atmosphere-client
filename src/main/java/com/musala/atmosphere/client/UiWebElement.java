@@ -185,7 +185,7 @@ public class UiWebElement extends WebElement {
 
     /**
      * Get the tag name of this element. Not the value of the name attribute: will return "input" for the element
-     * <input name="foo" />.
+     * &lt; input name="foo" /&gt; .
      *
      * @return the tag name of the element
      */

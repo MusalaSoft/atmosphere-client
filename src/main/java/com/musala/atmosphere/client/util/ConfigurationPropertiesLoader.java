@@ -125,7 +125,6 @@ public class ConfigurationPropertiesLoader {
     /**
      * Loads the implicit wait timeout from the configuration file.
      *
-     * @return int, implicit wait timeout in milliseconds. If the config file does not exists will return zero
      */
     public static void loadImplicitWait() {
         if (isConfigExists()) {

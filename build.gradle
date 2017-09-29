@@ -1,7 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'maven-publish'
 
-version = '0.0.2'
+version = '0.1.0'
 jar {
     manifest {
         attributes 'Implementation-Title': 'Atmosphere Client',

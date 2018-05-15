@@ -52,10 +52,10 @@ public class DeviceCommunicator {
     /**
      * Creates an instance for specified client device.
      *
-     * @param wrappedDevice
-     *        - the {@link IClientDevice} instance which this instance will communicate with.
      * @param passkey
-     *        - the invocation passkey for the client device instance.
+     *        - the invocation passkey for the client device instance
+     * @param wrappedDevice
+     *        - the identifier of the device   
      */
     DeviceCommunicator(long passkey, String deviceId) {
         invocationPasskey = passkey;

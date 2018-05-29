@@ -182,6 +182,30 @@ public class ConfigurationPropertiesLoader {
         }
     }
 
+    /**
+     * Gets the time for which the client will wait for a response from the server.
+     *
+     * @return the wait for response timeout
+     */
+    public static int getResponseWaitTimeout() {
+        String waitForResponseTimeout = getPropertyString(ConfigurationProperties.RESPONSE_WAIT_TIMEOUT);
+        validatePropertyValue(waitForResponseTimeout, ConfigurationProperties.RESPONSE_WAIT_TIMEOUT);
+
+        return Integer.parseInt(waitForResponseTimeout);
+    }
+
+    /**
+     * Gets the time for which the client will wait for available device.
+     *
+     * @return the wait for a device timeout
+     */
+    public static int getDeviceWaitTimeout() {
+        String waitForDeviceTimeout = getPropertyString(ConfigurationProperties.DEVICE_WAIT_TIMEOUT);
+        validatePropertyValue(waitForDeviceTimeout, ConfigurationProperties.DEVICE_WAIT_TIMEOUT);
+
+        return Integer.parseInt(waitForDeviceTimeout);
+    }
+
     private static void validatePropertyValue(String propertyValue, ConfigurationProperties propertyType) {
         if (propertyValue.isEmpty()) {
             String errorMessage = String.format("%s value cannot be empty.", propertyType);

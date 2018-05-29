@@ -28,7 +28,9 @@ public enum ConfigurationProperties {
     SERVER_CONNECTION_RETRIES("server.connectionRetries"),
     FTP_SERVER("ftp.server"),
     FTP_DIR("ftp.dir"),
-    IMPLICIT_WAIT_TIMEOUT("implicit.wait.timeout");
+    IMPLICIT_WAIT_TIMEOUT("implicit.wait.timeout"),
+    RESPONSE_WAIT_TIMEOUT("response.wait.timeout"),
+    DEVICE_WAIT_TIMEOUT("device.wait.timeout");
 
     private String value;
 

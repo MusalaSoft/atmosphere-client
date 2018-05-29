@@ -34,14 +34,14 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
-import com.musala.atmosphere.client.util.ServerConnectionProperties;
+import com.musala.atmosphere.client.util.ConfigurationPropertiesLoader;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformation;
 import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
 import com.musala.atmosphere.commons.cs.exception.NoDeviceMatchingTheGivenSelectorException;
 import com.musala.atmosphere.commons.cs.util.ClientServerGsonUtil;
-import com.musala.atmosphere.commons.exceptions.CommandFailedException;
 import com.musala.atmosphere.commons.exceptions.NoAvailableDeviceFoundException;
+import com.musala.atmosphere.commons.util.ConnectionProperties;
 import com.musala.atmosphere.commons.util.Pair;
 import com.musala.atmosphere.commons.websocket.WebSocketCommunicatorManager;
 import com.musala.atmosphere.commons.websocket.message.MessageAction;
@@ -58,13 +58,13 @@ import com.musala.atmosphere.commons.websocket.util.IJsonUtil;
 public class ClientDispatcher {
     private static final Logger LOGGER = Logger.getLogger(ClientDispatcher.class.getCanonicalName());
 
-    private static final int WAIT_FOR_RESPONSE_TIME = 30_000;
-
-    private static final int WAIT_FOR_DEVICE_TIME = 300_000;
-
     private static final int HANDLE_LOST_CONNECTION_RETRIES = 5;
 
     private static final String SERVER_URI = "ws://%s:%s/client_server";
+
+    private int waitForResponseTime;
+
+    private int waitForDeviceTime;
 
     private Session session;
 
@@ -72,7 +72,7 @@ public class ClientDispatcher {
 
     private final IJsonUtil jsonUtil = new ClientServerGsonUtil();
 
-    private ServerConnectionProperties serverConnectionProperties;
+    private ConnectionProperties serverConnectionProperties;
 
     private static class DispatcherLoader {
         private static final ClientDispatcher INSTANCE = new ClientDispatcher();
@@ -89,13 +89,17 @@ public class ClientDispatcher {
      * @param serverConnectionProperties
      *        - properties for the server connection (IP, port, connection retry limit)
      */
-    public void connectToServer(ServerConnectionProperties serverConnectionProperties) {
+    public void connectToServer(ConnectionProperties serverConnectionProperties) {
         LOGGER.info("Connecting to server...");
 
         this.serverConnectionProperties = serverConnectionProperties;
         String serverAddress = serverConnectionProperties.getIp();
         int webSocketPort = serverConnectionProperties.getPort();
         int connectionRetryLimit = serverConnectionProperties.getConnectionRetryLimit();
+
+        // initializes the timeouts
+        this.waitForResponseTime = ConfigurationPropertiesLoader.getResponseWaitTimeout();
+        this.waitForDeviceTime = ConfigurationPropertiesLoader.getDeviceWaitTimeout();
 
         connectToServer(serverAddress, webSocketPort, connectionRetryLimit);
     }
@@ -209,7 +213,7 @@ public class ClientDispatcher {
     public DeviceAllocationInformation getDeviceDescriptor(DeviceSelector deviceSelector,
                                                            int allocateDeviceRetryCount) {
         RequestMessage request = new RequestMessage(MessageAction.DEVICE_ALLOCATION_INFORMATION, deviceSelector);
-        ResponseMessage response = sendRequest(request, session, WAIT_FOR_DEVICE_TIME);
+        ResponseMessage response = sendRequest(request, session, waitForDeviceTime);
         if (response.getMessageAction() != MessageAction.ERROR) {
             return (DeviceAllocationInformation) response.getData();
         }
@@ -259,7 +263,7 @@ public class ClientDispatcher {
     }
 
     private ResponseMessage sendRequest(RequestMessage request, Session session) {
-        return sendRequest(request, session, WAIT_FOR_RESPONSE_TIME);
+        return sendRequest(request, session, waitForResponseTime);
     }
 
     /**

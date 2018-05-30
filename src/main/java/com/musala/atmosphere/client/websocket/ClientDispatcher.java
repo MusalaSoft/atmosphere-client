@@ -62,9 +62,9 @@ public class ClientDispatcher {
 
     private static final String SERVER_URI = "ws://%s:%s/client_server";
 
-    private int waitForResponseTime;
+    private int waitForResponseTime = 30_000; // 30 seconds
 
-    private int waitForDeviceTime;
+    private int waitForDeviceTime = 300_000; // 5 minutes
 
     private Session session;
 
@@ -97,9 +97,11 @@ public class ClientDispatcher {
         int webSocketPort = serverConnectionProperties.getPort();
         int connectionRetryLimit = serverConnectionProperties.getConnectionRetryLimit();
 
-        // initializes the timeouts
-        this.waitForResponseTime = ConfigurationPropertiesLoader.getResponseWaitTimeout();
-        this.waitForDeviceTime = ConfigurationPropertiesLoader.getDeviceWaitTimeout();
+        // loads the timeouts if the config file exists
+        if (ConfigurationPropertiesLoader.isConfigExists()) {
+            this.waitForResponseTime = ConfigurationPropertiesLoader.getResponseWaitTimeout();
+            this.waitForDeviceTime = ConfigurationPropertiesLoader.getDeviceWaitTimeout();
+        }
 
         connectToServer(serverAddress, webSocketPort, connectionRetryLimit);
     }

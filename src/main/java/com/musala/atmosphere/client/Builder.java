@@ -34,8 +34,8 @@ import com.musala.atmosphere.client.util.ServerConnectionProperties;
 import com.musala.atmosphere.client.websocket.ClientDispatcher;
 import com.musala.atmosphere.commons.cs.clientbuilder.DeviceAllocationInformation;
 import com.musala.atmosphere.commons.cs.deviceselection.DeviceSelector;
-import com.musala.atmosphere.commons.cs.exception.DeviceNotFoundException;
 import com.musala.atmosphere.commons.cs.exception.InvalidPasskeyException;
+import com.musala.atmosphere.commons.exceptions.DeviceNotFoundException;
 import com.musala.atmosphere.commons.exceptions.NoAvailableDeviceFoundException;
 import com.musala.atmosphere.commons.util.Pair;
 

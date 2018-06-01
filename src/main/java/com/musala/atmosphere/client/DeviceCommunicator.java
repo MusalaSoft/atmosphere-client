@@ -23,9 +23,9 @@ import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.client.exceptions.ServerConnectionFailedException;
 import com.musala.atmosphere.client.websocket.ClientDispatcher;
 import com.musala.atmosphere.commons.RoutingAction;
-import com.musala.atmosphere.commons.cs.exception.DeviceNotFoundException;
 import com.musala.atmosphere.commons.cs.exception.InvalidPasskeyException;
 import com.musala.atmosphere.commons.exceptions.CommandFailedException;
+import com.musala.atmosphere.commons.exceptions.DeviceNotFoundException;
 import com.musala.atmosphere.commons.webelement.exception.WebElementNotPresentException;
 
 /**

@@ -72,8 +72,9 @@ public class ClassLocator {
                     break;
                 }
             } catch (ClassNotFoundException e) {
-                String message = String.format("Could not find class with name: %s", callerMethod.getClassName());
-                LOGGER.error(message, e);
+                String message = String.format("Failed to get the first annotated class. Could not find class with name: %s",
+                                               callerMethod.getClassName());
+                LOGGER.error(message);
             }
         }
 
